@@ -16,6 +16,7 @@ function user_master_data($dataArray=array()) {
 	
 	If the data is found, the returned array will look like this:
 		$returnArray			= array('result'=>TRUE,
+										'id'=>(value),
 										'callsign'=>(value),
 										'first_name'=>(value),
 										'last_name'=>(value),
@@ -31,6 +32,7 @@ function user_master_data($dataArray=array()) {
 										'telegram'=>(value),
 										'signal'=>(value),
 										'messenger'=>(value),
+										'user_action_log'=>(value),
 										'date_created'=>(value),
 										'date_updated'=>(value));
 
@@ -43,7 +45,7 @@ function user_master_data($dataArray=array()) {
 									'action'=>'get',
 									'debugging'=> $doDebug,
 									'testing'=> $testMode);
-		$dataResult				= $user_master_data($dataArray);
+		$dataResult				= user_master_data($dataArray);
 		if ($dataResult['result'] === TRUE) {
 			unpack the data
 		} else {
@@ -82,6 +84,7 @@ function user_master_data($dataArray=array()) {
 	$action			= "";
 	$debugging		= FALSE;
 	$testing		= FALSE;
+	$id				= "";
 	$callsign		= "";
 	$first_name		= "";
 	$last_name		= "";
@@ -97,6 +100,7 @@ function user_master_data($dataArray=array()) {
 	$telegram		= "";
 	$signal			= "";
 	$messenger		= "";
+	$user_action_log	= "";
 	$date_created	= "";
 	$date_updated	= "";
 	
@@ -161,6 +165,7 @@ function user_master_data($dataArray=array()) {
 			}
 			if ($numRows > 0) {
 				foreach($sqlResult as $sqlRow) {
+					$id				= $sqlRow->ID;
 					$callsign		= $sqlRow->call_sign;
 					$first_name		= $sqlRow->first_name;
 					$last_name		= $sqlRow->last_name;
@@ -174,6 +179,7 @@ function user_master_data($dataArray=array()) {
 					$telegram		= $sqlRow->telegram_app;
 					$signal			= $sqlRow->signal_app;
 					$messenger		= $sqlRow->messenger_app;
+					$user_action_log	= $sqlRow->user_action_log;
 					$date_created	= $sqlRow->date_created;
 					$date_updated	= $sqlRow->date_updated;
 
@@ -206,6 +212,7 @@ function user_master_data($dataArray=array()) {
 					echo "have all available data. Returning<br /><br />";
 				}
 				$returnArray			= array('result'=>TRUE,
+												'id'=>$id,
 												'callsign'=>$callsign,
 												'first_name'=>$first_name,
 												'last_name'=>$last_name,
@@ -221,6 +228,7 @@ function user_master_data($dataArray=array()) {
 												'telegram'=>$telegram,
 												'signal'=>$signal,
 												'messenger'=>$messenger,
+												'user_action_log'=>$user_action_log,
 												'date_created'=>$date_created,
 												'date_updated'=>$date_updated);
 				return $returnArray;
@@ -232,6 +240,7 @@ function user_master_data($dataArray=array()) {
 				if ($debugging) {
 					echo "no user_master record for $callsign. Looking in userMeta<br />";
 				}
+				$id				= "";
 				$first_name		= "";
 				$last_name		= "";
 				$email			= "";
@@ -246,6 +255,7 @@ function user_master_data($dataArray=array()) {
 				$telegram		= "";
 				$signal			= "";
 				$messenger		= "";
+				$user_action_log	= "";
 
 				$userSQL			= "select * from $userTableName 
 										where user_login like '$callsign'";
@@ -361,6 +371,8 @@ function user_master_data($dataArray=array()) {
 										}
 									}
 									// have all the data. Insert the record into user_master
+									$thisDate			= date('Y-m-d H:i:s');
+									$user_action_log	= "/ $thisDate $userName Record created ";
 									$userInsert			= $wpdb->insert($userMasterTableName,
 																		array('call_sign'=>$callsign,
 																			  'first_name'=>$first_name,
@@ -374,8 +386,10 @@ function user_master_data($dataArray=array()) {
 																			  'whatsapp_app'=>$whatsapp,
 																			  'telegram_app'=>$telegram,
 																			  'signal_app'=>$signal,
-																			  'messenger_app'=>$messenger ),
+																			  'messenger_app'=>$mxexssenger,
+																			  'user_action_log'=>$user_action_log ),
 																		  array('%s',
+																				'%s',
 																				'%s',
 																				'%s',
 																				'%s',
@@ -397,8 +411,9 @@ function user_master_data($dataArray=array()) {
 																			'reason'=>"unable to insert $callsign info into 4userMasterTableName table");
 										return $returnArray;
 									} else {
+										$id			= $wpdb->insert_id;
 										if ($debugging) {
-											echo "user_master record added for $callsign<br />";
+											echo "user_master record added for $callsign at id $id<br />";
 										}
 										// get the country and ph_code
 										$countrySQL		= "select * from $countryCodesTableName 
@@ -427,6 +442,7 @@ function user_master_data($dataArray=array()) {
 										// now return the data
 										$myDate					= date('Y-m-d H:i:s');
 										$returnArray			= array('result'=>TRUE,
+																		'id'=>$id,
 																		'callsign'=>$callsign,
 																		'first_name'=>$first_name,
 																		'last_name'=>$last_name,
@@ -442,6 +458,7 @@ function user_master_data($dataArray=array()) {
 																		'telegram'=>$telegram,
 																		'signal'=>$signal,
 																		'messenger'=>$messenger,
+																		'user_action_log'=>$user_action_log,
 																		'date_created'=>$myDate,
 																		'date_updated'=>$myDate);
 										if ($debugging) {
@@ -474,6 +491,7 @@ function user_master_data($dataArray=array()) {
 		
 	} elseif ($action == 'update') {
 		// unpack the input data
+		$id				= "";
 		$callsign		= "";
 		$first_name		= "";
 		$last_name		= "";
@@ -489,6 +507,7 @@ function user_master_data($dataArray=array()) {
 		$telegram		= "";
 		$signal			= "";
 		$messenger		= "";
+		$user_action_log	= "";
 		
 		$have_callsign	= FALSE;
 		$updateParams	= array();
@@ -563,6 +582,11 @@ function user_master_data($dataArray=array()) {
 					$updateParams['messenger_app']	= $thisValue;
 					$updateFormat[]	= "%s";
 					break;
+				case "user_action_log":
+					$user_action_log	= $thisValue;
+					$updateParams['user_action_log']	= $thisValue;
+					$updateFormat[]						= '%s';
+					break;
 				case "action":
 					$doingNothin	= TRUE;
 					break;
@@ -570,6 +594,9 @@ function user_master_data($dataArray=array()) {
 					$doingNothin	= TRUE;
 					break;
 				case "testing":
+					$doingNothin	= TRUE;
+					break;
+				case "id":
 					$doingNothin	= TRUE;
 					break;
 				default:
