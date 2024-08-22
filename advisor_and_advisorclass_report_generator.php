@@ -73,7 +73,7 @@ function advisor_and_advisorclass_report_generator_func() {
 	$messenger = '';
 	
 	// advisorclass fields
-	$advisorclass_ID = '';
+	$advisorclass_id = '';
 	$advisor_call_sign = '';
 	$sequence = '';
 	$level = '';
@@ -302,10 +302,10 @@ function advisor_and_advisorclass_report_generator_func() {
 				}
 			}
 
-			if($str_key == "advisorclass_ID") {
-				$advisorclass_ID = 'X';
+			if($str_key == "advisorclass_id") {
+				$advisorclass_id = 'X';
 				if($doDebug) {
-					echo "set advisorclass_ID to X<br />";
+					echo "set advisorclass_id to X<br />";
 				}
 			}
 			if($str_key == "advisor_call_sign") {
@@ -526,7 +526,7 @@ function advisor_and_advisorclass_report_generator_func() {
 	</table></p>
 	<p>Select the advisorClass fields to be on the report:
 	<table>
-	<tr><td><input type='checkbox' name='advisorclass_ID' value='advisorclass_ID'> AdvisorClass_ID</td><td>advisorClass_ID</td></tr>
+	<tr><td><input type='checkbox' name='advisorclass_id' value='advisorclass_id'> advisorclass_id</td><td>advisorclass_id</td></tr>
 	<tr><td><input type='checkbox' name='advisor_call_sign' value='advisor_call_sign'> Call Sign</td><td>advisor_call_sign</td></tr>
 	<tr><td><input type='checkbox' name='sequence' value='sequence'> Sequence</td><td>sequence</td></tr>
 	<tr><td><input type='checkbox' name='level' value='level'> Level</td><td>level</td></tr>
@@ -549,8 +549,14 @@ function advisor_and_advisorclass_report_generator_func() {
 	<input type='radio' name='mode_type' value='past'> past_advisor and past_advisorClass<br />
 	<input type='radio' name='mode_type' value='past22'> past_advisor2 and past_advisorClass2<br />
 	</p><p>Enter the 'Where' clause:<br />
-	<textarea class='formInputText' id='where' name='where' rows='5' cols='80'></textarea><br />
-	</p><p>Enter the 'Orderby' clause:<br />
+	<textarea class='formInputText' id='where' name='where' rows='5' cols='80'></textarea>
+	</p>
+	<p><b>NOTE: </b>There are several fields in both the advisor and advisorClass tables. If you get 
+		an 'ambiguous' error, then specifying the field you want is required. For instance, semester 
+		is in both tables. The where statement should be either 'a.semester = ...' or 'b.semester = ...'. 
+		a.semester refers to the semester in the advisor table, b.semester refers to the semester in the 
+		advisorClass table<br /></p>
+	<p>Enter the 'Orderby' clause:<br />
 	<textarea class='formInputText' id='orderby' name='orderby' rows='5' cols='80'>call_sign</textarea><br /></p>
 	<p>Verbose Debugging?<br />
 	<input type='radio' id='inp_debug' name='inp_debug' value='N' checked='checked'> Debugging off<br />
@@ -599,7 +605,7 @@ function advisor_and_advisorclass_report_generator_func() {
 	$nameConversionArray['telegram'] = 'Telegram';
 	$nameConversionArray['messenger'] = 'Messenger';
 
-	$nameConversionArray['advisorClass_ID'] = 'AdvisorClass ID';
+	$nameConversionArray['advisorclass_id'] = 'AdvisorClass ID';
 	$nameConversionArray['advisor_call_sign'] = 'Call Sign';
 	$nameConversionArray['advisor_id'] = 'Advisor ID';
 	$nameConversionArray['advisor_first_name'] = 'First Name';
@@ -672,7 +678,7 @@ function advisor_and_advisorclass_report_generator_func() {
 	a.class_verified,
 	a.date_created,
 	a.date_updated,
-	b.advisorClass_ID,
+	b.advisorclass_id,
 	b.advisor_call_sign,
 	b.sequence,
 	b.level,
@@ -854,16 +860,17 @@ function advisor_and_advisorclass_report_generator_func() {
 	$headerName = $nameConversionArray['class_verified'];
 	$content .= "<th>$headerName</th>";
 	}
-				if ($date_created == 'X') {
-					$headerName = $nameConversionArray['date_created'];
-					$content .= "<th>$headerName</th>";
-				}
-				if ($date_updated == 'X') {
-					$headerName = $nameConversionArray['date_updated'];
-					$content .= "<th>$headerName</th>";
-				}
-	if ($advisorClass_ID == 'X') {
-	$headerName = $nameConversionArray['advisorClass_ID'];
+	if ($date_created == 'X') {
+		$headerName = $nameConversionArray['date_created'];
+		$content .= "<th>$headerName</th>";
+	}
+	if ($date_updated == 'X') {
+		$headerName = $nameConversionArray['date_updated'];
+		$content .= "<th>$headerName</th>";
+	}
+		
+	if ($advisorclass_id == 'X') {
+	$headerName = $nameConversionArray['advisorclass_id'];
 	$content .= "<th>$headerName</th>";
 	}
 
@@ -1123,11 +1130,11 @@ function advisor_and_advisorclass_report_generator_func() {
 					$needComma = TRUE;
 				}
 
-	if ($advisorClass_ID == 'X') {
+	if ($advisorclass_id == 'X') {
 	if ($needComma) {
 	$content .= '	';
 	}
-	$content .= "'$advisorClass_ID'";
+	$content .= "'$advisorclass_id'";
 	$needComma = TRUE;
 	}
 
@@ -1281,7 +1288,7 @@ function advisor_and_advisorclass_report_generator_func() {
 						$advisor_class_verified 			= $advisorRow->class_verified;
 						$advisor_date_created 				= $advisorRow->date_created;
 						$advisor_date_updated 				= $advisorRow->date_updated;
-						$advisorClass_ID				 		= $advisorRow->advisorClass_ID;
+						$advisorclass_id				 		= $advisorRow->advisorclass_id;
 						$advisorclass_advisor_call_sign 		= $advisorRow->advisor_call_sign;
 						$advisorclass_sequence 					= $advisorRow->sequence;
 						$advisorclass_level 					= $advisorRow->level;
@@ -1402,8 +1409,8 @@ function advisor_and_advisorclass_report_generator_func() {
 							if ($date_updated == 'X') {
 								$content .= "<td style='vertical-align:top;'>${'student' . '_date_updated'}</td>";
 							}
-	if ($advisorClass_ID	== 'X') {
-	$content .= "<td style='vertical-align:top;'>$advisorClass_ID</td>";
+	if ($advisorclass_id	== 'X') {
+	$content .= "<td style='vertical-align:top;'>$advisorclass_id</td>";
 	}
 	if ($advisor_call_sign 	== 'X') {
 	$content .= "<td style='vertical-align:top;'>$advisorclass_advisor_call_sign</td>";
@@ -1677,11 +1684,11 @@ function advisor_and_advisorclass_report_generator_func() {
 								$content .= "${'student' . '_date_updated'}";
 								$needComma = TRUE;
 							}
-	if ($advisorClass_ID == 'X') {
+	if ($advisorclass_id == 'X') {
 	if ($needComma) {
 	$content .= ',';
 	}
-	$content .= "'$advisorClass_ID'";
+	$content .= "'$advisorclass_id'";
 	$needComma = TRUE;
 	}
 	if ($advisor_call_sign == 'X') {
