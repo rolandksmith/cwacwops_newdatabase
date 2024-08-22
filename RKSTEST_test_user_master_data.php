@@ -1,7 +1,7 @@
 function RKSTEST_test_user_master_data_func() {
 
 			$dataArray			= array('callsign'=>'K7OJL',
-									'action'=>'updatet',
+									'action'=>'update',
 									'last_name'=>'Smitty',
 									'debugging'=> TRUE,
 									'testing'=> FALSE);
