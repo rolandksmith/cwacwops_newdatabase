@@ -2691,7 +2691,7 @@ td:last-child {
 				}
 				$variableDump	= get_defined_vars();
 				$newStr			= print_r($variableDump,TRUE);
-				sendErrorEmail("$jobname Pass2: no record found for $inp_callsign but allowSignup is FALSE. email: $inp_email. Phone: $inp_phone. $myStr\n<br />$newStr");
+				sendErrorEmail("$jobname Pass2: no record found for $inp_callsign but allowSignup is FALSE. email: $inp_email. Phone: $inp_phone. $myStr\n<br /><pre>$newStr</pre>");
 				$content		.= "A fatal program error has occurred. System admin has been notified.";
 			}
 		}
