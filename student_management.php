@@ -5174,8 +5174,6 @@ taking any further action.<br /><br />Otherwise:<br />";
 						<td><input class='formInputText' type='text' size = '5' maxlength='5' name='inp_advisorClass'></td></tr>
 					$testModeOption
 					<tr><td>&nbsp;</td>
-						<td><input class='formInputButton' name='submit' type='submit' value='Show Classes' /></td></tr>
-					<tr><td>&nbsp;</td>
 						<td><input class='formInputButton' name='submit' type='submit' value='Assign' /></td></tr>
 					</table>
 					</form>";
@@ -5194,20 +5192,8 @@ taking any further action.<br /><br />Otherwise:<br />";
 		}
 		$assignMatch		= FALSE;
 				
-//		$doAssign			= FALSE;
-//		if ($submit == 'Assign') {
-//			$doAssign		= TRUE;
-//		}
-
-
-
 		$class_sequence		= 0;                            
-//		if ($inp_advisorClass != '') {
-//			$doAssign		= TRUE;
-//			if ($doDebug ) {
-//				echo "setting doAssign to TRUE<br />";
-//			}
-//		}
+
 		// See if the student is in the student table
 		$sql				= "select * from $studentTableName 
 								where call_sign = '$inp_student_callsign' 
@@ -5302,8 +5288,6 @@ taking any further action.<br /><br />Otherwise:<br />";
 						echo "Student $student_call_sign student status is $student_student_status<br />
 							  assigned advisor is $student_assigned_advisor<br />";
 					}
-//					$content		.= "<h3>Add a Student to an Advisor's Class Regardless of Semester or Status</h3>
-//										<p>Student $student_call_sign cannot be assigned as the student is already assigned to $student_assigned_advisor</p>";
 				}
 				if ($doProceed) {
 					// see if there is an advisor in the proximate semester. If so, get the classes at that level for the advisor
@@ -5331,8 +5315,6 @@ taking any further action.<br /><br />Otherwise:<br />";
 							echo "ran $myStr<br />and found $numACRows rows<br />";
 						}
 						if ($numACRows > 0) {
-							$firstClass									= TRUE;
-							$optionCount								= 0;
 							foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
 								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
 								$advisorClass_advisor_call_sign 		= $advisorClassRow->advisor_call_sign;
@@ -5357,191 +5339,130 @@ taking any further action.<br /><br />Otherwise:<br />";
 
 								$advisorClass_advisor_last_name  		= no_magic_quotes($advisorClass_advisor_last_name);
 
-								//// if doing assign, if the class matches, hang on to the info
-								if ($submit == 'Assign') {
-									if ($inp_advisorClass == $advisorClass_sequence) {
-										$class_ID							= $advisorClass_ID;	
-										$class_sequence					 	= $advisorClass_sequence;
-										$assignMatch						= TRUE;
-										if ($doDebug) {
-											echo "Have a class match. Saving id: $class_ID; sequence: $class_sequence<br />";
-										}
+								if ($inp_advisorClass == $advisorClass_sequence) {
+									$class_ID							= $advisorClass_ID;	
+									$class_sequence					 	= $advisorClass_sequence;
+									$assignMatch						= TRUE;
+									if ($doDebug) {
+										echo "Have a class match. Saving id: $class_ID; sequence: $class_sequence<br />";
 									}
-								}
-								$myStr									= '';
-								if ($firstClass) {
-									$firstClass							= FALSE;
-									$myStr								= "checked";
-								}
-								$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorClass_sequence' $myStr> $advisorClass_advisor_call_sign $advisorClass_level Class nbr $advisorClass_sequence at $advisorClass_class_schedule_times on $advisorClass_class_schedule_days Local Time<br />";
-								$optionCount++;
-								if ($doDebug) {
-									echo "Have a level match, making class $advisorClass_sequence available<br />";
 								}
 							}
-							$doAssign				= FALSE;
-							//// if only one class, then go do the assignment
-							if (($submit == 'assign' || $submit == 'Assign') && $optionCount == 1) {
-								$doAssign			= TRUE;
-								$class_ID			= $advisorClass_ID;
-								$class_sequence		= $advisorClass_sequence;
+							if ($assignMatch) {
+								$content			.= "<h3>Add Student $inp_student_callsign to Advisor $inp_advisor_callsign Class Regardless of Semester or Status</h3>";
 								if ($doDebug) {
-									echo "Have only one match. Saving id: $class_ID; sequence: $class_sequence<br />";
+									echo "<br />Doing the assignment<br />
+											advisor callsign: $inp_advisor_callsign<br />
+											advisor class: $inp_advisorClass<br />
+											level: $inp_level<br />
+											student: $student_call_sign<br />
+											current semester: $student_semester<br />
+											current level: $student_level<br />
+											current response: $student_response<br />
+											current status: $student_student_status<br />
+											current assigned advisor: $student_assigned_advisor<br />
+											current assigned advisor class: $student_assigned_advisor_class<br />
+											current intervention required: $student_intervention_required<br />
+											current email number: $student_email_number<br />";
 								}
-							
-								if (!$doAssign) {
+								// if the student is assigned elsewhere, first remove the student
+								if ($student_assigned_advisor != '' && ($student_student_status == 'S' || $student_student_status == 'Y')) {
 									if ($doDebug) {
-										echo "doAssign is FALSE<br />";
-									}
-									if ($optionList != '') {
-										if ($doDebug) {
-											echo "optionList has values<br />";
-										}
-										$content	.= "<h3>Add a Student to an Advisor's Class Regardless of Semester or Status</h3>
-														<p>Select the class to which the student $inp_student_callsign is to  be assigned and click 'Next'</p>
-														<p><form method='post' action='$theURL' 
-														name='selection_form' ENCTYPE='multipart/form-data''>
-														<input type='hidden' name='strpass' value='91'>
-														<input type='hidden' name='inp_mode' value='$inp_mode'>
-														<input type='hidden' name='inp_verbose' value='$inp_verbose'>
-														<input type='hidden' name='inp_student_callsign' value='$inp_student_callsign'>
-														<input type='hidden' name='inp_advisor_callsign' value='$inp_advisor_callsign'>
-														<input type='hidden' name='inp_level' value='$inp_level'>
-														<input type='hidden' name='submit' value='assign'>
-														<table style='border-collapse:collapse;'>
-														<tr><th colspan='2'>The Advisor $inp_advisor_callsign's Classes</th></tr>
-														<tr><td style='width:150px;'>Advisor Class(es)</td><td>
-														$optionList
-														</td></tr>
-														<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Next' /></td></tr></table>
-														</form></p>";
-									} else {
-										if ($doDebug) {
-											echo "no options in optionList<br />";
-										}
-										$content	.= "<h3>Add a Student to an Advisor's Class Regardless of Semester or Status</h3>
-														<p>The requested advisor $input_advisor_callsign does not have a class. No action taken.</p>";
-									}
-								} else {
-									if ($doDebug) {
-										echo "doAssign is TRUE. Doing the assignment<br />";
-									}
-									/////// do the assignment
-									$content			.= "<h3>Add Student $inp_student_callsign to Advisor $inp_advisor_callsign Class Regardless of Semester or Status</h3>";
-									if ($doDebug) {
-										echo "<br />Doing the assignment<br />
-												advisor callsign: $inp_advisor_callsign<br />
-												advisor class: $inp_advisorClass<br />
-												level: $inp_level<br />
-												student: $student_call_sign<br />
-												current semester: $student_semester<br />
-												current level: $student_level<br />
-												current response: $student_response<br />
-												current status: $student_student_status<br />
-												current assigned advisor: $student_assigned_advisor<br />
-												current assigned advisor class: $student_assigned_advisor_class<br />
-												current intervention required: $student_intervention_required<br />
-												current email number: $student_email_number<br />";
-									}
-									// if the student is assigned elsewhere, first remove the student
-									if ($student_assigned_advisor != '' && ($student_student_status == 'S' || $student_student_status == 'Y')) {
-										if ($doDebug) {
-											echo "student has to be removed from $student_assigned_advisor $advisor_class_squence class<br />";
-										}
-										$inp_data			= array('inp_student'=>$student_call_sign,
-																	'inp_semester'=>$student_semester,
-																	'inp_assigned_advisor'=>$student_assigned_advisor,
-																	'inp_assigned_advisor_class'=>$student_assigned_advisor_class,
-																	'inp_remove_status'=>'',
-																	'inp_arbitrarily_assigned'=>$student_no_catalog,
-																	'inp_method'=>'remove',
-																	'jobname'=>$jobname,
-																	'userName'=>$userName,
-																	'testMode'=>$testMode,
-																	'doDebug'=>$doDebug);
-						
-										$removeResult		= add_remove_student($inp_data);
-										if ($removeResult[0] === FALSE) {
-											$thisReason		= $removeResult[1];
-											if ($doDebug) {
-												echo "attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
-											}
-											sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
-											$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
-										} else {
-											$content		.= "Student removed from $student_assigned_advisor $student_assigned_advisor_class class and unassigned<br />";
-										}
-									}
-									// if the student_semester is not the proximate semester, change the semester
-									if ($student_semester != $theSemester) {
-										if ($doDebug) {
-											echo "Student semester $student_semester needs to be changed to $theSemester<br />";
-										}
-										$updateParams		= array("semester|$theSemester|s",
-																	"response|Y|s");
-										$studentUpdateData			= array('tableName'=>$studentTableName,
-																			'inp_data'=>$updateParams,
-																			'inp_method'=>'update',
-																			'jobname'=>'MGMT90',
-																			'inp_id'=>$student_ID,
-																			'inp_callsign'=>$student_call_sign,
-																			'inp_semester'=>$theSemester,
-																			'inp_who'=>$userName,
-																			'testMode'=>$testMode,
-																			'doDebug'=>$doDebug);
-										$updateResult	= updateStudent($studentUpdateData);
-										if ($updateResult[0] === FALSE) {
-											handleWPDBError("$jobname MGMT 91",$doDebug);
-										} else {
-											$lastError			= $wpdb->last_error;
-											if ($lastError != '') {
-												handleWPDBError("$jobname MGMT 91",$doDebug);
-												$content		.= "Fatal program error. System Admin has been notified";
-												if (!$doDebug) {
-													return $content;
-												}
-											}
-
-											$content		.= "Updated student semester to $theSemester<br />";
-										}
-									}								
-									// now assign the student
-									if ($doDebug) {
-										echo "doing the assignment to $inp_advisor_callsign $class_sequence class<br />";
+										echo "student has to be removed from $student_assigned_advisor $advisor_class_squence class<br />";
 									}
 									$inp_data			= array('inp_student'=>$student_call_sign,
-																'inp_semester'=>$theSemester,
-																'inp_assigned_advisor'=>$inp_advisor_callsign,
-																'inp_assigned_advisor_class'=>$class_sequence,
+																'inp_semester'=>$student_semester,
+																'inp_assigned_advisor'=>$student_assigned_advisor,
+																'inp_assigned_advisor_class'=>$student_assigned_advisor_class,
 																'inp_remove_status'=>'',
-																'inp_arbitrarily_assigned'=>'',
-																'inp_method'=>'add',
+																'inp_arbitrarily_assigned'=>$student_no_catalog,
+																'inp_method'=>'remove',
 																'jobname'=>$jobname,
 																'userName'=>$userName,
 																'testMode'=>$testMode,
 																'doDebug'=>$doDebug);
-						
-									$addResult			= add_remove_student($inp_data);
-									if ($addResult[0] === FALSE) {
+					
+									$removeResult		= add_remove_student($inp_data);
+									if ($removeResult[0] === FALSE) {
 										$thisReason		= $removeResult[1];
 										if ($doDebug) {
-											echo "attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason<br />";
+											echo "attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
 										}
-										sendErrorEmail("$jobname Attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason");
-										$content		.= "Attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason<br />";
+										sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+										$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
 									} else {
-										$content		.= "Student has been added to $inp_advisor_callsign class $class_sequence<br />
-										<p>Click 'Push' to push the information to the advisor:<br />
-										<form method='post' action='$pushURL' 
-										name='selection_form_41' ENCTYPE='multipart/form-data'>
-										<input type='hidden' name='strpass' value='2'>
-										<input type='hidden' name='inp_mode' value='$inp_mode'>
-										<input type='hidden' name='inp_semester' value='$student_semester'>
-										<input type='hidden' name='request_info' value='$student_assigned_advisor'>
-										<input type='hidden' name='request_type' value= 'Full'>
-										<input type='submit' class='formInputButton' value='Push'></form></p><br /><br />";
-									}								
+										$content		.= "Student removed from $student_assigned_advisor $student_assigned_advisor_class class and unassigned<br />";
+									}
 								}
+								// if the student_semester is not the proximate semester, change the semester
+								if ($student_semester != $theSemester) {
+									if ($doDebug) {
+										echo "Student semester $student_semester needs to be changed to $theSemester<br />";
+									}
+									$updateParams		= array("semester|$theSemester|s",
+																"response|Y|s");
+									$studentUpdateData			= array('tableName'=>$studentTableName,
+																		'inp_data'=>$updateParams,
+																		'inp_method'=>'update',
+																		'jobname'=>'MGMT90',
+																		'inp_id'=>$student_ID,
+																		'inp_callsign'=>$student_call_sign,
+																		'inp_semester'=>$theSemester,
+																		'inp_who'=>$userName,
+																		'testMode'=>$testMode,
+																		'doDebug'=>$doDebug);
+									$updateResult	= updateStudent($studentUpdateData);
+									if ($updateResult[0] === FALSE) {
+										handleWPDBError("$jobname MGMT 91",$doDebug);
+									} else {
+										$lastError			= $wpdb->last_error;
+										if ($lastError != '') {
+											handleWPDBError("$jobname MGMT 91",$doDebug);
+											$content		.= "Fatal program error. System Admin has been notified";
+											if (!$doDebug) {
+												return $content;
+											}
+										}
+	
+										$content		.= "Updated student semester to $theSemester<br />";
+									}
+								}								
+								// now assign the student
+								if ($doDebug) {
+									echo "doing the assignment to $inp_advisor_callsign $class_sequence class<br />";
+								}
+								$inp_data			= array('inp_student'=>$student_call_sign,
+															'inp_semester'=>$theSemester,
+															'inp_assigned_advisor'=>$inp_advisor_callsign,
+															'inp_assigned_advisor_class'=>$class_sequence,
+															'inp_remove_status'=>'',
+															'inp_arbitrarily_assigned'=>'',
+															'inp_method'=>'add',
+															'jobname'=>$jobname,
+															'userName'=>$userName,
+															'testMode'=>$testMode,
+															'doDebug'=>$doDebug);
+					
+								$addResult			= add_remove_student($inp_data);
+								if ($addResult[0] === FALSE) {
+									$thisReason		= $removeResult[1];
+									if ($doDebug) {
+										echo "attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason<br />";
+									}
+									sendErrorEmail("$jobname Attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason");
+									$content		.= "Attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason<br />";
+								} else {
+									$content		.= "Student has been added to $inp_advisor_callsign class $class_sequence<br />
+									<p>Click 'Push' to push the information to the advisor:<br />
+									<form method='post' action='$pushURL' 
+									name='selection_form_41' ENCTYPE='multipart/form-data'>
+									<input type='hidden' name='strpass' value='2'>
+									<input type='hidden' name='inp_mode' value='$inp_mode'>
+									<input type='hidden' name='inp_semester' value='$student_semester'>
+									<input type='hidden' name='request_info' value='$student_assigned_advisor'>
+									<input type='hidden' name='request_type' value= 'Full'>
+									<input type='submit' class='formInputButton' value='Push'></form></p><br /><br />";
+								}								
 							}
 						} else {
 							if ($doDebug) {
@@ -5756,8 +5677,8 @@ taking any further action.<br /><br />Otherwise:<br />";
 
 	
 		
-	$content		.= "<br /><p>To return to the Student Management menu, click
-						<a href='$theURL?strpass=1'>HERE</a>.</p>";
+//	$content		.= "<br /><p>To return to the Student Management menu, click
+//						<a href='$theURL?strpass=1'>HERE</a>.</p>";
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
 	$endingMicroTime = microtime(TRUE);
