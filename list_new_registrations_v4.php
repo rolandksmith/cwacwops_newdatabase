@@ -96,7 +96,10 @@ function list_new_registrations_v4_func(){
 									'AH7RF',
 									'ah7rf', 
 									'f8tas', 
-									't8taa');
+									't8taa',
+									'VE2KM',
+									've2km',
+									'K7OJL');
 	$registrationRecord				= FALSE;		// whether or not there is a registration record with callsign = user_login
 	$verifiedUser				= FALSE;		// whether or not the user_login record is verified
 	$validFormat				= FALSE;		// whether or not the user_login is a callsign or the user's last name
@@ -306,7 +309,7 @@ user_login $user_login with token $token deleted 0 rows. Query: $lastQuery<br />
 					
 					$user_uppercase		= strtoupper($user_login);
 					
-						$debugData .= "<br />Processing $user_login<br />";
+					$debugData .= "<br />Processing $user_login<br />";
 					
 					if (in_array($user_uppercase,$bypassArray)) { 
 						$doProceed 		= FALSE;
@@ -405,7 +408,7 @@ user_login $user_login with token $token deleted 0 rows. Query: $lastQuery<br />
 										if ($tempToken == 'register') {
 											$tempRegister			= TRUE;
 											$debugData	.= "tempRegister record found. tempRegister is TRUE<br />";
-											$allUsersArray[$user_uppercase]['thempRegisterID']	= $tempID;
+											$allUsersArray[$user_uppercase]['tempRegisterID']	= $tempID;
 											$threeDayDate 			= date('Y-m-d H:i:s', strtotime($date_written . ' +3 days'));
 // echo "<br />date_written: $date_written<br />";
 // echo "threeDayDate: $threeDayDate<br />";

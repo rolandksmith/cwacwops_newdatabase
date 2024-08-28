@@ -989,7 +989,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 
 									// now get the advisor email address
 									$advisorEmail		= $wpdb->get_var("select email from $advisorTableName where call_sign='$replacement_call_sign' and semester='$theSemester'");
-									if ($a === NULL) {
+									if ($advisorEmail === NULL) {
 										$myQuery		= $wpdb->last_query;
 										$myError		= $wpdb->last_error;
 										if ($doDebugLog) {
