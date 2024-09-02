@@ -287,17 +287,19 @@ function RKSTEST_fill_profile_fields_func() {
 								$advisor_last_name 					= stripslashes($advisorRow->last_name);
 								$advisor_email 						= strtolower($advisorRow->email);
 								$advisor_phone						= $advisorRow->phone;
-								$advisor_ph_code					= $advisorRow->ph_code;				// new
+								$advisor_ph_code					= $advisorRow->ph_code;				
 								$advisor_text_message 				= $advisorRow->text_message;
 								$advisor_city 						= $advisorRow->city;
 								$advisor_state 						= $advisorRow->state;
 								$advisor_zip_code 					= $advisorRow->zip_code;
 								$advisor_country 					= $advisorRow->country;
-								$advisor_country_code				= $advisorRow->country_code;		// new
-								$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-								$advisor_signal						= $advisorRow->signal_app;			// new
-								$advisor_telegram					= $advisorRow->telegram_app;		// new
-								$advisor_messenger					= $advisorRow->messenger_app;		// new
+								$advisor_country_code				= $advisorRow->country_code;		
+								$advisor_whatsapp					= $advisorRow->whatsapp_app;		
+								$advisor_signal						= $advisorRow->signal_app;			
+								$advisor_telegram					= $advisorRow->telegram_app;		
+								$advisor_messenger					= $advisorRow->messenger_app;		
+								$advisor_timezone_id				= $advisorRow->timezone_id;
+								$advisor_languages					= $advisorRow->languages;
 			
 								$advisor_last_name 					= no_magic_quotes($advisor_last_name);
 								
@@ -320,8 +322,12 @@ function RKSTEST_fill_profile_fields_func() {
 																		  'telegram_app'=>$advisor_telegram,
 																		  'signal_app'=>$advisor_signal,
 																		  'messenger_app'=>$advisor_messenger,
+																		  'timezone_id'=>$advisor_timezone_id,
+																		  'languages'=>$advisor_languages,
 																		  'user_action_log'=>$user_action_log ),
 																	  array('%s',
+																	  		'%s',
+																	  		'%s',
 																	  		'%s',
 																	  		'%s',
 																	  		'%s',
@@ -411,7 +417,8 @@ function RKSTEST_fill_profile_fields_func() {
 									$student_whatsapp					= $studentRow->whatsapp_app;		
 									$student_signal						= $studentRow->signal_app;			
 									$student_telegram					= $studentRow->telegram_app;		
-									$student_messenger					= $studentRow->messenger_app;		
+									$student_messenger					= $studentRow->messenger_app;
+									$student_timezone_id				= $studentRow->timezone_id;
 				
 									$student_last_name 					= no_magic_quotes($student_last_name);
 									
@@ -434,8 +441,10 @@ function RKSTEST_fill_profile_fields_func() {
 																			  'telegram_app'=>$student_telegram,
 																			  'signal_app'=>$student_signal,
 																			  'messenger_app'=>$student_messenger,
+																			  'timezone_id'=>$student_timezone_id,
 																			  'user_action_log'=>$user_action_log ),
 																		  array('%s',
+																				'%s',
 																				'%s',
 																				'%s',
 																				'%s',

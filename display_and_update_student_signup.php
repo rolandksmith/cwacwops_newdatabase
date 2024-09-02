@@ -88,10 +88,6 @@ function display_and_update_student_signup_func() {
 				$inp_student_time_zone = $str_value;
 				$inp_student_time_zone = filter_var($inp_student_time_zone,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key == "inp_student_timezone_id") {
-				$inp_student_timezone_id = $str_value;
-				$inp_student_timezone_id = filter_var($inp_student_timezone_id,FILTER_UNSAFE_RAW);
-			}
 			if ($str_key == "inp_student_timezone_offset") {
 				$inp_student_timezone_offset = $str_value;
 				$inp_student_timezone_offset = filter_var($inp_student_timezone_offset,FILTER_UNSAFE_RAW);
@@ -364,6 +360,7 @@ function display_and_update_student_signup_func() {
 
 
 	if ("1" == $strPass) {
+	
 		$content 		.= "<h3>$jobname</h3>
 							<p>
 							<form method='post' action='$theURL' 
@@ -409,6 +406,8 @@ function display_and_update_student_signup_func() {
 		$telegram		= "";
 		$signal			= "";
 		$messenger		= "";
+		$languages		= "";
+		$timezone_id	= "";
 		$date_created	= "";
 		$date_updated	= "";
 
@@ -438,11 +437,13 @@ function display_and_update_student_signup_func() {
 								<td><b>Telegram</b><br />$telegram</td>
 								<td><b>Signal</b><br />$signal</td>
 								<td><b>Messenger</b><br />$messenger</td></tr>
-							<tr><td><b>Date Created</b><br />$date_created</td>
-								<td><b>Date Updated</b><br />$date_updated</td>
-								<td colspan='2'><b>Action Log</b><br />$myStr</td></tr>
+							<tr><td><b>Timezone ID</b><br />$timezone_id</td>
+								<td><b>Languages</b><br />$languages</td>
+								<td><b>Date Created</b><br />$date_created</td>
+								<td><b>Date Updated</b><br />$date_updated</td></tr>
+							<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
 							</table>
-							<p>Click HERE to update the Student Master Data</p>";
+							<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=3&inp_callsign=$inp_callsign' target='_blank'>HERE</a> to update the Student Master Data</p>";
 		}
 
 		// get the student signup info
@@ -462,7 +463,6 @@ function display_and_update_student_signup_func() {
 					$student_student_id 					= $studentRow -> student_id;
 					$student_call_sign 						= $studentRow -> call_sign;
 					$student_time_zone 						= $studentRow -> time_zone;
-					$student_timezone_id 					= $studentRow -> timezone_id;
 					$student_timezone_offset 				= $studentRow -> timezone_offset;
 					$student_youth 							= $studentRow -> youth;
 					$student_age 							= $studentRow -> age;
@@ -522,8 +522,6 @@ function display_and_update_student_signup_func() {
 												<td>$student_call_sign</td></tr>
 											<tr><td>Student Time Zone<td>
 												<td>$student_time_zone</td></tr>
-											<tr><td>Student Timezone Id<td>
-												<td>$student_timezone_id</td></tr>
 											<tr><td>Student Timezone Offset<td>
 												<td>$student_timezone_offset</td></tr>
 											<tr><td>Student Youth<td>
@@ -645,7 +643,6 @@ function display_and_update_student_signup_func() {
 					$student_call_sign 						= $studentRow -> call_sign;
 					$student_time_zone 						= $studentRow -> time_zone;
 					$student_timezone_id 					= $studentRow -> timezone_id;
-					$student_timezone_offset 				= $studentRow -> timezone_offset;
 					$student_youth 							= $studentRow -> youth;
 					$student_age 							= $studentRow -> age;
 					$student_student_parent 				= $studentRow -> student_parent;
@@ -711,9 +708,6 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_time_zone</td>
 													<td><input type='text' class='formInputText' name='inp_student_time_zone' length='50' 
 													maxlength='50' value='$student_time_zone'></td></tr>
-												<tr><td>student_timezone_id</td>
-													<td><input type='text' class='formInputText' name='inp_student_timezone_id' length='50' 
-													maxlength='50' value='$student_timezone_id'></td></tr>
 												<tr><td>student_timezone_offset</td>
 													<td><input type='text' class='formInputText' name='inp_student_timezone_offset' length='20' 
 													maxlength='20' value='$student_timezone_offset'></td></tr>
@@ -752,9 +746,6 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_email_number</td>
 													<td><input type='text' class='formInputText' name='inp_student_email_number' length='20' 
 													maxlength='20' value='$student_email_number'></td></tr>
-												<tr><td>student_email_number</td>
-													<td><input type='text' class='formInputText' name='inp_student_email_number' length='10' 
-													maxlength='10' value='$student_email_number'></td></tr>
 												<tr><td>student_response</td>
 													<td><input type='text' class='formInputText' name='inp_student_response' length='1' 
 													maxlength='1' value='$student_response'></td></tr>
@@ -885,7 +876,6 @@ function display_and_update_student_signup_func() {
 					$student_student_id 					= $studentRow -> student_id;
 					$student_call_sign 						= $studentRow -> call_sign;
 					$student_time_zone 						= $studentRow -> time_zone;
-					$student_timezone_id 					= $studentRow -> timezone_id;
 					$student_timezone_offset 				= $studentRow -> timezone_offset;
 					$student_youth 							= $studentRow -> youth;
 					$student_age 							= $studentRow -> age;
@@ -945,13 +935,6 @@ function display_and_update_student_signup_func() {
 						$updateFormat[]	= "%s";
 						$content	.= "student_time_zone updated to $inp_student_time_zone<br />";
 						$updateLog	.= " /student_time_zone updated to $inp_student_time_zone";
-					}
-					if ($inp_student_timezone_id != $student_timezone_id) {
-						$student_timezone_id = $inp_student_timezone_id;
-						$updateParams['timezone_id']	= $inp_student_timezone_id;
-						$updateFormat[]	= "%s";
-						$content	.= "student_timezone_id updated to $inp_student_timezone_id<br />";
-						$updateLog	.= " /student_timezone_id updated to $inp_student_timezone_id";
 					}
 					if ($inp_student_timezone_offset != $student_timezone_offset) {
 						$student_timezone_offset = $inp_student_timezone_offset;
@@ -1319,6 +1302,8 @@ function display_and_update_student_signup_func() {
 					$telegram		= "";
 					$signal			= "";
 					$messenger		= "";
+					$languages		= "";
+					$timezone_id	= "";
 					$date_created	= "";
 					$date_updated	= "";
 			
@@ -1348,9 +1333,11 @@ function display_and_update_student_signup_func() {
 											<td><b>Telegram</b><br />$telegram</td>
 											<td><b>Signal</b><br />$signal</td>
 											<td><b>Messenger</b><br />$messenger</td></tr>
-										<tr><td><b>Date Created</b><br />$date_created</td>
-											<td><b>Date Updated</b><br />$date_updated</td>
-											<td colspan='2'><b>Action Log</b><br />$myStr</td></tr>
+										<tr><td><b>Timezone ID</b><br />$timezone_id</td>
+											<td><b>Languages</b><br />$languages</td>
+											<td><b>Date Created</b><br />$date_created</td>
+											<td><b>Date Updated</b><br />$date_updated</td></tr>
+										<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
 										</table>
 										<p>Click HERE to update the Student Master Data</p>";
 					}
@@ -1371,7 +1358,6 @@ function display_and_update_student_signup_func() {
 								$student_student_id 					= $studentRow -> student_id;
 								$student_call_sign 						= $studentRow -> call_sign;
 								$student_time_zone 						= $studentRow -> time_zone;
-								$student_timezone_id 					= $studentRow -> timezone_id;
 								$student_timezone_offset 				= $studentRow -> timezone_offset;
 								$student_youth 							= $studentRow -> youth;
 								$student_age 							= $studentRow -> age;
@@ -1431,8 +1417,6 @@ function display_and_update_student_signup_func() {
 															<td>$student_call_sign</td></tr>
 														<tr><td>Student Time Zone<td>
 															<td>$student_time_zone</td></tr>
-														<tr><td>Student Timezone Id<td>
-															<td>$student_timezone_id</td></tr>
 														<tr><td>Student Timezone Offset<td>
 															<td>$student_timezone_offset</td></tr>
 														<tr><td>Student Youth<td>
@@ -1549,19 +1533,23 @@ function display_and_update_student_signup_func() {
 		$content		.= "<h3>Display and Update Student Information</h3>
 							<h4>Deleting record ID $inp_student_id</h4>";
 							
-		$deleteResult	= $wpdb->delete($studentTableName, 
-										array('student_id'=>$inp_student_id),
-										array('%d'));
-		if ($deleteResult === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		//// first move the record to the deleted table
+		
+		$sql		= "insert into $deletedStudentTableName 
+						select * from $studentTableName 
+						where ID = $inp_student_id";
+		$myResult	= $wpdb->get_results($sql);
+		if ($myResult === FALSE) {
+			handledWPDBError($jobname,$doDebug);
+			$content .= "<p>The deletion was not successful. Sys Admin has been notified</p>";
 		} else {
-			if ($deleteResult == 1) {
-				$content	.= "Record successfully deleted<br />";
-			} else {
-				if ($doDebug) {
-					echo "delete said $deleteResult rows were deleted<br />";
-				}
-				$content	.= "Deletion Failed. Delete Result: $deleteResult rows deleted<br />";
+			//// then, if the move was successful, delete the record
+			$myResult	= $wpdb->delete($studentTableName,
+									array('ID'=>$inp_student_id),
+									array('%d'));
+			if ($myResult === FALSE) {
+				handleWPDBError($jobname,$doDebug);
+				$content	.= "<p>The deletion was not successful. Sys Admin has been notified</p>";
 			}
 		}
 		$content		.= "<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student";

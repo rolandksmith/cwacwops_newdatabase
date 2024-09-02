@@ -1113,7 +1113,7 @@ There will be no replacement. Thanks for putting in a useful comment.</p>";
 								if ($doDebug) {
 									echo "attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
 								}
-								sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+								sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />userName: $userName");
 								$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
 							} else {
 								if ($doDebug) {

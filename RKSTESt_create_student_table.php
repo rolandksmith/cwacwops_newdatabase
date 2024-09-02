@@ -299,7 +299,6 @@ function RKSTEST_create_student_table_func() {
 					$insertResult			= $wpdb->insert($studentTableName, 
 														array('call_sign'=>$student_call_sign,
 																'time_zone'=>$student_time_zone,
-																'timezone_id'=>$student_timezone_id,
 																'timezone_offset'=>$student_timezone_offset,
 																'youth'=>$student_youth,
 																'age'=>$student_age,
@@ -344,7 +343,7 @@ function RKSTEST_create_student_table_func() {
 																'catalog_options'=>$student_catalog_options,
 																'flexible'=>$student_flexible),
 															array( 
-																  '%s','%s','%s','%f','%s','%s','%s','%s','%s','%s',
+																  '%s','%s','%f','%s','%s','%s','%s','%s','%s',
 																  '%s','%s','%s','%s','%s','%d','%s','%s','%s','%s',
 																  '%s','%s','%s','%s','%s','%s','%s','%s','%d','%s',
 																  '%d','%s','%s','%s','%s','%s','%s','%s','%s','%s',

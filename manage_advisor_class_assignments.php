@@ -30,6 +30,7 @@ function manage_advisor_class_assignments_func() {
 	}
 	$validUser 					= $initializationArray['validUser'];
 	$userName					= $initializationArray['userName'];
+	$userRole					= $initializationArray['userRole'];
 	$validTestmode				= $initializationArray['validTestmode'];
 	$currentSemester			= $initializationArray['currentSemester'];
 	$nextSemester				= $initializationArray['nextSemester'];
@@ -41,10 +42,10 @@ function manage_advisor_class_assignments_func() {
 	if ($proximateSemester == 'Not in Session') {
 		$proximateSemester		= $nextSemester;
 	}
-	if ($userName != 'administrator') {
-		$doDebug		= FALSE;
-		$testMode		= FALSE;
-	}
+//	if ($userRole != 'administrator') {
+//		$doDebug		= FALSE;
+//		$testMode		= FALSE;
+//	}
 	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
@@ -130,10 +131,20 @@ function manage_advisor_class_assignments_func() {
 				$inp_comment_attend			= str_replace("'","&apos;",$inp_comment_attend);
 				$inp_comment_attend			 = filter_var($inp_comment_attend,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key 		== "inp_comment") {
-				$inp_comment			 = $str_value;
-				$inp_comment			= str_replace("'","&apos;",$inp_comment);
-				$inp_comment			 = filter_var($inp_comment,FILTER_UNSAFE_RAW);
+			if ($str_key 		== "inp_comment1") {
+				$inp_comment1			 = $str_value;
+				$inp_comment1			= str_replace("'","&apos;",$inp_comment1);
+				$inp_comment1			 = filter_var($inp_comment1,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_comment2") {
+				$inp_comment2			 = $str_value;
+				$inp_comment2			= str_replace("'","&apos;",$inp_comment2);
+				$inp_comment2			 = filter_var($inp_comment2,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_comment3") {
+				$inp_comment3			 = $str_value;
+				$inp_comment3			= str_replace("'","&apos;",$inp_comment3);
+				$inp_comment3			 = filter_var($inp_comment3,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_replace") {
 				$inp_replace			 = $str_value;
@@ -389,20 +400,20 @@ td:last-child {
 													select this option. CW Academy will unassign the student from your class and the student will be unavailable 
 													for reassignment. Comments would be helpful but not required.</td></tr>
 											<tr><td><b>Advisor Comments (<em>optional</em>):</b><br />
-													<textarea class=formInputText' name='inp_comment' id='inp_comment' rows='2' cols='50'></textarea></td></tr>
+													<textarea class=formInputText' name='inp_comment1' id='inp_comment1' rows='2' cols='50'></textarea></td></tr>
 											<tr><td style='vertical-align:top;'><input type='radio' class='formInputButton' name='inp_attend' value='advisor'> 
 													<b>Advisor Doesn't Want the Student:</b><br />
 													If you don't want the student in your class for whatever reason, select this option. The student will be unassigned and 
 													returned to the unassigned pool for possible assignment to another advisor's class. Comments would be helpful but 
 													not required.</td></tr>
 											<tr><td><b>Advisor Comments (<em>optional</em>):</b><br />
-													<textarea class=formInputText' name='inp_comment' id='inp_comment' rows='2' cols='50'></textarea></td></tr>
+													<textarea class=formInputText' name='inp_comment2' id='inp_comment2' rows='2' cols='50'></textarea></td></tr>
 											<tr><td style='vertical-align:top;'><input type='radio' class='formInputButton' id='chk_attend' name='inp_attend' value='other'> 
 													<b>Some Other Reason</b> (such as no responding)<br />
 													Please enter as much information as you have about why. 
 													The student will be marked as unavailable for reassignment.</td></tr>
 											<tr><td><b>Advisor Comments (<em>Required</em>):</b><br />
-													<textarea class=formInputText' name='inp_comment' id='inp_comment' rows='2' cols='50'></textarea></td></tr></table>";
+													<textarea class=formInputText' name='inp_comment3' id='inp_comment3' rows='2' cols='50'></textarea></td></tr></table>";
 						if ($validReplacementPeriod == 'Y') {
 							$content		.= "<table style='border:4px solid blue;'>
 												<tr><td style='vertical-align:top;width:500px;'><b>If the student will <em>NOT</em> be attending your class, do you want the 
@@ -753,8 +764,8 @@ td:last-child {
 									if ($doDebug) {
 										echo "Doing Class; Replacement Yes<br />";
 									}
-									if ($inp_comment != '') {
-										$myStr				= "Advisor comments: $inp_coment ";
+									if ($inp_comment1 != '') {
+										$myStr				= "Advisor comments: $inp_coment1 ";
 									}
 									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student does not want the class. $myStr Replacement requested ";
 									$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign does not want the class. $myStr Replacement requested ";
@@ -772,8 +783,8 @@ td:last-child {
 									} else {
 										$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
 									}
-									if ($inp_comment != '') {
-										$myStr				= "Advisor comments: $inp_coment ";
+									if ($inp_comment2 != '') {
+										$myStr				= "Advisor comments: $inp_coment2 ";
 									}
 									$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
 									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr Replacement requested ";
@@ -789,7 +800,10 @@ td:last-child {
 									if ($doDebug) {
 										echo "Doing Other; Replacement Yes<br />";
 									}
-									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student will not attend. Advisor comments: $inp_comment. Replacement requested ";
+									if ($inp_comment3 != '') {
+										$myStr				= "Advisor comments: $inp_coment3 ";
+									}
+									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student will not attend. $myStr Replacement requested ";
 									$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign will not attend. Advisor comments: $inp_comment. Replacement requested ";
 									$studentUpdateParams[]	= "action_log|$student_action_log|s";
 									$advisorUpdateParams[]	= "action_log|$advisor_action_log|s";
@@ -827,8 +841,9 @@ No replacement requested. ";
 									if ($doDebug) {
 										echo "Doing Class; Replacement No<br />";
 									}
-									if ($inp_comment != '') {
-										$myStr				= "Advisor comments: $inp_coment ";
+									$myStr					= "";
+									if ($inp_comment1 != '') {
+										$myStr				= "Advisor comments: $inp_comment1 ";
 									}
 									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student does not want the class. $myStr No replacement requested ";
 									$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign does not want the class. $myStr No replacement requested ";
@@ -847,8 +862,9 @@ No replacement requested. ";
 										$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
 									}
 									$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
-									if ($inp_comment != '') {
-										$myStr				= "Advisor comments: $inp_coment ";
+									$myStr					= "";
+									if ($inp_comment2 != '') {
+										$myStr				= "Advisor comments: $inp_comment2 ";
 									}
 									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr No replacement requested. Student set to unassigned ";
 									$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM advisor does not want $student_call_sign. $myStr No replacement requested ";
@@ -863,8 +879,9 @@ No replacement requested. ";
 									if ($doDebug) {
 										echo "Doing Other; Replacement No<br />";
 									}
-									if ($inp_comment != '') {
-										$myStr				= "Advisor comments: $inp_comment ";
+									$myStr					= "";
+									if ($inp_comment3 != '') {
+										$myStr				= "Advisor comments: $inp_comment3 ";
 									}
 									$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student will not attend. $myStr No replacement requested ";
 									$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign will not attend. $myStr No replacement requested ";
@@ -882,6 +899,69 @@ No replacement requested. ";
 									$removeStudent			= TRUE;
 									$confirmationMsg		= "Student $student_call_sign confirmed as not attending and no replacement was requested.<br />";
 								}
+							}
+						}
+						if ($updateFiles) {
+							//// now update the student and write to the audit log
+							$updateData	= array('tableName'=>$studentTableName,
+												'inp_data'=>$studentUpdateParams,
+												'inp_format'=>array(''),
+												'inp_method'=>'update',
+												'jobname'=>$jobname,
+												'inp_id'=>$student_ID,
+												'inp_callsign'=>$student_call_sign,
+												'inp_semester'=>$student_semester,
+												'inp_who'=>$userName,
+												'testMode'=>$testMode,
+												'doDebug'=>$doDebug);
+							if ($doDebug) {
+								echo "Ready to update student:<br /><pre>";
+								print_r($updateData);
+								echo "</pre><br />";
+							}
+							$updateResult				= updateStudent($updateData);
+							if ($updateResult[0] === FALSE) {
+								if ($doDebug) {
+									echo "updating $student_call_sign table entry failed. Reason: $updateResult[1]";
+								}
+							} else {
+								if ($doDebug) {
+									echo "student record successfully updated<br />";
+								}
+							}
+							// update the advisor
+							$advisorUpdateData		= array('tableName'=>$advisorTableName,
+															'inp_method'=>'update',
+															'inp_data'=>$advisorUpdateParams,
+															'inp_format'=>array(''),
+															'jobname'=>$jobname,
+															'inp_id'=>$advisor_ID,
+															'inp_callsign'=>$advisor_call_sign,
+															'inp_semester'=>$advisor_semester,
+															'inp_who'=>$userName,
+															'testMode'=>$testMode,
+															'doDebug'=>$doDebug);
+							if ($doDebug) {
+								echo "doing update advisor:<br /><pre>";
+								print_r($advisorUpdateData);
+								echo "</pre><br />";
+							}
+							$updateResult	= updateAdvisor($advisorUpdateData);
+							if ($updateResult[0] === FALSE) {
+								handleWPDBError($jobname,$doDebug);
+							} else {
+								$lastError			= $wpdb->last_error;
+								if ($lastError != '') {
+									handleWPDBError($jobname,$doDebug);
+									$content		.= "Fatal program error. System Admin has been notified";
+									if (!$doDebug) {
+										return $content;
+									}
+								}
+								if ($doDebug) {
+									echo "updating $advisor_call_sign in $advisorTableName succeeded<br />";
+								}
+//								$content			.= "Student status verification was successful<br />";
 							}
 						}
 						if ($removeStudent) {
@@ -911,60 +991,6 @@ No replacement requested. ";
 									echo "student was successfully remived from the advisor's class<br />";
 								}
 //								$content		.= "Student removed from the advisor's class<br />";
-							}
-						}
-						if ($updateFiles) {
-							//// now update the student and write to the audit log
-							$updateData	= array('tableName'=>$studentTableName,
-												'inp_data'=>$studentUpdateParams,
-												'inp_format'=>array(''),
-												'inp_method'=>'update',
-												'jobname'=>$jobname,
-												'inp_id'=>$student_ID,
-												'inp_callsign'=>$student_call_sign,
-												'inp_semester'=>$student_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-
-							$updateResult				= updateStudent($updateData);
-							if ($updateResult[0] === FALSE) {
-								if ($doDebug) {
-									echo "updating $student_call_sign table entry failed. Reason: $updateResult[1]";
-								}
-							} else {
-								if ($doDebug) {
-									echo "student record successfully updated<br />";
-								}
-							}
-							// update the advisor
-							$advisorUpdateData		= array('tableName'=>$advisorTableName,
-															'inp_method'=>'update',
-															'inp_data'=>$advisorUpdateParams,
-															'inp_format'=>array(''),
-															'jobname'=>$jobname,
-															'inp_id'=>$advisor_ID,
-															'inp_callsign'=>$advisor_call_sign,
-															'inp_semester'=>$advisor_semester,
-															'inp_who'=>$userName,
-															'testMode'=>$testMode,
-															'doDebug'=>$doDebug);
-							$updateResult	= updateAdvisor($advisorUpdateData);
-							if ($updateResult[0] === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								$lastError			= $wpdb->last_error;
-								if ($lastError != '') {
-									handleWPDBError($jobname,$doDebug);
-									$content		.= "Fatal program error. System Admin has been notified";
-									if (!$doDebug) {
-										return $content;
-									}
-								}
-								if ($doDebug) {
-									echo "updating $advisor_call_sign in $advisorTableName succeeded<br />";
-								}
-//								$content			.= "Student status verification was successful<br />";
 							}
 						}
 					}

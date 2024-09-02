@@ -629,7 +629,8 @@ changed student callsign from $inp_old_callsign to $inp_new_callsign ";
 											}
 											$studentCallSign					= ${'advisorClass_student' . $strSnum};
 											if ($studentCallSign == $inp_old_callsign) { 		// if so, change the callsign
-												$advisorClass_action_log	= "$advisorClass_action_log / $actionDate $userName MGNT95 
+											$actionDate						= date('Y-m-d H:i:s');
+												$advisorClass_action_log	= "$advisorClass_action_log / $actionDate $userName $jobname 
 student$strSnum call sign changed from $inp_old_callsign to $inp_new_callsign ";
 												$updateArray["student$strSnum"]	= $inp_new_callsign;
 												$updateArray["action_log"]		= $advisorClass_action_log;

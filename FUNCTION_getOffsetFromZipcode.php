@@ -18,8 +18,8 @@ function getOffsetFromZipcode($inp_zip='',$inp_semester='',$fuzzy=FALSE,$testMod
 		if ($doDebug) {
 			echo "<br />At function getOffsetFromZipcode with inp_zip: $inp_zip and inp_semester=$inp_semester<br />";
 		}
-		if ($inp_zip == '' || $inp_semester == '') {
-			return array('NOK','','','One or more inputs empty');
+		if ($inp_zip == '') {
+			return array('NOK','','','zip_code is required');
 		}
 
 
@@ -97,26 +97,31 @@ function getOffsetFromZipcode($inp_zip='',$inp_semester='',$fuzzy=FALSE,$testMod
 			$matchMsg		= "Getting timezone_id based on zipcode $myZip failed. ";
 			return array('NOK','','',$matchMsg);
 		}
-		// have the timezone_id. Now figure out the UTC offset for the student's semester
-		$myArray			= explode(" ",$inp_semester);
-		$thisYear			= $myArray[0];
-		$thisMonDay			= $myArray[1];
-		$myConvertArray		= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01','JAN/FEB'=>'-01-01','APR/MAY'=>'-04-01','MAY/JUN'=>'-05-01','SEP/OCT'=>'-09-01','Apr/May'=>'-04-01');
-		$myMonDay			= $myConvertArray[$thisMonDay];
-		$thisNewDate		= "$thisYear$myMonDay 00:00:00";
-		if ($doDebug) {
-			echo "converted $inp_semester to $thisNewDate<br />";
+		if ($inp_semester != '') {
+			// have the timezone_id. Now figure out the UTC offset for the student's semester
+			$myArray			= explode(" ",$inp_semester);
+			$thisYear			= $myArray[0];
+			$thisMonDay			= $myArray[1];
+			$myConvertArray		= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01','JAN/FEB'=>'-01-01','APR/MAY'=>'-04-01','MAY/JUN'=>'-05-01','SEP/OCT'=>'-09-01','Apr/May'=>'-04-01');
+			$myMonDay			= $myConvertArray[$thisMonDay];
+			$thisNewDate		= "$thisYear$myMonDay 00:00:00";
+			if ($doDebug) {
+				echo "converted $inp_semester to $thisNewDate<br />";
+			}
+			$dateTimeZoneLocal 	= new DateTimeZone($zipTimeZone);
+			$dateTimeZoneUTC 	= new DateTimeZone("UTC");
+			$dateTimeLocal 		= new DateTime($thisNewDate,$dateTimeZoneLocal);
+			$dateTimeUTC		= new DateTime($thisNewDate,$dateTimeZoneUTC);
+			$php2 				= $dateTimeZoneLocal->getOffset($dateTimeUTC);
+			$offset 			= $php2/3600;
+			if ($doDebug) {
+				echo "UTC offset for $zipTimeZone is $offset hours<br />";
+			}
+			$matchMsg			= "Using $zipTimeZone the UTC offset for $inp_semester is $offset hours. ";
+		} else {
+			$offset				= 0;
+			$matchMsg			= "no semester";
 		}
-		$dateTimeZoneLocal 	= new DateTimeZone($zipTimeZone);
-		$dateTimeZoneUTC 	= new DateTimeZone("UTC");
-		$dateTimeLocal 		= new DateTime($thisNewDate,$dateTimeZoneLocal);
-		$dateTimeUTC		= new DateTime($thisNewDate,$dateTimeZoneUTC);
-		$php2 				= $dateTimeZoneLocal->getOffset($dateTimeUTC);
-		$offset 			= $php2/3600;
-		if ($doDebug) {
-			echo "UTC offset for $zipTimeZone is $offset hours<br />";
-		}
-		$matchMsg			= "Using $zipTimeZone the UTC offset for $inp_semester is $offset hours. ";
 
 		return array('OK',$zipTimeZone,$offset,$matchMsg);	
 	}

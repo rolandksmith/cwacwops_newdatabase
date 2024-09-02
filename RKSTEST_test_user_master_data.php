@@ -1,8 +1,8 @@
 function RKSTEST_test_user_master_data_func() {
 
-			$dataArray			= array('callsign'=>'K7OJL',
-									'action'=>'update',
-									'last_name'=>'Smitty',
+	
+		$dataArray			= array('callsign'=>'K7OJL',
+									'action'=>'get',
 									'debugging'=> TRUE,
 									'testing'=> FALSE);
 		$dataResult				= user_master_data($dataArray);
@@ -10,8 +10,7 @@ function RKSTEST_test_user_master_data_func() {
 		echo "dataResult:<br /><pre>";
 		print_r($dataResult);
 		echo "</pre><br />";		
-		
-		
+				
 
 }
 add_shortcode('RKSTEST_test_user_master_data','RKSTEST_test_user_master_data_func');

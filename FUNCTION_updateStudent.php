@@ -7,6 +7,8 @@ function updateStudent($inpArray) {
 		tableName		name of the table to be updated
 							must be one of 	wpw1_cwa_consolidated_student
 											wpw1_cwa_consolidated_student2
+											wpw1_cwa_student
+											wpw1_cwa_student2
 		inp_method		add / update / delete
 		inp_data:		an array of table fields to be updated
 							either in the format of
@@ -94,7 +96,9 @@ function updateStudent($inpArray) {
 	}
 
 	$tableNameArray			= array('wpw1_cwa_consolidated_student'=>'wpw1_cwa_student_deleted',
-									'wpw1_cwa_consolidated_student2'=>'wpw1_cwa_student_deleted2');		
+									'wpw1_cwa_consolidated_student2'=>'wpw1_cwa_student_deleted2',
+									'wpw1_cwa_student'=>'wpw1_cwa_deleted_student',
+									'wpw1_cwa_student2'=>'wpw1_cwa_deleted_student2');		
 	$fieldTest				= array('action_log','control_code');
 		
 	if ($doDebug) {
