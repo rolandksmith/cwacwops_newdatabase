@@ -4,6 +4,8 @@ function practiceAssessment_func() {
 
 	Allows the student to take a practice assessment
 	
+	// modified 20Oct24 by Roland for new database
+	
 */
 
 	global $wpdb;
@@ -12,27 +14,22 @@ function practiceAssessment_func() {
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
-
-	if ($validUser == 'N') {				// turn off debug and testmode
-		$doDebug					= FALSE;
-		$testMode					= FALSE;
-	}
-
+	$userName						= $initializationArray['userName'];
+	$currentTimestamp				= $initializationArray['currentTimestamp'];
+	$validTestmode					= $initializationArray['validTestmode'];
+	$siteURL						= $initializationArray['siteurl'];
+	
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	
+
 //	CHECK THIS!								//////////////////////
-//	if ($validUser == "N") {
-//		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
-//	}
+	if ($userName == '') {
+		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+	}
 
 //	ini_set('memory_limit','256M');
 //	ini_set('max_execution_time',0);
@@ -48,7 +45,7 @@ function practiceAssessment_func() {
 
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-practice-assessment/";
-	$jobname					= "Practice Assessment V$versionNumber";
+	$jobname					= "Practice Morse Code Assessment V$versionNumber";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -96,8 +93,8 @@ function practiceAssessment_func() {
 	
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -107,65 +104,65 @@ function practiceAssessment_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -176,16 +173,16 @@ td:last-child {
 		$ipAddressTableName			= "wpw1_cwa_ip_address_check2";
 	} else {
 		$extMode					= 'pd';
-		$ipAddressTableName			= "wpw1_cwa_ip_address_check2";
+		$ipAddressTableName			= "wpw1_cwa_ip_address_check";
 	}
 
 
 
 	if ("1" == $strPass) {
-			$content 		.= "<h3>$jobname</h3>
-								<p>You have requested to take a practice Morse Code Proficiency Assessment. Please 
-								enter your call sign in the space below. If you don't have a call sign, enter your 
-								last name.</p>
+	
+			$inp_callsign	= strtoupper($userName);
+			$content 		.= "<h3>$jobname for $inp_callsign</h3>
+								<p>You have requested to take a practice Morse Code Proficiency Assessment.</p>
 								<p>The purpose of the assessment is to help prospective students get into the 
 								proper class based on their Morse code proficiency. Each of the four classes 
 								offered by CW Academy has different proficiency requirements:
@@ -209,9 +206,8 @@ td:last-child {
 								<form method='post' action='$theURL' 
 								name='selection_form' ENCTYPE='multipart/form-data'>
 								<input type='hidden' name='strpass' value='2'>
+								<input type='hidden' name='inp_callsign' value='$inp_callsign'>
 								<table style='border-collapse:collapse;'>
-								<tr><td>Call Sign</td>
-									<td><input type='text' class='formInputText' name='inp_callsign' size='15' maxlength='20'></td></tr>
 								$testModeOption
 								<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 								</form></p>
@@ -251,28 +247,25 @@ td:last-child {
 				}
 			}
 		}
-		if ($doProceed) {
-			if (!in_array($userName,$validTestmode)) {			
-		
-				$dateWritten		= date('Y-m-d H:i:s');
-				$ip_address			= get_the_user_ip();
-				$ipResult			= $wpdb->insert($ipAddressTableName,
-														array('ip_address'=>$ip_address,
-															   'callsign'=>$inp_callsign,
-															   'program'=>'Practice Assessment',
-															   'token'=>'',
-																'date_written'=>$dateWritten),
-														 array('%s','%s','%s','%s','%s'));
-				if ($ipResult === FALSE) {
-					if ($doDebug) {
-						$lastError		= $wpdb->last_error;
-						$lastQuery		= $wpdb->last_query;
-						echo "inserting $ip_address into $ipAddressTableName failed.<br />
-								Error: $lastError<br />
-								SQL: $lastQuery<br />";
-					}
+		if ($doProceed) {		
+			$dateWritten		= date('Y-m-d H:i:s');
+			$ip_address			= get_the_user_ip();
+			$ipResult			= $wpdb->insert($ipAddressTableName,
+													array('ip_address'=>$ip_address,
+														   'callsign'=>$inp_callsign,
+														   'program'=>'Practice Assessment',
+														   'token'=>'',
+															'date_written'=>$dateWritten),
+													 array('%s','%s','%s','%s','%s'));
+			if ($ipResult === FALSE) {
+				if ($doDebug) {
+					$lastError		= $wpdb->last_error;
+					$lastQuery		= $wpdb->last_query;
+					echo "inserting $ip_address into $ipAddressTableName failed.<br />
+							Error: $lastError<br />
+							SQL: $lastQuery<br />";
 				}
-			}		
+			}
 			$token					= mt_rand();
 			$returnURL				= "$siteURL/cwa-practice-assessment/?strpass=3&inp_callsign=$inp_callsign&token=$token";
 			$returnURL				= urlencode($returnURL);		

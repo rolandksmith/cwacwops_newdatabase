@@ -28,7 +28,7 @@ function generate_catalog_for_student($inp_data = array('')) {
 	Each semester has three important dates:
 		Date 1 is January 1st, May 1st, and September 1st, This is the date the semester starts
 			The value is days_to_semester
-		Date 2 is March 15th, July 15th, and November 15th. This is the date the catalog becomes available
+		Date 2 is March 10th, July 10th, and November 10th. This is the date the catalog becomes available
 		Date 3 is April 10th, July 10th, and December 10th. This is the date students get assigned to advisors
 		
 		If the current date is earlier than Date2, then there is no catalog available
@@ -186,9 +186,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 		$prevYear				= date('Y',$myInt);
 		
 		
-		$dateArray				= array('Jan/Feb'=>"$thisYear-01-01,$prevYear-11-15,$prevYear-12-10",
-										'May/Jun'=>"$thisYear-05-01,$thisYear-03-15,$thisYear-04-10", 
-										'Sep/Oct'=>"$thisYear-09-01,$thisYear-07-15,$thisYear-08-10");
+		$dateArray				= array('Jan/Feb'=>"$thisYear-01-01,$prevYear-11-10,$prevYear-12-10",
+										'May/Jun'=>"$thisYear-05-01,$thisYear-03-10,$thisYear-04-10", 
+										'Sep/Oct'=>"$thisYear-09-01,$thisYear-07-10,$thisYear-08-10");
 		$thisDates				= $dateArray[$thisSemester];
 		$myArray				= explode(',',$thisDates);
 		if ($doDebug) {

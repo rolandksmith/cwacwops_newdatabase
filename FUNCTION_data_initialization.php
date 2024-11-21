@@ -197,8 +197,9 @@ $userName						= "";
 	}
 
 // set up pastSemesters
-	$pastSemesters				= '2020 Jan/Feb|2020 APR/MAY|2020 SEP/OCT|2021 Jan/Feb|2021 Apr/May|2021 Sep/Oct|2022 Jan/Feb|2022 May/Jun|2022 Sep/Oct|2023 Jan/Feb|2023 May/Jun|2023 Sep/Oct|2024 Jan/Feb|2024 May/Jun';
-	$pastSemestersArray			= array('2024 May/Jun',
+	$pastSemesters				= '2020 Jan/Feb|2020 APR/MAY|2020 SEP/OCT|2021 Jan/Feb|2021 Apr/May|2021 Sep/Oct|2022 Jan/Feb|2022 May/Jun|2022 Sep/Oct|2023 Jan/Feb|2023 May/Jun|2023 Sep/Oct|2024 Jan/Feb|2024 May/Jun|2024 Sep/Oct';
+	$pastSemestersArray			= array('2024 Sep/Oct',
+										'2024 May/Jun',
 										'2024 Jan/Feb',
 										'2023 Sep/Oct',
 										'2023 May/Jun',

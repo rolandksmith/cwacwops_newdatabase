@@ -24,70 +24,81 @@ Function AdvisorEvaluationStatus($advisorCallSign,$advisorSemester,$testMode,$do
 	}
 	
 	if ($testMode) {
-		$advisordvisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass2';
-		$studentTableName				= 'wpw1_cwa_consolidated_student2';
+		$advisorClassTableName			= 'wpw1_cwa_advisorclass2';
+		$studentTableName				= 'wpw1_cwa_student2';
 	} else {
-		$advisordvisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass';
-		$studentTableName				= 'wpw1_cwa_consolidated_student';
+		$advisorClassTableName			= 'wpw1_cwa_advisorclass';
+		$studentTableName				= 'wpw1_cwa_student';
 	}
 
+	$dataOK							= TRUE;
 	$returnArray					= array();
 
 	// get the classes and counts
-	$wpw1_cwa_consolidated_advisorclass	= $wpdb->get_results("select * from $advisordvisorClassTableName 
-													  where advisor_call_sign = '$advisorCallSign' 
-														and semester='$advisorSemester'
-													  order by sequence");
-	if ($wpw1_cwa_consolidated_advisorclass === FALSE) {
-		if ($doDebug) {
-			echo "Reading $advisordvisorClassTableName table failed<br />";
-			echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-			echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-		}
-		$returnArray[]			= FALSE;
+	$sql							= "select * from $advisorClassTableName 
+									  where advisorclass_call_sign = '$advisorCallSign' 
+										and advisorclass_semester='$advisorSemester'
+													  order by advisorclass_sequence";
+	$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+	if ($wpw1_cwa_advisorclass === FALSE) {
+		handleWPDBError($jobname,$doDebug);
 	} else {
-		$numACRows				= $wpdb->num_rows;
+		$numACRows			= $wpdb->num_rows;
+		$dataOK				= FALSE;
 		if ($doDebug) {
-			$myStr				= $wpdb->last_query;
-			echo "ran $myStr<br />and found $numACRows rows in $advisordvisorClassTableName table<br />";
+			echo "ran $sql<br />and found $numACRows rows<br />";
 		}
 		if ($numACRows > 0) {
-			foreach ($wpw1_cwa_consolidated_advisorclass as $advisorClassRow) {
+			foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
 				$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-				$advisorClass_level						= $advisorClassRow->level;
-				$advisorClass_sequence 					= $advisorClassRow->sequence;
-				$advisorClass_semester 					= $advisorClassRow->semester;
-				$advisorClass_student01 				= $advisorClassRow->student01;
-				$advisorClass_student02 				= $advisorClassRow->student02;
-				$advisorClass_student03 				= $advisorClassRow->student03;
-				$advisorClass_student04 				= $advisorClassRow->student04;
-				$advisorClass_student05 				= $advisorClassRow->student05;
-				$advisorClass_student06 				= $advisorClassRow->student06;
-				$advisorClass_student07 				= $advisorClassRow->student07;
-				$advisorClass_student08 				= $advisorClassRow->student08;
-				$advisorClass_student09 				= $advisorClassRow->student09;
-				$advisorClass_student10 				= $advisorClassRow->student10;
-				$advisorClass_student11 				= $advisorClassRow->student11;
-				$advisorClass_student12 				= $advisorClassRow->student12;
-				$advisorClass_student13 				= $advisorClassRow->student13;
-				$advisorClass_student14 				= $advisorClassRow->student14;
-				$advisorClass_student15 				= $advisorClassRow->student15;
-				$advisorClass_student16 				= $advisorClassRow->student16;
-				$advisorClass_student17 				= $advisorClassRow->student17;
-				$advisorClass_student18 				= $advisorClassRow->student18;
-				$advisorClass_student19 				= $advisorClassRow->student19;
-				$advisorClass_student20 				= $advisorClassRow->student20;
-				$advisorClass_student21 				= $advisorClassRow->student21;
-				$advisorClass_student22 				= $advisorClassRow->student22;
-				$advisorClass_student23 				= $advisorClassRow->student23;
-				$advisorClass_student24 				= $advisorClassRow->student24;
-				$advisorClass_student25 				= $advisorClassRow->student25;
-				$advisorClass_student26 				= $advisorClassRow->student26;
-				$advisorClass_student27 				= $advisorClassRow->student27;
-				$advisorClass_student28 				= $advisorClassRow->student28;
-				$advisorClass_student29 				= $advisorClassRow->student29;
-				$advisorClass_student30 				= $advisorClassRow->student30;
-				$class_number_students						= $advisorClassRow->number_students;
+				$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+				$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+				$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+				$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+				$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+				$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+				$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+				$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+				$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+				$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+				$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+				$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+				$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+				$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+				$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+				$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+				$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+				$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+				$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+				$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+				$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+				$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+				$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+				$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+				$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+				$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+				$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+				$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+				$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+				$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+				$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+				$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+				$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+				$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+				$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+				$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+				$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+				$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+				$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+				$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+				$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+				$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+				$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+				$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+				$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+				$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+				$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+				$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 
 				if ($doDebug) {
 					echo "have class $advisorClass_sequence for $advisorCallSign<br />";
@@ -101,7 +112,7 @@ Function AdvisorEvaluationStatus($advisorCallSign,$advisorSemester,$testMode,$do
 				$nmbrWithdrawn					= 0;
 
 				// cycle through thru all students in the class
-				for ($snum=1;$snum<=$class_number_students;$snum++) {
+				for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
 					if ($snum < 10) {
 						$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
 					} else {
@@ -115,46 +126,27 @@ Function AdvisorEvaluationStatus($advisorCallSign,$advisorSemester,$testMode,$do
 						$studentCallSign = $theInfo;
 						
 						// get the student info
-						$wpw1_cwa_consolidated_student	= $wpdb->get_results("select promotable 
+						$student_promotable			= $wpdb->get_var("select student_promotable 
 																	  from $studentTableName 
-																	  where call_sign='$studentCallSign' 
-																		and semester='$advisorSemester'");
-						if ($wpw1_cwa_consolidated_student === FALSE) {
-							if ($doDebug) {
-								echo "Reading $studentTableName table failed<br />";
-								echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-								echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-							}
+																	  where student_call_sign = '$studentCallSign' 
+																	  and student_semester = '$advisorSemester'");
+						if ($student_promotable == NULL || $student_promotable == 0) {
+							$student_promotable		= '';
+						}			
+						$nmbrStudents++;
+						if ($student_promotable == '') {
+							$nmbrNotEvaluated++;
 						} else {
-							$numPSRows									= $wpdb->num_rows;
-							if ($doDebug) {
-								$myStr			= $wpdb->last_query;
-								echo "ran $myStr<br />and found $numPSRows rows in $studentTableName table<br />";
-							}
-							if ($numPSRows > 0) {
-								foreach ($wpw1_cwa_consolidated_student as $studentRow) {
-									$student_promotable  					= $studentRow->promotable;
-									if ($doDebug) {
-										echo "got a promotable of $student_promotable for $studentCallSign<br />";
-									}
-									
-									$nmbrStudents++;
-									if ($student_promotable == '') {
-										$nmbrNotEvaluated++;
-									} else {
-										$nmbrEvaluated++;
-									}
-									if ($student_promotable == 'P') {
-										$nmbrPromoted++;
-									}
-									if ($student_promotable == 'N') {
-										$nmbrNotPromoted++;
-									}
-									if ($student_promotable == 'W') {
-										$nmbrWithdrawn++;
-									}
-								}
-							}
+							$nmbrEvaluated++;
+						}
+						if ($student_promotable == 'P') {
+							$nmbrPromoted++;
+						}
+						if ($student_promotable == 'N') {
+							$nmbrNotPromoted++;
+						}
+						if ($student_promotable == 'W') {
+							$nmbrWithdrawn++;
 						}
 					}
 				}

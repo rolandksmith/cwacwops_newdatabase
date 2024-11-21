@@ -69,6 +69,7 @@ function updateStudent($inpArray) {
 			array(FALSE,'reason') if not successful
 
 	Modified 12Jul23 by Roland to use consolidated tables
+	Modified 3Oct24 by Roland for new database
 
 */
 
@@ -88,16 +89,14 @@ function updateStudent($inpArray) {
 	$doDebug					= TRUE;
 
 	foreach($inpArray as $fieldName=>$fieldValue) {
-		${$fieldName}			= $fieldValue;
+		$$fieldName			= $fieldValue;
 	}
 
 	if ($doDebug) {
 		echo "inp_id: $inp_id<br />";
 	}
 
-	$tableNameArray			= array('wpw1_cwa_consolidated_student'=>'wpw1_cwa_student_deleted',
-									'wpw1_cwa_consolidated_student2'=>'wpw1_cwa_student_deleted2',
-									'wpw1_cwa_student'=>'wpw1_cwa_deleted_student',
+	$tableNameArray			= array('wpw1_cwa_student'=>'wpw1_cwa_deleted_student',
 									'wpw1_cwa_student2'=>'wpw1_cwa_deleted_student2');		
 	$fieldTest				= array('action_log','control_code');
 		
@@ -171,7 +170,7 @@ function updateStudent($inpArray) {
 			if ($doDebug) {
 				echo "inp_who is empty<br />";
 			}
-	//		return array(FALSE,'invalid input who. No update done');
+//			return array(FALSE,'invalid input who. No update done');
 			$errorMsg					= "Function updateStudent. inp_who is empty.<br />
 				  jobname: $jobname<br />
 				  inp_id: $inp_id<br />
@@ -185,9 +184,12 @@ function updateStudent($inpArray) {
 		if ($doDebug) {
 			echo "<br /><b>Doing the Insert</b><br />";
 		}
+		$updateParams	= array('student_call_sign'=>$inp_callsign,
+					  		    'student_notes'=>"Record created by update_student function ");
+
 		$addResult		= $wpdb->insert($tableName,
-										array('call_sign'=>$inp_callsign),
-										array('%s'));
+										$updateParams, 
+										array('%s','%s'));
 		if ($addResult === FALSE) {
 			$thisSQL	= $wpdb->last_query;
 			$thisError	= $wpdb->last_error;
@@ -200,6 +202,33 @@ function updateStudent($inpArray) {
 		if ($doDebug) {
 			echo "add was successful. Got inp_id of $inp_id<br />";
 		}
+		// write the audit log
+		if ($testMode) {
+			$log_mode		= 'TESTMODE';
+		} else {
+			$log_mode		= 'PRODUCTION';
+		}
+		$submitArray		= array('logtype'=>'STUDENT',
+									'logmode'=>$log_mode,
+									'logdate'=>date('Y-m-d H:i:s'),
+									'logprogram'=>$jobname,
+									'logwho'=>$inp_who,
+									'logcallsign'=>$inp_callsign,
+									'logid'=>$inp_id,
+									'logsemester'=>$inp_semester,
+									'logsequence'=>0, 
+									'logdata'=>$updateParams);
+		$result		= storeAuditLogData($submitArray,$doDebug);
+		if ($result[0] === FALSE) {
+			if ($doDebug) {
+				echo "storeAuditLogData failed: $result[1]<br />";
+			}
+		} else {
+			if ($doDebug) {
+				echo "audit log record successfully processed<br />";
+			}
+		}
+		
 	}
 	
 	if ($doUpdate) {
@@ -213,7 +242,7 @@ function updateStudent($inpArray) {
 			return array(FALSE,'invalid input id. No update done');
 		}
 		// make sure there is a record to be updated
-		$thisData						= $wpdb->get_var("select call_sign from $tableName where student_id = $inp_id");
+		$thisData						= $wpdb->get_var("select student_call_sign from $tableName where student_id = $inp_id");
 		if ($thisData == NULL) {				// no such record
 			if ($doDebug) {
 				echo "no record with id of $inp_id found in $tableName to update<br />";
@@ -228,22 +257,13 @@ function updateStudent($inpArray) {
 		if ($inp_format[0] == 'Not Specified' || $inp_format[0] == '') {
 			foreach($inp_data as $myValue) {
 				$myArray				= explode("|",$myValue);
-	//			if ($doDebug) {
-	//				echo "myValue: $myValue<br />Exploded:<br /><pre>";
-	//				print_r($myArray);
-	//				echo "</pre><br />";
-	//			}
+//				if ($doDebug) {
+//					echo "myValue: $myValue<br />Exploded:<br /><pre>";
+//					print_r($myArray);
+//					echo "</pre><br />";
+//			}
 				$field					= $myArray[0];
-				$fieldValue				= $myArray[1];
-			
-				// if field is excluded_advisor, fix up this field
-				if ($field == 'excluded_advisor') {
-					$fieldValue			= str_replace('&','|',$fieldValue);
-					if ($doDebug) {
-						echo "Updated excluded_advisor to $fieldValue<br />";
-					}
-				}
-			
+				$fieldValue				= $myArray[1];			
 				$fieldFormat			= $myArray[2];
 				$updateParams[$field]	= $fieldValue;
 				$updateFormat[]			= "%$fieldFormat";
@@ -281,54 +301,30 @@ function updateStudent($inpArray) {
 				echo "Successfully updated $tableName record at $inp_id<br />";
 			}
 
-			// store action_record
-			$actionData		= array('tablename'=>$tableName,
-									'method'=>$inp_method,
-									'update_data'=>$updateParams,
-									'table_id'=>$inp_id,
-									'callsign'=>$inp_callsign,
-									'semester'=>$inp_semester,
-									'who'=>$inp_who,
-									'jobname'=>$jobname,
-									'other_info'=>"");
-			$actionResult	= record_actions($actionData);
-			if (!$actionResult) {
-				if ($doDebug) {
-					echo "record_actions failed<br />";
-				}
-			}
-
 			// write the student audit log record
 			if ($testMode) {
-				$log_mode		= 'testMode';
-				$log_file		= 'TestStudent';
+				$log_mode		= 'TESTMODE';
 			} else {
-				$log_mode		= 'Production';
-				$log_file		= 'Student';
+				$log_mode		= 'PRODUCTION';
 			}
-			$submitArray		= array('logtype'=>$log_file,
+			$submitArray		= array('logtype'=>'STUDENT',
 										'logmode'=>$log_mode,
-										'logaction'=>'UPDATE',
-										'logsubtype'=>'STUDENT',
 										'logdate'=>date('Y-m-d H:i:s'),
 										'logprogram'=>$jobname,
 										'logwho'=>$inp_who,
-										'student_ID'=>$inp_id,
-										'call_sign'=>$inp_callsign,
-										'logid'=>$inp_id,
 										'logcallsign'=>$inp_callsign,
+										'logid'=>$inp_id,
 										'logsemester'=>$inp_semester,
-										'first_name'=>'',
-										'last_name'=>'');
-			foreach($updateParams as $myKey=>$myValue) {
-				if (!in_array($myKey,$fieldTest)) {
-					$submitArray[$myKey]	= $myValue;
-				}
-			}
-			$result		= storeAuditLogData_v3($submitArray,$doDebug);
+										'logsequence'=>0, 
+										'logdata'=>$updateParams);
+			$result		= storeAuditLogData($submitArray,$doDebug);
 			if ($result[0] === FALSE) {
 				if ($doDebug) {
 					echo "storeAuditLogData failed: $result[1]<br />";
+				}
+			} else {
+				if ($doDebug) {
+					echo "audit log record successfully processed<br />";
 				}
 			}
 		}
@@ -337,7 +333,7 @@ function updateStudent($inpArray) {
 
 	if ($doDelete) {
 		// make sure there is a record to be deleted
-		$thisData						= $wpdb->get_var("select call_sign from $tableName where student_id = $inp_id");
+		$thisData						= $wpdb->get_var("select student_call_sign from $tableName where student_id = $inp_id");
 		if ($thisData == NULL) {				// no such record
 			if ($doDebug) {
 				echo "no record with id of $inp_id found in $tableName to delete<br />";
@@ -352,7 +348,7 @@ function updateStudent($inpArray) {
 		$deleteTable			= $tableNameArray[$tableName];
 		if ($deleteTable != 'No Deleted') {			/// no deleted table for past_student
 			// now see if there is a record by this id in the deleted table. If so, delete it
-			$thisData			= $wpdb->get_var("select call_sign from $deleteTable where student_id = $inp_id");
+			$thisData			= $wpdb->get_var("select student_call_sign from $deleteTable where student_id = $inp_id");
 			if ($thisData != NULL) {
 				$thisDelete		= $wpdb->delete($deleteTable,
 												array('student_id'=>$inp_id),
@@ -368,82 +364,70 @@ function updateStudent($inpArray) {
 					echo "no record for $inp_id found in $deleteTable<br />";
 				}
 			}
-		}
-		// now copy the student record to be deleted to the deleted table
-		$myResult	= $wpdb->get_results("insert into $deleteTable 
-											select * from $tableName 
-											where student_id=$inp_id");
-
-		if (sizeof($myResult) != 0 || $myResult === FALSE) {
-			echo "adding $inp_id to $deleteTable table failed<br />";
-			echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-			$myStr				= $wpdb->last_error;
-			sendErrorEmail("$jobname: attempting to move $inp_id from $tableName to $deleteName failed. Last error: $myStr");
-			return array(FALSE,"attempting to move $inp_id from $tableName to $deleteName failed");
-		} else {
-			if ($doDebug) {
-				echo "copied student record $inp_id to $deleteTable<br />";
-			}
-			$deleteResult			= $wpdb->delete($tableName,
-													array('student_id'=>$inp_id),
-													array('%d'));
-			if ($deleteResult === FALSE) {
-				$thisSQL	= $wpdb->last_query;
-				$thisError	= $wpdb->last_error;
-				if ($doDebug) {
-					echo "Deleting record $inp_id failed.<br />SQL: $thisSQL<br />Error: $thisError<br />";
-				}
-				return array(FALSE,"Deleting record $inp_idfailed. $thisError");
+			// now copy the student record to be deleted to the deleted table
+			$myResult	= $wpdb->get_results("insert into $deleteTable 
+												select * from $tableName 
+												where student_id=$inp_id");
+	
+			if (sizeof($myResult) != 0 || $myResult === FALSE) {
+				echo "adding $inp_id to $deleteTable table failed<br />";
+				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
+				$myStr				= $wpdb->last_error;
+				sendErrorEmail("$jobname: attempting to move $inp_id from $tableName to $deleteName failed. Last error: $myStr");
+				return array(FALSE,"attempting to move $inp_id from $tableName to $deleteName failed");
 			} else {
 				if ($doDebug) {
-					echo "deleted record $inp_id from $tableName<br />";
+					echo "copied student record $inp_id to $deleteTable<br />";
 				}
-				// store action_record
-				$actionData		= array('tablename'=>$tableName,
-										'method'=>$inp_method,
-										'update_data'=>array('student_id'=>$inp_id),
-										'table_id'=>$inp_id,
-										'callsign'=>$inp_callsign,
-										'semester'=>$inp_semester,
-										'who'=>$inp_who,
-										'jobname'=>$jobname,
-										'other_info'=>"");
-				$actionResult	= record_actions($actionData);
-				if (!$actionResult) {
+				$deleteResult			= $wpdb->delete($tableName,
+														array('student_id'=>$inp_id),
+														array('%d'));
+				if ($deleteResult === FALSE) {
+					$thisSQL	= $wpdb->last_query;
+					$thisError	= $wpdb->last_error;
 					if ($doDebug) {
-						echo "record_actions failed<br />";
+						echo "Deleting record $inp_id failed.<br />SQL: $thisSQL<br />Error: $thisError<br />";
 					}
-				}
-
-				// write the student audit log record
-				if ($testMode) {
-					$log_mode		= 'testMode';
-					$log_file		= 'TESTSTUDENT';
+					return array(FALSE,"Deleting record $inp_id failed. $thisError");
 				} else {
-					$log_mode		= 'Production';
-					$log_file		= 'STUDENT';
-				}
-				$submitArray		= array('logtype'=>$log_file,
-											'logmode'=>$log_mode,
-											'logaction'=>'DELETE',
-											'logsubtype'=>'STUDENT',
-											'logdate'=>date('Y-m-d H:i:s'),
-											'logprogram'=>$jobname,
-											'logwho'=>$inp_who,
-											'student_ID'=>$inp_id,
-											'call_sign'=>$inp_callsign,
-											'logid'=>$inp_id,
-											'logcallsign'=>$inp_callsign,
-											'logsemester'=>$inp_semester,
-											'first_name'=>'',
-											'last_name'=>'');
-				$result		= storeAuditLogData_v3($submitArray,$doDebug);
-				if ($result[0] === FALSE) {
 					if ($doDebug) {
-						echo "storeAuditLogData failed: $result[1]<br />";
+						echo "deleted record $inp_id from $tableName<br />";
+					}
+	
+					// write the student audit log record
+					if ($testMode) {
+						$log_mode		= 'TESTMODE';
+					} else {
+						$log_mode		= 'PRODUCTION';
+					}
+					$updateParams		= array('class_schedule_days'=>'Class record deleted');
+					$submitArray		= array('logtype'=>'CLASS',
+												'logmode'=>$log_mode,
+												'logdate'=>date('Y-m-d H:i:s'),
+												'logprogram'=>$jobname,
+												'logwho'=>$inp_who,
+												'logcallsign'=>$inp_callsign,
+												'logid'=>$inp_id,
+												'logsemester'=>$inp_semester,
+												'logsequence'=>0, 
+												'logdata'=>$updateParams);
+					$result		= storeAuditLogData($submitArray,$doDebug);
+					if ($result[0] === FALSE) {
+						if ($doDebug) {
+							echo "storeAuditLogData failed: $result[1]<br />";
+						}
+					} else {
+						if ($doDebug) {
+							echo "audit log record successfully processed<br />";
+						}
 					}
 				}
 			}
+		} else{
+			if ($doDebug) {
+				echo "No delete table found. Returning without doing the delete<br />";
+			}
+			return array(FALSE,'No delete table found. No deletion made.');
 		}
 	}
 		

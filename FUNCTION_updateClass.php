@@ -5,8 +5,8 @@
 	The inpArray contains these elements:
 		
 		tableName		name of the table to be updated
-							must be one of 	wpw1_cwa_consolidated_advisorclass
-											wpw1_cwa_consolidated_advisorclass2
+							must be one of 	wpw1_cwa_advisorclass
+											wpw1_cwa_advisorclass2
 		inp_method		add / update / delete
 		inp_data:		an array of table fields to be updated
 							either in the format of
@@ -48,22 +48,23 @@
 												'inp_id'=>$advisorClass_ID,
 												'inp_callsign'=>$advisorClass_advisor_call_sign,
 												'inp_semester'=>$advisorClass_semester,
+												'inp_sequence'=?$advosprClass_sequence, 
 												'inp_who'=>$userName,
 												'testMode'=>$testMode,
 												'doDebug'=>$doDebug);
-				$updateResult	= updateClass($classUpdateData);
+				$updateResult			= updateClass($classUpdateData);
 				if ($updateResult[0] === FALSE) {
 					handleWPDBError("FUNCTION Update Advisor Class $jobname",$doDebug);
 					$content		.= "Unable to update content in $advisorClassTableName<br />";
 				} else {
-		
+				}		
 	returns array(TRUE,record_id) if update was successful
 			array(FALSE,'reason') if not successful
 
 	Modified 13Jul23 by Roland to use consolidated tables
+	Modified 3Oct24 by Roland for new databse
 
 */
-
 
 	global $wpdb;
 
@@ -76,6 +77,7 @@
 	$inp_semester				= '';
 	$inp_callsign				= '';
 	$inp_who					= '';
+	$inp_sequence				= 0;
 	$testMode					= FALSE;
 	$doDebug					= TRUE;
 
@@ -91,8 +93,8 @@
 		$inp_who		= $inp_callsign;
 	}
 	
-	$tableNameArray			= array('wpw1_cwa_consolidated_advisorclass'=>'wpw1_cwa_advisorclass_deleted',
-									'wpw1_cwa_consolidated_advisorclass2'=>'wpw1_cwa_advisorclass_deleted2');		
+	$tableNameArray			= array('wpw1_cwa_advisorclass'=>'wpw1_cwa_deleted_advisorclass',
+									'wpw1_cwa_advisorclass2'=>'wpw1_cwa_deleted_advisorclass');		
 	$fieldTest				= array('action_log','control_code');
 		
 	if ($doDebug) {
@@ -163,6 +165,12 @@
 			}
 			return array(FALSE,'invalid input semester. No update done');
 		}
+		if ($inp_sequence == 0) {
+			if ($doDebug) {
+				echo "inp_sequence is zero<br />";
+			}
+			return array(FALSE,'invalid input sequence. No update done');
+		}
 		if ($inp_who == '') {
 			if ($doDebug) {
 				echo "inp_who is empty<br />";
@@ -182,9 +190,12 @@
 		if ($doDebug) {
 			echo "<br /><b>Doing the Insert</b><br />";
 		}
+		$updateParams	= array('advisorclass_call_sign'=>$inp_callsign,
+					  		    'advisorclass_class_comments'=>"Record created by update_class function ");
+
 		$addResult		= $wpdb->insert($tableName,
-										array('advisor_call_sign'=>$inp_callsign),
-										array('%s'));
+										$updateParams, 
+										array('%s','%s'));
 		if ($addResult === FALSE) {
 			$thisSQL	= $wpdb->last_query;
 			$thisError	= $wpdb->last_error;
@@ -196,6 +207,32 @@
 		$inp_id			= $wpdb->insert_id;
 		if ($doDebug) {
 			echo "add was successful. Got inp_id of $inp_id<br />";
+		}
+		// write the audit log
+		if ($testMode) {
+			$log_mode		= 'TESTMODE';
+		} else {
+			$log_mode		= 'PRODUCTION';
+		}
+		$submitArray		= array('logtype'=>'CLASS',
+									'logmode'=>$log_mode,
+									'logdate'=>date('Y-m-d H:i:s'),
+									'logprogram'=>$jobname,
+									'logwho'=>$inp_who,
+									'logcallsign'=>$inp_callsign,
+									'logid'=>$inp_id,
+									'logsemester'=>$inp_semester,
+									'logsequence'=>$inp_sequence, 
+									'logdata'=>$updateParams);
+		$result		= storeAuditLogData($submitArray,$doDebug);
+		if ($result[0] === FALSE) {
+			if ($doDebug) {
+				echo "storeAuditLogData failed: $result[1]<br />";
+			}
+		} else {
+			if ($doDebug) {
+				echo "audit log record successfully processed<br />";
+			}
 		}
 	}
 	
@@ -210,12 +247,13 @@
 			return array(FALSE,'invalid input id. No update done');
 		}
 		// make sure there is a record to be updated
-		$thisData						= $wpdb->get_var("select advisor_call_sign 
+		$thisData						= $wpdb->get_var("select advisorclass_call_sign 
 															from $tableName 
 															where advisorclass_id = $inp_id");
-		if ($thisData == NULL) {				// no such record
+		if ($thisData === FALSE) {				// no such record
 			if ($doDebug) {
-				echo "no record with id of $inp_id found in $tableName to update<br />";
+				$myStr					= $wpdb->last_query;
+				echo "ran $myStr<br />and no record with id of $inp_id found in $tableName to update<br />";
 			}
 			return array(FALSE,"no record with id of $inp_id found in $tableName to update");
 		}
@@ -260,7 +298,7 @@
 				$errorMsg					= $wpdb->last_error;
 				$mySQL						= $wpdb->last_query;
 				$myStr						= $wpdb->last_error;
-				$errorMsg					= "FUNCTION updateAdvisor failed attempting to update record $inp_id.<br /> 
+				$errorMsg					= "FUNCTION updateClass failed attempting to update record $inp_id.<br /> 
 											   Last error: $myStr.<br />Last query: $mySQL";
 				sendErrorEmail($errorMsg);
 				return array(FALSE,$errorMsg);
@@ -269,197 +307,33 @@
 			if ($doDebug) {
 				echo "Successfully updated $tableName record at $inp_id<br />";
 			}
-			// store action_record
-			$actionData		= array('tablename'=>$tableName,
-									'method'=>$inp_method,
-									'update_data'=>$updateParams,
-									'table_id'=>$inp_id,
-									'callsign'=>$inp_callsign,
-									'semester'=>$inp_semester,
-									'who'=>$inp_who,
-									'jobname'=>$jobname,
-									'other_info'=>"");
-			$actionResult	= record_actions($actionData);
-			if (!$actionResult) {
-				if ($doDebug) {
-					echo "record_actions failed<br />";
-				}
-			}
 
-			// write the advisorClass audit log record
+			// write the class audit log record
 			if ($testMode) {
-				$log_mode		= 'testMode';
-				$log_file		= 'TESTADVISOR';
+				$log_mode		= 'TESTMODE';
 			} else {
-				$log_mode		= 'Production';
-				$log_file		= 'ADVISOR';
+				$log_mode		= 'PRODUCTION';
 			}
-			$submitArray		= array('logtype'=>$log_file,
+			$submitArray		= array('logtype'=>'CLASS',
 										'logmode'=>$log_mode,
-										'logaction'=>'UPDATE',
-										'logsubtype'=>'CLASS',
 										'logdate'=>date('Y-m-d H:i:s'),
 										'logprogram'=>$jobname,
 										'logwho'=>$inp_who,
-										'call_sign'=>$inp_callsign,
-										'logid'=>$inp_id,
 										'logcallsign'=>$inp_callsign,
+										'logid'=>$inp_id,
 										'logsemester'=>$inp_semester,
-										'first_name'=>'',
-										'last_name'=>'');
-			foreach($updateParams as $myKey=>$myValue) {
-				if (!in_array($myKey,$fieldTest)) {
-					$submitArray[$myKey]	= $myValue;
-				}
-			}
-			$result		= storeAuditLogData_v3($submitArray,$doDebug);
+										'logsequence'=>$inp_sequence, 
+										'logdata'=>$updateParams);
+			$result		= storeAuditLogData($submitArray,$doDebug);
 			if ($result[0] === FALSE) {
 				if ($doDebug) {
 					echo "storeAuditLogData failed: $result[1]<br />";
 				}
-			}
-			
-			// get the advisorClass record, count students, and update class_number_students if needed
-			if ($doDebug) {
-				echo "getting the class record to verify the number of students<br />";
-			}
-			$sql			= "select * from $tableName 
-								where advisorclass_id = $inp_id";
-
-			$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisorclass === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebug) {
-					echo "Reading tableName table failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "$jobname Reading $tableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-				sendErrorEmail($errorMsg);
 			} else {
-				$numACRows						= $wpdb->num_rows;
 				if ($doDebug) {
-					$myStr						= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numACRows rows<br />";
+					echo "audit log record successfully processed<br />";
 				}
-				if ($numACRows > 0) {
-					foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-						$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-						$advisorClass_advisor_call_sign 		= $advisorClassRow->advisor_call_sign;
-						$advisorClass_advisor_first_name 		= $advisorClassRow->advisor_first_name;
-						$advisorClass_advisor_last_name 		= stripslashes($advisorClassRow->advisor_last_name);
-						$advisorClass_advisor_id 				= $advisorClassRow->advisor_id;
-						$advisorClass_sequence 					= $advisorClassRow->sequence;
-						$advisorClass_semester 					= $advisorClassRow->semester;
-						$advisorClass_timezone 					= $advisorClassRow->time_zone;
-						$advisorClass_timezone_id				= $advisorClassRow->timezone_id;		// new
-						$advisorClass_timezone_offset			= $advisorClassRow->timezone_offset;	// new
-						$advisorClass_level 					= $advisorClassRow->level;
-						$advisorClass_class_size 				= $advisorClassRow->class_size;
-						$advisorClass_class_schedule_days 		= $advisorClassRow->class_schedule_days;
-						$advisorClass_class_schedule_times 		= $advisorClassRow->class_schedule_times;
-						$advisorClass_class_schedule_days_utc 	= $advisorClassRow->class_schedule_days_utc;
-						$advisorClass_class_schedule_times_utc 	= $advisorClassRow->class_schedule_times_utc;
-						$advisorClass_action_log 				= $advisorClassRow->action_log;
-						$advisorClass_class_incomplete 			= $advisorClassRow->class_incomplete;
-						$advisorClass_date_created				= $advisorClassRow->date_created;
-						$advisorClass_date_updated				= $advisorClassRow->date_updated;
-						$advisorClass_student01 				= $advisorClassRow->student01;
-						$advisorClass_student02 				= $advisorClassRow->student02;
-						$advisorClass_student03 				= $advisorClassRow->student03;
-						$advisorClass_student04 				= $advisorClassRow->student04;
-						$advisorClass_student05 				= $advisorClassRow->student05;
-						$advisorClass_student06 				= $advisorClassRow->student06;
-						$advisorClass_student07 				= $advisorClassRow->student07;
-						$advisorClass_student08 				= $advisorClassRow->student08;
-						$advisorClass_student09 				= $advisorClassRow->student09;
-						$advisorClass_student10 				= $advisorClassRow->student10;
-						$advisorClass_student11 				= $advisorClassRow->student11;
-						$advisorClass_student12 				= $advisorClassRow->student12;
-						$advisorClass_student13 				= $advisorClassRow->student13;
-						$advisorClass_student14 				= $advisorClassRow->student14;
-						$advisorClass_student15 				= $advisorClassRow->student15;
-						$advisorClass_student16 				= $advisorClassRow->student16;
-						$advisorClass_student17 				= $advisorClassRow->student17;
-						$advisorClass_student18 				= $advisorClassRow->student18;
-						$advisorClass_student19 				= $advisorClassRow->student19;
-						$advisorClass_student20 				= $advisorClassRow->student20;
-						$advisorClass_student21 				= $advisorClassRow->student21;
-						$advisorClass_student22 				= $advisorClassRow->student22;
-						$advisorClass_student23 				= $advisorClassRow->student23;
-						$advisorClass_student24 				= $advisorClassRow->student24;
-						$advisorClass_student25 				= $advisorClassRow->student25;
-						$advisorClass_student26 				= $advisorClassRow->student26;
-						$advisorClass_student27 				= $advisorClassRow->student27;
-						$advisorClass_student28 				= $advisorClassRow->student28;
-						$advisorClass_student29 				= $advisorClassRow->student29;
-						$advisorClass_student30 				= $advisorClassRow->student30;
-						$class_number_students					= $advisorClassRow->number_students;
-						$class_evaluation_complete 				= $advisorClassRow->evaluation_complete;
-						$class_comments							= $advisorClassRow->class_comments;
-						$copycontrol							= $advisorClassRow->copy_control;
-
-						$numberStudents							= 0;
-						for ($snum=1;$snum<31;$snum++) {
-							if ($snum < 10) {
-								$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
-							} else {
-								$strSnum		= strval($snum);
-							}
-							if (${'advisorClass_student' . $strSnum} != '') {
-								$numberStudents++;
-							}
-						}
-						if ($doDebug) {
-							echo "Count: $numberStudents vs class_number_students: $class_number_students<br />";
-						}
-						if ($numberStudents != $class_number_students) {
-							// update the advisorClass record
-							$classResult		= $wpdb->update($tableName, 
-																array('number_students'=>$numberStudents),
-																array('advisorclass_id'=>$inp_id),
-																array('%d'),
-																array('%d'));
-							if ($classResult === FALSE) {
-								$myError			= $wpdb->last_error;
-								$myQuery			= $wpdb->last_query;
-								if ($doDebug) {
-									echo "updating $tableName table failed<br />
-										  wpdb->last_query: $myQuery<br />
-										  wpdb->last_error: $myError<br />";
-								}
-								$errorMsg			= "$jobname updateClass updating $tableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-								sendErrorEmail($errorMsg);
-							} else {
-								echo "updated class_number_students to $numberStudents<br />";
-							}
-							// store action_record
-							$actionData		= array('tablename'=>$tableName,
-													'method'=>$inp_method,
-													'update_data'=>array('number_students'=>$numberStudents),
-													'table_id'=>$inp_id,
-													'callsign'=>$inp_callsign,
-													'semester'=>$inp_semester,
-													'who'=>$inp_who,
-													'jobname'=>$jobname,
-													'other_info'=>"");
-							$actionResult	= record_actions($actionData);
-							if (!$actionResult) {
-								if ($doDebug) {
-									echo "record_actions failed<br />";
-								}
-							}
-
-						}
-					}	
-				} else {
-					if ($doDebug) {
-						echo "reading $tableName for id $inp_id to check number of students found no records<br />";
-					}
-					sendErrorEmail("$jobname updateClass reading $tableName for id $inp_id to check number of students found no records");
-				}
-			}			
+			}
 		}
 	}
 
@@ -469,14 +343,15 @@
 			echo "<br />deleting record $inp_id<br />";
 		}
 		// make sure there is a record to be deleted
-		$thisData						= $wpdb->get_var("select advisor_call_sign 
+		$thisData						= $wpdb->get_var("select advisorclass_class_comments  
 											from $tableName 
 											where advisorclass_id = $inp_id");
-		if ($thisData == NULL) {				// no such record
+		if ($thisData === FALSE) {				// no such record
 			if ($doDebug) {
-				echo "no record with id of $inp_id found in $tableName to delete<br />";
+				$myStr					= $wpdb->last_query;
+				echo "ran $myStr<br />and no record with advisorclass_id of $inp_id found in $tableName to delete<br />";
 			}
-			return array(FALSE,"no record with id of $inp_id found in $tableName to delete");
+			return array(FALSE,"no record with advisorclass_id of $inp_id found in $tableName to delete");
 		} else {
 			if ($doDebug) {
 				echo "found a record for $inp_id to be deleted from $tableName<br />";
@@ -486,7 +361,7 @@
 		$deleteTable			= $tableNameArray[$tableName];
 		if ($deleteTable != 'No Deleted') {			/// no deleted table for past_advisorclass
 			// now see if there is a record by this id in the deleted table. If so, delete it
-			$thisData			= $wpdb->get_var("select advisor_call_sign from $deleteTable where advisorclass_id = $inp_id");
+			$thisData			= $wpdb->get_var("select advisorclass_call_sign from $deleteTable where advisorclass_id = $inp_id");
 			if ($thisData != NULL) {
 				$thisDelete		= $wpdb->delete($deleteTable,
 												array('advisorclass_id'=>$inp_id),
@@ -532,46 +407,28 @@
 				if ($doDebug) {
 					echo "deletion was successful. Writing audit log<br />";
 				}
-				// store action_record
-				$actionData		= array('tablename'=>$tableName,
-										'method'=>$inp_method,
-										'update_data'=>array('advisorclass_id'=>$inp_id),
-										'table_id'=>$inp_id,
-										'callsign'=>$inp_callsign,
-										'semester'=>$inp_semester,
-										'who'=>$inp_who,
-										'jobname'=>$jobname,
-										'other_info'=>"");
-				$actionResult	= record_actions($actionData);
-				if (!$actionResult) {
-					if ($doDebug) {
-						echo "record_actions failed<br />";
-					}
-				}
-
 
 				// write the advisorClass audit log record
 				if ($testMode) {
-					$log_mode		= 'testMode';
-					$log_file		= 'TESTADVISOR';
+					$log_mode		= 'TESTMODE';
 				} else {
-					$log_mode		= 'Production';
-					$log_file		= 'ADVISOR';
+					$log_mode		= 'PRODUCTION';
 				}
-				$submitArray		= array('logtype'=>$log_file,
+				$actionDate			= date('Y-m-d H:i:s');
+				$thisData			.= " / $actionDate updateClass $inp_who record deleted ";
+				$updateParams		= array('advisorclass_class_comments'=>$thisData);				
+				
+				$submitArray		= array('logtype'=>'CLASS',
 											'logmode'=>$log_mode,
-											'logaction'=>'DELETE',
-											'logsubtype'=>'CLASS',
 											'logdate'=>date('Y-m-d H:i:s'),
 											'logprogram'=>$jobname,
 											'logwho'=>$inp_who,
-											'call_sign'=>$inp_callsign,
-											'logid'=>$inp_id,
 											'logcallsign'=>$inp_callsign,
+											'logid'=>$inp_id,
 											'logsemester'=>$inp_semester,
-											'first_name'=>'',
-											'last_name'=>'');
-				$result		= storeAuditLogData_v3($submitArray,$doDebug);
+											'logsequence'=>$inp_sequence, 
+											'logdata'=>$updateParams);
+				$result		= storeAuditLogData($submitArray,$doDebug);
 				if ($result[0] === FALSE) {
 					if ($doDebug) {
 						echo "storeAuditLogData failed: $result[1]<br />";

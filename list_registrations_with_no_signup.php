@@ -1,6 +1,6 @@
 function list_registrations_with_no_signup_func() {
 
-/*	The program has to options
+/*	The program has two options
 
 	The first option is to prepare a list of all user_logins found in wpw1_users who 
 	created a user_login on or after a specific date but have not signed up for a class. 
@@ -9,6 +9,8 @@ function list_registrations_with_no_signup_func() {
 	created a user_login before a specific date but have not signed up for a class. The 
 	program can either just prepare a list, or can prepare a list and delete the user_login 
 	from wpw1_users and wpw1_usermeta
+	
+	Modified 19Oct24 by Roland for new database
 */
 	global $wpdb;
 
@@ -107,8 +109,8 @@ function list_registrations_with_no_signup_func() {
 	
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -186,14 +188,14 @@ function list_registrations_with_no_signup_func() {
 		$extMode					= 'tm';
 		$userTableName				= "wpw1_users";
 		$userMetaTableName			= "wpw1_usermeta";
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
-		$studentTableName			= "wpw1_cwa_consolidated_student2";
+		$advisorTableName			= "wpw1_cwa_advisor2";
+		$studentTableName			= "wpw1_cwa_student2";
 	} else {
 		$extMode					= 'pd';
 		$userTableName				= "wpw1_users";
 		$userMetaTableName			= "wpw1_usermeta";
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor";
-		$studentTableName			= "wpw1_cwa_consolidated_student";
+		$advisorTableName			= "wpw1_cwa_advisor";
+		$studentTableName			= "wpw1_cwa_student";
 	}
 
 
@@ -349,11 +351,11 @@ function list_registrations_with_no_signup_func() {
 								// now get the appropriate signup info
 								$user_login			= strtoupper($user_login);
 								if ($user_role == 'advisor') {
-									$advisorSQL		= "select count(call_sign) 
+									$advisorSQL		= "select count(advisor_call_sign) 
 														from $advisorTableName 
-														where call_sign = '$user_login'";
+														where advisor_call_sign = '$user_login'";
 									$advisorResult		= $wpdb->get_var($advisorSQL);
-									if ($advisorResult === NULL) {
+									if ($advisorResult == NULL) {
 										if ($doDebug) {
 											echo "ran $advisorSQL<br />which returned NULL. Shouldn't happen<br />";
 										}
@@ -369,9 +371,9 @@ function list_registrations_with_no_signup_func() {
 									}
 								
 								} elseif ($user_role == 'student') {
-									$studentSQL		= "select count(call_sign) 
+									$studentSQL		= "select count(student_call_sign) 
 														from $studentTableName 
-														where call_sign = '$user_login'";
+														where student_call_sign = '$user_login'";
 									$studentResult		= $wpdb->get_var($studentSQL);
 									if ($studentResult === NULL) {
 										if ($doDebug) {

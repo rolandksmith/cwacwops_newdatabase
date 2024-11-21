@@ -48,15 +48,16 @@ function daily_catalog_cron_process_v3_func() {
  	Modified 19NOv23 by Roland for new portal process
  	Modified 24May24 by Roland to do away with the abbreviated catalog process and 
  		display a nicely formated catalog
+ 	Modified 12Oct24 by Roland for the new database
 */
 
 
 	global $wpdb, $testMode, $doDebug, $printArray;
 
-	$doDebug				= FALSE;
+	$doDebug				= TRUE;
 	$testMode				= FALSE;
 	
-	$versionNumber			= '4';
+	$versionNumber			= '5';
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 	
@@ -104,65 +105,65 @@ function daily_catalog_cron_process_v3_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 		
 	$runTheJob				= TRUE;
 		
@@ -172,53 +173,22 @@ td:last-child {
 		$content			.= "<h3>$jobname Automatically Executed</h3>";
 		$userName			= "CRON";
 
-		$dst				= date('I');
-		if ($dst == 1) {
-			$checkBegin 	= strtotime('13:50:00');
-			$checkEnd 		= strtotime('14:30:00');
-			$thisTime 		= date('H:i:s');
-		
-		} else {
-			$checkBegin 	= strtotime('12:50:00');
-			$checkEnd 		= strtotime('13:30:00');
-			$thisTime 		= date('H:i:s');
-		}
-
-		$nowTime = strtotime($thisTime);
-		if ($nowTime >= $checkBegin && $nowTime <= $checkEnd) {
-			$runTheJob = TRUE;
-		} else {
-			$runTheJob = FALSE;
-			$userName	= "CRON Aborted";
-			if ($doDebugLog) {
-				$debugLog .= "runTheJob is FALSE<br />";
-			}
-			$theRecipient	= 'rolandksmith@gmail.com';
-			$theSubject		= 'CW Academy - Cron Triggered';
-			$theContent		= "$jobname was triggered at $thisTime. It did not run. 
-checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
-			$mailCode		= 16;
-			$result			= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-													'theSubject'=>$theSubject,
-													'jobname'=>$jobname,
-													'theContent'=>$theContent,
-													'mailCode'=>$mailCode,
-													'testMode'=>$testMode,
-													'doDebug'=>FALSE));
-		}
+		$runTheJob			= allow_job_to_run($doDebug);
 	}
 	if ($runTheJob) {
 	
 		if ($testMode) {
 			$content .= "<p><strong>Function is under development.</strong></p>";
-			$advisorClassTableName		= 'wpw1_cwa_consolidated_advisorclass2';
-			$advisorTableName			= 'wpw1_cwa_consolidated_advisor2';
+			$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
+			$advisorTableName			= 'wpw1_cwa_advisor2';
 			$catalogTableName			= 'wpw1_cwa_current_catalog';
+			$userMasterTableName		= "wpw1_cwa_user_master2";
 			$mode						= 'TestMode';
 		} else {
-			$advisorClassTableName		= 'wpw1_cwa_consolidated_advisorclass';
-			$advisorTableName			= 'wpw1_cwa_consolidated_advisor';
+			$advisorClassTableName		= 'wpw1_cwa_advisorclass';
+			$advisorTableName			= 'wpw1_cwa_advisor';
 			$catalogTableName			= 'wpw1_cwa_current_catalog';
+			$userMasterTableName		= "wpw1_cwa_user_master";
 			$mode						= 'Production';
 		}
 		
@@ -305,65 +275,60 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 			//////////	Build the arrays
 
 			/// get each advisor and associated class record for that advisor
-			$sql				= "select 
-								   a.call_sign,
-								   a.survey_score,
-								   a.verify_response,
-								   b.sequence,
-								   b.level,
-								   b.class_incomplete,
-								   b.class_schedule_days_utc,
-								   b.class_schedule_times_utc
-								   from $advisorTableName as a 
-								   join $advisorClassTableName as b 
-								   where a.semester='$theSemester' 
-								   and a.semester = b.semester 
-								   and a.call_sign = b.advisor_call_sign 
-								   order by call_sign";
+
+			$sql	= "SELECT 
+							ac.advisorclass_call_sign, 
+							ac.advisorclass_sequence, 
+							ac.advisorclass_semester, 
+							ac.advisorclass_level, 
+							ac.advisorclass_class_incomplete, 
+							ac.advisorclass_class_schedule_days_utc, 
+							ac.advisorclass_class_schedule_times_utc, 
+							a.advisor_verify_response, 
+							um.user_survey_score 
+						FROM wpw1_cwa_advisorclass ac 
+						LEFT JOIN wpw1_cwa_user_master um ON ac.advisorclass_call_sign = um.user_call_sign 
+						LEFT JOIN wpw1_cwa_advisor a ON ac.advisorclass_call_sign = a.advisor_call_sign 
+							and a.advisor_semester = ac.advisorclass_semester 
+						WHERE ac.advisorclass_semester = '$proximateSemester' 
+						order by ac.advisorclass_call_sign";
+								   
 			$cwa_advisor		= $wpdb->get_results($sql);
 			if ($cwa_advisor === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebug) {
-					echo "Reading $advisorTableName and $advisorClassTableName tables failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "Daily Student Cron (D) Reading $advisorTableName and $advisorClassTableName tables failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-				sendErrorEmail($errorMsg);
+				handleWPDBError($jobname,$doDebug);
 			} else {
 				$numARows									= $wpdb->num_rows;
 				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numARows rows in $$advisorTableName / $advisorClassTableName<br />";
+					echo "ran $sql<br />and found $numARows rows<br />";
 				}
 				if ($numARows > 0) {
 					foreach ($cwa_advisor as $advisorRow) {
-						$advisor_call_sign 						= strtoupper($advisorRow->call_sign);
-						$advisor_survey_score 					= $advisorRow->survey_score;
-						$advisor_verify_response 				= strtoupper($advisorRow->verify_response);
-						$advisorClass_sequence 					= $advisorRow->sequence;
-						$advisorClass_level 					= $advisorRow->level;
-						$advisorClass_class_incomplete 			= $advisorRow->class_incomplete;
-						$advisorClass_class_schedule_days_utc 	= $advisorRow->class_schedule_days_utc;
-						$advisorClass_class_schedule_times_utc 	= $advisorRow->class_schedule_times_utc;
+						$advisorClass_call_sign 				= strtoupper($advisorRow->advisorclass_call_sign);
+						$advisorClass_survey_score 				= $advisorRow->user_survey_score;
+						$advisorClass_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+						$advisorClass_sequence 					= $advisorRow->advisorclass_sequence;
+						$advisorClass_semester					= $advisorRow->advisorclass_semester;
+						$advisorClass_level 					= $advisorRow->advisorclass_level;
+						$advisorClass_class_incomplete 			= $advisorRow->advisorclass_class_incomplete;
+						$advisorClass_class_schedule_days_utc 	= $advisorRow->advisorclass_class_schedule_days_utc;
+						$advisorClass_class_schedule_times_utc 	= $advisorRow->advisorclass_class_schedule_times_utc;
 
 						if ($doDebug) {
-							echo "<br /><b>Processing Advisor $advisor_call_sign Sequence $advisorClass_sequence</b> ($advisor_survey_score | $advisor_verify_response)<br />
+							echo "<br /><b>Processing Advisor $advisorClass_call_sign Sequence $advisorClass_sequence</b> ($advisorClass_survey_score | $advisorClass_verify_response)<br />
 								  Level: $advisorClass_level<br />
 								  schedule Days: $advisorClass_class_schedule_days_utc 
 								  schedule times: $advisorClass_class_schedule_times_utc<br />";
 						}
-						if ($advisor_survey_score != '6' and $advisor_verify_response != 'R') {
+						if ($advisorClass_survey_score != '6' and $advisorClass_verify_response != 'R') {
 							if ($doDebug) {
-								echo "Adding $advisor_call_sign to advisorArray and processing classes<br />";
+								echo "Adding $advisorClass_call_sign to advisorArray and processing classes<br />";
 							}
 							if ($advisorClass_class_incomplete == 'Y') {
 								if ($doDebug) {
 									echo "&nbsp;&nbsp;&nbsp;&nbsp;advisorClass incomplete. Skipping<br />
 										  &nbsp;&nbsp;&nbsp;&nbsp;Value: $advisorClass_class_incomplete<br />";
 								}
-								$errorArray[]	= "advisorClass incomplete for $advisor_call_sign, $advisorClass_sequence. Skipped.<br />";
+								$errorArray[]	= "advisorClass incomplete for $advisorClass_call_sign, $advisorClass_sequence. Skipped.<br />";
 							} else {
 								// fix up the class schedule times to be on the hour
 								$myStr1 		= substr($advisorClass_class_schedule_times_utc,0,2);
@@ -376,24 +341,25 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 									$classesArray[$classesArrayKey]	= 1;
 								}
 								// now put the record into the advisorClasses array
-								$advisorClasses[$classesArrayKey][$advisorClassInc]	= "$advisor_call_sign-$advisorClass_sequence";
+								$advisorClasses[$classesArrayKey][$advisorClassInc]	= "$advisorClass_call_sign-$advisorClass_sequence";
 								$advisorClassInc++;
 								if ($doDebug) {
-									echo "Incremented $classesArrayKey in classesArray<br />Put $advisor_call_sign-$advisorClass_sequence in advisorClasses array<br />";
+									echo "Incremented $classesArrayKey in classesArray<br />Put $advisorClass_call_sign-$advisorClass_sequence in advisorClasses array<br />";
 								}
 							}
 						} else {
 							if ($doDebug) {
-								echo "$advisor_call_sign has issues with survey score or verify response<br />";
+								echo "$advisorClass_call_sign has issues with survey score or verify response<br />";
 							}
 						}
 					}
 				} else {
 					if ($doDebug) {
-						echo "No $advisorTableName / $advisorClassTableName records found for $nextSemester<br />";
+						echo "No records found for $nextSemester<br />";
 					}
 				}
 			}
+		
 			ksort($classesArray);
 			if ($doDebug) {
 				echo "<br />classesArray built for advisorClass table<br /><pre>";

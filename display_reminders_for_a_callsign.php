@@ -207,20 +207,20 @@ function display_reminders_for_a_callsign_func() {
 			echo "<br />Arrived at pass 2 with inp_callsign of $inp_callsign and inp_type of $inp_type<br />";
 		}
 	
-		$content			= "<h3>$jobname</h3>";
+		$content			= "<h3>$jobname for $inp_callsign</h3>";
 		
 		if ($inp_type == 'all') {
 			$content		.= "<p>Listing all reminders</p>";
 			$sql			= "select * from $reminderTableName 
 								where call_sign = '$inp_callsign' 
-								order by date_created";
+								order by date_created DESC";
 		} else {
 			$content		.= "<p>Listing open reminders only</p>";
 			$sql			= "select * from $reminderTableName 
 								where call_sign = '$inp_callsign' 
 									and resolved != 'Y' 
 									and close_date > '$rightNow'  
-								order by date_created";
+								order by date_created DESC";
 		}
 								
 		$remindersResult	= $wpdb->get_results($sql);

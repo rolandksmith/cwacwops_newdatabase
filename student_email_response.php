@@ -9,19 +9,21 @@ function student_email_response_func() {
   	modified 12Nove23 by Roland to ask why the student is turning down the class
 		The program now only handles students asking to be removed. Verification 
 		is handled by the student registration program
+	Modified 15Nov24 by Roland for new database
 
 */
 
 	global $wpdb;
 
-	$doDebug				= TRUE;
+	$doDebug				= FALSE;
 	$testMode				= FALSE;
 	$myDate 				= date('Y-m-d');
 	$studentID 				= '';
 	$strPass				= "1";
 	$increment				= 0;
 	$initializationArray 	= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$validUser 				= $initializationArray['validUser'];
+	$userName				= $initializationArray['userName']; 
 	if ($validUser == 'N') {				// turn off debug and testmode
 		$doDebug					= FALSE;
 		$testMode					= FALSE;
@@ -32,6 +34,11 @@ function student_email_response_func() {
 	$semesterThree			= $initializationArray['semesterThree'];
 	$jobname				= "Student Email Response V$versionNumber";
 	$theURL					= "$siteURL/cwa-thank-you-remove/";
+
+ 	if ($userName == '') {
+		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+	}
+
 	
 	$inp_work				= '';
 	$inp_equip				= '';
@@ -118,77 +125,79 @@ function student_email_response_func() {
 	}
 
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 
 	
   if ("1" == $strPass) {
- 	if ($validUser == "N") {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
-	}
  	$content	.= "<p>This function cannot be run directly. It is executed when a 
 prospective student responds to the verification email.</p>";
 
 
   } elseif ("2" == $strPass) {
+  	if ($doDebug) {
+  		echo "<br />at pass 2<br />";
+  	}
+
+	sendErrorEmail("Info Only: student_email_response called with studentID: $studentID and inp_option: $inp_option");
 
 	$content				.= "<h3>$jobname</h3>";
 
@@ -220,9 +229,11 @@ Class Resolution</a>.</p>";
 		
 		}
 		if ($testMode) {
-			$studentTableName	= 'wpw1_cwa_consolidated_student2';
+			$studentTableName	= 'wpw1_cwa_student2';
+			$userMasterTableName = 'wpw1_cwa_user_master2';
 		} else {
-			$studentTableName	= 'wpw1_cwa_consolidated_student';
+			$studentTableName	= 'wpw1_cwa_student';
+			$userMasterTableName = 'wpw1_cwa_user_master';
 		}
   
 		if ($studentID == '') {
@@ -236,11 +247,7 @@ Class Resolution</a>.</p>";
 								where student_id='$studentID'";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			if ($doDebug) {
-				echo "Reading $studentTableName table<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "wpdb->last_error: " . $wpdb->last_error . "<br />";
-			}
+			handleWPDBError($jobname,$doDebug,"pass2 reading $studentTableName table. username: $userName");
 		} else {
 			$numSRows			= $wpdb->num_rows;
 			if ($doDebug) {
@@ -250,67 +257,52 @@ Class Resolution</a>.</p>";
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
 					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= strtoupper($studentRow->call_sign);
-					$student_first_name						= $studentRow->first_name;
-					$student_last_name						= stripslashes($studentRow->last_name);
-					$student_email  						= strtolower(strtolower($studentRow->email));
-					$student_phone  						= $studentRow->phone;
-					$student_ph_code						= $studentRow->ph_code;
-					$student_city  							= $studentRow->city;
-					$student_state  						= $studentRow->state;
-					$student_zip_code  						= $studentRow->zip_code;
-					$student_country  						= $studentRow->country;
-					$student_country_code					= $studentRow->country_code;
-					$student_time_zone  					= $studentRow->time_zone;
-					$student_timezone_id					= $studentRow->timezone_id;
-					$student_timezone_offset				= $studentRow->timezone_offset;
-					$student_whatsapp						= $studentRow->whatsapp_app;
-					$student_signal							= $studentRow->signal_app;
-					$student_telegram						= $studentRow->telegram_app;
-					$student_messenger						= $studentRow->messenger_app;					
-					$student_wpm 	 						= $studentRow->wpm;
-					$student_youth  						= $studentRow->youth;
-					$student_age  							= $studentRow->age;
-					$student_student_parent 				= $studentRow->student_parent;
-					$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-					$student_level  						= $studentRow->level;
-					$student_waiting_list 					= $studentRow->waiting_list;
-					$student_request_date  					= $studentRow->request_date;
-					$student_semester						= $studentRow->semester;
-					$student_notes  						= $studentRow->notes;
-					$student_welcome_date  					= $studentRow->welcome_date;
-					$student_email_sent_date  				= $studentRow->email_sent_date;
-					$student_email_number  					= $studentRow->email_number;
-					$student_response  						= strtoupper($studentRow->response);
-					$student_response_date  				= $studentRow->response_date;
-					$student_abandoned  				= $studentRow->abandoned;
-					$student_student_status  				= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->action_log;
-					$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->selected_date;
-					$student_no_catalog			 			= $studentRow->no_catalog;
-					$student_hold_override  				= $studentRow->hold_override;
-					$student_messaging  					= $studentRow->messaging;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->hold_reason_code;
-					$student_class_priority  				= $studentRow->class_priority;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
-					$student_excluded_advisor  				= $studentRow->excluded_advisor;
-					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->available_class_days;
-					$student_intervention_required  		= $studentRow->intervention_required;
-					$student_copy_control  					= $studentRow->copy_control;
-					$student_first_class_choice  			= $studentRow->first_class_choice;
-					$student_second_class_choice  			= $studentRow->second_class_choice;
-					$student_third_class_choice  			= $studentRow->third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-					$student_date_created 					= $studentRow->date_created;
-					$student_date_updated			  		= $studentRow->date_updated;
+					$student_call_sign						= $studentRow->student_call_sign;
+					$student_time_zone  					= $studentRow->student_time_zone;
+					$student_timezone_offset				= $studentRow->student_timezone_offset;
+					$student_youth  						= $studentRow->student_youth;
+					$student_age  							= $studentRow->student_age;
+					$student_parent 						= $studentRow->student_parent;
+					$student_parent_email  					= strtolower($studentRow->student_parent_email);
+					$student_level  						= $studentRow->student_level;
+					$student_waiting_list 					= $studentRow->student_waiting_list;
+					$student_request_date  					= $studentRow->student_request_date;
+					$student_semester						= $studentRow->student_semester;
+					$student_notes  						= $studentRow->student_notes;
+					$student_welcome_date  					= $studentRow->student_welcome_date;
+					$student_email_sent_date  				= $studentRow->student_email_sent_date;
+					$student_email_number  					= $studentRow->student_email_number;
+					$student_response  						= strtoupper($studentRow->student_response);
+					$student_response_date  				= $studentRow->student_response_date;
+					$student_abandoned  					= $studentRow->student_abandoned;
+					$student_status  						= strtoupper($studentRow->student_status);
+					$student_action_log  					= $studentRow->student_action_log;
+					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+					$student_selected_date  				= $studentRow->student_selected_date;
+					$student_no_catalog  					= $studentRow->student_no_catalog;
+					$student_hold_override  				= $studentRow->student_hold_override;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+					$student_class_priority  				= $studentRow->student_class_priority;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
+					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_available_class_days  			= $studentRow->student_available_class_days;
+					$student_intervention_required  		= $studentRow->student_intervention_required;
+					$student_copy_control  					= $studentRow->student_copy_control;
+					$student_first_class_choice  			= $studentRow->student_first_class_choice;
+					$student_second_class_choice  			= $studentRow->student_second_class_choice;
+					$student_third_class_choice  			= $studentRow->student_third_class_choice;
+					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+					$student_catalog_options				= $studentRow->student_catalog_options;
+					$student_flexible						= $studentRow->student_flexible;
+					$student_date_created 					= $studentRow->student_date_created;
+					$student_date_updated			  		= $studentRow->student_date_updated;
 
 					$actionDate				= date('dMY H:i');
 					$doProceed				= TRUE;
@@ -320,29 +312,29 @@ Class Resolution</a>.</p>";
 					if ($inp_option == '1') {		// move registration to semester two
 						$student_action_log		= "$student_action_log / $actionDate $student_call_sign student 
 requested to be moved to $semesterTwo ";
-						$updateParams[]		 	= "semester|$semesterTwo|s";
-						$updateParams[]			= "abandoned||s";
-						$updateParams[]			= "catalog_options||s";
-						$updateParams[]			= "email_number|0|d";
-						$updateParams[]			= "email_sent_date||s";
-						$updateParams[]			= "no_catalog|Y|s";
-						$updateParams[]			= "action_log|$student_action_log|s";
+						$updateParams[]		 	= "student_semester|$semesterTwo|s";
+						$updateParams[]			= "student_abandoned||s";
+						$updateParams[]			= "student_catalog_options||s";
+						$updateParams[]			= "student_email_number|0|d";
+						$updateParams[]			= "student_email_sent_date||s";
+						$updateParams[]			= "student_no_catalog|Y|s";
+						$updateParams[]			= "student_action_log|$student_action_log|s";
 						$newSemester			= $semesterTwo;
 					} elseif ($inp_option == '2') {  // move registration to semester three
 						$student_action_log		= "$student_action_log / $actionDate $student_call_sign student 
 requested to be moved to $semesterThree ";
-						$updateParams[]		 	= "semester|$semesterThree|s";
-						$updateParams[]			= "abandoned||s";
-						$updateParams[]			= "catalog_options||s";
-						$updateParams[]			= "email_number|0|d";
-						$updateParams[]			= "email_sent_date||s";
-						$updateParams[]			= "no_catalog|Y|s";
-						$updateParams[]			= "action_log|$student_action_log|s";
+						$updateParams[]		 	= "student_semester|$semesterThree|s";
+						$updateParams[]			= "student_abandoned||s";
+						$updateParams[]			= "student_catalog_options||s";
+						$updateParams[]			= "student_email_number|0|d";
+						$updateParams[]			= "student_email_sent_date||s";
+						$updateParams[]			= "student_no_catalog|Y|s";
+						$updateParams[]			= "student_action_log|$student_action_log|s";
 						$newSemester			= $semesterThree;
 					} elseif ($inp_option == '3') {
 						$student_action_log		= "$student_action_log / $actionDate $student_call_sign Student responded to verify email with Remove ";
-						$updateParams[]			= 'response|R|s';
-						$updateParams[]			= "action_log|$student_action_log|s";
+						$updateParams[]			= 'student_response|R|s';
+						$updateParams[]			= "student_action_log|$student_action_log|s";
 						$updateParams[]			= "response_date|$myDate|s";
 					} else {
 						if ($doDebug) {
@@ -359,7 +351,7 @@ requested to be moved to $semesterThree ";
 														'inp_id'=>$student_ID,
 														'inp_callsign'=>$student_call_sign,
 														'inp_semester'=>$student_semester,
-														'inp_who'=>$student_call_sign,
+														'inp_who'=>$userName,
 														'testMode'=>$testMode,
 														'doDebug'=>$doDebug);
 						$updateResult	= updateStudent($studentUpdateData);
@@ -386,7 +378,7 @@ requested to be moved to $semesterThree ";
 					}
 	
 					if ($inp_option == "3") {
-						$content	 	.= "<p>$student_last_name, $student_first_name ($student_call_sign)</p>
+						$content	 	.= "<p>$student_call_sign</p>
 							<p>Thanks for your response and your interest in the CW Academy.  
 							Your registration for the upcoming semester has been cancelled.</p>
 							<p>Is there a particular reason you will not be able to take a $student_level class? 
@@ -417,7 +409,7 @@ requested to be moved to $semesterThree ";
 							</table>
 							</form>";
 					} else {
-						$content		.= "<p>$student_last_name, $student_first_name ($student_call_sign)</p>
+						$content		.= "<p>$student_call_sign</p>
 <p>Thank you for interest in taking the CW Academy $student_level Level class. Your registration 
 has been moved to the $newSemester semester. About 45 days before that semester starts, you 
 will receive an email asking you to verify your availability and to select your class preferences.<br /><br />
@@ -475,13 +467,12 @@ CW Academy</p>";
 	$elapsedTime	= number_format($elapsedTime, 4, '.', ',');
 	$nowDate		= date('Y-m-d');
 	$nowTime		= date('H:i:s');
-	$content 		.= "<br /><br /><a href='$siteURL/program-list/'>Return to Student Portal</a>
-						<br /><br /><p>V$versionNumber. Prepared at $nowDate $nowTime</p>";
+	$content 		.= "<br /><br /><p>V$versionNumber. Prepared at $nowDate $nowTime</p>";
 	$thisStr			= 'Production';
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$student_call_sign|$nowDate $nowTime|$thisStr|$strPass: $elapsedTime");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|$nowDate $nowTime|$thisStr|$strPass: $elapsedTime");
 	return $content;
 }
 add_shortcode ('student_email_response', 'student_email_response_func');

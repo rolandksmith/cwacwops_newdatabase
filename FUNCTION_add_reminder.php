@@ -48,7 +48,7 @@ function add_reminder($inp_data=array(),$testMode=FALSE,$doDebug=FALSE) {
 		$studentTableName		= 'wpw1_cwa_consolidated_student';
 	}
 	
-	$administratorArray			= array('WR7Q','K7OJL');
+	$administratorArray			= array('WR7Q','K7OJL','VE2KM');
 	$doingAdministrator			= FALSE;
 	
 // $doDebug = TRUE;	

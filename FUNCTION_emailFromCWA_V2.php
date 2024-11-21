@@ -55,6 +55,8 @@ function emailFromCWA_v2($mailParameters) {
 	
 	In testmode, if the increment is greater than 10, the email is not sent nor stored
 	
+	Modified 12Oct24 by Roland to not actually send email if running in docker
+	
 */
 
 	global $wpdb;
@@ -341,7 +343,14 @@ function emailFromCWA_v2($mailParameters) {
 	}
 
 	if ($sendEmail) {
-		$result			= wp_mail($thisTo,$theSubject,$theContent,$myHeaders,$theAttachment);
+		// see if we're running in Docker
+		if (is_file("/.dockerenv")) {
+			// running in docker
+			echo "<br />Running in docker. Bypassing email send. See saved email<br />";
+			$result		= TRUE;
+		} else {
+			$result			= wp_mail($thisTo,$theSubject,$theContent,$myHeaders,$theAttachment);
+		}
 		if ($result === FALSE) {
 			if ($doDebug) {
 				echo "Sending the email to $thisTo failed<br />

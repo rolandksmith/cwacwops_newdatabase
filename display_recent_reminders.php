@@ -117,66 +117,66 @@ function display_recent_reminders_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
-
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
+				
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
 		if ($doDebug) {
@@ -195,14 +195,13 @@ td:last-child {
 		if ($userRole == 'administrator') {
 			$userNameUC		= strtoupper($userName);
 			$content 		.= "<h3>$jobname (Administrator Role)</h3>
-								<p>Displays reminders for the user starting with the newest 
+								<p>Displays reminders for all users starting with the newest 
 								reminder. Displays 25 reminders at a time</p>
 								<form method='post' action='$theURL' 
 								name='selection_form' ENCTYPE='multipart/form-data'>
 								<input type='hidden' name='strpass' value='2'>
+								<input type='hidden' name='inp_callsign' value = 'all'>
 								<table style='border-collapse:collapse;'>
-								<tr><td>Advisor Callsign</td>
-									<td><input type='text' class='formInputText' size='15' maxlength='30' name='inp_callsign' value='$userNameUC'></td></tr>
 								$testModeOption
 								<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 								</form></p>";
@@ -221,12 +220,18 @@ td:last-child {
 			echo "<br />at pass 2 with inp_callsign of $inp_callsign and offset of $offset and totalRecords of $totalRecords<br />";
 		}
 		
+		if ($inp_callsign == 'all') {
+			$thisSQL	= "select count(record_id) 
+							from wpw1_cwa_reminders ";
+		} else {
+			$thisSQL	= "select count(record_id) 
+							from wpw1_cwa_reminders 
+							where call_sign = '$inp_callsign'";
+		}
 		if ($offset == 0) {			/// first time through get total number of reminders
-			$totalRecords		= $wpdb->get_var("select count(record_id) 
-													from wpw1_cwa_reminders 
-													where call_sign = '$inp_callsign'");
+			$totalRecords		= $wpdb->get_var($thisSQL);
 			if ($doDebug) {
-				echo "retrieved a total records count of $totalRecords<br />";
+				echo "ran $thisSQL<br />and retrieved a total records count of $totalRecords<br />";
 			}
 		}
 		$thisOffset		= $offset + 1;
@@ -245,10 +250,16 @@ td:last-child {
 								<th>Date Created</th></tr>";
 								
 			// get a list of reminders
-			$sql			= "select * from wpw1_cwa_reminders 
-								where call_sign = '$inp_callsign' 
-								order by date_created DESC 
-								LIMIT $offset,25";	
+			if ($inp_callsign == 'all') {
+				$sql			= "select * from wpw1_cwa_reminders 
+									order by date_created DESC 
+									LIMIT $offset,25";				
+			} else {
+				$sql			= "select * from wpw1_cwa_reminders 
+									where call_sign = '$inp_callsign' 
+									order by date_created DESC 
+									LIMIT $offset,25";	
+			}
 			$reminderResult	= $wpdb->get_results($sql);
 			if ($reminderResult === FALSE) {
 				handleWPDBError($jobname,$doDebug);
@@ -280,6 +291,9 @@ td:last-child {
 													<td style='vertical-align:top;'>$date_created</td></tr>";
 						$offset++;
 					}
+				}
+				if ($doDebug) {
+					echo "this set is finished. Offset: $offset; total records: $totalRecords<br />";
 				}
 				if ($offset < $totalRecords) {
 					$content		.= "<form method='post' action='$theURL' 

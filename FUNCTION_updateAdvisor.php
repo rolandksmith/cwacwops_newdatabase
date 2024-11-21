@@ -5,8 +5,8 @@ function updateAdvisor($inpArray) {
 	The inpArray contains these elements:
 		
 		tableName		name of the table to be updated
-							must be one of 	wpw1_cwa_consolidated_adviisor
-											wpw1_cwa_consolidated_adviisor2
+							must be one of 	wpw1_cwa_advisor
+											wpw1_cwa_advisor2
 		inp_method		add / update / delete
 		inp_data:		an array of table fields to be updated
 							either in the format of
@@ -55,8 +55,6 @@ function updateAdvisor($inpArray) {
 				if ($updateResult[0] === FALSE) {
 					handleWPDBError($jobname,$doDebug);
 				} else {
-
-
 		
 	returns array(TRUE,advisor_id) if update was successful
 			array(FALSE,'reason') if not successful
@@ -80,15 +78,15 @@ function updateAdvisor($inpArray) {
 	$doDebug					= TRUE;
 
 	foreach($inpArray as $fieldName=>$fieldValue) {
-		${$fieldName}			= $fieldValue;
+		$$fieldName			= $fieldValue;
 	}
 
 	if ($inp_who == '' && $inp_callsign != '') {
 		$inp_who				= $inp_callsign;	
 	}
 
-	$tableNameArray			= array('wpw1_cwa_consolidated_advisor'=>'wpw1_cwa_advisor_deleted',
-									'wpw1_cwa_consolidated_advisor2'=>'wpw1_cwa_advisor_deleted2');		
+	$tableNameArray			= array('wpw1_cwa_advisor'=>'wpw1_cwa_deleted_advisor',
+									'wpw1_cwa_advisor2'=>'wpw1_cwa_deleted_advisor');		
 	$fieldTest				= array('action_log','control_code');
 		
 	if ($doDebug) {
@@ -174,9 +172,12 @@ function updateAdvisor($inpArray) {
 		if ($doDebug) {
 			echo "<br /><b>Doing the Insert</b><br />";
 		}
+		$updateParams	= array('advisor_call_sign'=>$inp_callsign,
+					  		    'advisor_action_log'=>"Record created by update_advisor function ");
+
 		$addResult		= $wpdb->insert($tableName,
-										array('call_sign'=>$inp_callsign),
-										array('%s'));
+										$updateParams, 
+										array('%s','%s'));
 		if ($addResult === FALSE) {
 			$thisSQL	= $wpdb->last_query;
 			$thisError	= $wpdb->last_error;
@@ -188,6 +189,32 @@ function updateAdvisor($inpArray) {
 		$inp_id			= $wpdb->insert_id;
 		if ($doDebug) {
 			echo "add was successful. Got inp_id of $inp_id<br />";
+		}
+		// write the audit log
+		if ($testMode) {
+			$log_mode		= 'TESTMODE';
+		} else {
+			$log_mode		= 'PRODUCTION';
+		}
+		$submitArray		= array('logtype'=>'ADVISOR',
+									'logmode'=>$log_mode,
+									'logdate'=>date('Y-m-d H:i:s'),
+									'logprogram'=>$jobname,
+									'logwho'=>$inp_who,
+									'logcallsign'=>$inp_callsign,
+									'logid'=>$inp_id,
+									'logsemester'=>$inp_semester,
+									'logsequence'=>0, 
+									'logdata'=>$updateParams);
+		$result		= storeAuditLogData($submitArray,$doDebug);
+		if ($result[0] === FALSE) {
+			if ($doDebug) {
+				echo "storeAuditLogData failed: $result[1]<br />";
+			}
+		} else {
+			if ($doDebug) {
+				echo "audit log record successfully processed<br />";
+			}
 		}
 	}
 	
@@ -202,12 +229,16 @@ function updateAdvisor($inpArray) {
 			return array(FALSE,'invalid input id. No update done');
 		}
 		// make sure there is a record to be updated
-		$thisData						= $wpdb->get_var("select call_sign from $tableName where advisor_id = $inp_id");
+		$thisData						= $wpdb->get_var("select advisor_call_sign from $tableName where advisor_id = $inp_id");
 		if ($thisData == NULL) {				// no such record
 			if ($doDebug) {
-				echo "no record with id of $inp_id found in $tableName to update<br />";
+				echo "no record with advisor_id of $inp_id found in $tableName to update<br />";
 			}
-			return array(FALSE,"no record with id of $inp_id found in $tableName to update");
+			return array(FALSE,"no record with advisor_id of $inp_id found in $tableName to update");
+		} else {
+			if ($doDebug) {
+				echo "There is a record to be updated<br />";
+			}
 		}
 	
 		// convert inp_data to updateParams and updateFormat
@@ -215,13 +246,13 @@ function updateAdvisor($inpArray) {
 		$updateParams					= array();
 		$updateFormat					= array();
 		if ($inp_format[0] == 'Not Specified' || $inp_format[0] == '') {
+			if ($doDebug) {
+				echo "creating the updateFormat array from: <br /><pre>";
+				print_r($updateParams);
+				echo "</pre><br />";
+			}
 			foreach($inp_data as $myValue) {
 				$myArray				= explode("|",$myValue);
-	//			if ($doDebug) {
-	//				echo "myValue: $myValue<br />Exploded:<br /><pre>";
-	//				print_r($myArray);
-	//				echo "</pre><br />";
-	//			}
 				$field					= $myArray[0];
 				$fieldValue				= $myArray[1];
 			
@@ -237,6 +268,9 @@ function updateAdvisor($inpArray) {
 		if ($doDebug) {
 			echo "Ready to do the update.<br />updateParams:<br /><pre>";
 			print_r($updateParams);
+			echo "</pre><br />
+				  updateFormat:<br /><pre>";
+			print_r($updateFormat);
 			echo "</pre><br />";
 		}
 		$result		= $wpdb->update($tableName, 
@@ -261,53 +295,31 @@ function updateAdvisor($inpArray) {
 			if ($doDebug) {
 				echo "Successfully updated $tableName record at $inp_id<br />";
 			}
-			// store action_record
-			$actionData		= array('tablename'=>$tableName,
-									'method'=>$inp_method,
-									'update_data'=>$updateParams,
-									'table_id'=>$inp_id,
-									'callsign'=>$inp_callsign,
-									'semester'=>$inp_semester,
-									'who'=>$inp_who,
-									'jobname'=>$jobname,
-									'other_info'=>"");
-			$actionResult	= record_actions($actionData);
-			if (!$actionResult) {
-				if ($doDebug) {
-					echo "record_actions failed<br />";
-				}
-			}
 
 			// write the advisor audit log record
 			if ($testMode) {
-				$log_mode		= 'testMode';
-				$log_file		= 'TestAdvisor';
+				$log_mode		= 'TESTMODE';
 			} else {
-				$log_mode		= 'Production';
-				$log_file		= 'Advisor';
+				$log_mode		= 'PRODUCTION';
 			}
-			$submitArray		= array('logtype'=>$log_file,
+			$submitArray		= array('logtype'=>'ADVISOR',
 										'logmode'=>$log_mode,
-										'logaction'=>'UPDATE',
-										'logsubtype'=>'ADVISOR',
 										'logdate'=>date('Y-m-d H:i:s'),
 										'logprogram'=>$jobname,
 										'logwho'=>$inp_who,
-										'call_sign'=>$inp_callsign,
-										'logid'=>$inp_id,
 										'logcallsign'=>$inp_callsign,
+										'logid'=>$inp_id,
 										'logsemester'=>$inp_semester,
-										'first_name'=>'',
-										'last_name'=>'');
-			foreach($updateParams as $myKey=>$myValue) {
-				if (!in_array($myKey,$fieldTest)) {
-					$submitArray[$myKey]	= $myValue;
-				}
-			}
-			$result		= storeAuditLogData_v3($submitArray,$doDebug);
+										'logsequence'=>0, 
+										'logdata'=>$updateParams);
+			$result		= storeAuditLogData($submitArray,$doDebug);
 			if ($result[0] === FALSE) {
 				if ($doDebug) {
 					echo "storeAuditLogData failed: $result[1]<br />";
+				}
+			} else {
+				if ($doDebug) {
+					echo "audit log record successfully processed<br />";
 				}
 			}
 		}
@@ -316,12 +328,12 @@ function updateAdvisor($inpArray) {
 
 	if ($doDelete) {
 		// make sure there is a record to be deleted
-		$thisData						= $wpdb->get_var("select call_sign from $tableName where advisor_id = $inp_id");
+		$thisData						= $wpdb->get_var("select advisor_action_log from $tableName where advisor_id = $inp_id");
 		if ($thisData == NULL) {				// no such record
 			if ($doDebug) {
-				echo "no record with id of $inp_id found in $tableName to delete<br />";
+				echo "no record with advisor_id of $inp_id found in $tableName to delete<br />";
 			}
-			return array(FALSE,"no record with id of $inp_id found in $tableName to delete");
+			return array(FALSE,"no record with advisor_id of $inp_id found in $tableName to delete");
 		} else {
 			if ($doDebug) {
 				echo "found a record for $inp_id to be deleted from $tableName<br />";
@@ -331,7 +343,7 @@ function updateAdvisor($inpArray) {
 		$deleteTable			= $tableNameArray[$tableName];
 		if ($deleteTable != 'No Deleted') {			/// no deleted table for past_advisor
 			// now see if there is a record by this id in the deleted table. If so, delete it
-			$thisData			= $wpdb->get_var("select call_sign from $deleteTable where advisor_id = $inp_id");
+			$thisData			= $wpdb->get_var("select advisor_call_sign from $deleteTable where advisor_id = $inp_id");
 			if ($thisData != NULL) {
 				$thisDelete		= $wpdb->delete($deleteTable,
 												array('advisor_id'=>$inp_id),
@@ -346,78 +358,59 @@ function updateAdvisor($inpArray) {
 					echo "no record for $inp_id found in $deleteTable<br />";
 				}
 			}
-		}
-		// now copy the advisor record to be deleted to the deleted table
-		$myResult	= $wpdb->get_results("insert into $deleteTable 
-											select * from $tableName 
-											where advisor_id=$inp_id");
-
-		if (sizeof($myResult) != 0 || $myResult === FALSE) {
-			echo "adding $inp_id to $deleteTable table failed<br />";
-			echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-			$myStr				= $wpdb->last_error;
-			sendErrorEmail("$jobname: attempting to move $inp_id from $tableName to $deleteName failed. Last error: $myStr");
-			return array(FALSE,"attempting to move $inp_id from $tableName to $deleteName failed");
-		} else {
-			if ($doDebug) {
-				echo "copied advisor record $inp_id to $deleteTable<br />";
-			}
-			$deleteResult			= $wpdb->delete($tableName,
-													array('advisor_id'=>$inp_id),
-													array('%d'));
-			if ($deleteResult === FALSE) {
-				$thisSQL	= $wpdb->last_query;
-				$thisError	= $wpdb->last_error;
-				if ($doDebug) {
-					echo "Deleting record $inp_id failed.<br />SQL: $thisSQL<br />Error: $thisError<br />";
-				}
-				return array(FALSE,"Deleting record $inp_idfailed. $thisError");
+			// now copy the advisor record to be deleted to the deleted table
+			$myResult	= $wpdb->get_results("insert into $deleteTable 
+												select * from $tableName 
+												where advisor_id=$inp_id");
+	
+			if (sizeof($myResult) != 0 || $myResult === FALSE) {
+				echo "adding $inp_id to $deleteTable table failed<br />";
+				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
+				$myStr				= $wpdb->last_error;
+				sendErrorEmail("$jobname: attempting to move $inp_id from $tableName to $deleteName failed. Last error: $myStr");
+				return array(FALSE,"attempting to move $inp_id from $tableName to $deleteName failed");
 			} else {
 				if ($doDebug) {
-					echo "deleted record $inp_id from $tableName<br />";
+					echo "copied advisor record $inp_id to $deleteTable<br />";
 				}
-				// store action_record
-				$actionData		= array('tablename'=>$tableName,
-										'method'=>$inp_method,
-										'update_data'=>array('advisor_id'=>$inp_id),
-										'table_id'=>$inp_id,
-										'callsign'=>$inp_callsign,
-										'semester'=>$inp_semester,
-										'who'=>$inp_who,
-										'jobname'=>$jobname,
-										'other_info'=>"");
-				$actionResult	= record_actions($actionData);
-				if (!$actionResult) {
+				$deleteResult			= $wpdb->delete($tableName,
+														array('advisor_id'=>$inp_id),
+														array('%d'));
+				if ($deleteResult === FALSE) {
+					$thisSQL	= $wpdb->last_query;
+					$thisError	= $wpdb->last_error;
 					if ($doDebug) {
-						echo "record_actions failed<br />";
+						echo "Deleting record $inp_id failed.<br />SQL: $thisSQL<br />Error: $thisError<br />";
 					}
-				}
-
-				// write the advisor audit log record
-				if ($testMode) {
-					$log_mode		= 'testMode';
-					$log_file		= 'TESTADVISOR';
+					return array(FALSE,"Deleting record $inp_idfailed. $thisError");
 				} else {
-					$log_mode		= 'Production';
-					$log_file		= 'ADVISOR';
-				}
-				$submitArray		= array('logtype'=>$log_file,
-											'logmode'=>$log_mode,
-											'logaction'=>'DELETE',
-											'logsubtype'=>'ADVISOR',
-											'logdate'=>date('Y-m-d H:i:s'),
-											'logprogram'=>$jobname,
-											'logwho'=>$inp_who,
-											'call_sign'=>$inp_callsign,
-											'logid'=>$inp_id,
-											'logcallsign'=>$inp_callsign,
-											'logsemester'=>$inp_semester,
-											'first_name'=>'',
-											'last_name'=>'');
-				$result		= storeAuditLogData_v3($submitArray,$doDebug);
-				if ($result[0] === FALSE) {
 					if ($doDebug) {
-						echo "storeAuditLogData failed: $result[1]<br />";
+						echo "deleted record $inp_id from $tableName<br />";
+					}
+					// write the advisor audit log record
+					if ($testMode) {
+						$log_mode		= 'TESTMODE';
+					} else {
+						$log_mode		= 'PRODUCTION';
+					}
+					$actionDate			= date('Y-m-d H:i:s');
+					$thisData			.= " / $actionDate UdateAdvisor $inp_who record deleted ";
+					$updateParams		= array('advisor_action_log'=>$thisData);
+					$submitArray		= array('logtype'=>'ADVISOR',
+												'logmode'=>$log_mode,
+												'logdate'=>date('Y-m-d H:i:s'),
+												'logprogram'=>$jobname,
+												'logwho'=>$inp_who,
+												'logcallsign'=>$inp_callsign,
+												'logid'=>$inp_id,
+												'logsemester'=>$inp_semester,
+												'logsequence'=>0, 
+												'logdata'=>$updateParams);
+					$result		= storeAuditLogData($submitArray,$doDebug);
+					if ($result[0] === FALSE) {
+						if ($doDebug) {
+							echo "storeAuditLogData failed: $result[1]<br />";
+						}
 					}
 				}
 			}

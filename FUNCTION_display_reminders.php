@@ -110,7 +110,7 @@ function display_reminders($inp_role,$inp_callsign,$doDebug=FALSE) {
 						$call_sign		= $role;
 					}
 
-					$removeLink			= "Click <a href='$siteURL/cwa-remove-item/?inp_call_sign=$call_sign&token=$token' target='_blank'>HERE</a> to remove this Reminder</a>";
+					$removeLink			= "Click <a href='$siteURL/cwa-remove-item/?inp_callsign=$call_sign&token=$token' target='_blank'>HERE</a> to remove this Reminder</a>";
 					$myInt				= strrpos($reminder_text,"</p>");
 					if ($myInt === FALSE) {
 						$reminder_text	= "$reminder_text<br />$removeLink";
@@ -166,7 +166,7 @@ function display_reminders($inp_role,$inp_callsign,$doDebug=FALSE) {
 							$date_created		= $reminderRow->date_created;
 							$date_modified		= $reminderRow->date_modified;
 				
-							$removeLink			= "Click <a href='$siteURL/cwa-remove-item/?inp_call_sign=$call_sign&token=$token' target='_blank'>HERE</a> to remove this Reminder</a>";
+							$removeLink			= "Click <a href='$siteURL/cwa-remove-item/?inp_callsign=$call_sign&token=$token' target='_blank'>HERE</a> to remove this Reminder</a>";
 							$myInt				= strrpos($reminder_text,"</p>");
 							if ($myInt === FALSE) {
 								$reminder_text	= "$reminder_text<br />$removeLink";

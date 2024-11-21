@@ -6,6 +6,7 @@ function list_all_students_func() {
 //	Modified 25Oct22 by Roland for new timezone tabe format
 //	Modified 16Apr23 by Roland to fix action_log
 //	Modified 13Jul23 by Roland to use consolidated tables
+//  Modified 16Oct24 by Roland for new database
 
 	global $wpdb, $testMode, $doDebug, $advisorTableName, $printArray, $timeToBlock;
 
@@ -24,7 +25,7 @@ function list_all_students_func() {
 	$validTestmode					= $initializationArray['validTestmode'];
 	$siteURL						= $initializationArray['siteurl'];
 	
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	ini_set('display_errors','1');
@@ -70,17 +71,19 @@ function list_all_students_func() {
 	}
 	
 	if ($testMode) {
-		$studentTableName		= 'wpw1_cwa_consolidated_student2';
-		$advisorTableName		= 'wpw1_cwa_consolidated_advisorew2';
-		$advisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass2';
+		$studentTableName		= 'wpw1_cwa_student2';
+		$advisorTableName		= 'wpw1_cwa_advisorew2';
+		$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
+		$userMasterTableName	= 'wpw1_cwa_user_master2';
 		if ($doDebug) {
 			echo "Operating in TestMode<br />";
 		}
 		
 	} else {
-		$studentTableName		= 'wpw1_cwa_consolidated_student';
-		$advisorTableName		= 'wpw1_cwa_consolidated_advisor';
-		$advisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass';
+		$studentTableName		= 'wpw1_cwa_student';
+		$advisorTableName		= 'wpw1_cwa_advisor';
+		$advisorClassTableName	= 'wpw1_cwa_advisorclass';
+		$userMasterTableName	= 'wpw1_cwa_user_master';
 	}
 	
 
@@ -198,7 +201,7 @@ function list_all_students_func() {
 	$semesterTwo					= $initializationArray['semesterTwo'];
 	$semesterThree					= $initializationArray['semesterThree'];
 	$semesterFour					= $initializationArray['semesterFour'];
-	$updateStudentURL				= "$siteURL/cwa-display-and-update-student-information/";
+	$updateStudentURL				= "$siteURL/cwa-display-and-update-student-signup-information/";
 	if ($currentSemester == 'Not in Session') {
 		$theSemester	= $prevSemester;
 		$futureSemesters			= array($semesterTwo,$semesterThree,$semesterFour);
@@ -285,74 +288,14 @@ td:last-child {
 			return FALSE;
 		}
 		$haveAMatch					= FALSE;
-		$sql						= "select * from $advisorTableName 
-										where call_sign='$myStr' 
-										and semester = '$mySemester' ";
-		$wpw1_cwa_advisor		= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $advisorTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname Reading $advisorTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
-//			$content		.= "Unable to obtain content from $advisorTableName<br />";
-		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_select_sequence 			= $advisorRow->select_sequence;
-					$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-					$advisor_first_name 				= $advisorRow->first_name;
-					$advisor_last_name 					= stripslashes($advisorRow->last_name);
-					$advisor_email 						= strtolower($advisorRow->email);
-					$advisor_phone						= $advisorRow->phone;
-					$advisor_ph_code					= $advisorRow->ph_code;				// new
-					$advisor_text_message 				= $advisorRow->text_message;
-					$advisor_city 						= $advisorRow->city;
-					$advisor_state 						= $advisorRow->state;
-					$advisor_zip_code 					= $advisorRow->zip_code;
-					$advisor_country 					= $advisorRow->country;
-					$advisor_country_code				= $advisorRow->country_code;		// new
-					$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-					$advisor_signal						= $advisorRow->signal_app;			// new
-					$advisor_telegram					= $advisorRow->telegram_app;		// new
-					$advisor_messenger					= $advisorRow->messenger_app;		// new
-					$advisor_time_zone 					= $advisorRow->time_zone;
-					$advisor_timezone_id				= $advisorRow->timezone_id;			// new
-					$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
-					$advisor_semester 					= $advisorRow->semester;
-					$advisor_survey_score 				= $advisorRow->survey_score;
-					$advisor_languages 					= $advisorRow->languages;
-					$advisor_fifo_date 					= $advisorRow->fifo_date;
-					$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
-					$advisor_action_log 				= $advisorRow->action_log;
-					$advisor_class_verified 			= $advisorRow->class_verified;
-					$advisor_control_code 				= $advisorRow->control_code;
-					$advisor_date_created 				= $advisorRow->date_created;
-					$advisor_date_updated 				= $advisorRow->date_updated;
-
-					$advisor_last_name 					= no_magic_quotes($advisor_last_name);
-					
-					$haveAMatch							= TRUE;
-				}
-			}
-		}
-		if ($haveAMatch) {
-			return TRUE;
-		} else {
+		$recordCount			= $wpdb->get_var("select count(advisor_call_sign) 
+												from $advisorTableName 
+												where advisor_call_sign = '$myStr' 
+													and advisor_semester = '$mySemester'");
+		if ($recordCount == NULL || $recordCount = 0) {
 			return FALSE;
+		} else {
+			return TRUE;
 		}
 	}
 	
@@ -388,8 +331,8 @@ td:last-child {
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -423,96 +366,118 @@ td:last-child {
 		}
 // read and process the student table
 		$sql					= "select * from $studentTableName 
-									where (semester = '$currentSemester' 
-										   or semester = '$nextSemester' 
-										   or semester = '$semesterTwo' 
-										   or semester = '$semesterThree' 
-										   or semester = '$semesterFour') 
-									order by semester, call_sign";
+									left join $userMasterTableName on user_call_sign = student_call_sign 
+									where (student_semester = '$currentSemester' 
+										   or student_semester = '$nextSemester' 
+										   or student_semester = '$semesterTwo' 
+										   or student_semester = '$semesterThree' 
+										   or student_semester = '$semesterFour') 
+									order by student_semester, student_call_sign";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $studentTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
+			handelWPDBError($jobname,$doDebug);
 			$content		.= "Unable to obtain content from $studentTableName<br />";
 		} else {
 			$numSRows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numSRows rows<br />";
+				echo "ran $sql<br />and found $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
-					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= strtoupper($studentRow->call_sign);
-					$student_first_name						= $studentRow->first_name;
-					$student_last_name						= stripslashes($studentRow->last_name);
-					$student_email  						= strtolower(strtolower($studentRow->email));
-					$student_phone  						= $studentRow->phone;
-					$student_ph_code						= $studentRow->ph_code;
-					$student_city  							= $studentRow->city;
-					$student_state  						= $studentRow->state;
-					$student_zip_code  						= $studentRow->zip_code;
-					$student_country  						= $studentRow->country;
-					$student_country_code					= $studentRow->country_code;
-					$student_time_zone  					= $studentRow->time_zone;
-					$student_timezone_id					= $studentRow->timezone_id;
-					$student_timezone_offset				= $studentRow->timezone_offset;
-					$student_whatsapp						= $studentRow->whatsapp_app;
-					$student_signal							= $studentRow->signal_app;
-					$student_telegram						= $studentRow->telegram_app;
-					$student_messenger						= $studentRow->messenger_app;					
-					$student_wpm 	 						= $studentRow->wpm;
-					$student_youth  						= $studentRow->youth;
-					$student_age  							= $studentRow->age;
-					$student_student_parent 				= $studentRow->student_parent;
-					$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-					$student_level  						= $studentRow->level;
-					$student_waiting_list 					= $studentRow->waiting_list;
-					$student_request_date  					= $studentRow->request_date;
-					$student_semester						= $studentRow->semester;
-					$student_notes  						= $studentRow->notes;
-					$student_welcome_date  					= $studentRow->welcome_date;
-					$student_email_sent_date  				= $studentRow->email_sent_date;
-					$student_email_number  					= $studentRow->email_number;
-					$student_response  						= strtoupper($studentRow->response);
-					$student_response_date  				= $studentRow->response_date;
-					$student_abandoned  					= $studentRow->abandoned;
-					$student_student_status  				= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->action_log;
-					$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->selected_date;
-					$student_no_catalog			 			= $studentRow->no_catalog;
-					$student_hold_override  				= $studentRow->hold_override;
-					$student_messaging  					= $studentRow->messaging;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->hold_reason_code;
-					$student_class_priority  				= $studentRow->class_priority;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
-					$student_excluded_advisor  				= $studentRow->excluded_advisor;
-					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->available_class_days;
-					$student_intervention_required  		= $studentRow->intervention_required;
-					$student_copy_control  					= $studentRow->copy_control;
-					$student_first_class_choice  			= $studentRow->first_class_choice;
-					$student_second_class_choice  			= $studentRow->second_class_choice;
-					$student_third_class_choice  			= $studentRow->third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-					$student_date_created 					= $studentRow->date_created;
-					$student_date_updated			  		= $studentRow->date_updated;
+					$student_master_ID 					= $studentRow->user_ID;
+					$student_master_call_sign 			= $studentRow->user_call_sign;
+					$student_first_name 				= $studentRow->user_first_name;
+					$student_last_name 					= $studentRow->user_last_name;
+					$student_email 						= $studentRow->user_email;
+					$student_phone 						= $studentRow->user_phone;
+					$student_city 						= $studentRow->user_city;
+					$student_state 						= $studentRow->user_state;
+					$student_zip_code 					= $studentRow->user_zip_code;
+					$student_country_code 				= $studentRow->user_country_code;
+					$student_whatsapp 					= $studentRow->user_whatsapp;
+					$student_telegram 					= $studentRow->user_telegram;
+					$student_signal 					= $studentRow->user_signal;
+					$student_messenger 					= $studentRow->user_messenger;
+					$student_master_action_log 			= $studentRow->user_action_log;
+					$student_timezone_id 				= $studentRow->user_timezone_id;
+					$student_languages 					= $studentRow->user_languages;
+					$student_survey_score 				= $studentRow->user_survey_score;
+					$student_is_admin					= $studentRow->user_is_admin;
+					$student_role 						= $studentRow->user_role;
+					$student_master_date_created 		= $studentRow->user_date_created;
+					$student_master_date_updated 		= $studentRow->user_date_updated;
 
-					$student_last_name 						= no_magic_quotes($student_last_name);
+					$student_ID								= $studentRow->student_id;
+					$student_call_sign						= $studentRow->student_call_sign;
+					$student_time_zone  					= $studentRow->student_time_zone;
+					$student_timezone_offset				= $studentRow->student_timezone_offset;
+					$student_youth  						= $studentRow->student_youth;
+					$student_age  							= $studentRow->student_age;
+					$student_parent 				= $studentRow->student_parent;
+					$student_parent_email  					= strtolower($studentRow->student_parent_email);
+					$student_level  						= $studentRow->student_level;
+					$student_waiting_list 					= $studentRow->student_waiting_list;
+					$student_request_date  					= $studentRow->student_request_date;
+					$student_semester						= $studentRow->student_semester;
+					$student_notes  						= $studentRow->student_notes;
+					$student_welcome_date  					= $studentRow->student_welcome_date;
+					$student_email_sent_date  				= $studentRow->student_email_sent_date;
+					$student_email_number  					= $studentRow->student_email_number;
+					$student_response  						= strtoupper($studentRow->student_response);
+					$student_response_date  				= $studentRow->student_response_date;
+					$student_abandoned  					= $studentRow->student_abandoned;
+					$student_status  						= strtoupper($studentRow->student_status);
+					$student_action_log  					= $studentRow->student_action_log;
+					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+					$student_selected_date  				= $studentRow->student_selected_date;
+					$student_no_catalog  					= $studentRow->student_no_catalog;
+					$student_hold_override  				= $studentRow->student_hold_override;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+					$student_class_priority  				= $studentRow->student_class_priority;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
+					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_available_class_days  			= $studentRow->student_available_class_days;
+					$student_intervention_required  		= $studentRow->student_intervention_required;
+					$student_copy_control  					= $studentRow->student_copy_control;
+					$student_first_class_choice  			= $studentRow->student_first_class_choice;
+					$student_second_class_choice  			= $studentRow->student_second_class_choice;
+					$student_third_class_choice  			= $studentRow->student_third_class_choice;
+					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+					$student_catalog_options				= $studentRow->student_catalog_options;
+					$student_flexible						= $studentRow->student_flexible;
+					$student_date_created 					= $studentRow->student_date_created;
+					$student_date_updated			  		= $studentRow->student_date_updated;
+
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$student_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+						$student_country		= "UNKNOWN";
+						$student_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$student_country		= $countryRow->country_name;
+								$student_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$student_country			= "Unknown";
+							$student_ph_code			= "";
+						}
+					}
 				
 					$totalStudents++;
 					$totalThisSemester++;
@@ -565,7 +530,7 @@ td:last-child {
 						$myStr1					= $student_hold_reason_code;
 					}
 					$content			.= "<tr><td style='vertical-align:top;'>$student_ID</td>
-												<td style='vertical-align:top;'><a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a></td>
+												<td style='vertical-align:top;'><a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a></td>
 												<td style='vertical-align:top;'>$student_last_name, $student_first_name</td>
 												<td style='vertical-align:top;'>$student_city</td>
 												<td style='vertical-align:top;'>$student_state</td>
@@ -577,7 +542,7 @@ td:last-child {
 												<td style='vertical-align:top;'>$student_level</td>
 												<td style='vertical-align:top;'>$student_semester</td>
 												<td style='vertical-align:top;'>$student_response</td>
-												<td style='vertical-align:top;'>$student_student_status</td>
+												<td style='vertical-align:top;'>$student_status</td>
 												<td style='vertical-align:top;'>$student_assigned_advisor</td>
 												<td style='vertical-align:top;'>$student_request_date</td>
 												<td style='vertical-align:top;'>$student_welcome_date</td>
@@ -604,7 +569,7 @@ td:last-child {
 					if (!in_array($student_level,$validLevels)) {
 						$content	.= "<b>Issue 01</b> Student has invalid level of |$student_level|<br />";
 						$issue01++;
-						$issue01Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue01Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						if ($doDebug) {
 							echo "&nbsp;&nbsp;&nbsp; Level Error or $student_level found<br />";
 						}
@@ -616,7 +581,7 @@ td:last-child {
 					}
 					if ($student_call_sign == "") {
 						$content .= "<b>Issue 02</b> Student has no call sign.<br />";
-						$issue02Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue02Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						$issue02++;
 						if ($doDebug) {
 							echo "&nbsp;&nbsp;&nbsp; Call sign error found<br />";
@@ -626,7 +591,7 @@ td:last-child {
 					// check for valid country, country_code, and ph_code
 					if ($student_country_code == 'XX' || $student_country_code == '') {
 						$content	.= "<b>Issue 28</b> Country code and country missing<br />";
-						$issue28Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue28Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						$issue28++;
 						if ($doDebug) {
 							echo "&nbsp;&nbsp;&nbsp; Missing country code<br />";
@@ -652,7 +617,7 @@ td:last-child {
 								if ($student_country != $thisCountry) {
 									$content		.= "<b>Issue 27</b> Country code does not agree with country<br />";
 									$issue27++;
-									$issue27Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+									$issue27Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 									if ($doDebug) {
 										echo "&nbsp;&nbsp;&nbsp; country code and country do not match<br />";
 									}
@@ -660,17 +625,17 @@ td:last-child {
 								if ($student_ph_code != $thisPhCode) {
 									$content		.= "<b>Issue 29</b> Student ph_code of $student_ph_code does not match country ph code of $thisPhCode<br />";
 									$issue29++;
-									$issue29Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+									$issue29Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 									if ($doDebug) {
 										echo "Student ph_code of $student_ph_code does not match country ph code of $thisPhCode<br />";
 									}
 								}
 							} else {
 								$content			.= "<b>Issue 28</b> Country code not found in database<br />";
-								$issue28Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+								$issue28Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 								$issue28++;
 								$content			.= "<b>Issue 29</b> Unable to verify phone code<br />";
-								$issue29Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+								$issue29Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 								$issue29++;								
 							}
 						}
@@ -683,7 +648,7 @@ td:last-child {
 					if ($student_response != '') {
 						if (!in_array($student_response,$validResponses)) {
 							$content	.= "<b>Issue 03</b> Student has an invalid Response of |$student_response|<br />";
-							$issue03Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue03Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							$issue03++;
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp; Resonse error found<br />";
@@ -693,12 +658,12 @@ td:last-child {
 
 					// check for valid student status
 					if ($doDebug) {
-						echo "Checking $student_student_status for a valid student status<br />";
+						echo "Checking $student_status for a valid student status<br />";
 					}
-					if ($student_student_status != '') {
-						if (!in_array($student_student_status,$validStatuses)) {
-							$content	.= "<b>Issue 04</b> Student has an invalid Student Status of |$student_student_status|<br />";
-							$issue04Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+					if ($student_status != '') {
+						if (!in_array($student_status,$validStatuses)) {
+							$content	.= "<b>Issue 04</b> Student has an invalid Student Status of |$student_status|<br />";
+							$issue04Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							$issue04++;
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Student Status error found<br />";
@@ -714,7 +679,7 @@ td:last-child {
 						if (!in_array($student_hold_reason_code,$validHRC)) {
 							$content	.= "<b>Issue 22</b> Student has an invalid Hold Reason Code of |$student_hold_reason_code|<br />";
 							$issue22++;
-							$issue22Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue22Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Student hold reason code error found<br />";
 							}
@@ -729,7 +694,7 @@ td:last-child {
 						if (!in_array($student_intervention_required,$validIntReq)) {
 							$content	.= "<b>Issue 23</b> Student has an invalid Student Intervention Required of |$student_intervention_required|<br />";
 							$issue23++;
-							$issue23Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue23Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Student Intervention Required error found<br />";
 							}
@@ -757,7 +722,7 @@ td:last-child {
 					}
 					if (!$timezoneOK) {
 						$issue05++;
-						$issue05Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue05Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 					}
 
 					// check for a valid request date
@@ -767,7 +732,7 @@ td:last-child {
 					if ($student_request_date == '') {
 						$content	.= "<b>Issue 06</b> Student has no Request Date<br />";
 						$issue06++;
-						$issue06Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue06Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						if ($doDebug) {
 							echo "&nbsp;&nbsp;&nbsp; Request date error found<br />";
 						}
@@ -776,7 +741,7 @@ td:last-child {
 						if ($rdate > $myUnixTime) {
 							$content	.= "<b>Issue 07</b> Student has an future Request Date of |$student_request_date|<br />";
 							$issue07++;
-							$issue07Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue07Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp; Request date error found<br />";
 							}
@@ -786,7 +751,7 @@ td:last-child {
 							if ($student_welcome_date == '') {
 								$content	.= "<b>Issue 08</b> Student should have a welcome Date<br />";
 								$issue08++;
-								$issue08Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+								$issue08Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 								if ($doDebug) {
 									echo "&nbsp;&nbsp;&nbsp; Welcome dateError found<br />";
 								}
@@ -803,7 +768,7 @@ td:last-child {
 						if ($student_first_class_choice == '' || $student_first_class_choice == 'None') {
 							$content	.= "<b>Issue 09</b> Student has an empty first class choice<br />";
 							$issue09++;
-							$issue09Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue09Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Student first class choice missing error <br />";
 							}
@@ -817,22 +782,22 @@ td:last-child {
 					}
 
 					if ($doDebug) {
-						echo "Checking that Response of $student_response and Student Status of $student_student_status are blank for future semesters<br />";
+						echo "Checking that Response of $student_response and Student Status of $student_status are blank for future semesters<br />";
 					}
 					if (in_array($student_semester,$futureSemesters)) {
 						// check that Response and Student Status are blank for future semesters
 						if ($student_response != '' && $student_response != 'R') {
 							$content	.= "<b>Issue 14</b> Student should not have a Response of |$student_response|<br />";
-							$issue14Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue14Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							$issue14++;
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp; Response Error found<br />";
 							}
 						}
-						if ($student_student_status != '') {
-							$content	.= "<b>Issue 15</b> Student should not have a Student Status of |$student_student_status|<br />";
+						if ($student_status != '') {
+							$content	.= "<b>Issue 15</b> Student should not have a Student Status of |$student_status|<br />";
 							$issue15++;
-							$issue15Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue15Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Student Status error found<br />";
 							}
@@ -842,19 +807,19 @@ td:last-child {
 						if ($student_assigned_advisor != '') {
 							$content	.= "<b>Issue 16</b> Student's assigned advisor of |$student_assigned_advisor| should be blank<br />";
 							$issue16++;
-							$issue16Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue16Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						}
 
 						// hold reason code should be blank
 						if ($student_hold_reason_code != '' && $student_hold_reason_code != 'X') {
 							$content	.= "<b>Issue 17</b> Student's hold reason code of |$student_hold_reason_code| should be blank<br />";
 							$issue17++;
-							$issue17Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue17Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						}
 						if ($student_intervention_required != '') {
 							$content	.= "<b>Issue 18</b> Student's intervention required of |$student_intervention_required| should be blank<br />";
 							$issue18++;
-							$issue18Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue18Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 						}
 					}	
 
@@ -866,7 +831,7 @@ td:last-child {
 						if (checkAdvisor($student_pre_assigned_advisor,$student_semester) == FALSE) {
 							$content	.= "<b>Issue 19</b> Student has an unknown pre_assigned advisor of |$student_pre_assigned_advisor|<br />";
 							$issue19++;
-							$issue19Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue19Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp;Pre_assigned_advisor error found<br />";
 							}
@@ -876,7 +841,7 @@ td:last-child {
 						if (checkAdvisor($student_assigned_advisor,$student_semester) == FALSE) {
 							$content	.= "<b>Issue 20</b> Student has an unknown Assigned Advisor of |$student_assigned_advisor|<br />";
 							$issue20++;
-							$issue20Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+							$issue20Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 							if ($doDebug) {
 								echo "&nbsp;&nbsp;&nbsp; Assigned advisor error found<br />";
 							}
@@ -889,7 +854,7 @@ td:last-child {
 						}
 						$content .= "<b>Issue 21</b> Student has an unknown semester of $student_semester<br />";
 						$issue21++;
-						$issue21Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName' target='_blank'>$student_call_sign</a>";
+						$issue21Array[]		= "<a href='$updateStudentURL?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_dept=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 					}
 					$content	.= "<hr></tr></td>";
 				}

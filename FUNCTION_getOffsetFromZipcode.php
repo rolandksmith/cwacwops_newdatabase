@@ -31,6 +31,10 @@ function getOffsetFromZipcode($inp_zip='',$inp_semester='',$fuzzy=FALSE,$testMod
 			return array('NOK','','','Database Error');
 		} else {
 			$numRows		= $wpdb->num_rows;
+			if ($doDebug) {
+				$myStr		= $wpdb->last_query;
+				echo "ran $myStr<br />and retrieved $numRows rows<br />";
+			}
 			if ($numRows > 0) {
 				foreach($zipcodeData as $thisRow) {
 					$zipTimeZone	= $thisRow->timezone;

@@ -1,4 +1,4 @@
-function checkForBadActor($inp_call_sign='',$doDebug=FALSE) {
+function checkForBadActor($inp_callsign='',$doDebug=FALSE) {
 
 /*	checks to see if a call sign is in the bad actors table
 
@@ -11,17 +11,17 @@ function checkForBadActor($inp_call_sign='',$doDebug=FALSE) {
 	global $wpdb;
 	
 	if ($doDebug) {
-		echo "<br /><b>checkForBadActor</b> called with call sign $inp_call_sign<br />";
+		echo "<br /><b>checkForBadActor</b> called with call sign $inp_callsign<br />";
 	}
 
-	if ($inp_call_sign == '') {
+	if ($inp_callsign == '') {
 		if ($doDebug) {
 			echo "call sign is empty<br />";
 		}
 		return FALSE;
 	}
 	$sql				= "select * from wpw1_cwa_bad_actor 
-							where call_sign = '$inp_call_sign' 
+							where call_sign = '$inp_callsign' 
 							and status = 'A'";
 	$badActorsResult	= $wpdb->get_results($sql);
 	if ($badActorsResult === FALSE) {

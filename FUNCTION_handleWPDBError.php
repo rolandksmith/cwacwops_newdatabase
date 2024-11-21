@@ -1,4 +1,4 @@
-function handleWPDBError($jobname,$doDebug) {
+function handleWPDBError($jobname,$doDebug=FALSE,$info='') {
 
 	global $wpdb;
 	
@@ -11,7 +11,8 @@ function handleWPDBError($jobname,$doDebug) {
 	if ($doDebug) {
 		echo "Database error. Last Query: $lastQuery<br />Last Error: $lastError<br />";	
 	} else {
-	sendErrorEmail("$jobname Database Error. Last Query: $lastQuery. Error: $lastError. UserName: $userName");
+		sendErrorEmail("$jobname Database Error. Last Query: $lastQuery. Error: $lastError. 
+Info: $info. UserName: $userName");
 	}
 	
 	return TRUE;

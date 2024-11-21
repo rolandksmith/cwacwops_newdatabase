@@ -5,6 +5,7 @@ function advisor_statistics_func() {
 	Modified 22Oct22 by Roland for the new timezone table formats
 	Modified 15Apr23 by Roland to correct action log handling
 	Modified 12Jul23 by Roland to use consolidated tables
+	Modified 11Oct24 by Roland for new database
 */
 
 	global $wpdb;
@@ -21,7 +22,8 @@ function advisor_statistics_func() {
 	$userName  = $initializationArray['userName'];
 	$siteURL   = $initializationArray['siteurl'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	if ($validUser == "N") {
+
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 
@@ -82,78 +84,78 @@ function advisor_statistics_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
 		if ($doDebug) {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
-		$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass2";
-		$past_advisorTableName	= "wpw1_cwa_consolidated_past_advisor2";
+		$advisorTableName			= "wpw1_cwa_advisor2";
+		$advisorClassTableName		= "wpw1_cwa_advisorclass2";
+		$userMasterTableName		= "wpw1_cwa_user_master2";
 	} else {
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor";
-		$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass";
-		$past_advisorTableName	= "wpw1_cwa_consolidated_past_advisor";
+		$advisorTableName			= "wpw1_cwa_advisor";
+		$advisorClassTableName		= "wpw1_cwa_advisorclass";
+		$userMasterTableName		= "wpw1_cwa_user_master";
 	}
 
 
@@ -178,59 +180,81 @@ td:last-child {
 		}
 
 		$sql						= "select * from $advisorTableName 
-									   where semester='$nextSemester' 
-										order by call_sign";
-		$wpw1_cwa_advisor		= $wpdb->get_results($sql);
+										left join $userMasterTableName on user_call_sign = advisor_call_sign 
+									   where advisor_semester='$nextSemester' 
+										order by advisor_call_sign";
+
+		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisor === FALSE) {
-			if ($doDebug) {
-				echo "Reading $advisorTableName table failed<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
+			handleWPDBError($jobname,$doDebug);
 		} else {
-			$numARows				= $wpdb->num_rows;
+			$numARows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr				= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
+				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
 			}
 			if ($numARows > 0) {
 				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_select_sequence 			= $advisorRow->select_sequence;
-					$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-					$advisor_first_name 				= $advisorRow->first_name;
-					$advisor_last_name 					= stripslashes($advisorRow->last_name);
-					$advisor_email 						= strtolower($advisorRow->email);
-					$advisor_phone						= $advisorRow->phone;
-					$advisor_ph_code					= $advisorRow->ph_code;				// new
-					$advisor_text_message 				= $advisorRow->text_message;
-					$advisor_city 						= $advisorRow->city;
-					$advisor_state 						= $advisorRow->state;
-					$advisor_zip_code 					= $advisorRow->zip_code;
-					$advisor_country 					= $advisorRow->country;
-					$advisor_country_code				= $advisorRow->country_code;		// new
-					$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-					$advisor_signal						= $advisorRow->signal_app;			// new
-					$advisor_telegram					= $advisorRow->telegram_app;		// new
-					$advisor_messenger					= $advisorRow->messenger_app;		// new
-					$advisor_time_zone 					= $advisorRow->time_zone;
-					$advisor_timezone_id				= $advisorRow->timezone_id;			// new
-					$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
-					$advisor_semester 					= $advisorRow->semester;
-					$advisor_survey_score 				= $advisorRow->survey_score;
-					$advisor_languages 					= $advisorRow->languages;
-					$advisor_fifo_date 					= $advisorRow->fifo_date;
-					$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
-					$advisor_action_log 				= stripslashes($advisorRow->action_log);
-					$advisor_class_verified 			= $advisorRow->class_verified;
-					$advisor_control_code 				= $advisorRow->control_code;
-					$advisor_date_created 				= $advisorRow->date_created;
-					$advisor_date_updated 				= $advisorRow->date_updated;
+					$advisor_master_ID 					= $advisorRow->user_ID;
+					$advisor_master_call_sign			= $advisorRow->user_call_sign;
+					$advisor_first_name 				= $advisorRow->user_first_name;
+					$advisor_last_name 					= $advisorRow->user_last_name;
+					$advisor_email 						= $advisorRow->user_email;
+					$advisor_phone 						= $advisorRow->user_phone;
+					$advisor_city 						= $advisorRow->user_city;
+					$advisor_state 						= $advisorRow->user_state;
+					$advisor_zip_code 					= $advisorRow->user_zip_code;
+					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
+					$advisor_telegram 					= $advisorRow->user_telegram;
+					$advisor_signal 					= $advisorRow->user_signal;
+					$advisor_messenger 					= $advisorRow->user_messenger;
+					$advisor_action_log 				= $advisorRow->user_action_log;
+					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
+					$advisor_languages 					= $advisorRow->user_languages;
+					$advisor_survey_score 				= $advisorRow->user_survey_score;
+					$advisor_is_admin					= $advisorRow->user_is_admin;
+					$advisor_role 						= $advisorRow->user_role;
+					$advisor_master_date_created 		= $advisorRow->user_date_created;
+					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
 
-					$advisor_last_name 					= no_magic_quotes($advisor_last_name);
+					$advisor_ID							= $advisorRow->advisor_id;
+					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
+					$advisor_semester 					= $advisorRow->advisor_semester;
+					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
+					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+					$advisor_action_log 				= $advisorRow->advisor_action_log;
+					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+					$advisor_control_code 				= $advisorRow->advisor_control_code;
+					$advisor_date_created 				= $advisorRow->advisor_date_created;
+					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
+
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$advisor_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+						$advislr_country		= "UNKNOWN";
+						$advisor_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$advisor_country		= $countryRow->country_name;
+								$advisor_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$advisor_country			= "Unknown";
+							$advisor_ph_code			= "";
+						}
+					}
+
 
 					if ($doDebug) {
 						echo "<br />Processing $advisor_call_sign: $advisor_semester | email_date:$advisor_verify_email_date | verify_number:$advisor_verify_email_number | verify_response:$advisor_verify_response<br />";

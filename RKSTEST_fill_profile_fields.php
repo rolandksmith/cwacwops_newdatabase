@@ -5,15 +5,16 @@ function RKSTEST_fill_profile_fields_func() {
 		nickname		g2hij				already filled
 		first_name		Rolando				already filled
 		last_name		Smitty				already filled
-		wpum_field_18	City
-		wpum_field_19	State
-		wpum_field_15	Country Code
-		wpum_field_14	Phone number
-		wpum_field_20	WhatsApp	
-		wpum_field_21	Telegram
-		wpum_field_22	Signal
-		wpum_field_23	Messenger
-		wpum_field_24	ZipCode
+		wpum_field_20	City
+		wpum_field_21	State
+		wpum_field_22	Country Code
+		wpum_field_23	Phone number
+		wpum_field_24	WhatsApp	
+		wpum_field_25	Telegram
+		wpum_field_27	Signal
+		wpum_field_27	Messenger
+		wpum_field_28	ZipCode
+		wpum_field_30	Languages
 		
 		Foreach user_ID 
 			determine if a student or an advisor
@@ -29,7 +30,7 @@ function RKSTEST_fill_profile_fields_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -77,6 +78,7 @@ function RKSTEST_fill_profile_fields_func() {
 	$theURL						= "$siteURL/rkstest-fill-profile-fields/";
 	$inp_semester				= '';
 	$jobname					= "RKSTEST - Fill Profile Fields";
+	$addedCount					= 0;
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -194,6 +196,8 @@ function RKSTEST_fill_profile_fields_func() {
 		$userTableName				= "wpw1_users";
 		$userMetaTableName			= "wpw1_usermeta";
 		$userMasterTableName		= "wpw1_cwa_user_master2";
+		$countryCodesTableName		= "wpw1_cwa_country_codes";
+		$userMasterHistoryTableName	= "wpw1_cwa_user_master_history2";
 	} else {
 		$extMode					= 'pd';
 		$advisorTableName			= "wpw1_cwa_consolidated_advisor";
@@ -201,6 +205,8 @@ function RKSTEST_fill_profile_fields_func() {
 		$userTableName				= "wpw1_users";
 		$userMetaTableName			= "wpw1_usermeta";
 		$userMasterTableName		= "wpw1_cwa_user_master";
+		$countryCodesTableName		= "wpw1_cwa_country_codes";
+		$userMasterHistoryTableName	= "wpw1_cwa_user_master_history";
 	}
 
 
@@ -228,11 +234,11 @@ function RKSTEST_fill_profile_fields_func() {
 			echo "<br />at pass 2<br />";
 		}
 
-		
+		$actionDate			= date('Y-m-d H:i:s');
 		// now build the user_master table
 		$content			.= "<h4>Building $userMasterTableName Table</h4>";
 		
-		// first truncate the table
+		// first truncate the user_master table
 		if ($doDebug) {
 			echo "truncating $userMasterTableName<br />";
 		}
@@ -241,6 +247,16 @@ function RKSTEST_fill_profile_fields_func() {
 			handleWPDBError($jobname,$doDebug);
 		} else {
 			$content		.= "$userMasterTableName table has been truncated<br />";
+		}
+		// now truncate the user_master_history table
+		if ($doDebug) {
+			echo "truncating $userMasterTableName<br />";
+		}
+		$deleteUsers 		= $wpdb->query("TRUNCATE TABLE $userMasterHistoryTableName");
+		if ($deleteUsers === FALSE) {
+			handleWPDBError($jobname,$doDebug);
+		} else {
+			$content		.= "$userMasterHistoryTableName table has been truncated<br />";
 		}
 		
 		if ($doDebug) {
@@ -259,12 +275,14 @@ function RKSTEST_fill_profile_fields_func() {
 				echo "ran $sql<br />and retrieved $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
+				$content			.= "<p>Have $numSRows of unique advisors</p>";
 				foreach($sqlResult as $sqlRow) {
 					$thisCallSign		= $sqlRow->callsign;
 					
 					if ($doDebug) {
 						echo "<br />processing advisor $thisCallSign<br />";
 					}
+					
 					// get the latest advisor record
 					$advisorSQL		= "select * from $advisorTableName 
 										where call_sign = '$thisCallSign' 
@@ -287,66 +305,183 @@ function RKSTEST_fill_profile_fields_func() {
 								$advisor_last_name 					= stripslashes($advisorRow->last_name);
 								$advisor_email 						= strtolower($advisorRow->email);
 								$advisor_phone						= $advisorRow->phone;
-								$advisor_ph_code					= $advisorRow->ph_code;				
+								$advisor_ph_code					= $advisorRow->ph_code;				// new
 								$advisor_text_message 				= $advisorRow->text_message;
 								$advisor_city 						= $advisorRow->city;
 								$advisor_state 						= $advisorRow->state;
 								$advisor_zip_code 					= $advisorRow->zip_code;
 								$advisor_country 					= $advisorRow->country;
-								$advisor_country_code				= $advisorRow->country_code;		
-								$advisor_whatsapp					= $advisorRow->whatsapp_app;		
-								$advisor_signal						= $advisorRow->signal_app;			
-								$advisor_telegram					= $advisorRow->telegram_app;		
-								$advisor_messenger					= $advisorRow->messenger_app;		
-								$advisor_timezone_id				= $advisorRow->timezone_id;
-								$advisor_languages					= $advisorRow->languages;
+								$advisor_country_code				= $advisorRow->country_code;		// new
+								$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
+								$advisor_signal						= $advisorRow->signal_app;			// new
+								$advisor_telegram					= $advisorRow->telegram_app;		// new
+								$advisor_messenger					= $advisorRow->messenger_app;		// new
+								$advisor_time_zone 					= $advisorRow->time_zone;
+								$advisor_timezone_id				= $advisorRow->timezone_id;			// new
+								$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
+								$advisor_semester 					= $advisorRow->semester;
+								$advisor_survey_score 				= $advisorRow->survey_score;
+								$advisor_languages 					= $advisorRow->languages;
+								$advisor_fifo_date 					= $advisorRow->fifo_date;
+								$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
+								$advisor_verify_email_date 			= $advisorRow->verify_email_date;
+								$advisor_verify_email_number 		= $advisorRow->verify_email_number;
+								$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
+								$advisor_action_log 				= $advisorRow->action_log;
+								$advisor_class_verified 			= $advisorRow->class_verified;
+								$advisor_control_code 				= $advisorRow->control_code;
+								$advisor_date_created 				= $advisorRow->date_created;
+								$advisor_date_updated 				= $advisorRow->date_updated;
+								$advisor_replacement_status 		= $advisorRow->replacement_status;
 			
 								$advisor_last_name 					= no_magic_quotes($advisor_last_name);
+								
+								if ($doDebug) {
+									echo "got advisor info for $advisor_call_sign<br />";
+								}
+								
+								// get the role
+								$roleArray				= get_user_role($advisor_call_sign,$testMode,$doDebug);
+								$result					= "";
+								$reason					= "";
+								$isAdvisor				= FALSE;
+								$isAdmin				= FALSE;
+								$isStudent				= FALSE;
+								$isOther				= FALSE;
+								$updateParams			= array();
+								$updateFormat			= array();
+								
+								if ($doDebug) {
+									echo "Have roleArray<br /><pre>";
+									print_r($roleArray);
+									echo "</pre><br />";
+								}
+
+								foreach($roleArray as $thisField => $thisValue) {
+									$$thisField			= $thisValue;
+								}
+								if ($result === FALSE) {
+									if ($doDebug) {
+										echo "get_user_role returned FALSE<br />Reason: $reason<br />";
+									}
+//									sendErrorEmail("FUNCTION_user_master_data: get_user_role returned FALSE for $callsign");
+									$is_admin						='N';
+									$role							= 'student';
+								} else {
+									if ($isAdmin) {
+										$is_admin						= 'Y';
+									}
+									if ($isStudent) {
+										$role							= 'student';
+									} 
+									if ($isAdvisor) {
+										$role							= 'advisor';
+									} 
+									if ($isOther) {
+										$role							= 'other';
+									} 
+								}								
+								
+								// is the country code valid?
+								
+								$countrySQL		= "select * from $countryCodesTableName 
+													where country_code = '$advisor_country_code'";
+								$countrySQLResult	= $wpdb->get_results($countrySQL);
+								if ($countrySQLResult === FALSE) {
+									handleWPDBError("FUNCTION User Master Data",$doDebug);
+									$country		= "UNKNOWN";
+									$ph_code		= "";
+								} else {
+									$numCRows		= $wpdb->num_rows;
+									if ($doDebug) {
+										echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+									}
+									if($numCRows > 0) {
+										foreach($countrySQLResult as $countryRow) {
+											$country		= $countryRow->country_name;
+											$ph_code		= $countryRow->ph_code;
+											
+											if ($country != $advisor_country) {
+												$content	.= "<b>ERROR</b> Advisor $advisor_call_sign Country of $advisor_country doesn't match the advisor's country_code of $advisor_country_code<br />";
+												$advisor_country_code 	= 'XX';
+											}
+											if ($advisor_ph_code == '') {
+												$advisor_ph_code 	= $ph_code;
+											} else {
+												if ($ph_code != $advisor_ph_code) {
+//													$content	.= "<b>ERROR</b> Advisor $advisor_call_sign ph_code of $advisor_ph_code doesn't match country $country<br />";
+													$advisor_ph_code		= $ph_code;
+												}
+											}
+										}
+									} else {
+										$content		.= "<b>ERROR</b> advisor $advisor_call_sign country code of $advisor_country_code is not in the country code table<br />";
+										$advisor_country_code		= "XX";
+										$advisor_ph_code			= "99";
+									}
+								}	
 								
 								$thisDate	 	= date('Y-m-d H:i:s');
 								$user_action_log	= "/ $thisDate $userName record created ";
 
 								// insert into user_master
 								
-								$advisorInsert			= $wpdb->insert($userMasterTableName,
-																	array('call_sign'=>$advisor_call_sign,
-																		  'first_name'=>$advisor_first_name,
-																		  'last_name'=>$advisor_last_name,
-																		  'email'=>$advisor_email,
-																		  'phone'=>$advisor_phone,
-																		  'city'=>$advisor_city,
-																		  'state'=>$advisor_state,
-																		  'zip_code'=>$advisor_zip_code,
-																		  'country_code'=>$advisor_country_code,
-																		  'whatsapp_app'=>$advisor_whatsapp,
-																		  'telegram_app'=>$advisor_telegram,
-																		  'signal_app'=>$advisor_signal,
-																		  'messenger_app'=>$advisor_messenger,
-																		  'timezone_id'=>$advisor_timezone_id,
-																		  'languages'=>$advisor_languages,
-																		  'user_action_log'=>$user_action_log ),
-																	  array('%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s',
-																	  		'%s'));
-								if ($advisorInsert === FALSE) {
+								$updateParams			= array('user_call_sign'=>$advisor_call_sign,
+															  'user_first_name'=>$advisor_first_name,
+															  'user_last_name'=>$advisor_last_name,
+															  'user_email'=>$advisor_email,
+															  'user_phone'=>$advisor_phone,
+															  'user_city'=>$advisor_city,
+															  'user_state'=>$advisor_state,
+															  'user_zip_code'=>$advisor_zip_code,
+															  'user_country_code'=>$advisor_country_code,
+															  'user_whatsapp'=>$advisor_whatsapp,
+															  'user_telegram'=>$advisor_telegram,
+															  'user_signal'=>$advisor_signal,
+															  'user_messenger'=>$advisor_messenger,
+															  'user_timezone_id'=>$advisor_timezone_id,
+															  'user_languages'=>$advisor_languages,
+															  'user_survey_score'=>$advisor_survey_score,
+															  'user_action_log'=>"$actionDate $userName Create User Master - record created", 
+															  'user_is_admin'=>$is_admin,
+															  'user_role'=>'advisor' );
+								$updateFormat			= array('%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%s',
+																'%d',
+																'%s',
+																'%s',
+																'%s');
+								$userMasterData			= array('tableName'=>$userMasterTableName,
+																'inp_method'=>'add',
+																'inp_data'=>$updateParams,
+																'inp_format'=>$updateFormat,
+																'jobname'=>$jobname,
+																'inp_id'=>0,
+																'inp_callsign'=>$advisor_call_sign,
+																'inp_who'=>$userName,
+																'testMode'=>$testMode,
+																'doDebug'=>$doDebug);
+								$updateResult	= update_user_master($userMasterData);
+								if ($updateResult === FALSE) {
 									handleWPDBError($jobname,$doDebug);
 								} else {
 									if ($doDebug) {
 										echo "user_master record added for $thisCallSign<br />";
 									}
+									$addedCount++;
 								}
 							}
 						}
@@ -371,6 +506,7 @@ function RKSTEST_fill_profile_fields_func() {
 				echo "ran $sql<br />and retrieved $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
+				$content			.= "<p>Have $numSRows of unique students. Some are also advisors</p>";
 				foreach($sqlResult as $sqlRow) {
 					$thisCallSign		= $sqlRow->callsign;
 					
@@ -378,9 +514,9 @@ function RKSTEST_fill_profile_fields_func() {
 						echo "<br />processing student $thisCallSign<br />";
 					}
 					// see if we've already added a record for this callsign					
-					$sql			= "SELECT count(call_sign) as callsign_count 
+					$sql			= "SELECT count(user_call_sign) as callsign_count 
 									   from $userMasterTableName 
-										where call_sign = '$thisCallSign'";
+										where user_call_sign = '$thisCallSign'";
 					$callsign_count	= $wpdb->get_var($sql);
 					if ($callsign_count == 0) {
 						if ($doDebug) {
@@ -388,7 +524,7 @@ function RKSTEST_fill_profile_fields_func() {
 						}
 					
 						// get the latest student record
-						$studentSQL		= "select * from $studentTableName 
+  						$studentSQL		= "select * from $studentTableName 
 											where call_sign = '$thisCallSign' 
 											order by date_created DESC 
 											limit 1";
@@ -422,48 +558,147 @@ function RKSTEST_fill_profile_fields_func() {
 				
 									$student_last_name 					= no_magic_quotes($student_last_name);
 									
+									// get the role
+									$roleArray				= get_user_role($advisor_call_sign);
+									$result					= "";
+									$reason					= "";
+									$isAdvisor				= FALSE;
+									$isAdmin				= FALSE;
+									$isStudent				= FALSE;
+									$isOther				= FALSE;
+									$updateParams			= array();
+									$updateFormat			= array();
+									$doUpdate				= FALSE;
+									foreach($roleArray as $thisField => $thisValue) {
+										$$thisField			= $thisValue;
+									}
+									if ($result === FALSE) {
+										if ($doDebug) {
+											echo "get_user_role returned FALSE<br />Reason: $reason<br />";
+										}
+//										sendErrorEmail("FUNCTION_user_master_data: get_user_role returned FALSE for $callsign");
+										$is_admin						= 'N';
+										$role							= 'student';
+									} else {
+										if ($isAdmin) {
+											$is_admin						= 'Y';
+										}
+										if ($isStudent) {
+											$role							= 'student';
+										} 
+										if ($isAdvisor) {
+											$role							= 'advisor';
+										} 
+										if ($isOther) {
+											$role							= 'other';
+										} 
+									}
+									// is the country code valid?
+									
+									$countrySQL		= "select * from $countryCodesTableName 
+														where country_code = '$student_country_code'";
+									$countrySQLResult	= $wpdb->get_results($countrySQL);
+									if ($countrySQLResult === FALSE) {
+										handleWPDBError("FUNCTION User Master Data",$doDebug);
+										$country		= "UNKNOWN";
+										$ph_code		= "";
+									} else {
+										$numCRows		= $wpdb->num_rows;
+										if ($doDebug) {
+											echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+										}
+										if($numCRows > 0) {
+											foreach($countrySQLResult as $countryRow) {
+												$country		= $countryRow->country_name;
+												$ph_code		= $countryRow->ph_code;
+												
+												if ($country != $student_country) {
+													if ($doDebug) {
+														echo "student country $student_country doesn't match the retrieved country $country<br >";
+													}
+													$content	.= "<b>ERROR</b> Student $student_call_sign Country of $student_country doesn't match the student's country_code of $student_country_code<br />";
+													$student_country_code 	= 'XX';
+												}
+												if ($student_ph_code == '') {
+													if ($doDebug) {
+														echo "student_ph_code is empty<br />";
+													}
+													$student_ph_code 	= $ph_code;
+													if ($doDebug) {
+														echo "student_ph_code is empty. Set it to $ph_code<br />";
+													}
+												} else {
+													if ($ph_code != $student_ph_code) {
+//														$content	.= "<b>ERROR</b> Advisor $student_call_sign ph_code of $student_ph_code doesn't match country $country<br />";
+														$student_ph_code		= $ph_code;
+													}
+												}
+											}
+										} else {
+											$content		.= "<b>ERROR</b> Student $student_call_sign country code of $student_country_code is not in the country code table<br />";
+											$student_country_code		= "XX";
+											$student_ph_code			= "99";
+										}
+									}	
+
+
 									$thisDate	 	= date('Y-m-d H:i:s');
 									$user_action_log	= "/ $thisDate $userName record created ";
 									
 									// insert into user_master
 									
-									$studentInsert			= $wpdb->insert($userMasterTableName,
-																		array('call_sign'=>$student_call_sign,
-																			  'first_name'=>$student_first_name,
-																			  'last_name'=>$student_last_name,
-																			  'email'=>$student_email,
-																			  'phone'=>$student_phone,
-																			  'city'=>$student_city,
-																			  'state'=>$student_state,
-																			  'zip_code'=>$student_zip_code,
-																			  'country_code'=>$student_country_code,
-																			  'whatsapp_app'=>$student_whatsapp,
-																			  'telegram_app'=>$student_telegram,
-																			  'signal_app'=>$student_signal,
-																			  'messenger_app'=>$student_messenger,
-																			  'timezone_id'=>$student_timezone_id,
-																			  'user_action_log'=>$user_action_log ),
-																		  array('%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s',
-																				'%s'));
-									if ($studentInsert === FALSE) {
+									$updateParams			= array('user_call_sign'=>$student_call_sign,
+																	  'user_first_name'=>$student_first_name,
+																	  'user_last_name'=>$student_last_name,
+																	  'user_email'=>$student_email,
+																	  'user_phone'=>$student_phone,
+																	  'user_city'=>$student_city,
+																	  'user_state'=>$student_state,
+																	  'user_zip_code'=>$student_zip_code,
+																	  'user_country_code'=>$student_country_code,
+																	  'user_whatsapp'=>$student_whatsapp,
+																	  'user_telegram'=>$student_telegram,
+																	  'user_signal'=>$student_signal,
+																	  'user_messenger'=>$student_messenger,
+																	  'user_timezone_id'=>$student_timezone_id,
+																	  'user_action_log'=>"$actionDate $userName Create User Master - record created", 
+																	  'user_is_admin'=>$is_admin,
+																	  'user_role'=>'student' );
+									$updateFormat			= array('%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s',
+																	'%s');
+									$userMasterData			= array('tableName'=>$userMasterTableName,
+																	'inp_method'=>'add',
+																	'inp_data'=>$updateParams,
+																	'inp_format'=>$updateFormat,
+																	'jobname'=>$jobname,
+																	'inp_id'=>0,
+																	'inp_callsign'=>$student_call_sign,
+																	'inp_who'=>$userName,
+																	'testMode'=>$testMode,
+																	'doDebug'=>$doDebug);
+									$updateResult	= update_user_master($userMasterData);
+									if ($updateResult === FALSE) {
 										handleWPDBError($jobname,$doDebug);
 									} else {
 										if ($doDebug) {
 											echo "user_master record added for $thisCallSign<br />";
 										}
+										$addedCount++;
 									}
 								}
 							}
@@ -476,10 +711,7 @@ function RKSTEST_fill_profile_fields_func() {
 				}
 			}			
 		}
-		
-		
-	
-	
+		$content			.= "<p>$addedCount records added to user_master table</p>";
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";

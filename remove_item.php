@@ -72,9 +72,9 @@ function remove_item_func() {
 				$token	 = $str_value;
 				$token	 = filter_var($token,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key 		== "inp_call_sign") {
-				$inp_call_sign	 = $str_value;
-				$inp_call_sign	 = filter_var($inp_call_sign,FILTER_UNSAFE_RAW);
+			if ($str_key 		== "inp_callsign") {
+				$inp_callsign	 = $str_value;
+				$inp_callsign	 = filter_var($inp_callsign,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -170,11 +170,11 @@ function remove_item_func() {
 	if ("1" == $strPass) {
 		if ($doDebug) {
 			echo "<br />at pass $strPass with<br />
-					inp_call_sign = $inp_call_sign<br />
+					inp_callsign = $inp_callsign<br />
 					token: $token<br />";
 		}
 		
-		$resolveResult		= resolve_reminder($inp_call_sign,$token,$testMode,$doDebug);
+		$resolveResult		= resolve_reminder($inp_callsign,$token,$testMode,$doDebug);
 		
 		if ($resolveResult) {
 			$content		.= "Reminder has been removed";

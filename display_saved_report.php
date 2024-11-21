@@ -75,70 +75,78 @@ function display_saved_report_func() {
 				$inp_callsign		 = $str_value;
 				$inp_callsign		 = filter_var($inp_callsign,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "doDebug") {
+				$doDebug		 = $str_value;
+				$doDebug		 = filter_var($doDebug,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "testMode") {
+				$testMode		 = $str_value;
+				$testMode		 = filter_var($testMode,FILTER_UNSAFE_RAW);
+			}
 		}
 	}
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		echo "Operating in Test Mode<br />";
@@ -171,21 +179,21 @@ td:last-child {
 						name='option2Form' ENCTYPE='multipart/form-data'>
 						<input type='hidden' name='strpass' value='3'>
 						<input type='hidden' name='inp_id' value='recent'>
-						<input class='formInputButton' type='submit' value='Show Most Reent Reports' />
+						<input class='formInputButton' type='submit' value='Show Most Recent Reports' />
 						</form></p>
 						</div></td></tr></table>";
 
 	} elseif ("5" == $strPass) {
-		$content					.= "<h3>$jobname</h3>
-<p>The saved report names are shown below along with the most recent three 
-reports. Select one of the reports or 'Show More'</p>
-<p><form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data'>
-<input type='hidden' name='strpass' value='3'>
-<table>
-<tr><th colspan='2'>Report Name</th></tr>";
+		$content		.= "<h3>$jobname</h3>
+							<p>The saved report names are shown below along with the most recent three 
+							reports. Select one of the reports or 'Show More'</p>
+							<p><form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data'>
+							<input type='hidden' name='strpass' value='3'>
+							<table>
+							<tr><th colspan='2'>Report Name</th></tr>";
 		
-		// get all report titles from the reports pod
+		// get all report titles from the reports table
 		$sql			= "select distinct(report_name) as report_name 
 							from $reportsTableName 
 							order by report_name";
@@ -220,9 +228,8 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 							$reports_report_filename	= $reportsDetailRow->report_filename;
 							$reports_report_data		= $reportsDetailRow->report_data;
 							
-							$content					.= "
-<tr><td style='width:50px;'><input type='radio' class='formInputButton' name='inp_id' value='$reports_ID|id'></td>
-	<td>$reports_report_date</td></tr>";
+							$content					.= "<tr><td style='width:50px;'><input type='radio' class='formInputButton' name='inp_id' value='$reports_ID|id'></td>
+																<td>$reports_report_date</td></tr>";
 							$linesOut++;
 						
 						}
@@ -271,7 +278,8 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 		} 
 		if ($doById) {
 			// get the requested report
-			$sql				= "select * from $reportsTableName where report_id=$inp_id";
+			$sql				= "select * from $reportsTableName 
+									where report_id=$inp_id";
 			$wpw1_cwa_reports	= $wpdb->get_results($sql);
 			if ($wpw1_cwa_reports === FALSE) {
 				handleWPDBError($jobname,$doDebug);
@@ -300,7 +308,9 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 							$reports_report_data	= "<p>Report Data No Longer Available</p>";
 						}
 						$content					.= "<h3>$jobname</h3><h4>$reports_report_name for $reports_report_date</h4>
-														$reports_report_data<br /><br /><hr><br /><br />";
+														$reports_report_data<br />
+														<a href='$theURL/?strpass=10&inp_id=$inp_id&doDebug=$doDebug&testMode=$testMode'>Delete this saved report?</a>
+														<hr><br /><br />";
 					}
 					if ($token != '') {
 						$resolveResult				= resolve_reminder($inp_callsign,$token,$testMode,$doDebug);
@@ -328,7 +338,7 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 				$linesOut						= 0;
 				$content						.= "<h3>Display Saved Report</h3>
 													<p>Select the desired report</p>
-													<p><form method='post' action='$theURL' 
+													<p><form method='post' action='$theURL' target='_blank' 
 													name='selection_form' ENCTYPE='multipart/form-data'>
 													<input type='hidden' name='strpass' value='3'>
 													<table>
@@ -365,7 +375,7 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 				$content						.= "<h3>$jobname</h3>
 													<p>Showing the 30 most recent reports</p>
 													<p>Select the desired report</p>
-													<p><form method='post' action='$theURL' 
+													<p><form method='post' action='$theURL' target='_blank' 
 													name='selection_form' ENCTYPE='multipart/form-data'>
 													<input type='hidden' name='strpass' value='3'>
 													<table style='width:400px;'>
@@ -390,8 +400,33 @@ name='selection_form' ENCTYPE='multipart/form-data'>
 				$content								.= "<tr><td colspan='3'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table></form>";	
 			}
 		}
-
-
+///// Pass 10 - delete saved report
+		
+	} elseif ("10" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 5 deleting inp_id of $inp_id<br />";
+		}
+		
+		$content		.= "<h3>$jobname Deleting $inp_id</h3>";
+		$deleteResult	= $wpdb->delete($reportsTableName, 
+										array('report_id'=>$inp_id),
+										array('%d'));
+		if ($deleteResult === FALSE) {
+			handleWPDBError("$jobname pass 5",$doDebug);
+			$content	.= "<p>Deleting report ID $inp_id failed</p>";
+		} else {
+			if ($doDebug) {
+				echo "$deleteResult rows deleted<br />";
+			}
+			if ($deleteResult == 0) {
+				$content .= "<p>Report ID $inp_id not found to delete</p>";
+			} else {
+				if ($doDebug) {
+					echo "report_id $inp_id deleted<br />";
+				}
+				$content .= "<p>Report ID $inp_id has been deleted</p>";
+			}
+		}
 	}	
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>V$versionNumber. Prepared at $thisTime</p>";

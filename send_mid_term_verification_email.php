@@ -3,7 +3,7 @@ function send_mid_term_verification_email_func() {
 /*	Send mid-term class verification email to advisors
  *	This function is run around the middle of the semester.
  *
- *	Read the advisor pod for the current semester
+ *	Read the advisor table for the current semester
  *	if 'class_verified' is blank, prepare an email to the advisor
  *	and send the email
  *
@@ -18,11 +18,12 @@ function send_mid_term_verification_email_func() {
  	Modified 17Apr23 by Roland to fix action_log
  	Modified 14Jul23 by Roland to use consolidated tables
  	Modified 31Jan24 by Roland to use reminders
+ 	Modified 1Oct24 by Roland for new database
 */
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -32,11 +33,18 @@ function send_mid_term_verification_email_func() {
 	}
 	$validUser 						= $initializationArray['validUser'];
 	$userName  						= $initializationArray['userName'];
+	$userRole						= $initializationArray['userRole'];
 	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$siteURL						= $initializationArray['siteurl'];
+	$currentSemester				= $initializationArray['currentSemester'];
 
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+	}
+
+	if ($userRole != 'administrator') {
+		$doDebug			= FALSE;
+		$testMode			= FALSE;
 	}
 
 //	if ($doDebug) {
@@ -88,11 +96,11 @@ function send_mid_term_verification_email_func() {
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-	<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
-<tr><td>Verbose Debugging?</td>
-<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
-	<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+							<tr><td>Verbose Debugging?</td>
+								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
+									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 		} else {
 			$testModeOption	= '';
 		}
@@ -160,16 +168,18 @@ td:last-child {
 </style>";	
 
 	if ($testMode) {
-		$studentTableName	= 'wpw1_cwa_consolidated_student2';
-		$advisorTableName	= 'wpw1_cwa_consolidated_advisor2';
+		$studentTableName	= 'wpw1_cwa_student2';
+		$advisorTableName	= 'wpw1_cwa_advisor2';
+		$userMasterTableName	= 'wpw1_cwa_user_master2';
 		if ($doDebug) {
 			echo "Function is under development. Using student2 and advisor2, not the production data.<br />";
 		}
 		$extMode					= 'tm';
 		$content .= "Function is under development. Using student2 and advisor2, not the production data.<br />";
 	} else {
-		$studentTableName 	= 'wpw1_cwa_consolidated_student';
-		$advisorTableName	= 'wpw1_cwa_consolidated_advisor';
+		$studentTableName 	= 'wpw1_cwa_student';
+		$advisorTableName	= 'wpw1_cwa_advisor';
+		$userMasterTableName	= 'wpw1_cwa_user_master';
 		$extMode					= 'pd';
 	}
 
@@ -179,82 +189,47 @@ td:last-child {
 			echo "Function starting.<br />";
 		}
 		$content 		.= "<h3>Send Mid-term Verification Email to Advisors</h3>
-<p>This function is run around the middle of the semester to send an email to the advisors 
-with a link to a web page so they can verify which students are actualy attending their 
-class(es). When the advisor does the verification, that information is recorded in the 
-advisor pod so the advisor won't receive a follow-up email.<br /><br />
-Click 'Submit' to start the process.</p>
-<p><form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data''>
-<input type='hidden' name='strpass' value='2'>
-<table>
-$testModeOption
-<tr><td><input class='formInputButton' type='submit' value='Submit' /></td>
-	<td>&nbsp;</td></tr></table>
-</form></p>";
-		return $content;
+							<p>This function is run around the middle of the semester to send an email to the advisors 
+							with a link to a web page so they can verify which students are actualy attending their 
+							class(es). When the advisor does the verification, that information is recorded in the 
+							advisor table so the advisor won't receive a follow-up email.<br /><br />
+							Click 'Submit' to start the process.</p>
+							<p><form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data''>
+							<input type='hidden' name='strpass' value='2'>
+							<table>
+							$testModeOption
+							<tr><td><input class='formInputButton' type='submit' value='Submit' /></td>
+								<td>&nbsp;</td></tr></table>
+							</form></p>";
 
 ///// Pass 2 -- do the work
 
 
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
-			echo "Arrived at pass 2<br />
-inp_mode: $inp_mode<br />
-inp_verbose: $inp_verbose<br />";
+			echo "<br />Arrived at pass 2<br />";
 		}
-		if ($doDebug) {
-			echo "doDebug is TRUE<br />";
-		}
-		if ($testMode) {
-			echo "testMode is TRUE<br />";
-		}
-		$currentSemester		= $initializationArray['currentSemester'];
-		$content				.= "<h3>Sending Mid-term Verification Emails</h3>";
+
+		$content				.= "<h3>$jobname</h3>";
 		// get all the advisor records for this semester
 		$sql					= "select * from $advisorTableName 
+									left join $userMasterTableName on advisor_call_sign = user_call_sign 
 									where semester='$currentSemester' 
 									and survey_score != '6'";
 		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisor === FALSE) {
-			if ($doDebug) {
-				echo "Reading $advisorTableName table failed<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
+			handleWPDBError($jobname,$doDebug);
 		} else {
 			$numARows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
+				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
 			}
 			if ($numARows > 0) {
 				foreach ($wpw1_cwa_advisor as $advisorRow) {
 					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_select_sequence 			= $advisorRow->select_sequence;
 					$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-					$advisor_first_name 				= $advisorRow->first_name;
-					$advisor_last_name 					= stripslashes($advisorRow->last_name);
-					$advisor_email 						= strtolower($advisorRow->email);
-					$advisor_phone						= $advisorRow->phone;
-					$advisor_ph_code					= $advisorRow->ph_code;				// new
-					$advisor_text_message 				= $advisorRow->text_message;
-					$advisor_city 						= $advisorRow->city;
-					$advisor_state 						= $advisorRow->state;
-					$advisor_zip_code 					= $advisorRow->zip_code;
-					$advisor_country 					= $advisorRow->country;
-					$advisor_country_code				= $advisorRow->country_code;		// new
-					$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-					$advisor_signal						= $advisorRow->signal_app;			// new
-					$advisor_telegram					= $advisorRow->telegram_app;		// new
-					$advisor_messenger					= $advisorRow->messenger_app;		// new
-					$advisor_time_zone 					= $advisorRow->time_zone;
-					$advisor_timezone_id				= $advisorRow->timezone_id;			// new
-					$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
 					$advisor_semester 					= $advisorRow->semester;
-					$advisor_survey_score 				= $advisorRow->survey_score;
-					$advisor_languages 					= $advisorRow->languages;
-					$advisor_fifo_date 					= $advisorRow->fifo_date;
 					$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
 					$advisor_verify_email_date 			= $advisorRow->verify_email_date;
 					$advisor_verify_email_number 		= $advisorRow->verify_email_number;
@@ -264,6 +239,7 @@ inp_verbose: $inp_verbose<br />";
 					$advisor_control_code 				= $advisorRow->control_code;
 					$advisor_date_created 				= $advisorRow->date_created;
 					$advisor_date_updated 				= $advisorRow->date_updated;
+					$advisor_replacement_status 		= $advisorRow->replacement_status;
 
 					$doProceed							= TRUE;
 					if ($doDebug) {
@@ -312,7 +288,7 @@ inp_verbose: $inp_verbose<br />";
 							$increment++;
 							$mySubject				= "TESTMODE $mySubject";
 						} else {
- 							$email_to				= $advisor_email;
+							$email_to				= $advisor_email;
 							$mailCode				= 12;
 						}
 						$myContent		= "<p>To: $advisor_last_name, $advisor_first_name ($advisor_call_sign)</p>

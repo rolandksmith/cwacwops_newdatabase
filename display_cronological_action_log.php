@@ -177,20 +177,19 @@ td:last-child {
 
 	if ("1" == $strPass) {
 		$content 		.= "<h3>$jobname</h3>
-<p>$jobname
-<form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data'>
-<input type='hidden' name='strpass' value='2'>
-<table style='border-collapse:collapse;width:auto;'>
-<tr><td style='vertical-align:top;'>Option</td>
-	<td><input type='radio' class='formInputButton' name='inp_run_type' value='cron' selected> Cronological Order, Newest to Oldest<br />
-		<input type='radio' class='formInputButton' name='inp_run_type' value='callsign'> Specific callsign, Oldest to Newest. Callsign:<br />
-		<input type='text' class='formInputText' name='inp_callsign' size='15' maxlength='50'></td></tr>
-<tr><td colspan='2'>Click submit to show up to 100 records in reverse chronological order 
-(newest to oldest)</td></tr>
-$testModeOption
-<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
-</form></p>";
+							<form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data'>
+							<input type='hidden' name='strpass' value='2'>
+							<table style='border-collapse:collapse;width:auto;'>
+							<tr><td style='vertical-align:top;'>Option</td>
+								<td><input type='radio' class='formInputButton' name='inp_run_type' value='cron' selected> Cronological Order, Newest to Oldest<br />
+									<input type='radio' class='formInputButton' name='inp_run_type' value='callsign'> Specific callsign, Oldest to Newest. Callsign:<br />
+									<input type='text' class='formInputText' name='inp_callsign' size='15' maxlength='50'></td></tr>
+							<tr><td colspan='2'>Click submit to show up to 100 records in reverse chronological order 
+							(newest to oldest)</td></tr>
+							$testModeOption
+							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+							</form></p>";
 	
 
 ///// Pass 2 -- do the work

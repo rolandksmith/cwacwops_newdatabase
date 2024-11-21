@@ -88,12 +88,13 @@ function daily_student_cron_v4_func() {
 	Modified 17Nov23 by Roland to store actions in the reminders table
 	Modified 25Dec23 by Roland to store the debug log correctly. Version upgraded to 4
 	Modified 26Feb24 by Roland to add additional counts
+	Modified 12Oct24 by Roland for new database
  
 */
 
 	global $wpdb, $testMode, $doDebug, $classesArray;
 
-	$doDebug				= FALSE;
+	$doDebug				= TRUE;
 	$doDebugLog				= TRUE;
 	$testMode				= FALSE;
 	$verifyMode				= FALSE;
@@ -165,7 +166,7 @@ function daily_student_cron_v4_func() {
 	$TUYesURL				= "$siteURL/cwa-thank-you-yes/";
 	$TURemoveURL			= "$siteURL/cwa-thank-you-remove/";
 	$advisorVerifyURL		= "$siteURL/cwa-advisor-verification-of-student/";
-	$studentUpdateURL		= "$siteURL/cwa-display-and-update-student-information/";	
+	$studentUpdateURL		= "$siteURL/cwa-display-and-update-student-signup-information/";	
 	
 	$recordsProcessed		= 0;
 	$student45DayCount		= 0;
@@ -349,55 +350,55 @@ function daily_student_cron_v4_func() {
 
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-</style>";
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				</style>";
 
 
 /* 	function to check classes
@@ -474,7 +475,7 @@ td {padding:5px;font-size:small;}
 	} else {
 		$content			.= "<h3>$jobname Process Automatically Executed</h3>";
 		$userName			= "CRON";
-
+/*
 		$dst				= date('I');
 		if ($dst == 1) {
 			$checkBegin 	= strtotime('13:50:00');
@@ -509,24 +510,31 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 													'testMode'=>$testMode,
 													'doDebug'=>FALSE));
 		}
+*/
+		$runTheJob				= allow_job_to_run($doDebug);
 	}
+
+	
+	
 	if ($runTheJob) {
 		if ($testMode) {
-			$studentTableName		= 'wpw1_cwa_consolidated_student2';
-			$advisorTableName		= 'wpw1_cwa_consolidated_advisor2';
-			$advisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass2';
+			$studentTableName		= 'wpw1_cwa_student2';
+			$advisorTableName		= 'wpw1_cwa_advisor2';
+			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
 			$audioAssessmentTableName = 'wpw1_cwa_audio_assessment2';
 			$replacementRequests	= 'wpw1_cwa_replacement_requests2';
+			$userMasterTableName	= 'wpw1_cwa_user_master2';
 			$content .= "<p><strong>Function is under development.</strong></p>";
 			$xmode					= 'tm';
 			$inp_mode				= 'TESTMODE';
 			$catalogMode			= 'TestMode';
 		} else {
-			$studentTableName	 	= 'wpw1_cwa_consolidated_student';
-			$advisorTableName		= 'wpw1_cwa_consolidated_advisor';
-			$advisorClassTableName	= 'wpw1_cwa_consolidated_advisorclass';
+			$studentTableName	 	= 'wpw1_cwa_student';
+			$advisorTableName		= 'wpw1_cwa_advisor';
+			$advisorClassTableName	= 'wpw1_cwa_advisorclass';
 			$audioAssessmentTableName = 'wpw1_cwa_audio_assessment';
 			$replacementRequests	= 'wpw1_cwa_replacement_requests';
+			$userMasterTableName	= 'wpw1_cwa_user_master';
 			$xmode					= 'pd';
 			$inp_mode				= 'Production';
 			$catalogMode			= 'Production';
@@ -591,6 +599,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 			////// replaceArray[level][priority-reqdate] = student call sign|first choice UTC|second choice UTC|thirdChoice UTC|excluded advisor
 		
 			$sql				= "select * from $studentTableName 
+									left join $userMasterTableName on user_call_sign = student_call_sign 
 								   where semester='$theSemester' 
 								   	and response='Y' 
 								   	and student_status='' 
@@ -598,90 +607,112 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 								   order by level, call_sign";
 			$wpw1_cwa_student		= $wpdb->get_results($sql);
 			if ($wpw1_cwa_student === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebugLog) {
-					$debugLog .= "Reading $studentTableName table failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "Daily Student Cron (A) reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>r";
-				sendErrorEmail($errorMsg);
+				handleWPDBError($jobname,$doDebug);
 			} else {
 				$numSRows			= $wpdb->num_rows;
 				if ($doDebugLog) {
-					$myStr			= $wpdb->last_query;
-					$debugLog .= "ran $myStr<br />and found $numSRows rows<br />";
+					$debugLog .= "ran $sql<br />and found $numSRows rows<br />";
 				}
 				if ($numSRows > 0) {
 					foreach ($wpw1_cwa_student as $studentRow) {
+						$student_master_ID 					= $studentRow->user_ID;
+						$student_master_call_sign 			= $studentRow->user_call_sign;
+						$student_first_name 				= $studentRow->user_first_name;
+						$student_last_name 					= $studentRow->user_last_name;
+						$student_email 						= $studentRow->user_email;
+						$student_phone 						= $studentRow->user_phone;
+						$student_city 						= $studentRow->user_city;
+						$student_state 						= $studentRow->user_state;
+						$student_zip_code 					= $studentRow->user_zip_code;
+						$student_country_code 				= $studentRow->user_country_code;
+						$student_whatsapp 					= $studentRow->user_whatsapp;
+						$student_telegram 					= $studentRow->user_telegram;
+						$student_signal 					= $studentRow->user_signal;
+						$student_messenger 					= $studentRow->user_messenger;
+						$student_master_action_log 			= $studentRow->user_action_log;
+						$student_timezone_id 				= $studentRow->user_timezone_id;
+						$student_languages 					= $studentRow->user_languages;
+						$student_survey_score 				= $studentRow->user_survey_score;
+						$student_is_admin					= $studentRow->user_is_admin;
+						$student_role 						= $studentRow->user_role;
+						$student_master_date_created 		= $studentRow->user_date_created;
+						$student_master_date_updated 		= $studentRow->user_date_updated;
+	
 						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= strtoupper($studentRow->call_sign);
-						$student_first_name						= $studentRow->first_name;
-						$student_last_name						= stripslashes($studentRow->last_name);
-						$student_email  						= strtolower(strtolower($studentRow->email));
-						$student_phone  						= $studentRow->phone;
-						$student_ph_code						= $studentRow->ph_code;
-						$student_city  							= $studentRow->city;
-						$student_state  						= $studentRow->state;
-						$student_zip_code  						= $studentRow->zip_code;
-						$student_country  						= $studentRow->country;
-						$student_country_code					= $studentRow->country_code;
-						$student_time_zone  					= $studentRow->time_zone;
-						$student_timezone_id					= $studentRow->timezone_id;
-						$student_timezone_offset				= $studentRow->timezone_offset;
-						$student_whatsapp						= $studentRow->whatsapp_app;
-						$student_signal							= $studentRow->signal_app;
-						$student_telegram						= $studentRow->telegram_app;
-						$student_messenger						= $studentRow->messenger_app;					
-						$student_wpm 	 						= $studentRow->wpm;
-						$student_youth  						= $studentRow->youth;
-						$student_age  							= $studentRow->age;
-						$student_student_parent 				= $studentRow->student_parent;
-						$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-						$student_level  						= trim($studentRow->level);
-						$student_waiting_list 					= $studentRow->waiting_list;
-						$student_request_date  					= $studentRow->request_date;
-						$student_semester						= $studentRow->semester;
-						$student_notes  						= $studentRow->notes;
-						$student_welcome_date  					= $studentRow->welcome_date;
-						$student_email_sent_date  				= $studentRow->email_sent_date;
-						$student_email_number  					= $studentRow->email_number;
-						$student_response  						= strtoupper($studentRow->response);
-						$student_response_date  				= $studentRow->response_date;
-						$student_abandoned  					= $studentRow->abandoned;
-						$student_student_status  				= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->action_log;
-						$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->selected_date;
-						$student_no_catalog			 			= $studentRow->no_catalog;
-						$student_hold_override  				= $studentRow->hold_override;
-						$student_messaging  					= $studentRow->messaging;
-						$student_assigned_advisor  				= $studentRow->assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->hold_reason_code;
-						$student_class_priority  				= $studentRow->class_priority;
-						$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-						$student_promotable  					= $studentRow->promotable;
-						$student_excluded_advisor  				= $studentRow->excluded_advisor;
-						$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->available_class_days;
-						$student_intervention_required  		= $studentRow->intervention_required;
-						$student_copy_control  					= $studentRow->copy_control;
-						$student_first_class_choice  			= $studentRow->first_class_choice;
-						$student_second_class_choice  			= $studentRow->second_class_choice;
-						$student_third_class_choice  			= $studentRow->third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-						$student_catalog_options				= $studentRow->catalog_options;
-						$student_flexible						= $studentRow->flexible;
-						$student_date_created 					= $studentRow->date_created;
-						$student_date_updated			  		= $studentRow->date_updated;
-
+						$student_call_sign						= $studentRow->student_call_sign;
+						$student_time_zone  					= $studentRow->student_time_zone;
+						$student_timezone_offset				= $studentRow->student_timezone_offset;
+						$student_youth  						= $studentRow->student_youth;
+						$student_age  							= $studentRow->student_age;
+						$student_parent 				= $studentRow->student_parent;
+						$student_parent_email  					= strtolower($studentRow->student_parent_email);
+						$student_level  						= $studentRow->student_level;
+						$student_waiting_list 					= $studentRow->student_waiting_list;
+						$student_request_date  					= $studentRow->student_request_date;
+						$student_semester						= $studentRow->student_semester;
+						$student_notes  						= $studentRow->student_notes;
+						$student_welcome_date  					= $studentRow->student_welcome_date;
+						$student_email_sent_date  				= $studentRow->student_email_sent_date;
+						$student_email_number  					= $studentRow->student_email_number;
+						$student_response  						= strtoupper($studentRow->student_response);
+						$student_response_date  				= $studentRow->student_response_date;
+						$student_abandoned  					= $studentRow->student_abandoned;
+						$student_status  						= strtoupper($studentRow->student_status);
+						$student_action_log  					= $studentRow->student_action_log;
+						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+						$student_selected_date  				= $studentRow->student_selected_date;
+						$student_no_catalog  					= $studentRow->student_no_catalog;
+						$student_hold_override  				= $studentRow->student_hold_override;
+						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+						$student_class_priority  				= $studentRow->student_class_priority;
+						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+						$student_promotable  					= $studentRow->student_promotable;
+						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+						$student_available_class_days  			= $studentRow->student_available_class_days;
+						$student_intervention_required  		= $studentRow->student_intervention_required;
+						$student_copy_control  					= $studentRow->student_copy_control;
+						$student_first_class_choice  			= $studentRow->student_first_class_choice;
+						$student_second_class_choice  			= $studentRow->student_second_class_choice;
+						$student_third_class_choice  			= $studentRow->student_third_class_choice;
+						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+						$student_catalog_options				= $studentRow->student_catalog_options;
+						$student_flexible						= $studentRow->student_flexible;
+						$student_date_created 					= $studentRow->student_date_created;
+						$student_date_updated			  		= $studentRow->student_date_updated;
+	
+						// if you need the country name and phone code, include the following
+						$countrySQL		= "select * from wpw1_cwa_country_codes  
+											where country_code = '$student_country_code'";
+						$countrySQLResult	= $wpdb->get_results($countrySQL);
+						if ($countrySQLResult === FALSE) {
+							handleWPDBError($jobname,$doDebug);
+							$student_country		= "UNKNOWN";
+							$student_ph_code		= "";
+						} else {
+							$numCRows		= $wpdb->num_rows;
+							if ($doDebug) {
+								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+							}
+							if($numCRows > 0) {
+								foreach($countrySQLResult as $countryRow) {
+									$student_country		= $countryRow->country_name;
+									$student_ph_code		= $countryRow->ph_code;
+								}
+							} else {
+								$student_country			= "Unknown";
+								$student_ph_code			= "";
+							}
+						}
+								
 						$student_last_name 						= no_magic_quotes($student_last_name);
-
+						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
+	
 						if ($student_first_class_choice == '') {
 							$student_first_class_choice			= 'None';
 							$student_first_class_choice_utc		= 'None';
@@ -694,8 +725,8 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 							$student_third_class_choice			= 'None';
 							$student_third_class_choice_utc		= 'None';
 						}
-
-
+	
+	
 						if ($doDebugLog) {
 							$debugLog .= "<br />Processing $student_call_sign. Data read:<br />
 								  &nbsp;&nbsp;&nbsp;&nbsp;First class choice: $student_first_class_choice<br />
@@ -720,7 +751,6 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 								$debugLog .= "&nbsp;&nbsp;&nbsp;&nbsp;student is on hold<br />";
 							}
 							$noGo					= TRUE;
-//							$content				.= "Student $student_call_sign is on hold<br />";
 						}
 						if ($student_first_class_choice == '' || $student_first_class_choice == 'None') {
 							if ($doDebugLog) {
@@ -734,7 +764,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 							}
 							$student_class_priority	= 4 - intval($student_class_priority);
 							$thisSequence		= $student_class_priority . $myInt;
-
+	
 							/// if UTC field is set, use it. Otherwise calculate it
 							if ($student_first_class_choice_utc != '' || $student_first_class_choice != 'None') {
 								if ($doDebugLog) {
@@ -847,7 +877,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 							}
 						}
 					}			///// end of the student while
-			
+				
 					sort($replaceArrayBeginner);
 					sort($replaceArrayFundamental);
 					sort($replaceArrayIntermediate);
@@ -905,16 +935,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 							order by date_created ";
 			$wpw1_cwa_replacement_requests		= $wpdb->get_results($sql);
 			if ($wpw1_cwa_replacement_requests === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebugLog) {
-					$debugLog .= "Reading $replacementRequests table failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "$jobname reading $replacementRequests failed.\nSQL: $myQuery\nError: $myError";
-				sendErrorEmail($errorMsg);
-				$content		.= "Unable to obtain content from $replacementRequests<br />";
+				handleWPDBError($jobname,$doDebug);
 			} else {
 				$numBARows			= $wpdb->num_rows;
 				if ($doDebugLog) {
@@ -941,30 +962,26 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 						}
 
 						// get the advisor class schedule
-						$sql				= "select advisorclass_id, 
-													  advisor_call_sign, 
-													  advisor_first_name, 
-													  advisor_last_name, 
-													  sequence, 
-													  class_schedule_days, 
-													  class_schedule_times, 
-													  class_schedule_days_utc, 
-													  class_schedule_times_utc 
-												from $advisorClassTableName 
-												where semester = '$theSemester' 
-												and advisor_call_sign = '$replacement_call_sign' 
-												and sequence = $replacement_class ";
+						$sql			=  "select 
+												a.advisorclass_id, 
+												a.advisorclass_call_sign, 
+												a.advisorclass_sequence, 
+												a.advisorclass_class_schedule_days, 
+												a.advisorclass_class_schedule_times, 
+												a.advisorclass_class_schedule_days_utc, 
+												a.advisorclass_class_schedule_times_utc, 
+												b.user_first_name, 
+												b.user_last_name,
+												b.user_email  
+											from $advisorClassTableName as a 
+											left join $userMasterTableName as b 
+											on a.advisor_call_sign = b.call_sign 
+											where a.advisorclass_call_sign = '$replacement_call_sign' 
+											and a.advisorclass_sequence = $replacement_class";
+
 						$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
 						if ($wpw1_cwa_advisorclass === FALSE) {
-							$myError			= $wpdb->last_error;
-							$myQuery			= $wpdb->last_query;
-							if ($doDebugLog) {
-								$debugLog .= "Reading $advisorClassTableName table failed<br />
-									  wpdb->last_query: $myQuery<br />
-									  wpdb->last_error: $myError<br />";
-							}
-							$errorMsg			= "$jobname Reading $advisorClassTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-							sendErrorEmail($errorMsg);
+							handleWPDBError($jobname,$doDebug);
 						} else {
 							$numACRows						= $wpdb->num_rows;
 							if ($doDebugLog) {
@@ -974,185 +991,168 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 							if ($numACRows > 0) {
 								foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
 									$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-									$advisorClass_advisor_call_sign 		= $advisorClassRow->advisor_call_sign;
-									$advisorClass_advisor_first_name 		= $advisorClassRow->advisor_first_name;
-									$advisorClass_advisor_last_name 		= stripslashes($advisorClassRow->advisor_last_name);
-									$advisorClass_sequence					= $advisorClassRow->sequence;
-									$advisorClass_class_schedule_days 		= $advisorClassRow->class_schedule_days;
-									$advisorClass_class_schedule_times 		= $advisorClassRow->class_schedule_times;
-									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->class_schedule_days_utc;
-									$advisorClass_class_schedule_times_utc 	= $advisorClassRow->class_schedule_times_utc;
+									$advisorClass_advisor_call_sign 		= $advisorClassRow->advisorclass_call_sign;
+									$advisorClass_advisor_first_name 		= $advisorClassRow->user_first_name;
+									$advisorClass_advisor_last_name 		= $advisorClassRow->user_last_name;
+									$advisorEmail							= $advisorClassRow->user_email;
+									$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
+									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+									$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
 
 									if ($doDebugLog) {
 										$debugLog .= "got the advisor class schedule<br />";
 									}
 
-									// now get the advisor email address
-									$advisorEmail		= $wpdb->get_var("select email from $advisorTableName where call_sign='$replacement_call_sign' and semester='$theSemester'");
-									if ($advisorEmail === NULL) {
-										$myQuery		= $wpdb->last_query;
-										$myError		= $wpdb->last_error;
-										if ($doDebugLog) {
-											$debugLog .= "attempting to get the email address for $replacement_call_sign failed<br />
-													SQL: $myQuery<br />
-													Error: $myError<br />";
-										}
-										sendErrorEmail("$jobname replacement attempting to get the email address for $replacement_call_sign failed. SQL: $myQuery. Error: $myError<br />");
-										$content		.= "ERROR: Unable to obtain email address for $replacement_call_sign<br />";
-									} else {
-										if ($doDebugLog) {
-											$debugLog .= "got email of $advisorEmail for $replacement_call_sign<br />";
-										}
+									// now look for a potential replacement student
+									$searchTime = intval($advisorClass_class_schedule_times_utc);
+									$searchDays = $advisorClass_class_schedule_days_utc;
+									if ($doDebugLog) {
+										$debugLog .= "&nbsp;&nbsp;&nbsp;&nbsp;Looking for a replacement level $replacement_level $searchTime $searchDays<br />";
+									}
+									$callSign1	= '';
+									$sequence1	= '';
+									$callSign2	= '';
+									$sequence2	= '';
+									$callSign3	= '';
+									$sequence3	= '';
 
-										// now look for a potential replacement student
-										$searchTime = intval($advisorClass_class_schedule_times_utc);
-										$searchDays = $advisorClass_class_schedule_days_utc;
+									foreach(${'replaceArray' . $replacement_level} as $myKey=>$myValue) {
 										if ($doDebugLog) {
-											$debugLog .= "&nbsp;&nbsp;&nbsp;&nbsp;Looking for a replacement level $replacement_level $searchTime $searchDays<br />";
+											$debugLog .= "<br />Checking possible replacement: $myValue<br />";
 										}
-										$callSign1	= '';
-										$sequence1	= '';
-										$callSign2	= '';
-										$sequence2	= '';
-										$callSign3	= '';
-										$sequence3	= '';
-
-										foreach(${'replaceArray' . $replacement_level} as $myKey=>$myValue) {
-											if ($doDebugLog) {
-												$debugLog .= "<br />Checking possible replacement: $myValue<br />";
-											}
-											$myArray = explode("|",$myValue);
-											$thisSequence		= $myArray[0];
-											$thisCallSign 		= $myArray[1];
-											$firstTime 			= $myArray[2];
-											$firstDays 			= $myArray[3];
-											$secondTime 		= $myArray[4];
-											$secondDays 		= $myArray[5];
-											$thirdTime 			= $myArray[6];
-											$thirdDays 			= $myArray[7];
-											$excludedAdvisor	= $myArray[8];
-				
-											$myInt				= strpos($excludedAdvisor,$advisorClass_advisor_call_sign);
-											if ($myInt === FALSE) {
-												if ($searchDays == $firstDays) {
-													if ($doDebugLog) {
-														$debugLog .= "first choice match on $searchDays. Checking poss replacement first choice $firstTime<br />";
-													}
-													if ($callSign1 == '') {		// don't continue if have a match
-														$searchBegin = intval($firstTime) - 300;
-														$searchEnd = intval($firstTime) + 300;
-														if ($searchBegin < 0) {
-															$searchBegin	= 0;
-														}
-														if ($searchEnd > 2400) {
-															$searchEnd		= 2400;
-														}
-														if ($doDebugLog) {
-															$debugLog .= "testing firstTime: $firstTime. Looking for student between $searchBegin and $searchEnd<br />";
-														}
-														if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-															$callSign1 = $thisCallSign;
-															$sequence1 = $myKey;
-															if ($doDebugLog) {
-																$debugLog .= "1: Found $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />
-																				  Set callSign1 to $thisCallSign and sequence1 to $myKey<br />";
-															}
-														} else {
-															if ($doDebugLog) {
-																$debugLog .= "1: No go $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />";
-															}
-														}
-													}
-												} else {
-													if ($doDebugLog) {
-														$debugLog .= "Searching first choice days did not match<br />";
-													}
-					
+										$myArray = explode("|",$myValue);
+										$thisSequence		= $myArray[0];
+										$thisCallSign 		= $myArray[1];
+										$firstTime 			= $myArray[2];
+										$firstDays 			= $myArray[3];
+										$secondTime 		= $myArray[4];
+										$secondDays 		= $myArray[5];
+										$thirdTime 			= $myArray[6];
+										$thirdDays 			= $myArray[7];
+										$excludedAdvisor	= $myArray[8];
+			
+										$myInt				= strpos($excludedAdvisor,$advisorClass_advisor_call_sign);
+										if ($myInt === FALSE) {
+											if ($searchDays == $firstDays) {
+												if ($doDebugLog) {
+													$debugLog .= "first choice match on $searchDays. Checking poss replacement first choice $firstTime<br />";
 												}
-												if ($searchDays == $secondDays) {
-													if ($doDebugLog) {
-														$debugLog .= "second choice match on searchDays. Doing second choice $secondTime<br />";
+												if ($callSign1 == '') {		// don't continue if have a match
+													$searchBegin = intval($firstTime) - 300;
+													$searchEnd = intval($firstTime) + 300;
+													if ($searchBegin < 0) {
+														$searchBegin	= 0;
 													}
-													if ($callSign2 == '') {
-														$searchBegin 	= intval($secondTime) - 300;
-														$searchEnd 		= intval($secondTime) + 300;
-														if ($searchBegin < 0) {
-															$searchBegin	= 0;
-														}
-														if ($searchEnd > 2400) {
-															$searchEnd		= 2400;
-														}
+													if ($searchEnd > 2400) {
+														$searchEnd		= 2400;
+													}
+													if ($doDebugLog) {
+														$debugLog .= "testing firstTime: $firstTime. Looking for student between $searchBegin and $searchEnd<br />";
+													}
+													if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+														$callSign1 = $thisCallSign;
+														$sequence1 = $myKey;
 														if ($doDebugLog) {
-															$debugLog .= "testing secondTime: $secondTime. Looking for student between $searchBegin and $searchEnd<br />";
-														}
-														if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-															$callSign2 = $thisCallSign;
-															$sequence2 = $myKey;
-															if ($doDebugLog) {
-																$debugLog .= "2: Found $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />
-																Set callSign2 to $thisCallSign and sequence2 to $myKey<br />";
-															}
-														} else {
-															if ($doDebugLog) {
-																$debugLog .= "2: No go $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />";
-															}
+															$debugLog .= "1: Found $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />
+																			  Set callSign1 to $thisCallSign and sequence1 to $myKey<br />";
 														}
 													} else {
 														if ($doDebugLog) {
-															$debugLog .= "searching second choice days did not match<br />";
+															$debugLog .= "1: No go $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />";
 														}
-													}
-												} else {
-													if ($doDebugLog) {
-														$debugLog .= "searching second choice days didn't match<br />";
-													}
-												}
-												if ($searchDays == $thirdDays) {
-													if ($doDebugLog) {
-														$debugLog .= "third choice match on searchDays. Doing third choice $thirdTime<br />";
-													}
-													if ($callSign3 == '') {
-														$searchBegin 	= intval($thirdTime) - 300;
-														$searchEnd 		= intval($thirdTime) + 300;
-														$searchEnd = $searchBegin + 300;
-														if ($searchBegin < 0) {
-															$searchBegin	= 0;
-														}
-														if ($searchEnd > 2400) {
-															$searchEnd		= 2400;
-														}
-														if ($doDebugLog) {
-															$debugLog .= "testing thirdTime: $thirdTime. Looking for student between $searchBegin and $searchEnd<br />";
-														}
-														if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-															$callSign3 = $thisCallSign;
-															$sequence3 = $myKey;
-															if ($doDebugLog) {
-																$debugLog .= "3: Found $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />
-																				  Set callSign3 to $thisCallSign and sequence3 to $myKey<br />";
-															}
-														} else {
-															if ($doDebugLog) {
-																$debugLog .= "3: No go $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />";
-															}
-														}
-													}	
-												} else {
-													if ($doDebugLog) {
-														$debugLog .= "searching third choice days did not match<br />";
 													}
 												}
 											} else {
 												if ($doDebugLog) {
-													$debugLog .= "possible advisor is excluded: $excludedAdvisor<br />";
+													$debugLog .= "Searching first choice days did not match<br />";
 												}
-											} 
-										}
-										if ($doDebugLog) {
-											$debugLog .= "CallSign1: $callSign1<br />
-												  CallSign2: $callSign2<br />
-												  CallSign3: $callSign3<br />";
-										}
+				
+											}
+											if ($searchDays == $secondDays) {
+												if ($doDebugLog) {
+													$debugLog .= "second choice match on searchDays. Doing second choice $secondTime<br />";
+												}
+												if ($callSign2 == '') {
+													$searchBegin 	= intval($secondTime) - 300;
+													$searchEnd 		= intval($secondTime) + 300;
+													if ($searchBegin < 0) {
+														$searchBegin	= 0;
+													}
+													if ($searchEnd > 2400) {
+														$searchEnd		= 2400;
+													}
+													if ($doDebugLog) {
+														$debugLog .= "testing secondTime: $secondTime. Looking for student between $searchBegin and $searchEnd<br />";
+													}
+													if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+														$callSign2 = $thisCallSign;
+														$sequence2 = $myKey;
+														if ($doDebugLog) {
+															$debugLog .= "2: Found $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />
+															Set callSign2 to $thisCallSign and sequence2 to $myKey<br />";
+														}
+													} else {
+														if ($doDebugLog) {
+															$debugLog .= "2: No go $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />";
+														}
+													}
+												} else {
+													if ($doDebugLog) {
+														$debugLog .= "searching second choice days did not match<br />";
+													}
+												}
+											} else {
+												if ($doDebugLog) {
+													$debugLog .= "searching second choice days didn't match<br />";
+												}
+											}
+											if ($searchDays == $thirdDays) {
+												if ($doDebugLog) {
+													$debugLog .= "third choice match on searchDays. Doing third choice $thirdTime<br />";
+												}
+												if ($callSign3 == '') {
+													$searchBegin 	= intval($thirdTime) - 300;
+													$searchEnd 		= intval($thirdTime) + 300;
+													$searchEnd = $searchBegin + 300;
+													if ($searchBegin < 0) {
+														$searchBegin	= 0;
+													}
+													if ($searchEnd > 2400) {
+														$searchEnd		= 2400;
+													}
+													if ($doDebugLog) {
+														$debugLog .= "testing thirdTime: $thirdTime. Looking for student between $searchBegin and $searchEnd<br />";
+													}
+													if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+														$callSign3 = $thisCallSign;
+														$sequence3 = $myKey;
+														if ($doDebugLog) {
+															$debugLog .= "3: Found $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />
+																			  Set callSign3 to $thisCallSign and sequence3 to $myKey<br />";
+														}
+													} else {
+														if ($doDebugLog) {
+															$debugLog .= "3: No go $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />";
+														}
+													}
+												}	
+											} else {
+												if ($doDebugLog) {
+													$debugLog .= "searching third choice days did not match<br />";
+												}
+											}
+										} else {
+											if ($doDebugLog) {
+												$debugLog .= "possible advisor is excluded: $excludedAdvisor<br />";
+											}
+										} 
+									}
+									if ($doDebugLog) {
+										$debugLog .= "CallSign1: $callSign1<br />
+											  CallSign2: $callSign2<br />
+											  CallSign3: $callSign3<br />";
 									}
 									$gotAReplacement			= FALSE;
 									if ($callSign1 != '') {
@@ -1184,223 +1184,223 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 										}
 										///// get the replacement student record
 										$sql						= "select * from $studentTableName 
-																		where semester='$theSemester' 
-																		and call_sign='$replaceCallSign'";
+																		left join $userMasterTableName on user_call_sign = student_call_sign 
+																		where student_semester='$theSemester' 
+																		and student_call_sign='$replaceCallSign'";
 										$wpw1_cwa_replace				= $wpdb->get_results($sql);
 										if ($wpw1_cwa_replace === FALSE) {
-											$myError			= $wpdb->last_error;
-											$myQuery			= $wpdb->last_query;
-											if ($doDebugLog) {
-												$debugLog .= "Reading $studentTableName table failed<br />
-													  wpdb->last_query: $myQuery<br />
-													  wpdb->last_error: $myError<br />";
-											}
-											$errorMsg			= "Daily Student Cron (D) reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-											sendErrorEmail($errorMsg);
+											handleWPDBError($jobname,$doDebug);
 										} else {
 											$numRRows				= $wpdb->num_rows;
 											if ($doDebugLog) {
-												$myStr			= $wpdb->last_query;
-												$debugLog .= "ran $myStr<br />and retrieved $numRRows rows from $studentTableName table<br />";
+												$debugLog .= "ran $sql<br />and retrieved $numRRows rows from $studentTableName table<br />";
 											}
 											if ($numRRows > 0) {
 												if ($doDebugLog) {
-													$myStr			= $wpdb->last_query;
-													$debugLog .= "ran $myStr<br />and found $numRRows rows in $studentTableName<br />";
+													$debugLog .= "ran $sql<br />and found $numRRows rows in $studentTableName<br />";
 												}
 												foreach ($wpw1_cwa_replace as $replaceRow) {
-													$replace_ID								= $replaceRow->student_id;
-													$replace_call_sign						= strtoupper($replaceRow->call_sign);
-													$replace_first_name						= $replaceRow->first_name;
-													$replace_last_name						= $replaceRow->last_name;
-													$replace_email  						= $replaceRow->email;
-													$replace_phone  						= $replaceRow->phone;
-													$replace_city  							= $replaceRow->city;
-													$replace_state  						= $replaceRow->state;
-													$replace_zip_code  						= $replaceRow->zip_code;
-													$replace_country  						= $replaceRow->country;
-													$replace_time_zone  					= $replaceRow->time_zone;
-													$replace_wpm 	 						= $replaceRow->wpm;
-													$replace_youth  						= $replaceRow->youth;
-													$replace_age  							= $replaceRow->age;
-													$replace_student_parent 				= $replaceRow->student_parent;
-													$replace_student_parent_email  			= $replaceRow->student_parent_email;
-													$replace_level  						= $replaceRow->level;
-													$replace_waiting_list 					= $replaceRow->waiting_list;
-													$replace_request_date  					= $replaceRow->request_date;
-													$replace_semester						= $replaceRow->semester;
-													$replace_notes  						= $replaceRow->notes;
-													$replace_welcome_date  					= $replaceRow->welcome_date;
-													$replace_email_sent_date  				= $replaceRow->email_sent_date;
-													$replace_email_number  					= $replaceRow->email_number;
-													$replace_response  						= strtoupper($replaceRow->response);
-													$replace_response_date  				= $replaceRow->response_date;
-													$replace_abandoned  					= $replaceRow->abandoned;
-													$replace_student_status  				= strtoupper($replaceRow->student_status);
-													$replace_action_log  					= $replaceRow->action_log;
-													$replace_pre_assigned_advisor  			= $replaceRow->pre_assigned_advisor;
-													$replace_selected_date  				= $replaceRow->selected_date;
-													$replace_no_catalog			  			= $replaceRow->no_catalog;
-													$replace_hold_override  				= $replaceRow->hold_override;
-													$replace_messaging  					= $replaceRow->messaging;
-													$replace_assigned_advisor  				= $replaceRow->assigned_advisor;
-													$replace_advisor_select_date  			= $replaceRow->advisor_select_date;
-													$replace_advisor_class_timezone 		= $replaceRow->advisor_class_timezone;
-													$replace_hold_reason_code  				= $replaceRow->hold_reason_code;
-													$replace_class_priority  				= $replaceRow->class_priority;
-													$replace_assigned_advisor_class 		= $replaceRow->assigned_advisor_class;
-													$replace_promotable  					= $replaceRow->promotable;
-													$replace_excluded_advisor  				= $replaceRow->excluded_advisor;
-													$replace_student_survey_completion_date	= $replaceRow->student_survey_completion_date;
-													$replace_available_class_days  			= $replaceRow->available_class_days;
-													$replace_intervention_required  		= $replaceRow->intervention_required;
-													$replace_copy_control  					= $replaceRow->copy_control;
-													$replace_first_class_choice  			= $replaceRow->first_class_choice;
-													$replace_second_class_choice  			= $replaceRow->second_class_choice;
-													$replace_third_class_choice  			= $replaceRow->third_class_choice;
-													$replace_first_class_choice_utc  		= $replaceRow->first_class_choice_utc;
-													$replace_second_class_choice_utc  		= $replaceRow->second_class_choice_utc;
-													$replace_third_class_choice_utc  		= $replaceRow->third_class_choice_utc;
-													$replace_catalog_options				= $studentRow->catalog_options;
-													$replace_flexible						= $studentRow->flexible;
-													$replace_date_created 					= $replaceRow->date_created;
-													$replace_date_updated			  		= $replaceRow->date_updated;
+													$replace_master_ID 					= $studentRow->user_ID;
+													$replace_master_call_sign 			= $studentRow->user_call_sign;
+													$replace_first_name 				= $studentRow->user_first_name;
+													$replace_last_name 					= $studentRow->user_last_name;
+													$replace_email 						= $studentRow->user_email;
+													$replace_phone 						= $studentRow->user_phone;
+													$replace_city 						= $studentRow->user_city;
+													$replace_state 						= $studentRow->user_state;
+													$replace_zip_code 					= $studentRow->user_zip_code;
+													$replace_country_code 				= $studentRow->user_country_code;
+													$replace_whatsapp 					= $studentRow->user_whatsapp;
+													$replace_telegram 					= $studentRow->user_telegram;
+													$replace_signal 					= $studentRow->user_signal;
+													$replace_messenger 					= $studentRow->user_messenger;
+													$replace_master_action_log 			= $studentRow->user_action_log;
+													$replace_timezone_id 				= $studentRow->user_timezone_id;
+													$replace_languages 					= $studentRow->user_languages;
+													$replace_survey_score 				= $studentRow->user_survey_score;
+													$replace_is_admin					= $studentRow->user_is_admin;
+													$replace_role 						= $studentRow->user_role;
+													$replace_master_date_created 		= $studentRow->user_date_created;
+													$replace_master_date_updated 		= $studentRow->user_date_updated;
 
-													$replace_last_name						= no_magic_quotes($replace_last_name);
-												}
-												//// add student to the advisor's class
-												$inp_data			= array('inp_student'=>$replace_call_sign, 
-																			'inp_semester'=>$replace_semester, 
-																			'inp_assigned_advisor'=>$replacement_call_sign, 
-																			'inp_assigned_advisor_class'=>$replacement_class, 
-																			'inp_remove_status'=>'',
-																			'inp_arbitrarily_assigned'=>'',
-																			'inp_method'=>'add',
-																			'jobname'=>$jobname,
-																			'userName'=>$userName,
-																			'testMode'=>$testMode,
-																			'doDebug'=>$doDebug);
-			
-												$addResult			= add_remove_student($inp_data);
-												if ($addResult[0] === FALSE) {
-													$thisReason		= $addResult[1];
-													if ($doDebugLog) {
-														$debugLog .= "attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason<br />";
+													$replace_ID								= $studentRow->student_id;
+													$replace_call_sign						= $studentRow->student_call_sign;
+													$replace_time_zone  					= $studentRow->student_time_zone;
+													$replace_timezone_offset				= $studentRow->student_timezone_offset;
+													$replace_youth  						= $studentRow->student_youth;
+													$replace_age  							= $studentRow->student_age;
+													$replace_replace_parent 				= $studentRow->student_parent;
+													$replace_replace_parent_email  			= strtolower($studentRow->student_parent_email);
+													$replace_level  						= $studentRow->student_level;
+													$replace_waiting_list 					= $studentRow->student_waiting_list;
+													$replace_request_date  					= $studentRow->student_request_date;
+													$replace_semester						= $studentRow->student_semester;
+													$replace_notes  						= $studentRow->student_notes;
+													$replace_welcome_date  					= $studentRow->student_welcome_date;
+													$replace_email_sent_date  				= $studentRow->student_email_sent_date;
+													$replace_email_number  					= $studentRow->student_email_number;
+													$replace_response  						= strtoupper($studentRow->student_response);
+													$replace_response_date  				= $studentRow->student_response_date;
+													$replace_abandoned  					= $studentRow->student_abandoned;
+													$replace_replace_status  				= strtoupper($studentRow->student_status);
+													$replace_action_log  					= $studentRow->student_action_log;
+													$replace_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+													$replace_selected_date  				= $studentRow-student_>selected_date;
+													$replace_no_catalog  					= $studentRow-student_>no_catalog;
+													$replace_hold_override  				= $studentRow-student_>hold_override;
+													$replace_assigned_advisor  				= $studentRow->student_assigned_advisor;
+													$replace_advisor_select_date  			= $studentRow->student_advisor_select_date;
+													$replace_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+													$replace_hold_reason_code  				= $studentRow-student_>hold_reason_code;
+													$replace_class_priority  				= $studentRow->student_class_priority;
+													$replace_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+													$replace_promotable  					= $studentRow->student_promotable;
+													$replace_excluded_advisor  				= $studentRow->student_excluded_advisor;
+													$replace_replace_survey_completion_date	= $studentRow->student_survey_completion_date;
+													$replace_available_class_days  			= $studentRow->student_available_class_days;
+													$replace_intervention_required  		= $studentRow->student_intervention_required;
+													$replace_copy_control  					= $studentRow->student_copy_control;
+													$replace_first_class_choice  			= $studentRow->student_first_class_choice;
+													$replace_second_class_choice  			= $studentRow->student_second_class_choice;
+													$replace_third_class_choice  			= $studentRow->student_third_class_choice;
+													$replace_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+													$replace_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+													$replace_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+													$replace_catalog_options				= $studentRow->student_catalog_options;
+													$replace_flexible						= $studentRow->student_flexible;
+													$replace_date_created 					= $studentRow->student_date_created;
+													$replace_date_updated			  		= $studentRow->student_date_updated;
+								
+													//// add student to the advisor's class
+													$inp_data			= array('inp_student'=>$replace_call_sign, 
+																				'inp_semester'=>$replace_semester, 
+																				'inp_assigned_advisor'=>$replacement_call_sign, 
+																				'inp_assigned_advisor_class'=>$replacement_class, 
+																				'inp_remove_status'=>'',
+																				'inp_arbitrarily_assigned'=>'',
+																				'inp_method'=>'add',
+																				'jobname'=>$jobname,
+																				'userName'=>$userName,
+																				'testMode'=>$testMode,
+																				'doDebug'=>$doDebug);
+				
+													$addResult			= add_remove_student($inp_data);
+													if ($addResult[0] === FALSE) {
+														$thisReason		= $addResult[1];
+														if ($doDebugLog) {
+															$debugLog .= "attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason<br />";
+														}
+														sendErrorEmail("$jobname Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason");
+														$content		.= "Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason<br />";
+													} else {
+														$content	.= "&nbsp;&nbsp;&nbsp;REPLACE student <a href='$studentUpdateURL?request_type=callsign&request_info=$replacementStudent&inp_depth=one&doDebug=$dpDebug&testMode=$testMode&strpass=2' 
+																		target='_blank'>$replacement_student</a> was replaced by <a href='$studentUpdateURL?request_type=callsign&request_info=$replace_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																		target='_blank'>$replace_call_sign</a> in $advisorClass_advisor_call_sign $advisorClass_sequence class.<br />";
+														$studentReplaced	= TRUE;
+														if ($doDebugLog) {
+															$debugLog .= "&nbsp;&nbsp;&nbsp; student $replacement_student was replaced by $replace_call_sign<br />";
+														}
+														///// unset the replacement student in replaceArray
+														unset(${'replaceArray' . $replacement_level}[$replaceSequence]);
+														if ($doDebugLog) {
+															$debugLog .= "did unset replaceArray$replacement_level $replaceSequence|<br />";
+														}
 													}
-													sendErrorEmail("$jobname Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason");
-													$content		.= "Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason<br />";
-												} else {
-													$content	.= "&nbsp;&nbsp;&nbsp;REPLACE student <a href='$studentUpdateURL?request_type=callsign&request_info=$replacement_student&request_table=$studentTableName&strpass=2' target='_blank'>$replacement_student</a> was replaced by <a href='$studentUpdateURL?request_type=callsign&request_info=$replace_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$replace_call_sign</a> in $advisorClass_advisor_call_sign $advisorClass_sequence class.<br />";
-													$studentReplaced	= TRUE;
-													if ($doDebugLog) {
-														$debugLog .= "&nbsp;&nbsp;&nbsp; student $replacement_student was replaced by $replace_call_sign<br />";
+													//// format replacement email to advisor
+																			
+													///// send the email to the advisor
+													$theSubject			= "CW Academy Replacement Student Information for your Class";
+													if ($testMode) {
+														$theRecipient			= 'rolandksmith@gmail.com';
+														$theSubject				= "TESTMODE $theSubject";
+														$mailCode				= 2;
+													} else {
+														$theRecipient			= $advisorEmail;
+														$mailCode				= 14;
 													}
-													///// unset the replacement student in replaceArray
-													unset(${'replaceArray' . $replacement_level}[$replaceSequence]);
-													if ($doDebugLog) {
-														$debugLog .= "did unset replaceArray$replacement_level $replaceSequence|<br />";
+														
+													$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
+																				<p>You have requested a replacement student for 
+																				$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
+																				<p>A replacement student has been added to your class. Please login to 
+																				<a href='$siteURL/login'>CW Academy</a> and follow the directions there.
+																				<p>If you have questions or concerns, do not reply to this email as the address is not monitored. 
+																				Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
+																				<p>Thanks for your service as an advisor!<br />
+																				CW Academy</p>";
+													$mailResult				= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+																									'theSubject'=>$theSubject,
+																									'theContent'=>$thisContent,
+																									'jobname'=>$jobname,
+																									'mailCode'=>$mailCode,
+																									'testMode'=>$testMode,
+																									'doDebug'=>FALSE));
+													// $mailResult = TRUE;
+													if ($mailResult === TRUE) {
+														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to $theRecipient.<br />";
+														if ($doDebugLog) {
+															$debugLog .= "Replacement email sent to the advisor at $theRecipient<br />";
+														}
+														$studentEmailCount--;
+													} else {
+														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.</p><br />";
+														if ($doDebugLog) {
+															$debugLog .= "Replacement email FAILED to advisor at $theRecipient<br />";
+														}
 													}
-												}
-												//// format replacement email to advisor
-																		
-												///// send the email to the advisor
-												$theSubject			= "CW Academy Replacement Student Information for your Class";
-												if ($testMode) {
-													$theRecipient			= 'rolandksmith@gmail.com';
-													$theSubject				= "TESTMODE $theSubject";
-													$mailCode				= 2;
-												} else {
-													$theRecipient			= $advisorEmail;
-													$mailCode				= 14;
-												}
-													
-												$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
-																			<p>You have requested a replacement student for 
-																			$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
-																			<p>A replacement student has been added to your class. Please login to 
-																			<a href='$siteURL/login'>CW Academy</a>) and follow the directions there.
-																			<p>If you have questions or concerns, do not reply to this email as the address is not monitored. 
-																			Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
-																			<p>Thanks for your service as an advisor!<br />
-																			CW Academy</p>";
-												$mailResult				= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-																								'theSubject'=>$theSubject,
-																								'theContent'=>$thisContent,
-																								'jobname'=>$jobname,
-																								'mailCode'=>$mailCode,
-																								'testMode'=>$testMode,
-																								'doDebug'=>FALSE));
-												// $mailResult = TRUE;
-												if ($mailResult === TRUE) {
-													$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to $theRecipient.<br />";
+													// add the reminder to the reminders table
 													if ($doDebugLog) {
-														$debugLog .= "Replacement email sent to the advisor at $theRecipient<br />";
+														$debugLog .= "Adding reminder to reminders table<br />";
 													}
-													$studentEmailCount--;
-//													if ($doDebugLog) {
-//														$emailCountArray[]	= "email sent. Count now $studentEmailCount<br />";
-//													}
-												} else {
-													$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.</p><br />";
-													if ($doDebugLog) {
-														$debugLog .= "Replacement email FAILED to advisor at $theRecipient<br />";
-													}
-												}
-												// add the reminder to the reminders table
-												if ($doDebugLog) {
-													$debugLog .= "Adding reminder to reminders table<br />";
-												}
-												$myStr				= date('Y-m-d H:i:s');
-												$closeStr			= strtotime("+10 days");
-												$close_date			= date('Y-m-d H:i:s',$closeStr);
-												$token				= mt_rand();
-												$reminder_text		= "<b>Replacement Student:</b> Your class makeup has been revised and students need to be contacted 
+													$myStr				= date('Y-m-d H:i:s');
+													$closeStr			= strtotime("+10 days");
+													$close_date			= date('Y-m-d H:i:s',$closeStr);
+													$token				= mt_rand();
+													$reminder_text		= "<b>Replacement Student:</b> Your class makeup has been revised and students need to be contacted 
 and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_advisor_call_sign&token=$token'>Advisor Verification of Students</a> to complete that task.";
-												$inputParams		= array("effective_date|$myStr|s",
-																			"close_date|$close_date|s",
-																			"resolved_date||s",
-																			"send_reminder|N|s",
-																			"send_once|Y|s",
-																			"call_sign|$advisorClass_advisor_call_sign|s",
-																			"role||s",
-																			"email_text||s",
-																			"reminder_text|$reminder_text|s",
-																			"resolved|N|s",
-																			"token|$token|s");
-												$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
-												if ($insertResult[0] === FALSE) {
-													if ($doDebugLog) {
-														$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
+													$inputParams		= array("effective_date|$myStr|s",
+																				"close_date|$close_date|s",
+																				"resolved_date||s",
+																				"send_reminder|N|s",
+																				"send_once|Y|s",
+																				"call_sign|$advisorClass_advisor_call_sign|s",
+																				"role||s",
+																				"email_text||s",
+																				"reminder_text|$reminder_text|s",
+																				"resolved|N|s",
+																				"token|$token|s");
+													$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+													if ($insertResult[0] === FALSE) {
+														if ($doDebugLog) {
+															$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
+														}
+														$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+													} else {
+																			
+														/// mark the replacement request as fulfilled
+														$myStr 		= date("Y-m-d H:i:s");
+														$replResult		= $wpdb->update($replacementRequests,
+																						array('date_resolved'=>$myStr), 
+																						array('record_id'=>$replacement_id), 
+																						array('%s'), 
+																						array('%d'));
+														if ($replResult === FALSE) {
+															$myError			= $wpdb->last_error;
+															$myQuery			= $wpdb->last_query;
+															if ($doDebugLog) {
+																$debugLog .= "updating $replacementRequests table failed<br />
+																	  wpdb->last_query: $myQuery<br />
+																	  wpdb->last_error: $myError<br />";
+															}
+															$errorMsg			= "$jobname updating $replacementRequests failed.\nSQL: $myQuery\nError: $myError";
+															sendErrorEmail($errorMsg);
+															$content		.= "Unable to update $replacementRequests<br />";
+														} else {
+															$outstandingFulfilled++;
+																				
+															$replacedCount++;
+														}
 													}
-													$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-												} else {
-//													$content		.= "Reminder successfully added<br />";
-												}
-												
-																		
-												/// mark the replacement request as fulfilled
-												$myStr 		= date("Y-m-d H:i:s");
-												$replResult		= $wpdb->update($replacementRequests,
-																				array('date_resolved'=>$myStr), 
-																				array('record_id'=>$replacement_id), 
-																				array('%s'), 
-																				array('%d'));
-												if ($replResult === FALSE) {
-													$myError			= $wpdb->last_error;
-													$myQuery			= $wpdb->last_query;
-													if ($doDebugLog) {
-														$debugLog .= "updating $replacementRequests table failed<br />
-															  wpdb->last_query: $myQuery<br />
-															  wpdb->last_error: $myError<br />";
-													}
-													$errorMsg			= "$jobname updating $replacementRequests failed.\nSQL: $myQuery\nError: $myError";
-													sendErrorEmail($errorMsg);
-													$content		.= "Unable to update $replacementRequests<br />";
-												} else {
-//													$content		.= "Replacement completed,<br />";
-													$outstandingFulfilled++;
-																		
-													$replacedCount++;
 												}
 											} else {
 												if ($doDebugLog) {
@@ -1439,7 +1439,6 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 
 
 
-
 ////////////////	start student process
 
 
@@ -1456,98 +1455,118 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 		$close_date				= '';
 
 		$sql					= "select * from $studentTableName 
-									where (semester    = '$currentSemester' 
-									       or semester = '$nextSemester' 
-									       or semester = '$semesterTwo' 
-									       or semester = '$semesterThree' 
-									       or semester = '$semesterFour') 
-									order by call_sign";
-		$wpw1_cwa_student		= $wpdb->get_results($sql);
+									left join $userMasterTableName on user_call_sign = student_call_sign 
+									where (student_semester    = '$currentSemester' 
+									       or student_semester = '$nextSemester' 
+									       or student_semester = '$semesterTwo' 
+									       or student_semester = '$semesterThree' 
+									       or student_semester = '$semesterFour') 
+									order by student_call_sign";
+		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebugLog) {
-				$debugLog .= "Reading $studentTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "Daily Student Cron (B) reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>r";
-			sendErrorEmail($errorMsg);
+			handleWPDBError($jobname,$doDebug);
 		} else {
-			$numSRows			= $wpdb->num_rows;
+			$numSRows									= $wpdb->num_rows;
 			if ($doDebugLog) {
-				$myStr			= $wpdb->last_query;
-				$debugLog .= "ran $myStr<br />and found $numSRows rows<br />";
+				$debugLog	.= "ran $sql<br />retrieved $numSRows rows from $studentTableName table<br >";
 			}
-			$studentRecordsFound 	= $numSRows;
+			$studentRecordsFound		= $numSRows;
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
-					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= strtoupper($studentRow->call_sign);
-					$student_first_name						= $studentRow->first_name;
-					$student_last_name						= stripslashes($studentRow->last_name);
-					$student_email  						= strtolower(strtolower($studentRow->email));
-					$student_phone  						= $studentRow->phone;
-					$student_ph_code						= $studentRow->ph_code;
-					$student_city  							= $studentRow->city;
-					$student_state  						= $studentRow->state;
-					$student_zip_code  						= $studentRow->zip_code;
-					$student_country  						= $studentRow->country;
-					$student_country_code					= $studentRow->country_code;
-					$student_time_zone  					= $studentRow->time_zone;
-					$student_timezone_id					= $studentRow->timezone_id;
-					$student_timezone_offset				= $studentRow->timezone_offset;
-					$student_whatsapp						= $studentRow->whatsapp_app;
-					$student_signal							= $studentRow->signal_app;
-					$student_telegram						= $studentRow->telegram_app;
-					$student_messenger						= $studentRow->messenger_app;					
-					$student_wpm 	 						= $studentRow->wpm;
-					$student_youth  						= $studentRow->youth;
-					$student_age  							= $studentRow->age;
-					$student_student_parent 				= $studentRow->student_parent;
-					$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-					$student_level  						= trim($studentRow->level);
-					$student_waiting_list 					= $studentRow->waiting_list;
-					$student_request_date  					= $studentRow->request_date;
-					$student_semester						= $studentRow->semester;
-					$student_notes  						= $studentRow->notes;
-					$student_welcome_date  					= $studentRow->welcome_date;
-					$student_email_sent_date  				= $studentRow->email_sent_date;
-					$student_email_number  					= $studentRow->email_number;
-					$student_response  						= strtoupper($studentRow->response);
-					$student_response_date  				= $studentRow->response_date;
-					$student_abandoned  					= $studentRow->abandoned;
-					$student_student_status  				= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->action_log;
-					$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->selected_date;
-					$student_no_catalog			 			= $studentRow->no_catalog;
-					$student_hold_override  				= $studentRow->hold_override;
-					$student_messaging  					= $studentRow->messaging;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->hold_reason_code;
-					$student_class_priority  				= $studentRow->class_priority;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
-					$student_excluded_advisor  				= $studentRow->excluded_advisor;
-					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->available_class_days;
-					$student_intervention_required  		= $studentRow->intervention_required;
-					$student_copy_control  					= $studentRow->copy_control;
-					$student_first_class_choice  			= $studentRow->first_class_choice;
-					$student_second_class_choice  			= $studentRow->second_class_choice;
-					$student_third_class_choice  			= $studentRow->third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-					$student_catalog_options				= $studentRow->catalog_options;
-					$student_flexible						= $studentRow->flexible;
-					$student_date_created 					= $studentRow->date_created;
-					$student_date_updated			  		= $studentRow->date_updated;
+					$student_master_ID 					= $studentRow->user_ID;
+					$student_master_call_sign 			= $studentRow->user_call_sign;
+					$student_first_name 				= $studentRow->user_first_name;
+					$student_last_name 					= $studentRow->user_last_name;
+					$student_email 						= $studentRow->user_email;
+					$student_phone 						= $studentRow->user_phone;
+					$student_city 						= $studentRow->user_city;
+					$student_state 						= $studentRow->user_state;
+					$student_zip_code 					= $studentRow->user_zip_code;
+					$student_country_code 				= $studentRow->user_country_code;
+					$student_whatsapp 					= $studentRow->user_whatsapp;
+					$student_telegram 					= $studentRow->user_telegram;
+					$student_signal 					= $studentRow->user_signal;
+					$student_messenger 					= $studentRow->user_messenger;
+					$student_master_action_log 			= $studentRow->user_action_log;
+					$student_timezone_id 				= $studentRow->user_timezone_id;
+					$student_languages 					= $studentRow->user_languages;
+					$student_survey_score 				= $studentRow->user_survey_score;
+					$student_is_admin					= $studentRow->user_is_admin;
+					$student_role 						= $studentRow->user_role;
+					$student_master_date_created 		= $studentRow->user_date_created;
+					$student_master_date_updated 		= $studentRow->user_date_updated;
 
-					$student_last_name 						= no_magic_quotes($student_last_name);
+					$student_ID								= $studentRow->student_id;
+					$student_call_sign						= $studentRow->student_call_sign;
+					$student_time_zone  					= $studentRow->student_time_zone;
+					$student_timezone_offset				= $studentRow->student_timezone_offset;
+					$student_youth  						= $studentRow->student_youth;
+					$student_age  							= $studentRow->student_age;
+					$student_parent 				= $studentRow->student_parent;
+					$student_parent_email  					= strtolower($studentRow->student_parent_email);
+					$student_level  						= $studentRow->student_level;
+					$student_waiting_list 					= $studentRow->student_waiting_list;
+					$student_request_date  					= $studentRow->student_request_date;
+					$student_semester						= $studentRow->student_semester;
+					$student_notes  						= $studentRow->student_notes;
+					$student_welcome_date  					= $studentRow->student_welcome_date;
+					$student_email_sent_date  				= $studentRow->student_email_sent_date;
+					$student_email_number  					= $studentRow->student_email_number;
+					$student_response  						= strtoupper($studentRow->student_response);
+					$student_response_date  				= $studentRow->student_response_date;
+					$student_abandoned  					= $studentRow->student_abandoned;
+					$student_status  						= strtoupper($studentRow->student_status);
+					$student_action_log  					= $studentRow->student_action_log;
+					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+					$student_selected_date  				= $studentRow->student_selected_date;
+					$student_no_catalog  					= $studentRow->student_no_catalog;
+					$student_hold_override  				= $studentRow->student_hold_override;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+					$student_class_priority  				= $studentRow->student_class_priority;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
+					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_available_class_days  			= $studentRow->student_available_class_days;
+					$student_intervention_required  		= $studentRow->student_intervention_required;
+					$student_copy_control  					= $studentRow->student_copy_control;
+					$student_first_class_choice  			= $studentRow->student_first_class_choice;
+					$student_second_class_choice  			= $studentRow->student_second_class_choice;
+					$student_third_class_choice  			= $studentRow->student_third_class_choice;
+					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+					$student_catalog_options				= $studentRow->student_catalog_options;
+					$student_flexible						= $studentRow->student_flexible;
+					$student_date_created 					= $studentRow->student_date_created;
+					$student_date_updated			  		= $studentRow->student_date_updated;
+
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$student_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+						$student_country		= "UNKNOWN";
+						$student_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$student_country		= $countryRow->country_name;
+								$student_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$student_country			= "Unknown";
+							$student_ph_code			= "";
+						}
+					}
 
 					$debugLog .= "<br />Processing $student_call_sign<br />";
 					
@@ -1563,10 +1582,10 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 							if ($student_hold_reason_code == 'B') {
 								$debugLog .= "student is a bad actor and is on hold<br />";
 								$badActorCount++;
-								$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a>) is on hold as a bad actor<br />";
+								$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold as a bad actor<br />";
 							} else {
 								if ($student_hold_reason_code != 'X') {
-									$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a>) is on hold<br />";
+									$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold<br />";
 								}
 							}
 						} else {
@@ -1631,7 +1650,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										  &nbsp;&nbsp;&nbsp;Welcome Date: $student_welcome_date<br />
 										  &nbsp;&nbsp;&nbsp;Email Date: $student_email_sent_date<br />
 										  &nbsp;&nbsp;&nbsp;Email Number: $student_email_number<br />
-										  &nbsp;&nbsp;&nbsp;Student Status: $student_student_status<br />
+										  &nbsp;&nbsp;&nbsp;Student Status: $student_status<br />
 										  &nbsp;&nbsp;&nbsp;Assigned Advisor: $student_assigned_advisor<br />
 										  &nbsp;&nbsp;&nbsp;First Class Choice: $student_first_class_choice<br />
 										  &nbsp;&nbsp;&nbsp;Second Class Choice: $student_second_class_choice<br />
@@ -1673,7 +1692,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 											$utcTimes			= $result[1];
 											$utcDays			= $result[2];
 											$thisStr			= "$utcTimes $utcDays";
-											$updateData[]		= "first_class_choice_utc|$thisStr|s";
+											$updateData[]		= "student_first_class_choice_utc|$thisStr|s";
 											$doUpdateStudent		= TRUE;
 										}
 									}
@@ -1696,7 +1715,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 											$utcTimes			= $result[1];
 											$utcDays			= $result[2];
 											$thisStr			= "$utcTimes $utcDays";
-											$updateData[]		= "second_class_choice_utc|$thisStr|s";
+											$updateData[]		= "student_second_class_choice_utc|$thisStr|s";
 											$doUpdateStudent		= TRUE;
 										}
 									}
@@ -1719,7 +1738,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 											$utcTimes			= $result[1];
 											$utcDays			= $result[2];
 											$thisStr			= "$utcTimes $utcDays";
-											$updateData[]		= "third_class_choice_utc|$thisStr|s";
+											$updateData[]		= "student_third_class_choice_utc|$thisStr|s";
 											$doUpdateStudent		= TRUE;
 										}
 									}
@@ -1743,14 +1762,14 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 								}
 								if ($myWelcomeTest && $student_responseTest) {
 									if ($student_email == '') {
-										$content	.= "Email address for call sign <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> at id $student_ID missing. No welcome email sent.<br /><br />";
+										$content	.= "Email address for call sign <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> at id $student_ID missing. No welcome email sent.<br /><br />";
 										$myWelcomeTest = FALSE;
 										if ($doDebugLog) {
 											$debugLog .= "No email address. No welcome email will be sent<br />";
 										}
 									}
 									if (!in_array($student_level,$arrayLevels)) {
-										$content	.= "Level of $student_level for call sign <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> missing or invalid. No welcome email sent.<br /><br />";
+										$content	.= "Level of $student_level for call sign <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> missing or invalid. No welcome email sent.<br /><br />";
 										$myWelcomeTest	= FALSE;
 										if ($doDebugLog) {
 											$debugLog .= "No level for the student. No welcome email will be sent<br />";
@@ -1776,8 +1795,8 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										}
 										$token			= mt_rand();
 										$reminder_text	= "<b>Select Class Schedule Preferences:</b> You need to update your registration information and identify your class preferences.</p>
-<p>Click on <a href='$siteURL/cwa-student-registration/?token=$token'>Student Registration</a> 
-														 	and select option three.</p>";
+<p>Click on <a href='$siteURL/cwa-student-registration/?token=$token'>Student Signup</a> 
+															and select option three.</p>";
 										// add the reminder
 										$effective_date		= date('Y-m-d H:i:s');
 										$closeStr			= strtotime("+20 days");
@@ -1799,13 +1818,11 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 												$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
 											}
 											$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-										} else {
-//											$content		.= "Reminder successfully added<br />";
 										}
 
 
 
-										$updateData[]				= "welcome_date|$checkDate|s";
+										$updateData[]				= "student_welcome_date|$checkDate|s";
 										$student_welcome_date		= $checkDate;
 										$log_welcome_date			= $checkDate;
 										$update_action_log			.= "ABANDONED email sent to student ";
@@ -1914,7 +1931,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																<p>73,
 																<br />CW Academy</p>";
 										$update_action_log			.= "WELCOME Welcome email sent to student ";
-										$updateData[]				= "welcome_date|$checkDate|s";
+										$updateData[]				= "student_welcome_date|$checkDate|s";
 										$student_welcome_date		= $checkDate;
 										$log_welcome_date			= $checkDate;
 										$doUpdateStudent				= TRUE;
@@ -1922,10 +1939,10 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										/// if in the verification period (validEmailPeriod is Y), verify the student
 										if ($validEmailPeriod == 'Y' || $daysToSemester < 30) {
 											$update_action_log		.= "Student automaticially verified ";
-											$updateData[]			= "response|Y|s";
-											$updateData[]			= "response_date|$checkDate|s";
-											$updateData[]			= "email_sent_date|$checkDate|s";
-											$updateData[]			= "email_number|0|s";
+											$updateData[]			= "student_response|Y|s";
+											$updateData[]			= "student_response_date|$checkDate|s";
+											$updateData[]			= "student_email_sent_date|$checkDate|s";
+											$updateData[]			= "student_email_number|0|s";
 											$student_response		= 'Y';
 											$student_email_sent_date	= $checkDate;
 											$student_email_number	= 0;
@@ -1956,17 +1973,14 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																			  'increment'=>$increment,
 																			  'doDebug'=>$doDebug));
 									if ($mailResult === TRUE) {
-										$content 	.= "WELCOME An email was sent to <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) at email address $theRecipient<br />";
+										$content 	.= "WELCOME An email was sent to <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) at email address $theRecipient<br />";
 										if ($doDebugLog) {
 											$debugLog .= "Welcome email sent to $theRecipient<br />";
 										}
 										$studentEmailCount--;
-//										if ($doDebugLog) {
-//											$emailCountArray[]	= "email sent. Count now $studentEmailCount<br />";
-//										}
 										$welcomeCount++;
 									} else {
-										$content .= "The Welcome email send function failed. Student: <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a>; email: $theRecipient<br />";
+										$content .= "The Welcome email send function failed. Student: <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>; email: $theRecipient<br />";
 										if ($doDebugLog) {
 											$debugLog .= "The email send function failed<br />";
 										}
@@ -1976,12 +1990,13 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										$debugLog .= "&nbsp;&nbsp;&nbsp;No Welcome Email needed<br />";
 									}
 								}				/// go on to do the verification email	
+
 			
 
 
 //	Starting verification email process
 
-     								if ($doDebugLog) {
+								if ($doDebugLog) {
 									$debugLog .= "<br />Verification Process<br />";
 								}
 								if ($validEmailPeriod != "N") {
@@ -2004,14 +2019,14 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										$enstrNoVerify			= base64_encode($stringToPass);
 
 /*	Check the student class choices
-	If no class choices or none of the class choices matches an available class
-	set the classChoiceFail to true. The student, depending on other factors
-	should get a verification email
+If no class choices or none of the class choices matches an available class
+set the classChoiceFail to true. The student, depending on other factors
+should get a verification email
 
-	Three situations are being handled:
-	1.	Student has made class choices and at least one of the choices matches an available class
-	2.	Student has made class choices and none of choices match an available class
-	3.	Student class choices are empty
+Three situations are being handled:
+1.	Student has made class choices and at least one of the choices matches an available class
+2.	Student has made class choices and none of choices match an available class
+3.	Student class choices are empty
 */
 
 										if ($student_response == "Y" || $student_response == "R") {
@@ -2057,35 +2072,35 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 												}
 						
 /* 
-	At this point, student is to be processed
-	IF the _email_sent_date has not been sent
-		THEN start the verify process
-	else (verify email has been sent)
-		IF Email number > 0
-			THEN continue the verify process
+At this point, student is to be processed
+IF the _email_sent_date has not been sent
+	THEN start the verify process
+else (verify email has been sent)
+	IF Email number > 0
+		THEN continue the verify process
 */							
 												if ($processStudent) {
 													if ($doDebugLog) {
 														$debugLog .= "&nbsp;&nbsp;&nbsp;processStudent is true and email_number is $student_email_number<br />";
 													}
 /*
-	The prospective student qualifies for a verification email.
+The prospective student qualifies for a verification email.
 
-	When email_number is 0 or blank that means no initial confirmation email has been sent. 
-	Send the confirmation email. set the email_sent_date to today, set the email message 
-	subject, and set email_number to 1
+When email_number is 0 or blank that means no initial confirmation email has been sent. 
+Send the confirmation email. set the email_sent_date to today, set the email message 
+subject, and set email_number to 1
 
-	When email_number is 1 that means an initial confirmation email has been sent. If response is not 
-	Y nor R and three days (or more) have passed since the initial confirmation email has been sent then 
-	set the subject to Second Attempt, send the confirmation email again and set email_number to 2. 
+When email_number is 1 that means an initial confirmation email has been sent. If response is not 
+Y nor R and three days (or more) have passed since the initial confirmation email has been sent then 
+set the subject to Second Attempt, send the confirmation email again and set email_number to 2. 
 
-	When email_number is 2 that means an initial confirmation email and a followup email has been sent.
-	If response is not Y nor R, and six days have passed, set the subject to Third Attempt, 
-	send the confirmation email again and and set email_number to 3.
+When email_number is 2 that means an initial confirmation email and a followup email has been sent.
+If response is not Y nor R, and six days have passed, set the subject to Third Attempt, 
+send the confirmation email again and and set email_number to 3.
 
-	When email_number is 3 that means the initial email and two followups have been sent. 
-	If response is not Y nor R and ten days have passed, set up the No Response email,
-	set email_number to 4, and send the no Response email.
+When email_number is 3 that means the initial email and two followups have been sent. 
+If response is not Y nor R and ten days have passed, set up the No Response email,
+set email_number to 4, and send the no Response email.
 */ 	
 
 													$sendEmail 		= FALSE;
@@ -2101,7 +2116,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																if ($doDebugLog) {
 																	$debugLog .= "&nbsp;&nbsp;&nbsp;Request date is empty. Have set the request date to $todaysDate<br />";
 																}
-																$updateData[]				= "request_date|$todaysDate|s";
+																$updateData[]				= "student_request_date|$todaysDate|s";
 																$log_request_date			= $todaysDate;
 																$doUpdateStudent				= TRUE;
 																$studentNoRequestDate++;
@@ -2111,14 +2126,14 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																$debugLog .= "&nbsp;&nbsp;&nbsp;Send email and set email_sent_date to $todaysDate and email_number to 1<br />";
 															}
 															$update_action_log					.= "VERIFY Set email_number to 1 and sent verification email ";
-															$updateData[]						= "email_sent_date|$todaysDate|s";
-															$updateData[]						= "email_number|1|d";
+															$updateData[]						= "student_email_sent_date|$todaysDate|s";
+															$updateData[]						= "student_email_number|1|d";
 															$doUpdateStudent						= TRUE;
 															$log_email_sent_date				= $todaysDate;
 															$log_email_number					= '1';
 															$email1Sent++;
 															$studentsSentFirstEmail++;
-															$content							.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the first verification email.<br />";
+															$content							.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the first verification email.<br />";
 															$sendEmail							= TRUE;
 															$setReminder						= TRUE;
 															break;
@@ -2134,11 +2149,11 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																	$debugLog .= "VERIFY $student_call_sign send email and set email_number to 2<br />";
 																}
 																$update_action_log				.= "VERIFY Set email_number to 2 and sent verification email ";
-																$updateData[]					= "email_number|2|d";
+																$updateData[]					= "student_email_number|2|d";
 																$log_email_number				= '2';
 																$doUpdateStudent					= TRUE;
 																$email2Sent++;
-																$content						.= "VERIFY <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>Student $student_call_sign</a> ($student_level $student_semester) was sent the second verification email.<br />";
+																$content						.= "VERIFY <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>Student $student_call_sign</a> ($student_level $student_semester) was sent the second verification email.<br />";
 															} else {
 																// $content .= "&nbsp;&nbsp;&nbsp;Not enough time has passed between $student_email_sent_date and $todaysDate. No email sent<br />";
 																$notEnoughTime++;
@@ -2157,11 +2172,11 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																	$debugLog .= "$student_call_sign send email and set email_number to 3<br />";
 																}
 																$update_action_log				.= "VERIFY Set email_number to 3 and sent verification email ";
-																$updateData[]					= "email_number|3|d";
+																$updateData[]					= "student_email_number|3|d";
 																$log_email_number				= '3';
 																$doUpdateStudent					= TRUE;
 																$email3Sent++;
-																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the third verification email.<br />";
+																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the third verification email.<br />";
 															} else {
 																// $content 						.= "&nbsp;&nbsp;&nbsp;Not enough time has passed between $student_email_sent_date and $todaysDate. No email sent<br />";
 																$notEnoughTime++;
@@ -2193,18 +2208,15 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																$sendEmail						= TRUE;
 																$verifyCount++;
 																$studentEmailCount--;
-//																if ($doDebugLog) {
-//																	$emailCountArray[]	= "email sent. Count now $studentEmailCount<br />";
-//																}
 																if ($doDebugLog) {
 																	$debugLog .= "&nbsp;&nbsp;&nbsp;Final Notice email sent and set email_number to 4<br />";
 																}
 																$update_action_log				.= "VERIFY Set email_number to 4 and sent final notice email ";
-																$updateData[]					= "email_number|4|d";
+																$updateData[]					= "student_email_number|4|d";
 																$log_mail_number				= '4';
 																$doUpdateStudent					= TRUE;
 																$email4Sent++;
-																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the Final Notice email.<br />";
+																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the Final Notice email.<br />";
 															} else {					
 																$notEnoughTime++;
 															}
@@ -2346,9 +2358,6 @@ Update your information as needed and make your class preference choices.";
 																}
 																$verifyCount++;
 																$studentEmailCount--;
-	//															if ($doDebugLog) {
-	//																$emailCountArray[]	= "email sent. Count now $studentEmailCount<br />";
-	//															}
 																if ($addReminder && $setReminder) {
 																	$addReminder		= FALSE;
 																	$setReminder	 	= FALSE;
@@ -2374,9 +2383,7 @@ Update your information as needed and make your class preference choices.";
 																			$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
 																		}
 																		$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-																	} else {
-//																		$content		.= "Reminder successfully added<br />";
-															}
+																	}
 																}
 															} else {
 																$content .= "&nbsp;&nbsp;&nbsp;The verify mail send function failed. Student: $student_call_sign; email: $theRecipient<br />";
@@ -2387,8 +2394,6 @@ Update your information as needed and make your class preference choices.";
 																$debugLog .= "sendEmail is FALSE. No email to be sent<br />";
 															}
 														}
-													} else {				/// the opposite is not possible
-														
 													}
 												} else {
 													if ($doDebugLog) {
@@ -2417,7 +2422,7 @@ Update your information as needed and make your class preference choices.";
 									}
 								}				// Finished with the verification emails
 
-// End of the sent verification process
+// End of the verification process
 
 
 
@@ -2426,49 +2431,49 @@ Update your information as needed and make your class preference choices.";
 
 /*	The Replacement Process
 
-	Student status of R (replace the student) or V (replace the student and return to 
-		unassigned pool) triggers the replacement process
-	Do remove student
-		if the student status is R, set remove status to C
-		If the student status is V, set the remove status to blank
-		
-	Find a possible replacement student
-		The student level, the assigned advisor, and the assigned advisor class define the
-			class. Get the class record and the class time and days in UTC
-				Cycle through the replaceArray records using the level
-					if the class day matches first class choice days and the class 
-						times is within the students first class times, there is a match
-					if no match, check the 2nd class choice
-					if still no match, check the 3rd class choice
-					if still no match, go on to the next replaceArray record
-		If there is a match
-			Get the replacement student record
-				assign the student to the advisor class
-				delete the replaceArray record so the student does not get double assigned
-				send the email to the advisor
-		If there is no match
-			send the no replacement available to the advisor
-			add the replacement request to the replacementRequsts table
-		
+Student status of R (replace the student) or V (replace the student and return to 
+	unassigned pool) triggers the replacement process
+Do remove student
+	if the student status is R, set remove status to C
+	If the student status is V, set the remove status to blank
+	
+Find a possible replacement student
+	The student level, the assigned advisor, and the assigned advisor class define the
+		class. Get the class record and the class time and days in UTC
+			Cycle through the replaceArray records using the level
+				if the class day matches first class choice days and the class 
+					times is within the students first class times, there is a match
+				if no match, check the 2nd class choice
+				if still no match, check the 3rd class choice
+				if still no match, go on to the next replaceArray record
+	If there is a match
+		Get the replacement student record
+			assign the student to the advisor class
+			delete the replaceArray record so the student does not get double assigned
+			send the email to the advisor
+	If there is no match
+		send the no replacement available to the advisor
+		add the replacement request to the replacementRequsts table
+	
 */
 
 								if ($doDebugLog) {
 									$debugLog .= "<br />Replacement Student Process<br />";
 								}
 								if ($validReplacementPeriod == 'Y' && $currentSemester == 'Not in Session') {
-									if ($student_student_status == 'R' || $student_student_status == 'V') {
+									if ($student_status == 'R' || $student_status == 'V') {
 										// save off the assigned advisor and class so we can remove the student
 										$str_assigned_advisor		= $student_assigned_advisor;
 										$str_assigned_advisor_class	= $student_assigned_advisor_class;
 										
-										$content					.= "REPLACE Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> at level $student_level in advisor $str_assigned_advisor class $str_assigned_advisor_class<br />";
+										$content					.= "REPLACE Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> at level $student_level in advisor $str_assigned_advisor class $str_assigned_advisor_class<br />";
 										if ($doDebugLog) {
 											$debugLog .= "REPLACE Student $student_call_sign at level $student_level in advisor $str_assigned_advisor class $str_assigned_advisor_class<br />";
 										}
 										// Now remove the student from the advisor's class
-										if ($student_student_status == 'V') {
+										if ($student_status == 'V') {
 											$removeStatus	= '';
-											$updateData[]		= 'intervention_required|H|s';
+											$updateData[]		= 'student_intervention_required|H|s';
 											$doUpdateStudent	= TRUE;
 
 											// add the reminder
@@ -2479,7 +2484,7 @@ Update your information as needed and make your class preference choices.";
 											$closeStr			= strtotime("+10 days");
 											$close_date			= date('Y-m-d H:i:s', $closeStr);
 											$token				= mt_rand();
-											$reminder_text		= "<b>Signup on Hold:</b> Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> 
+											$reminder_text		= "<b>Signup on Hold:</b> Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> 
 had a student status of V and is on hold waiting for a possible reassignment. When the issue is resolved, click 'Remove Item'.";
 											$inputParams		= array("effective_date|$effective_date|s",
 																		"close_date|$close_date|s",
@@ -2499,9 +2504,8 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 												}
 												$content		.= "Inserting reminder failed: $insertResult[1]<br />";
 											} else {
-//												$content		.= "Reminder successfully added<br />";
 												// put the student on hold so the student does not get processed again
-												$updateData[] 	= 'intervention_required|H|s';
+												$updateData[] 	= 'student_intervention_required|H|s';
 												$updateData[]	= 'student_status||s';
 												$update_action_log	.= "placed student on hold ";
 											}
@@ -2533,222 +2537,195 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 										
 										/// figure out if there is a replacement student
 										//// get the advisor and advisorClass records
-										$sql				= "select a.advisorclass_id, 
-																	   a.sequence, 
-																	   a.level, 
-																	   a.class_schedule_days_utc, 
-																	   a.class_schedule_times_utc, 
-																	   a.action_log, 
-																	   a. sequence, 
-																	   a.level, 
-																	   a.class_schedule_days_utc, 
-																	   a.class_schedule_times_utc, 
-																	   a.action_log, 
-																	   b.advisor_id, 
-																	   b.call_sign, 
-																	   b.first_name, 
-																	   b.last_name, 
-																	   b.email, 
-																	   b.action_log 
-																from $advisorClassTableName as a 
-																left join $advisorTableName as b 
-																	on b.call_sign = a.advisor_call_sign 
-																	and b.semester = a.semester 
-																where a.advisor_call_sign = '$str_assigned_advisor' 
-																	and a.sequence = $str_assigned_advisor_class 
-																	and a.semester = '$theSemester'";
-									
-										$wpw1_cwa_information	= $wpdb->get_results($sql);
-										if ($wpw1_cwa_information === FALSE) {
-											$myError			= $wpdb->last_error;
-											$myQuery			= $wpdb->last_query;
-											if ($doDebugLog) {
-												$debugLog .= "Reading $advisorTableName and $advisorClassTableName tables failed<br />
-													  wpdb->last_query: $myQuery<br />
-													  wpdb->last_error: $myError<br />";
-											}
-											$errorMsg			= "Daily Student Cron (C) Reading $advisorTableName and $advisorClassTableName tablesfailed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-											sendErrorEmail($errorMsg);
+										$sql			=  "select 
+																a.advisorclass_id, 
+																a.advisorclass_call_sign, 
+																a.advisorclass_sequence, 
+																a.advisorclass_class_schedule_days, 
+																a.advisorclass_class_schedule_times, 
+																a.advisorclass_class_schedule_days_utc, 
+																a.advisorclass_class_schedule_times_utc, 
+																b.user_first_name, 
+																b.user_last_name,
+																b.user_email  
+															from $advisorClassTableName as a 
+															left join $userMasterTableName as b 
+															on a.advisor_call_sign = b.call_sign 
+															where a.advisor_call_sign = '$replacement_call_sign' 
+															and a.sequence = $replacement_class";
+				
+										$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
+										if ($wpw1_cwa_advisorclass === FALSE) {
+											handleWPDBError($jobname,$doDebug);
 										} else {
-											$numIRows			= $wpdb->num_rows;
+											$numACRows						= $wpdb->num_rows;
 											if ($doDebugLog) {
-												$myStr			= $wpdb->last_query;
-												$debugLog .= "ran $myStr<br />and found $numIRows rows in the combined tables<br />";
+												$myStr						= $wpdb->last_query;
+												$debugLog .= "ran $myStr<br />and found $numACRows rows<br />";
 											}
-											if ($numIRows > 0) {
-												foreach ($wpw1_cwa_information as $infoRow) {
-													$advisor_ID								= $infoRow->advisor_id;
-													$advisor_call_sign 						= strtoupper($infoRow->call_sign);
-													$advisor_first_name 					= $infoRow->first_name;
-													$advisor_last_name 						= $infoRow->last_name;
-													$advisor_email 							= $infoRow->email;
-													$advisor_action_log					 	= $infoRow->action_log;
-													$advisorClass_ID						= $infoRow->advisorclass_id;
-													$advisorClass_sequence					= $infoRow->sequence;
-													$advisorClass_level						= $infoRow->level;
-													$advisorClass_class_schedule_days_utc	= $infoRow->class_schedule_days_utc;
-													$advisorClass_class_schedule_times_utc	= $infoRow->class_schedule_times_utc;
-													$advisorClass_action_log				= $infoRow->action_log;
+											if ($numACRows > 0) {
+												foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+													$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+													$advisorClass_advisor_call_sign 		= $advisorClassRow->advisorclass_call_sign;
+													$advisorClass_advisor_first_name 		= $advisorClassRow->user_first_name;
+													$advisorClass_advisor_last_name 		= $advisorClassRow->user_last_name;
+													$advisorEmail							= $advisorClassRow->user_email;
+													$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
+													$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+													$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+													$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+													$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
 
-													$advisor_last_name 					= no_magic_quotes($advisor_last_name);
+													///// find a replacement student
+													$searchTime = intval($advisorClass_class_schedule_times_utc);
+													$searchDays = $advisorClass_class_schedule_days_utc;
+													if ($doDebugLog) {
+														$debugLog .= "&nbsp;&nbsp;&nbsp;&nbsp;Looking for a replacement level $student_level $searchTime $searchDays<br />";
+													}
+													$callSign1	= '';
+													$sequence1	= '';
+													$callSign2	= '';
+													$sequence2	= '';
+													$callSign3	= '';
+													$sequence3	= '';
 
-													//// have the class record. For grins and giggles, is it the same level?
-													if ($advisorClass_level != $student_level) {
+													foreach(${'replaceArray' . $student_level} as $myKey=>$myValue) {
 														if ($doDebugLog) {
-															$debugLog .= "student level of $student_level supposedly in $str_assigned_advisor $str_assigned_advisor_class class doesn't match the class level of $advisorClass_level<br />";
+															$debugLog .= "<br />Checking possible replacement: $myValue<br />";
 														}
-														$content	.= "<p>student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> level of $student_level supposedly in $str_assigned_advisor $str_assigned_advisor_class class doesn't match the class level of $advisorClass_level";
-													} else {
-														///// find a replacement student
-														$searchTime = intval($advisorClass_class_schedule_times_utc);
-														$searchDays = $advisorClass_class_schedule_days_utc;
-														if ($doDebugLog) {
-															$debugLog .= "&nbsp;&nbsp;&nbsp;&nbsp;Looking for a replacement level $student_level $searchTime $searchDays<br />";
-														}
-														$callSign1	= '';
-														$sequence1	= '';
-														$callSign2	= '';
-														$sequence2	= '';
-														$callSign3	= '';
-														$sequence3	= '';
-
-														foreach(${'replaceArray' . $student_level} as $myKey=>$myValue) {
-															if ($doDebugLog) {
-																$debugLog .= "<br />Checking possible replacement: $myValue<br />";
-															}
-															$myArray = explode("|",$myValue);
-															$student_sequence		= $myArray[0];
-															$thisCallSign 		= $myArray[1];
-															$firstTime 			= $myArray[2];
-															$firstDays 			= $myArray[3];
-															$secondTime 		= $myArray[4];
-															$secondDays 		= $myArray[5];
-															$thirdTime 			= $myArray[6];
-															$thirdDays 			= $myArray[7];
-															$excludedAdvisor	= $myArray[8];
-								
-															$myInt				= strpos($excludedAdvisor,$advisor_call_sign);
-															if ($myInt === FALSE) {
-																if ($searchDays == $firstDays) {
-																	if ($doDebugLog) {
-																		$debugLog .= "first choice match on $searchDays. Checking poss replacement first choice $firstTime<br />";
-																	}
-																	if ($callSign1 == '') {		// don't continue if have a match
-																		$searchBegin = intval($firstTime) - 300;
-																		$searchEnd = intval($firstTime) + 300;
-																		if ($searchBegin < 0) {
-																			$searchBegin	= 0;
-																		}
-																		if ($searchEnd > 2400) {
-																			$searchEnd		= 2400;
-																		}
-																		if ($doDebugLog) {
-																			$debugLog .= "testing firstTime: $firstTime. Looking for student between $searchBegin and $searchEnd<br />";
-																		}
-																		if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-																			$callSign1 = $thisCallSign;
-																			$sequence1 = $myKey;
-																			if ($doDebugLog) {
-																				$debugLog .= "1: Found $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />
-																								  Set callSign1 to $thisCallSign and sequence1 to $myKey<br />";
-																			}
-																		} else {
-																			if ($doDebugLog) {
-																				$debugLog .= "1: No go $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />";
-																			}
-																		}
-																	}
-																} else {
-																	if ($doDebugLog) {
-																		$debugLog .= "Searching first choice days did not match<br />";
-																	}
-									
+														$myArray = explode("|",$myValue);
+														$student_sequence		= $myArray[0];
+														$thisCallSign 		= $myArray[1];
+														$firstTime 			= $myArray[2];
+														$firstDays 			= $myArray[3];
+														$secondTime 		= $myArray[4];
+														$secondDays 		= $myArray[5];
+														$thirdTime 			= $myArray[6];
+														$thirdDays 			= $myArray[7];
+														$excludedAdvisor	= $myArray[8];
+							
+														$myInt				= strpos($excludedAdvisor,$advisor_call_sign);
+														if ($myInt === FALSE) {
+															if ($searchDays == $firstDays) {
+																if ($doDebugLog) {
+																	$debugLog .= "first choice match on $searchDays. Checking poss replacement first choice $firstTime<br />";
 																}
-																if ($searchDays == $secondDays) {
-																	if ($doDebugLog) {
-																		$debugLog .= "second choice match on searchDays. Doing second choice $secondTime<br />";
+																if ($callSign1 == '') {		// don't continue if have a match
+																	$searchBegin = intval($firstTime) - 300;
+																	$searchEnd = intval($firstTime) + 300;
+																	if ($searchBegin < 0) {
+																		$searchBegin	= 0;
 																	}
-																	if ($callSign2 == '') {
-																		$searchBegin 	= intval($secondTime) - 300;
-																		$searchEnd 		= intval($secondTime) + 300;
-																		if ($searchBegin < 0) {
-																			$searchBegin	= 0;
-																		}
-																		if ($searchEnd > 2400) {
-																			$searchEnd		= 2400;
-																		}
+																	if ($searchEnd > 2400) {
+																		$searchEnd		= 2400;
+																	}
+																	if ($doDebugLog) {
+																		$debugLog .= "testing firstTime: $firstTime. Looking for student between $searchBegin and $searchEnd<br />";
+																	}
+																	if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+																		$callSign1 = $thisCallSign;
+																		$sequence1 = $myKey;
 																		if ($doDebugLog) {
-																			$debugLog .= "testing secondTime: $secondTime. Looking for student between $searchBegin and $searchEnd<br />";
-																		}
-																		if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-																			$callSign2 = $thisCallSign;
-																			$sequence2 = $myKey;
-																			if ($doDebugLog) {
-																				$debugLog .= "2: Found $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />
-																				Set callSign2 to $thisCallSign and sequence2 to $myKey<br />";
-																			}
-																		} else {
-																			if ($doDebugLog) {
-																				$debugLog .= "2: No go $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />";
-																			}
+																			$debugLog .= "1: Found $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />
+																							  Set callSign1 to $thisCallSign and sequence1 to $myKey<br />";
 																		}
 																	} else {
 																		if ($doDebugLog) {
-																			$debugLog .= "searching second choice days did not match<br />";
+																			$debugLog .= "1: No go $searchDays in $firstDays and $searchTime between $searchBegin and $searchEnd<br />";
 																		}
-																	}
-																} else {
-																	if ($doDebugLog) {
-																		$debugLog .= "searching second choice days didn't match<br />";
-																	}
-																}
-																if ($searchDays == $thirdDays) {
-																	if ($doDebugLog) {
-																		$debugLog .= "third choice match on searchDays. Doing third choice $thirdTime<br />";
-																	}
-																	if ($callSign3 == '') {
-																		$searchBegin 	= intval($thirdTime) - 300;
-																		$searchEnd 		= intval($thirdTime) + 300;
-																		$searchEnd = $searchBegin + 300;
-																		if ($searchBegin < 0) {
-																			$searchBegin	= 0;
-																		}
-																		if ($searchEnd > 2400) {
-																			$searchEnd		= 2400;
-																		}
-																		if ($doDebugLog) {
-																			$debugLog .= "testing thirdTime: $thirdTime. Looking for student between $searchBegin and $searchEnd<br />";
-																		}
-																		if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
-																			$callSign3 = $thisCallSign;
-																			$sequence3 = $myKey;
-																			if ($doDebugLog) {
-																				$debugLog .= "3: Found $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />
-																								  Set callSign3 to $thisCallSign and sequence3 to $myKey<br />";
-																			}
-																		} else {
-																			if ($doDebugLog) {
-																				$debugLog .= "3: No go $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />";
-																			}
-																		}
-																	}	
-																} else {
-																	if ($doDebugLog) {
-																		$debugLog .= "searching third choice days did not match<br />";
 																	}
 																}
 															} else {
 																if ($doDebugLog) {
-																	$debugLog .= "possible advisor $advisor_call_sign is excluded: $excludedAdvisor<br />";
+																	$debugLog .= "Searching first choice days did not match<br />";
 																}
-															} 
-														}
-														if ($doDebugLog) {
-															$debugLog .= "CallSign1: $callSign1<br />
-																  CallSign2: $callSign2<br />
-																  CallSign3: $callSign3<br />";
-														}
+								
+															}
+															if ($searchDays == $secondDays) {
+																if ($doDebugLog) {
+																	$debugLog .= "second choice match on searchDays. Doing second choice $secondTime<br />";
+																}
+																if ($callSign2 == '') {
+																	$searchBegin 	= intval($secondTime) - 300;
+																	$searchEnd 		= intval($secondTime) + 300;
+																	if ($searchBegin < 0) {
+																		$searchBegin	= 0;
+																	}
+																	if ($searchEnd > 2400) {
+																		$searchEnd		= 2400;
+																	}
+																	if ($doDebugLog) {
+																		$debugLog .= "testing secondTime: $secondTime. Looking for student between $searchBegin and $searchEnd<br />";
+																	}
+																	if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+																		$callSign2 = $thisCallSign;
+																		$sequence2 = $myKey;
+																		if ($doDebugLog) {
+																			$debugLog .= "2: Found $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />
+																			Set callSign2 to $thisCallSign and sequence2 to $myKey<br />";
+																		}
+																	} else {
+																		if ($doDebugLog) {
+																			$debugLog .= "2: No go $searchDays in $secondDays and $searchTime between $searchBegin and $searchEnd<br />";
+																		}
+																	}
+																} else {
+																	if ($doDebugLog) {
+																		$debugLog .= "searching second choice days did not match<br />";
+																	}
+																}
+															} else {
+																if ($doDebugLog) {
+																	$debugLog .= "searching second choice days didn't match<br />";
+																}
+															}
+															if ($searchDays == $thirdDays) {
+																if ($doDebugLog) {
+																	$debugLog .= "third choice match on searchDays. Doing third choice $thirdTime<br />";
+																}
+																if ($callSign3 == '') {
+																	$searchBegin 	= intval($thirdTime) - 300;
+																	$searchEnd 		= intval($thirdTime) + 300;
+																	$searchEnd = $searchBegin + 300;
+																	if ($searchBegin < 0) {
+																		$searchBegin	= 0;
+																	}
+																	if ($searchEnd > 2400) {
+																		$searchEnd		= 2400;
+																	}
+																	if ($doDebugLog) {
+																		$debugLog .= "testing thirdTime: $thirdTime. Looking for student between $searchBegin and $searchEnd<br />";
+																	}
+																	if ($searchTime >= $searchBegin && $searchTime < $searchEnd) {
+																		$callSign3 = $thisCallSign;
+																		$sequence3 = $myKey;
+																		if ($doDebugLog) {
+																			$debugLog .= "3: Found $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />
+																							  Set callSign3 to $thisCallSign and sequence3 to $myKey<br />";
+																		}
+																	} else {
+																		if ($doDebugLog) {
+																			$debugLog .= "3: No go $searchDays in $thirdDays and $searchTime between $searchBegin and $searchEnd<br />";
+																		}
+																	}
+																}	
+															} else {
+																if ($doDebugLog) {
+																	$debugLog .= "searching third choice days did not match<br />";
+																}
+															}
+														} else {
+															if ($doDebugLog) {
+																$debugLog .= "possible advisor $advisor_call_sign is excluded: $excludedAdvisor<br />";
+															}
+														} 
 													}
+													if ($doDebugLog) {
+														$debugLog .= "CallSign1: $callSign1<br />
+															  CallSign2: $callSign2<br />
+															  CallSign3: $callSign3<br />";
+													}
+
 													$gotAReplacement			= FALSE;
 													if ($callSign1 != '') {
 														$replaceCallSign		= $callSign1;
@@ -2770,155 +2747,160 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 														}
 														///// get the replacement student record
 														$sql						= "select * from $studentTableName 
-																						where semester='$theSemester' 
-																						and call_sign='$replaceCallSign'";
+																						where student_semester='$theSemester' 
+																						and student_call_sign='$replaceCallSign'";
 														$wpw1_cwa_replace				= $wpdb->get_results($sql);
 														if ($wpw1_cwa_replace === FALSE) {
-															$myError			= $wpdb->last_error;
-															$myQuery			= $wpdb->last_query;
-															if ($doDebugLog) {
-																$debugLog .= "Reading $studentTableName table failed<br />
-																	  wpdb->last_query: $myQuery<br />
-																	  wpdb->last_error: $myError<br />";
-															}
-															$errorMsg			= "Daily Student Cron (D) reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-															sendErrorEmail($errorMsg);
+															handleWPDBError($jobname,$doDebug);
 														} else {
 															$numRRows				= $wpdb->num_rows;
 															if ($doDebugLog) {
-																$myStr			= $wpdb->last_query;
-																$debugLog .= "ran $myStr<br />and retrieved $numRRows rows from $studentTableName table<br />";
+																$debugLog .= "ran $sql<br />and retrieved $numRRows rows from $studentTableName table<br />";
 															}
 															if ($numRRows > 0) {
 																if ($doDebugLog) {
-																	$myStr			= $wpdb->last_query;
-																	$debugLog .= "ran $myStr<br />and found $numRRows rows in $studentTableName<br />";
+																	$debugLog .= "ran $sql<br />and found $numRRows rows in $studentTableName<br />";
 																}
 																foreach ($wpw1_cwa_replace as $replaceRow) {
-																	$replace_ID								= $replaceRow->student_id;
-																	$replace_call_sign						= strtoupper($replaceRow->call_sign);
-																	$replace_first_name						= $replaceRow->first_name;
-																	$replace_last_name						= $replaceRow->last_name;
-																	$replace_email  						= $replaceRow->email;
-																	$replace_phone  						= $replaceRow->phone;
-																	$replace_city  							= $replaceRow->city;
-																	$replace_state  						= $replaceRow->state;
-																	$replace_zip_code  						= $replaceRow->zip_code;
-																	$replace_country  						= $replaceRow->country;
-																	$replace_time_zone  					= $replaceRow->time_zone;
-																	$replace_wpm 	 						= $replaceRow->wpm;
-																	$replace_youth  						= $replaceRow->youth;
-																	$replace_age  							= $replaceRow->age;
-																	$replace_student_parent 				= $replaceRow->student_parent;
-																	$replace_student_parent_email  			= $replaceRow->student_parent_email;
-																	$replace_level  						= $replaceRow->level;
-																	$replace_waiting_list 					= $replaceRow->waiting_list;
-																	$replace_request_date  					= $replaceRow->request_date;
-																	$replace_semester						= $replaceRow->semester;
-																	$replace_notes  						= $replaceRow->notes;
-																	$replace_welcome_date  					= $replaceRow->welcome_date;
-																	$replace_email_sent_date  				= $replaceRow->email_sent_date;
-																	$replace_email_number  					= $replaceRow->email_number;
-																	$replace_response  						= strtoupper($replaceRow->response);
-																	$replace_response_date  				= $replaceRow->response_date;
-																	$replace_abandoned  					= $replaceRow->abandoned;
-																	$replace_student_status  				= strtoupper($replaceRow->student_status);
-																	$replace_action_log  					= $replaceRow->action_log;
-																	$replace_pre_assigned_advisor  			= $replaceRow->pre_assigned_advisor;
-																	$replace_selected_date  				= $replaceRow->selected_date;
-																	$replace_no_catalog			  			= $replaceRow->no_catalog;
-																	$replace_hold_override  				= $replaceRow->hold_override;
-																	$replace_messaging  					= $replaceRow->messaging;
-																	$replace_assigned_advisor  				= $replaceRow->assigned_advisor;
-																	$replace_advisor_select_date  			= $replaceRow->advisor_select_date;
-																	$replace_advisor_class_timezone 		= $replaceRow->advisor_class_timezone;
-																	$replace_hold_reason_code  				= $replaceRow->hold_reason_code;
-																	$replace_class_priority  				= $replaceRow->class_priority;
-																	$replace_assigned_advisor_class 		= $replaceRow->assigned_advisor_class;
-																	$replace_promotable  					= $replaceRow->promotable;
-																	$replace_excluded_advisor  				= $replaceRow->excluded_advisor;
-																	$replace_student_survey_completion_date	= $replaceRow->student_survey_completion_date;
-																	$replace_available_class_days  			= $replaceRow->available_class_days;
-																	$replace_intervention_required  		= $replaceRow->intervention_required;
-																	$replace_copy_control  					= $replaceRow->copy_control;
-																	$replace_first_class_choice  			= $replaceRow->first_class_choice;
-																	$replace_second_class_choice  			= $replaceRow->second_class_choice;
-																	$replace_third_class_choice  			= $replaceRow->third_class_choice;
-																	$replace_first_class_choice_utc  		= $replaceRow->first_class_choice_utc;
-																	$replace_second_class_choice_utc  		= $replaceRow->second_class_choice_utc;
-																	$replace_third_class_choice_utc  		= $replaceRow->third_class_choice_utc;
-																	$replace_date_created 					= $replaceRow->date_created;
-																	$replace_date_updated			  		= $replaceRow->date_updated;
+																	$replace_master_ID 					= $studentRow->user_ID;
+																	$replace_master_call_sign 			= $studentRow->user_call_sign;
+																	$replace_first_name 				= $studentRow->user_first_name;
+																	$replace_last_name 					= $studentRow->user_last_name;
+																	$replace_email 						= $studentRow->user_email;
+																	$replace_phone 						= $studentRow->user_phone;
+																	$replace_city 						= $studentRow->user_city;
+																	$replace_state 						= $studentRow->user_state;
+																	$replace_zip_code 					= $studentRow->user_zip_code;
+																	$replace_country_code 				= $studentRow->user_country_code;
+																	$replace_whatsapp 					= $studentRow->user_whatsapp;
+																	$replace_telegram 					= $studentRow->user_telegram;
+																	$replace_signal 					= $studentRow->user_signal;
+																	$replace_messenger 					= $studentRow->user_messenger;
+																	$replace_master_action_log 			= $studentRow->user_action_log;
+																	$replace_timezone_id 				= $studentRow->user_timezone_id;
+																	$replace_languages 					= $studentRow->user_languages;
+																	$replace_survey_score 				= $studentRow->user_survey_score;
+																	$replace_is_admin					= $studentRow->user_is_admin;
+																	$replace_role 						= $studentRow->user_role;
+																	$replace_master_date_created 		= $studentRow->user_date_created;
+																	$replace_master_date_updated 		= $studentRow->user_date_updated;
+				
+																	$replace_ID								= $studentRow->student_id;
+																	$replace_call_sign						= $studentRow->student_call_sign;
+																	$replace_time_zone  					= $studentRow->student_time_zone;
+																	$replace_timezone_offset				= $studentRow->student_timezone_offset;
+																	$replace_youth  						= $studentRow->student_youth;
+																	$replace_age  							= $studentRow->student_age;
+																	$replace_replace_parent 				= $studentRow->student_parent;
+																	$replace_replace_parent_email  			= strtolower($studentRow->student_parent_email);
+																	$replace_level  						= $studentRow->student_level;
+																	$replace_waiting_list 					= $studentRow->student_waiting_list;
+																	$replace_request_date  					= $studentRow->student_request_date;
+																	$replace_semester						= $studentRow->student_semester;
+																	$replace_notes  						= $studentRow->student_notes;
+																	$replace_welcome_date  					= $studentRow->student_welcome_date;
+																	$replace_email_sent_date  				= $studentRow->student_email_sent_date;
+																	$replace_email_number  					= $studentRow->student_email_number;
+																	$replace_response  						= strtoupper($studentRow->student_response);
+																	$replace_response_date  				= $studentRow->student_response_date;
+																	$replace_abandoned  					= $studentRow->student_abandoned;
+																	$replace_replace_status  				= strtoupper($studentRow->student_status);
+																	$replace_action_log  					= $studentRow->student_action_log;
+																	$replace_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+																	$replace_selected_date  				= $studentRow->student_selected_date;
+																	$replace_no_catalog  					= $studentRow->student_no_catalog;
+																	$replace_hold_override  				= $studentRow->student_hold_override;
+																	$replace_assigned_advisor  				= $studentRow->student_assigned_advisor;
+																	$replace_advisor_select_date  			= $studentRow->student_advisor_select_date;
+																	$replace_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+																	$replace_hold_reason_code  				= $studentRow->student_hold_reason_code;
+																	$replace_class_priority  				= $studentRow->student_class_priority;
+																	$replace_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+																	$replace_promotable  					= $studentRow->student_promotable;
+																	$replace_excluded_advisor  				= $studentRow->student_excluded_advisor;
+																	$replace_replace_survey_completion_date	= $studentRow->student_survey_completion_date;
+																	$replace_available_class_days  			= $studentRow->student_available_class_days;
+																	$replace_intervention_required  		= $studentRow->student_intervention_required;
+																	$replace_copy_control  					= $studentRow->student_copy_control;
+																	$replace_first_class_choice  			= $studentRow->student_first_class_choice;
+																	$replace_second_class_choice  			= $studentRow->student_second_class_choice;
+																	$replace_third_class_choice  			= $studentRow->student_third_class_choice;
+																	$replace_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+																	$replace_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+																	$replace_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+																	$replace_catalog_options				= $studentRow->student_catalog_options;
+																	$replace_flexible						= $studentRow->student_flexible;
+																	$replace_date_created 					= $studentRow->student_date_created;
+																	$replace_date_updated			  		= $studentRow->student_date_updated;
 
-																	$replace_last_name						= no_magic_quotes($replace_last_name);
-																}
-																//// add student to the advisor's class
-																$inp_data			= array('inp_student'=>$replace_call_sign,
-																							'inp_semester'=>$replace_semester,
-																							'inp_assigned_advisor'=>$advisor_call_sign,
-																							'inp_assigned_advisor_class'=>$advisorClass_sequence ,
-																							'inp_remove_status'=>'', 
-																							'inp_arbitrarily_assigned'=>'',
-																							'inp_method'=>'add',
-																							'jobname'=>$jobname,
-																							'userName'=>$userName,
-																							'testMode'=>$testMode,
-																							'doDebug'=>$doDebug);
-							
-																$addResult			= add_remove_student($inp_data);
-																if ($addResult[0] === FALSE) {
-																	$thisReason		= $addResult[1];
-																	if ($doDebugLog) {
-																		$debugLog .= "attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason<br />";
-																	}
-																	sendErrorEmail("$jobname Attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason");
-																	$content		.= "Attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason<br />";
-																} else {
-																	$content	.= "&nbsp;&nbsp;&nbsp;REPLACE student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a> was replaced by <a href='$studentUpdateURL?request_type=callsign&request_info=$replace_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$replace_call_sign</a> in $str_assigned_advisor $str_assigned_advisor_class class.<br />";
-																	$studentReplaced	= TRUE;
-																	if ($doDebugLog) {
-																		$debugLog .= "&nbsp;&nbsp;&nbsp; student $student_call_sign was replaced by $replace_call_sign<br />";
-																	}
-																	///// unset the replacement student in replaceArray
-																	unset(${'replaceArray' . $advisorClass_level}[$replaceSequence]);
-																	if ($doDebugLog) {
-																		$debugLog .= "did unset replaceArray$advisorClass_level $replaceSequence|<br />";
-																	}
-																	
-																	//// format replacement email to advisor
-																	$email_content			= "<p>You requested a replacement student. A replacement has been found and 
-																								added to your class. Please go to <a href='$siteURL/program-list/'>CW Academy</a> 
-																								and follow the instructions there.";
-																	if ($doDebugLog) {
-																		$debugLog .= "adding reminder to reminders table<br />";
-																	}
-																	$closeStr				= strtotime("+5 days");
-																	$close_date				= date('Y-m-d H:i:s',$closeStr);
-																	$token					= mt_rand();
-																	$effective_date			= date('Y-m-d H:i:s');
-																	$reminder_text			= "<b>Manage Students:</b> To see your current class makeup and and verify the student(s) click on 
-<a href='$siteURL/cwa-manage-advisor-class?strpass=2&callsign=$advisor_call_sign&token=$token'>Manage Advisor Class</a> to complete that task.";
-																	$inputParams		= array("effective_date|$effective_date|s",
-																								"close_date|$close_date|s",
-																								"resolved_date||s",
-																								"send_reminder|n|s",
-																								"send_once|Y|s",
-																								"call_sign|$str_assigned_advisor|s",
-																								"role||s",
-																								"email_text||s",
-																								"reminder_text|$reminder_text|s",
-																								"resolved|N|s",
-																								"token|$token|s");
-																	$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
-																	if ($insertResult[0] === FALSE) {
+
+																	//// add student to the advisor's class
+																	$inp_data			= array('inp_student'=>$replace_call_sign,
+																								'inp_semester'=>$replace_semester,
+																								'inp_assigned_advisor'=>$advisor_call_sign,
+																								'inp_assigned_advisor_class'=>$advisorClass_sequence ,
+																								'inp_remove_status'=>'', 
+																								'inp_arbitrarily_assigned'=>'',
+																								'inp_method'=>'add',
+																								'jobname'=>$jobname,
+																								'userName'=>$userName,
+																								'testMode'=>$testMode,
+																								'doDebug'=>$doDebug);
+								
+																	$addResult			= add_remove_student($inp_data);
+																	if ($addResult[0] === FALSE) {
+																		$thisReason		= $addResult[1];
 																		if ($doDebugLog) {
-																			$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
+																			$debugLog .= "attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason<br />";
 																		}
-																		$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+																		sendErrorEmail("$jobname Attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason");
+																		$content		.= "Attempting to add $student_call_sign to $advisorClass_advisor_call_sign class failed:<br />$thisReason<br />";
 																	} else {
-//																		$content		.= "Reminder successfully added<br />";
+																		$content	.= "&nbsp;&nbsp;&nbsp;REPLACE student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> was replaced by <a href='$studentUpdateURL?request_type=callsign&request_info=$replace_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$replace_call_sign</a> in $str_assigned_advisor $str_assigned_advisor_class class.<br />";
+																		$studentReplaced	= TRUE;
+																		if ($doDebugLog) {
+																			$debugLog .= "&nbsp;&nbsp;&nbsp; student $student_call_sign was replaced by $replace_call_sign<br />";
+																		}
+																		///// unset the replacement student in replaceArray
+																		unset(${'replaceArray' . $advisorClass_level}[$replaceSequence]);
+																		if ($doDebugLog) {
+																			$debugLog .= "did unset replaceArray$advisorClass_level $replaceSequence|<br />";
+																		}
+																		
+																		//// format replacement email to advisor
+																		$email_content			= "<p>You requested a replacement student. A replacement has been found and 
+																									added to your class. Please go to <a href='$siteURL/program-list/'>CW Academy</a> 
+																									and follow the instructions there.";
+																		if ($doDebugLog) {
+																			$debugLog .= "adding reminder to reminders table<br />";
+																		}
+																		$closeStr				= strtotime("+5 days");
+																		$close_date				= date('Y-m-d H:i:s',$closeStr);
+																		$token					= mt_rand();
+																		$effective_date			= date('Y-m-d H:i:s');
+																		$reminder_text			= "<b>Manage Students:</b> To see your current class makeup and and verify the student(s) click on 
+<a href='$siteURL/cwa-manage-advisor-class?strpass=2&callsign=$advisor_call_sign&token=$token'>Manage Advisor Class</a> to complete that task.";
+																		$inputParams		= array("effective_date|$effective_date|s",
+																									"close_date|$close_date|s",
+																									"resolved_date||s",
+																									"send_reminder|n|s",
+																									"send_once|Y|s",
+																									"call_sign|$str_assigned_advisor|s",
+																									"role||s",
+																									"email_text||s",
+																									"reminder_text|$reminder_text|s",
+																									"resolved|N|s",
+																									"token|$token|s");
+																		$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+																		if ($insertResult[0] === FALSE) {
+																			if ($doDebugLog) {
+																				$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
+																			}
+																			$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+																		} else {
+																			$replacedCount++;
+																		}
 																	}
-																	$replacedCount++;
 																}
 															} else {
 																if ($doDebugLog) {
@@ -2942,7 +2924,7 @@ assignment that meet the criteria for your class.<p>";
 														$advisorClass_action_log	= "$advisorClass_action_log / $actionDate CRON Advisor requested replacement for $student_call_sign. No replacement found ";
 														$classUpdateData		= array('tableName'=>$advisorClassTableName,
 																						'inp_method'=>'update',
-																						'inp_data'=>array('action_log'=>$advisorClass_action_log),
+																						'inp_data'=>array('advisorclass_action_log'=>$advisorClass_action_log),
 																						'inp_format'=>array('%s'),
 																						'jobname'=>$jobname,
 																						'inp_id'=>$advisorClass_ID,
@@ -3058,13 +3040,13 @@ assignment that meet the criteria for your class.<p>";
 								//////// update student process				
 								if ($doUpdateStudent) {
 									$student_action_log					= "$student_action_log / $actionDate $update_action_log";
-									$updateData[]						= "action_log|$student_action_log|s";
+									$updateData[]						= "student_action_log|$student_action_log|s";
 									if ($doDebugLog) {
 										$debugLog .= "<br />Updating student record for $student_call_sign in table $studentTableName:<br /><pre>";
 										$debugLog .= print_r($updateData,TRUE);
 										$debugLog .= "</pre><br />";
 									}
-									$updateData	= array('tableName'=>$studentTableName,
+									$updateStudent	= array('tableName'=>$studentTableName,
 														'inp_data'=>$updateData,
 														'inp_method'=>'update',
 														'jobname'=>'CRON',
@@ -3074,7 +3056,7 @@ assignment that meet the criteria for your class.<p>";
 														'inp_who'=>$userName,
 														'testMode'=>$testMode,
 														'doDebug'=>$doDebug);
-									$updateResult	= updateStudent($updateData);
+									$updateResult	= updateStudent($updateStudent);
 								
 									if ($updateResult[0] === FALSE) {
 										handleWPDBError($jobname,$doDebug);
@@ -3104,73 +3086,55 @@ assignment that meet the criteria for your class.<p>";
 												$myStr			= $wpdb->last_query;
 												echo "ran $myStr<br />and found $numSRows rows<br />";
 											}
-											$studentRecordsFound 	= $numSRows;
 											if ($numSRows > 0) {
 												foreach ($wpw1_cwa_student as $studentRow) {
 													$student_ID								= $studentRow->student_id;
-													$student_call_sign						= strtoupper($studentRow->call_sign);
-													$student_first_name						= $studentRow->first_name;
-													$student_last_name						= stripslashes($studentRow->last_name);
-													$student_email  						= strtolower(strtolower($studentRow->email));
-													$student_phone  						= $studentRow->phone;
-													$student_ph_code						= $studentRow->ph_code;
-													$student_city  							= $studentRow->city;
-													$student_state  						= $studentRow->state;
-													$student_zip_code  						= $studentRow->zip_code;
-													$student_country  						= $studentRow->country;
-													$student_country_code					= $studentRow->country_code;
-													$student_time_zone  					= $studentRow->time_zone;
-													$student_timezone_id					= $studentRow->timezone_id;
-													$student_timezone_offset				= $studentRow->timezone_offset;
-													$student_whatsapp						= $studentRow->whatsapp_app;
-													$student_signal							= $studentRow->signal_app;
-													$student_telegram						= $studentRow->telegram_app;
-													$student_messenger						= $studentRow->messenger_app;					
-													$student_wpm 	 						= $studentRow->wpm;
-													$student_youth  						= $studentRow->youth;
-													$student_age  							= $studentRow->age;
-													$student_student_parent 				= $studentRow->student_parent;
-													$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-													$student_level  						= trim($studentRow->level);
-													$student_waiting_list 					= $studentRow->waiting_list;
-													$student_request_date  					= $studentRow->request_date;
-													$student_semester						= $studentRow->semester;
-													$student_notes  						= $studentRow->notes;
-													$student_welcome_date  					= $studentRow->welcome_date;
-													$student_email_sent_date  				= $studentRow->email_sent_date;
-													$student_email_number  					= $studentRow->email_number;
-													$student_response  						= strtoupper($studentRow->response);
-													$student_response_date  				= $studentRow->response_date;
-													$student_abandoned  					= $studentRow->abandoned;
-													$student_student_status  				= strtoupper($studentRow->student_status);
-													$student_action_log  					= $studentRow->action_log;
-													$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-													$student_selected_date  				= $studentRow->selected_date;
-													$student_no_catalog			 			= $studentRow->no_catalog;
-													$student_hold_override  				= $studentRow->hold_override;
-													$student_messaging  					= $studentRow->messaging;
-													$student_assigned_advisor  				= $studentRow->assigned_advisor;
-													$student_advisor_select_date  			= $studentRow->advisor_select_date;
-													$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-													$student_hold_reason_code  				= $studentRow->hold_reason_code;
-													$student_class_priority  				= $studentRow->class_priority;
-													$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-													$student_promotable  					= $studentRow->promotable;
-													$student_excluded_advisor  				= $studentRow->excluded_advisor;
-													$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-													$student_available_class_days  			= $studentRow->available_class_days;
-													$student_intervention_required  		= $studentRow->intervention_required;
-													$student_copy_control  					= $studentRow->copy_control;
-													$student_first_class_choice  			= $studentRow->first_class_choice;
-													$student_second_class_choice  			= $studentRow->second_class_choice;
-													$student_third_class_choice  			= $studentRow->third_class_choice;
-													$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-													$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-													$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-													$student_catalog_options				= $studentRow->catalog_options;
-													$student_flexible						= $studentRow->flexible;
-													$student_date_created 					= $studentRow->date_created;
-													$student_date_updated			  		= $studentRow->date_updated;
+													$student_call_sign						= $studentRow->student_call_sign;
+													$student_time_zone  					= $studentRow->student_time_zone;
+													$student_timezone_offset				= $studentRow->student_timezone_offset;
+													$student_youth  						= $studentRow->student_youth;
+													$student_age  							= $studentRow->student_age;
+													$student_parent 						= $studentRow->student_parent;
+													$student_parent_email  					= strtolower($studentRow->student_parent_email);
+													$student_level  						= $studentRow->student_level;
+													$student_waiting_list 					= $studentRow->student_waiting_list;
+													$student_request_date  					= $studentRow->student_request_date;
+													$student_semester						= $studentRow->student_semester;
+													$student_notes  						= $studentRow->student_notes;
+													$student_welcome_date  					= $studentRow->student_welcome_date;
+													$student_email_sent_date  				= $studentRow->student_email_sent_date;
+													$student_email_number  					= $studentRow->student_email_number;
+													$student_response  						= strtoupper($studentRow->student_response);
+													$student_response_date  				= $studentRow->student_response_date;
+													$student_abandoned  					= $studentRow->student_abandoned;
+													$student_status  						= strtoupper($studentRow->student_status);
+													$student_action_log  					= $studentRow->student_action_log;
+													$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+													$student_selected_date  				= $studentRow->student_selected_date;
+													$student_no_catalog  					= $studentRow->student_no_catalog;
+													$student_hold_override  				= $studentRow->student_hold_override;
+													$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+													$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+													$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+													$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+													$student_class_priority  				= $studentRow->student_class_priority;
+													$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+													$student_promotable  					= $studentRow->student_promotable;
+													$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+													$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+													$student_available_class_days  			= $studentRow->student_available_class_days;
+													$student_intervention_required  		= $studentRow->student_intervention_required;
+													$student_copy_control  					= $studentRow->student_copy_control;
+													$student_first_class_choice  			= $studentRow->student_first_class_choice;
+													$student_second_class_choice  			= $studentRow->student_second_class_choice;
+													$student_third_class_choice  			= $studentRow->student_third_class_choice;
+													$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+													$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+													$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+													$student_catalog_options				= $studentRow->student_catalog_options;
+													$student_flexible						= $studentRow->student_flexible;
+													$student_date_created 					= $studentRow->student_date_created;
+													$student_date_updated			  		= $studentRow->student_date_updated;
 												}
 											} else {
 												sendErrorEmail("$jobname rereading student record for student_id $student_ID ($student_call_sign) failed");
@@ -3204,16 +3168,16 @@ assignment that meet the criteria for your class.<p>";
 					if ($student_email_number == 4 && $student_response == '') {
 						$semesterCountArray[$student_semester]['dropped']++;
 					}
-					if ($student_student_status == 'R' || $student_student_status == 'C' || $student_student_status == 'V') {
+					if ($student_status == 'R' || $student_status == 'C' || $student_status == 'V') {
 						$semesterCountArray[$student_semester]['replaced']++;
 					}
 					if ($student_response == 'Y') {
 						$semesterCountArray[$student_semester]['verified']++;
 					}
-					if ($student_response == 'Y' && $student_student_status == 'Y') {
+					if ($student_response == 'Y' && $student_status == 'Y') {
 						$semesterCountArray[$student_semester]['assigned']++;
 					}
-					if ($student_response == 'Y' && $student_student_status == '') {
+					if ($student_response == 'Y' && $student_status == '') {
 						$semesterCountArray[$student_semester]['unassigned']++;
 					}
 					if ($student_level == 'Beginner') {
@@ -3232,12 +3196,10 @@ assignment that meet the criteria for your class.<p>";
 				if ($doDebugLog) {
 					$debugLog .= "STUDENT end of student process<br />";
 				}
-
 			} else {
 				$content	.= "No records found in the $studentTableName table<br />";
 			}
 		}
-
 
 ///// all processing done. Prepare totals	
 		$content		.= "<h4>Processing Complete. Preparing Totals</h4>";
@@ -3304,7 +3266,7 @@ assignment that meet the criteria for your class.<p>";
 									<tr><td style='text-align:right;'>$myInt_Intermediate</td><td>Intermediate Registrations</td></tr>
 									<tr><td style='text-align:right;'>$myInt_Advanced</td><td>Advanced Registrations</td></tr>
 									<tr><td style='text-align:right;'>$myInt_total</td><td>Total Registrations</td></tr>
-									<tr><td style='text-align:right;'>$myInt_dropped</td><td>Regitrations dropped</tr>
+									<tr><td style='text-align:right;'>$myInt_dropped</td><td>Registrations dropped</tr>
 									<tr><td style='text-align:right;'>$myInt_replaced</td><td>Replacements</td></tr>
 									<tr><td style='text-align:right;'>$myInt_verified</td><td>Verified Registrations</td></tr>
 									<tr><td style='text-align:right;'>$myInt_assigned</td><td>Students assigned</td></tr>
@@ -3406,12 +3368,12 @@ assignment that meet the criteria for your class.<p>";
 												  'testMode'=>$testMode,
 												  'doDebug'=>$doDebug));
 		if ($result === TRUE) {
-			$myStr		= "Process completed";
+			$myStr		= "Process completed<br />";
 			return $myStr;
 		} else {
-			$myStr .= "<br />The final mail send function to $myTo failed.<br /><br />
+			$myStr .= "<br />The final mail send function failed.<br /><br />
 						<a href='$siteURL/program-list/'>Return to Portal</a></p>";
-			return $myStr;
+			return "Process completed, sending email failed<br />";
 		}
 	}
 }

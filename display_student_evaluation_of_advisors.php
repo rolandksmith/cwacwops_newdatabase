@@ -3,31 +3,32 @@ function display_student_evaluation_of_advisors_func() {
 /*
 
 	Modified 13Jul23 by Roland to use consolidated tables
+	Modified 19Oct24 by Roland to use new database
 */
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
-	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$doDebug				= FALSE;
+	$testMode				= FALSE;
+	$initializationArray 	= data_initialization_func();
+	$userName				= $initializationArray['userName'];
+	$validUser 				= $initializationArray['validUser'];
+	$siteURL				= $initializationArray['siteurl'];
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	$validTestmode				= $initializationArray['validTestmode'];
 
-	$userName					= $initializationArray['userName'];
 //	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
 //	}
 
-	$siteURL			= $initializationArray['siteurl'];
 
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
@@ -62,7 +63,7 @@ function display_student_evaluation_of_advisors_func() {
 				$evaluated	 = filter_var($theSemester,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "newSemester") {
-				$newSemester	 = strtoupper($str_value);
+				$newSemester	 = $str_value;
 				$evaluated	 = filter_var($newSemester,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_verbose") {
@@ -85,82 +86,84 @@ function display_student_evaluation_of_advisors_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
 		if ($doDebug) {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
-		$evaluateAdvisorTableName				= "wpw1_cwa_evaluate_advisor2";
-		$advisorTableName					= "wpw1_cwa_consolidated_advisor2";
+		$evaluateAdvisorTableName			= "wpw1_cwa_evaluate_advisor2";
+		$advisorTableName					= "wpw1_cwa_advisor2";
+		$userMasterTableName				= 'wpw1_cwa_user_master2';
 	} else {
-		$evaluateAdvisorTableName				= "wpw1_cwa_evaluate_advisor";
-		$advisorTableName					= "wpw1_cwa_consolidated_advisor";
+		$evaluateAdvisorTableName			= "wpw1_cwa_evaluate_advisor";
+		$advisorTableName					= "wpw1_cwa_advisor";
+		$userMasterTableName				= 'wpw1_cwa_user_master';
 	}
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	 = "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -176,9 +179,9 @@ td:last-child {
 		$currentSemester	= $initializationArray['currentSemester'];
 		$prevSemester		= $initializationArray['prevSemester'];
 		if ($currentSemester == 'Not in Session') {
-			$theSemester	= $prevSemester;
+			$useSemester	= $prevSemester;
 		} else {
-			$theSemester	= $currentSemester;
+			$useSemester	= $currentSemester;
 		}
 		$content 		.= "<h3>Display Student Evaluation of Advisors</h3>
 							<p>Specify the semester and click Submit to Start the Process</p>
@@ -186,19 +189,22 @@ td:last-child {
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
 							<table>
-							<tr><td style='width:150px;'>Semester</td>
-								<td><input type='radio' name='theSemester' value='$theSemester' class='formInputButton' checked> $theSemester<br />
+							<tr><td style='width:150px;vertical-align:top;'>Semester</td>
+								<td><input type='radio' name='theSemester' value='$useSemester' class='formInputButton' checked> $useSemester<br />
 									<input type='radio' name='theSemester' value='specified' class='formInputButton'> Specify semester:<br />
 									<input type='text' name='newSemester' class='formInputText' size='15' maxlength='15'></td></tr>
 							$testModeOption
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 							</form></p>";
-		return $content;
 
 ///// Pass 2 -- do the work
 
 
 	} elseif ("2" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 2<br />";
+		}
+	
 		$countsArray				= array();
 		$totalResponses				= 0;
 		$anonymousResponses			= 0;
@@ -255,35 +261,29 @@ td:last-child {
 			}
 		}
 		if ($doDebug) {
-			echo "countsArray:<br /><pre>";
-			print_r($countsArray);
-			echo "</pre><br />";
-			echo "<br />studentRespondingArray:<br /><pre>";
-			print_r($studentRespondingArray);
-			echo "</pre><br />";
+			echo "countsArray built<br />";
+			echo "studentRespondingArray built<br />";
 		}
 
 // Get the semester info
+		$useSemester				= $theSemester;
 		if ($theSemester == 'SPECIFIED') { 		// semester info in newSemester
-			$theSemester			= $newSemester;	
+			$useSemester			= $newSemester;	
 		}
 		if ($doDebug) {
-			echo "Using $theSemester as the semester<br />";
+			echo "Using $useSemester as the semester<br />";
 		}
 	
-		$sql						= "select * from $evaluateAdvisorTableName where advisor_semester='$theSemester' order by advisor_callsign";
+		$sql						= "select * from $evaluateAdvisorTableName 
+										where advisor_semester='$useSemester' 
+										order by advisor_callsign";
 		$wpw1_cwa_evaluate_advisor	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_evaluate_advisor === FALSE) {
-			if ($doDebug) {
-				echo "Reading $evaluateAdvisorTableName table failed<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
+			handleWPDBError($jobname,$doDebug);
 		} else {
 			$numARows				= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr				= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $evaluateAdvisorTableName table<br />";
+				echo "ran $sql<br />and found $numARows rows in $evaluateAdvisorTableName table<br />";
 			}
 			if ($numARows > 0) {
 				foreach ($wpw1_cwa_evaluate_advisor as $evaluateAdvisorRow) {
@@ -407,9 +407,9 @@ td:last-child {
 					}
 //////////////
 					foreach($arrayCategories as $theCategory) {
-						if ($doDebug) {
-							echo "Doing evaluateAdvisor_$theCategory: ${'evaluateAdvisor_' . $theCategory}<br />";
-						}
+//						if ($doDebug) {
+//							echo "Doing evaluateAdvisor_$theCategory: ${'evaluateAdvisor_' . $theCategory}<br />";
+//						}
 						if (${'evaluateAdvisor_' . $theCategory} != '') {
 							$myString			= ${'evaluateAdvisor_' . $theCategory};
 							$countsArray[$evaluateAdvisor_level][$theCategory]['responses']++;
@@ -745,31 +745,32 @@ td:last-child {
 								}
 						
 								//// get the advisor name
-								$mylink 			= $wpdb->get_results( "SELECT first_name, 
-																				  last_name 
-																			FROM $advisorTableName 
-																			where call_sign='$evaluateAdvisor_callsign' 
-																				and semester='$evaluateAdvisor_semester'");
+								$mylink 			= $wpdb->get_results( "SELECT user_first_name, 
+																				  user_last_name 
+																			FROM $userMasterTableName 
+																			where user_call_sign='$evaluateAdvisor_callsign'");
 								if ($mylink === FALSE) {
-									if ($doDebug) {
-										echo "Reading $evaluateAdvisorTableName table failed<br />";
-										echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-											echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-																
-										echo "mylink:<br /><pre>";
-										print_r($mylink);
-										echo "</pre><br /><br />";
-									}
+									handleWPDBError($jobname,$doDebug);
 								} else {
-									foreach($mylink as $advisorRow) {
-
-										$advisor_first_name	= $advisorRow->first_name;
-										$advisor_last_name 	= stripslashes($advisorRow->last_name);
+									$numURows	= $wpdb->num_rows;
+									if ($doDebug) {
+										$lastQuery	= $wpdb->last_query;
+										echo "ran $lastQuery and retrieved $numURows records<br />";
+									}
+									if ($numURows > 0) {
+										foreach($mylink as $advisorRow) {
+	
+											$advisor_first_name	= $advisorRow->user_first_name;
+											$advisor_last_name 	= $advisorRow->user_last_name;
+										}
+									} else {
+										$advisor_first_name	= "John";
+										$advisor_last_name 	= "Not Found";
 									}
 									$content	.= "<table style='width:900px;'>
 													<tr><th style='width:200px;'>Field</th><th>Value</th></tr>
 													<tr><td>Advisor Call Sign:</td><td>$evaluateAdvisor_callsign</td></tr>
-													<tr><td>Advisor Name:</td><td>$advisor_last_name, $advisor_first_name</td></tr>
+													<tr><td>Advisor Name:</td><td>$advisor_last_name, $advisor_first_name ($evaluateAdvisor_callsign)</td></tr>
 													<tr><td>Student ID:</td><td>$evaluateAdvisor_survey_id</td></tr>
 													<tr><td>Anonymous:</td><td>$evaluateAdvisor_anonymous</td></tr>
 													<tr><td>Create Date:</td><td>$evaluateAdvisor_create_date</td></tr>

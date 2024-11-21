@@ -125,7 +125,7 @@ function add_remove_student($inp_data = array()) {
 		$returnData					= array();
 	
 		foreach($inp_data as $thisKey=>$thisData) {
-			${$thisKey}				= $thisData;
+			$$thisKey				= $thisData;
 		}
 	
 		if ($inp_semester == '') {
@@ -166,13 +166,13 @@ function add_remove_student($inp_data = array()) {
 		} else {
 
 			if ($testMode) {
-				$studentTableName		= "wpw1_cwa_consolidated_student2";
-				$advisorNewTableName	= "wpw1_cwa_consolidated_advisor2";
-				$advisorClassTableName	= "wpw1_cwa_consolidated_advisorclass2";
+				$studentTableName		= "wpw1_cwa_student2";
+				$advisorNewTableName	= "wpw1_cwa_advisor2";
+				$advisorClassTableName	= "wpw1_cwa_advisorclass2";
 			} else {
-				$studentTableName		= "wpw1_cwa_consolidated_student";
-				$advisorNewTableName	= "wpw1_cwa_consolidated_advisor";
-				$advisorClassTableName	= "wpw1_cwa_consolidated_advisorclass";
+				$studentTableName		= "wpw1_cwa_student";
+				$advisorNewTableName	= "wpw1_cwa_advisor";
+				$advisorClassTableName	= "wpw1_cwa_advisorclass";
 			}
 
 			// get the student record
@@ -180,46 +180,38 @@ function add_remove_student($inp_data = array()) {
 				echo "getting student record for $inp_student<br />";
 			}
 			$sql				= "select student_id, 
-										  semester, 
+										  student_semester, 
 										  student_status, 
-										  assigned_advisor, 
-										  assigned_advisor_class, 
-										  advisor_select_date, 
-										  excluded_advisor,
-										  action_log, 
-										  no_catalog
+										  student_pre_assigned_advisor, 
+										  student_assigned_advisor, 
+										  student_assigned_advisor_class, 
+										  student_advisor_select_date, 
+										  student_excluded_advisor,
+										  student_action_log, 
+										  student_no_catalog
 									from $studentTableName 
-									where call_sign='$inp_student' 
-									and semester='$inp_semester'";
+									where student_call_sign='$inp_student' 
+									and student_semester='$inp_semester'";
 			$wpw1_cwa_student		= $wpdb->get_results($sql);
 			if ($wpw1_cwa_student === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebug) {
-					echo "Reading $studentTableName table failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-				sendErrorEmail($errorMsg);
-				$returnData			= array(FALSE,"getting $inp_student from $studentTableName failed");
+				handleWPDBError("FUNCTION Add Remove Student",$doDebug);
 			} else {
 				$numSRows			= $wpdb->num_rows;
 				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numSRows rows<br />";
+					echo "ran $sql<br />and found $numSRows rows<br />";
 				}
 				if ($numSRows > 0) {
 					foreach ($wpw1_cwa_student as $studentRow) {
 						$student_ID								= $studentRow->student_id;
-						$student_semester						= $studentRow->semester;
-						$student_student_status  				= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->action_log;
-						$student_assigned_advisor  				= $studentRow->assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->advisor_select_date;
-						$student_excluded_advisor				= $studentRow->excluded_advisor;
-						$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-						$student_no_catalog						= $studentRow->no_catalog;
+						$student_semester						= $studentRow->student_semester;
+						$student_status  				= strtoupper($studentRow->student_status);
+						$student_action_log  					= $studentRow->student_action_log;
+						$student_pres_assigned_advisor			= $studentRow->student_pre_assigned_advisor;
+						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+						$student_excluded_advisor				= $studentRow->student_excluded_advisor;
+						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+						$student_no_catalog						= $studentRow->student_no_catalog;
 
 						if ($inp_method == 'add') {
 							// add student to advisors class
@@ -229,19 +221,19 @@ function add_remove_student($inp_data = array()) {
 							}
 							$student_action_log						= "$student_action_log / $actionDate Add_Remove $userName $jobname Student assigned to $inp_assigned_advisor $inp_assigned_advisor_class class";
 							if ($inp_arbitrarily_assigned == 'Y') {
-								$updateParams['no_catalog']			= 'Y';
+								$updateParams['student_no_catalog']			= 'Y';
 								$updateFormat[]						= '%s';
 							} else {
-								$updateParams['no_catalog']			= '';
+								$updateParams['student_no_catalog']			= '';
 								$updateFormat[]						= '%s';
 							}
-							$updateParams['assigned_advisor']		= $inp_assigned_advisor;
+							$updateParams['student_assigned_advisor']		= $inp_assigned_advisor;
 							$updateFormat[]							= '%s';
-							$updateParams['assigned_advisor_class']	= $inp_assigned_advisor_class;
+							$updateParams['student_assigned_advisor_class']	= $inp_assigned_advisor_class;
 							$updateFormat[]							= '%d';
-							$updateParams['action_log']				= $student_action_log;
+							$updateParams['student_action_log']				= $student_action_log;
 							$updateFormat[]							= '%s';
-							$updateParams['advisor_select_date']	= date('Y-m-d H:i:s');
+							$updateParams['student_advisor_select_date']	= date('Y-m-d H:i:s');
 							$updateFormat[]							= '%s';
 							$updateParams['student_status']			= 'S';
 							$updateFormat[]							= '%s';
@@ -252,29 +244,31 @@ function add_remove_student($inp_data = array()) {
 							}
 							$student_action_log						= "$student_action_log / $actionDate Add_Remove $userName $jobname Student removed from $inp_assigned_advisor $inp_assigned_advisor_class class";
 							if ($student_no_catalog == 'Y') {
-								$updateParams['no_catalog']			= '';
+								$updateParams['student_no_catalog']			= '';
 								$updateFormat[]						= '%s';
 							}
-							$updateParams['action_log']				= $student_action_log;
+							$updateParams['student_action_log']				= $student_action_log;
 							$updateFormat[]							= '%s';
 					
 							if ($inp_remove_status == '') {					//// put in unassigned pool
 								$updateParams['student_status']			= '';
 								$updateFormat[]							= '%s';
-								$updateParams['assigned_advisor']		= '';
+								$updateParams['student_assigned_advisor']		= '';
 								$updateFormat[]							= '%s';
-								$updateParams['assigned_advisor_class']	= 0;
+								$updateParams['student_pre_assigned_advisor']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_assigned_advisor_class']	= 0;
 								$updateFormat[]							= '%d';
-								$updateParams['advisor_select_date']	= '';
+								$updateParams['student_advisor_select_date']	= '';
 								$updateFormat[]							= '%s';
 								if ($student_excluded_advisor == '') {
 									$student_excluded_advisor			.= "$student_assigned_advisor";
 								} else {
 									$student_excluded_advisor			.= "|$student_assigned_advisor";
 								}
-								$updateParams['excluded_advisor']		= $student_excluded_advisor;
+								$updateParams['student_excluded_advisor']		= $student_excluded_advisor;
 								$updateFormat[]							= '%s';
-								$updateParams['class_priority']			= 1;
+								$updateParams['student_class_priority']			= 1;
 								$updateFormat[]							= '%d';
 							} else {
 								$updateParams['student_status']			= $inp_remove_status;
@@ -284,14 +278,14 @@ function add_remove_student($inp_data = array()) {
 								} else {
 									$student_excluded_advisor			.= "|$student_assigned_advisor";
 								}
-								$updateParams['excluded_advisor']		= $student_excluded_advisor;
+								$updateParams['student_excluded_advisor']		= $student_excluded_advisor;
 								$updateFormat[]							= '%s';
-								$updateParams['assigned_advisor']		= '';
+								$updateParams['student_assigned_advisor']		= '';
 								$updateFormat[]							= '%s';
-								$updateParams['assigned_advisor_class']	= 0;
+								$updateParams['student_assigned_advisor_class']	= 0;
 								$updateFormat[]							= '%d';
-								if ($student_student_status == 'V') {
-									$updateParams['hold_reason_code']		= 'X';
+								if ($student_status == 'V') {
+									$updateParams['student_hold_reason_code']		= 'X';
 									$updateFormat[]							= '%s';
 								}
 							}
@@ -327,86 +321,69 @@ function add_remove_student($inp_data = array()) {
 							$updateParams		= array();
 							$updateFormat		= array();
 							$sql				= "select * from $advisorClassTableName 
-													where advisor_call_sign = '$inp_assigned_advisor' 
-													and sequence = $inp_assigned_advisor_class 
-													and semester = '$inp_semester'";
+													where advisorclass_call_sign = '$inp_assigned_advisor' 
+													and advisorclass_sequence = $inp_assigned_advisor_class 
+													and advisorclass_semester = '$inp_semester'";
 							$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
 							if ($wpw1_cwa_advisorclass === FALSE) {
-								$myError			= $wpdb->last_error;
-								$myQuery			= $wpdb->last_query;
-								if ($doDebug) {
-									echo "Reading $advisorClassTableName table failed<br />
-										  wpdb->last_query: $myQuery<br />
-										  wpdb->last_error: $myError<br />";
-								}
-								$errorMsg			= "$jobname Reading $advisorClassTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-								sendErrorEmail($errorMsg);
+								handleWPDBError("FUNCTION Add Remove Student",$doDebug);
 								$returnData			= array(FALSE,"reading $advisorClassTableName for $inp_assigned_advisor $inp_assigned_advisor_class in semester $inp_semester failed");
 							} else {
 								$numACRows						= $wpdb->num_rows;
 								if ($doDebug) {
-									$myStr						= $wpdb->last_query;
-									echo "ran $myStr<br />and found $numACRows rows<br />";
+									echo "ran $sql<br />and found $numACRows rows<br />";
 								}
 								if ($numACRows > 0) {
 									foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
 										$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-										$advisorClass_advisor_call_sign 		= $advisorClassRow->advisor_call_sign;
-										$advisorClass_advisor_first_name 		= $advisorClassRow->advisor_first_name;
-										$advisorClass_advisor_last_name 		= stripslashes($advisorClassRow->advisor_last_name);
-										$advisorClass_advisor_id 				= $advisorClassRow->advisor_id;
-										$advisorClass_sequence 					= $advisorClassRow->sequence;
-										$advisorClass_semester 					= $advisorClassRow->semester;
-										$advisorClass_timezone 					= $advisorClassRow->time_zone;
-										$advisorClass_timezone_id				= $advisorClassRow->timezone_id;		// new
-										$advisorClass_timezone_offset			= $advisorClassRow->timezone_offset;	// new
-										$advisorClass_level 					= $advisorClassRow->level;
-										$advisorClass_class_size 				= $advisorClassRow->class_size;
-										$advisorClass_class_schedule_days 		= $advisorClassRow->class_schedule_days;
-										$advisorClass_class_schedule_times 		= $advisorClassRow->class_schedule_times;
-										$advisorClass_class_schedule_days_utc 	= $advisorClassRow->class_schedule_days_utc;
-										$advisorClass_class_schedule_times_utc 	= $advisorClassRow->class_schedule_times_utc;
-										$advisorClass_action_log 				= $advisorClassRow->action_log;
-										$advisorClass_class_incomplete 			= $advisorClassRow->class_incomplete;
-										$advisorClass_date_created				= $advisorClassRow->date_created;
-										$advisorClass_date_updated				= $advisorClassRow->date_updated;
-										$advisorClass_student01 				= $advisorClassRow->student01;
-										$advisorClass_student02 				= $advisorClassRow->student02;
-										$advisorClass_student03 				= $advisorClassRow->student03;
-										$advisorClass_student04 				= $advisorClassRow->student04;
-										$advisorClass_student05 				= $advisorClassRow->student05;
-										$advisorClass_student06 				= $advisorClassRow->student06;
-										$advisorClass_student07 				= $advisorClassRow->student07;
-										$advisorClass_student08 				= $advisorClassRow->student08;
-										$advisorClass_student09 				= $advisorClassRow->student09;
-										$advisorClass_student10 				= $advisorClassRow->student10;
-										$advisorClass_student11 				= $advisorClassRow->student11;
-										$advisorClass_student12 				= $advisorClassRow->student12;
-										$advisorClass_student13 				= $advisorClassRow->student13;
-										$advisorClass_student14 				= $advisorClassRow->student14;
-										$advisorClass_student15 				= $advisorClassRow->student15;
-										$advisorClass_student16 				= $advisorClassRow->student16;
-										$advisorClass_student17 				= $advisorClassRow->student17;
-										$advisorClass_student18 				= $advisorClassRow->student18;
-										$advisorClass_student19 				= $advisorClassRow->student19;
-										$advisorClass_student20 				= $advisorClassRow->student20;
-										$advisorClass_student21 				= $advisorClassRow->student21;
-										$advisorClass_student22 				= $advisorClassRow->student22;
-										$advisorClass_student23 				= $advisorClassRow->student23;
-										$advisorClass_student24 				= $advisorClassRow->student24;
-										$advisorClass_student25 				= $advisorClassRow->student25;
-										$advisorClass_student26 				= $advisorClassRow->student26;
-										$advisorClass_student27 				= $advisorClassRow->student27;
-										$advisorClass_student28 				= $advisorClassRow->student28;
-										$advisorClass_student29 				= $advisorClassRow->student29;
-										$advisorClass_student30 				= $advisorClassRow->student30;
-										$class_number_students					= $advisorClassRow->number_students;
-										$class_evaluation_complete 				= $advisorClassRow->evaluation_complete;
-										$class_comments							= $advisorClassRow->class_comments;
-										$copycontrol							= $advisorClassRow->copy_control;
-
-										$advisorClass_advisor_last_name  		= no_magic_quotes($advisorClass_advisor_last_name);
-
+										$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+										$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+										$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+										$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+										$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+										$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+										$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+										$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+										$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+										$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+										$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+										$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+										$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+										$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+										$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+										$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+										$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+										$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+										$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+										$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+										$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+										$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+										$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+										$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+										$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+										$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+										$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+										$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+										$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+										$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+										$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+										$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+										$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+										$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+										$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+										$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+										$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+										$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+										$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+										$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+										$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+										$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+										$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+										$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+										$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+										$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+										$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+										$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 
 										$addedStudent							= FALSE;
 										if ($inp_method == 'add') {			// find the open spot
@@ -425,10 +402,10 @@ function add_remove_student($inp_data = array()) {
 												}
 												if ($theInfo == '') {       // have an open slot
 													$advisorClass_action_log		= "$advisorClass_action_log / $actionDate $userName $inp_student added to this class ";
-													$updateParams["student$strSnum"] = $inp_student;
+													$updateParams["advisorclass_student$strSnum"] = $inp_student;
 													$updateFormat[]= '%s';
-													$class_number_students++;
-													$updateParams['number_students']= $class_number_students;
+													$advisorClass_number_students++;
+													$updateParams['advisorclass_number_students']= $advisorClass_number_students;
 													$updateFormat[]= '%d';
 													$addedStudent					= TRUE;
 													if ($doDebug) {
@@ -447,9 +424,9 @@ function add_remove_student($inp_data = array()) {
 											}
 											if (!$addedStudent) {
 												if ($doDebug) {
-													echo "Could not find an open slot for student $inp_student in $advisorClass_advisor_call_sign class $advisorClass_sequence<br />";
+													echo "Could not find an open slot for student $inp_student in $advisorClass_call_sign class $advisorClass_sequence<br />";
 												}
-												$returnData		= array(FALSE,"could not find an open slot for student $inp_student in $advisorClass_advisor_call_sign class $advisorClass_sequence<br />");
+												$returnData		= array(FALSE,"could not find an open slot for student $inp_student in $advisorClass_call_sign class $advisorClass_sequence<br />");
 											} else {
 												// clear out the class_verified date in the advisor record
 												if ($doDebug) {
@@ -457,25 +434,16 @@ function add_remove_student($inp_data = array()) {
 												}
 												// first, get the id for the advisor's record
 												$sql					= "select advisor_id from $advisorNewTableName 
-																			where call_sign = '$inp_assigned_advisor' 
-																			and semester='$inp_semester'";
+																			where advisor_call_sign = '$inp_assigned_advisor' 
+																			and advisor_semester='$inp_semester'";
 												$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 												if ($wpw1_cwa_advisor === FALSE) {
-													$myError			= $wpdb->last_error;
-													$myQuery			= $wpdb->last_query;
-													if ($doDebug) {
-														echo "Reading $advisorNewTableName table failed<br />
-															  wpdb->last_query: $myQuery<br />
-															  wpdb->last_error: $myError<br />";
-													}
-													$errorMsg			= "$jobname Reading $advisorNewTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-													sendErrorEmail($errorMsg);
-													$content		.= "Unable to obtain content from $advisorNewTableName<br />";
+													handleWPDBError("FUNCTION Add Remove Student",$doDebug);
+													$returnData		= array(FALSE,"Unable to obtain content from $advisorNewTableName<br />");
 												} else {
 													$numARows			= $wpdb->num_rows;
 													if ($doDebug) {
-														$myStr			= $wpdb->last_query;
-														echo "ran $myStr<br />and found $numARows rows in $advisorNewTableName table<br />";
+														echo "ran $sql<br />and found $numARows rows in $advisorNewTableName table<br />";
 													}
 													if ($numARows > 0) {
 														foreach ($wpw1_cwa_advisor as $advisorRow) {
@@ -487,7 +455,7 @@ function add_remove_student($inp_data = array()) {
 																									
 															$advisorUpdateData		= array('tableName'=>$advisorNewTableName,
 																							'inp_method'=>'update',
-																							'inp_data'=>array('class_verified|N|s'),
+																							'inp_data'=>array('advisor_class_verified|N|s'),
 																							'jobname'=>$jobname,
 																							'inp_id'=>$advisor_ID,
 																							'inp_callsign'=>$inp_assigned_advisor,
@@ -515,7 +483,7 @@ function add_remove_student($inp_data = array()) {
 														if ($doDebug) {
 															echo "Did not find a record in $advisorNewTableName for advisor_ID of $advisor_ID<br />";
 														}
-														sendErrorEmail("$jobname updating class_verified Did not find a record in $advisorNewTableName for advisor_ID of $advisor_ID");
+														sendErrorEmail("$jobname updating class_verified Did not find a record in $advisorNewTableName for advisor_ID of $advisor_id");
 													}
 												}
 											}
@@ -555,7 +523,7 @@ function add_remove_student($inp_data = array()) {
 														if (${'advisorClass_student' . $strJJ} != '') {
 															${'advisorClass_student' . $strII} = ${'advisorClass_student' . $strJJ};
 															${'advisorClass_student' . $strJJ} = '';
-															$updateParams["student$strII"] = ${'advisorClass_student' . $strII};
+															$updateParams["advisorclass_student$strII"] = ${'advisorClass_student' . $strII};
 															$updateFormat[]					= '%s';
 															$numberStudents++;
 															$ii++;
@@ -563,16 +531,16 @@ function add_remove_student($inp_data = array()) {
 														} else {
 															$doneMoving = TRUE;
 															${'advisorClass_student' . $strII} = '';
-															$updateParams["student$strII"] = ${'advisorClass_student' . $strII};
+															$updateParams["advisorclass_student$strII"] = ${'advisorClass_student' . $strII};
 															$updateFormat[]					= '%s';
 														}
 													}
 												}
 											}
-											$updateParams['number_students'] 	= $numberStudents;
+											$updateParams['advisorclass_number_students'] 	= $numberStudents;
 											$updateFormat[]						= '%d';
 											$advisorClass_action_log 			= "$advisorClass_action_log / $actionDate $userName $inp_student removed ";
-											$updateParams['action_log'] 		= $advisorClass_action_log;
+											$updateParams['advisorclass_action_log'] 		= $advisorClass_action_log;
 											$updateFormat[] 					= '%s';
 
 										}
@@ -586,8 +554,9 @@ function add_remove_student($inp_data = array()) {
 																		'inp_format'=>$updateFormat,
 																		'jobname'=>$jobname,
 																		'inp_id'=>$advisorClass_ID,
-																		'inp_callsign'=>$advisorClass_advisor_call_sign,
+																		'inp_callsign'=>$advisorClass_call_sign,
 																		'inp_semester'=>$advisorClass_semester,
+																		'inp_sequence'=>$advisorClass_sequence,
 																		'inp_who'=>$userName,
 																		'testMode'=>$testMode,
 																		'doDebug'=>$doDebug);
@@ -595,7 +564,7 @@ function add_remove_student($inp_data = array()) {
 										if ($updateResult[0] === FALSE) {
 											$myError	= $wpdb->last_error;
 											$mySql		= $wpdb->last_query;
-											$errorMsg	= "$jobname Processing $advisorClass_advisor_call_sign in $advisorClassTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+											$errorMsg	= "$jobname Processing $advisorClass_call_sign in $advisorClassTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
 											if ($doDebug) {
 												echo $errorMsg;
 											}

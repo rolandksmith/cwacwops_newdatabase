@@ -87,7 +87,7 @@ if (isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'OPTIO
 	
 		$nowDate = date('Y-m-d H:i:s');
 		$query = "SELECT * FROM `wpw1_cwa_reminders` 
-					WHERE (call_sign = '$callsign' or role='$role') 
+					WHERE (call_sign = '$callsign' or role='$role' or role='all') 
 					and resolved != 'Y' 
 					and effective_date <= '$nowDate' 
 					and close_date > '$nowDate' 
@@ -146,9 +146,13 @@ if (isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'OPTIO
 						
 					$reminder_text			= str_replace("\t","",$reminder_text);
 					if ($call_sign != '') {
-						$removeLink			= "<a href='https://cwa.cwops.org/cwa-remove-item/?inp_call_sign=$call_sign&token=$token' target='_blank'>Remove Item</a>";
+						$removeLink			= "<a href='https://cwa.cwops.org/cwa-remove-item/?inp_callsign=$call_sign&token=$token' target='_blank'>Remove Item</a>";
 					} else{
-						$removeLink			= "<a href='https://cwa.cwops.org/cwa-remove-item/?inp_call_sign=$role&token=$token' target='_blank'>Remove Item</a>";
+						if ($role == 'all') {
+							$removeLink		= '';
+						} else {
+							$removeLink			= "<a href='https://cwa.cwops.org/cwa-remove-item/?inp_callsign=$role&token=$token' target='_blank'>Remove Item</a>";
+						}
 					}
 					$myInt				= strrpos($reminder_text,"</p>");
 					if ($myInt === FALSE) {

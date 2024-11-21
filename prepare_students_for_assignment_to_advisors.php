@@ -5,7 +5,7 @@ function prepare_students_for_assignment_to_advisors_func() {
  * This function should be run before running the
  * function to assign students to advisors. The function 
  * does the following:
- *		Checks each student in the past_student pod to see if the student has taken 
+ *		Checks each student in the upcoming semester to see if the student has taken 
  *		a previous class.
  *			Carry forward the excluded advisor(s)
  *			if so and the student is promotable, add 1 to priority
@@ -61,6 +61,7 @@ function prepare_students_for_assignment_to_advisors_func() {
 	modified 25Oct22 by Roland to accomodate new timezone table format
 	modified 16Apr23 by Roland to fix action_log
 	modified 13Jul23 by Roland to use consolidated tables
+	Modified 21Oct24 by Roland for new database
  
  */
  
@@ -73,16 +74,16 @@ function prepare_students_for_assignment_to_advisors_func() {
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	if ($validUser == "N") {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
-	}
+	$validUser 			= $initializationArray['validUser'];
 	$userName			= $initializationArray['userName'];
 	$currentDate		= $initializationArray['currentDate'];
 	$validTestmode		= $initializationArray['validTestmode'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
 	$siteURL			= $initializationArray['siteurl'];
 
+	if ($userName == '') {
+		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+	}
 //	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
@@ -131,8 +132,8 @@ function prepare_students_for_assignment_to_advisors_func() {
 	$semesterFour		= $initializationArray['semesterFour'];
 	$theURL				= "$siteURL/cwa-prepare-students-for-assignment-to-advisors/";
 	$studentManagementURL = "$siteURL/cwa-student-management/";
-	$studentUpdateURL	= "$siteURL/cwa-display-and-update-student-information/";
-	$advisorUpdateURL	= "$siteURL/cwa-display-and-update-advisor-information/";
+	$studentUpdateURL	= "$siteURL/cwa-display-and-update-student-signup-information/";
+	$advisorUpdateURL	= "$siteURL/cwa-display-and-update-advisor-signup-information/";
 	$errorArray			= array();
 
 // get the input information
@@ -197,65 +198,64 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				</style>";	
 
 	if ("1" == $strPass) {
 		if ($doDebug) {
-			echo "Function starting.<br />";
+			echo "<br />Function starting.<br />";
 		}
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
-		$testModeOption	= "
-<tr><td>Verbose Debugging?<br />
-		<input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
-		<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
+		$testModeOption	= "<tr><td>Verbose Debugging?<br />
+									<input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
+									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 	} else {
 		$testModeOption	= '';
 	}
@@ -346,51 +346,57 @@ td {padding:5px;font-size:small;}
 ///// Pass 2 -- do the work
 
 	} elseif ("2" == $strPass) {
-	
-		$content 						.= "<h3>Preparing for Student Assignments</h3>";
 		if ($doDebug) {
-			echo "Request Type: $inp_request_type<br />";
+			echo "<br />at pass 2<br />Request Type: $inp_request_type<br />";
 		}
+
+	
+		$content 						.= "<h3>$jobname</h3>";
 		if ($inp_request_type == "TestNoUpdate") {
-			$studentTableName			= "wpw1_cwa_consolidated_student2";
-			$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
-			$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass2";
+			$studentTableName			= "wpw1_cwa_student2";
+			$advisorTableName			= "wpw1_cwa_advisor2";
+			$advisorClassTableName		= "wpw1_cwa_advisorclass2";
+			$userMasterTableName		= 'wpw1_cwa_user_master2';
 			$updateMode					= FALSE;
 			$testMode					= TRUE;
 			$sendEmail					= FALSE;
 			$doAdvisors					= TRUE;
 			$content					.= "<p>System is running in TestMode No Updates</p><h5>The Function Found the Following Anomalies</h5>";
 		} elseif ($inp_request_type == "TestUpdate") {
-			$studentTableName			= "wpw1_cwa_consolidated_student2";
-			$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
-			$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass2";
+			$studentTableName			= "wpw1_cwa_student2";
+			$advisorTableName			= "wpw1_cwa_advisor2";
+			$advisorClassTableName		= "wpw1_cwa_advisorclass2";
+			$userMasterTableName		= 'wpw1_cwa_user_master2';
 			$updateMode					= TRUE;
 			$testMode					= TRUE;
 			$sendEmail					= FALSE;
 			$doAdvisors					= TRUE;
 			$content					.= "<p>System is running in TestMode With Updates</p><h5>The Function Found the Following Anomalies</h5>";
 		} elseif ($inp_request_type == "Production") {
-			$studentTableName			= "wpw1_cwa_consolidated_student";
-			$advisorTableName			= "wpw1_cwa_consolidated_advisor";
-			$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass";
+			$studentTableName			= "wpw1_cwa_student";
+			$advisorTableName			= "wpw1_cwa_advisor";
+			$advisorClassTableName		= "wpw1_cwa_advisorclass";
+			$userMasterTableName		= 'wpw1_cwa_user_master';
 			$testMode					= FALSE;
 			$updateMode					= TRUE;
 			$sendEmail					= FALSE;
 			$doAdvisors					= TRUE;
 			$content					.= "<p>System is running in Production with Updates</p><h5>The Function Found the Following Anomalies</h5>";
 		} elseif ($inp_request_type == 'SendTestEmail') {
-			$studentTableName			= "wpw1_cwa_consolidated_student2";
-			$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
-			$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass2";
+			$studentTableName			= "wpw1_cwa_student2";
+			$advisorTableName			= "wpw1_cwa_advisor2";
+			$advisorClassTableName		= "wpw1_cwa_advisorclass2";
+			$userMasterTableName		= 'wpw1_cwa_user_master2';
 			$testMode					= TRUE;
 			$updateMode					= TRUE;
 			$sendEmail					= TRUE;
 			$doAdvisors					= TRUE;
 			$content					.= "<p>System is running in TestMode Sending Test Emails Only</p><h5>Sending the Following Emails</h5>";
 		} elseif ($inp_request_type == 'SendEmail') {
-			$studentTableName			= "wpw1_cwa_consolidated_student";
-			$advisorTableName			= "wpw1_cwa_consolidated_advisor";
-			$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass";
+			$studentTableName			= "wpw1_cwa_student";
+			$advisorTableName			= "wpw1_cwa_advisor";
+			$advisorClassTableName		= "wpw1_cwa_advisorclass";
+			$userMasterTableName		= 'wpw1_cwa_user_master';
 			$testMode					= FALSE;
 			$updateMode					= FALSE;
 			$sendEmail					= TRUE;
@@ -413,94 +419,117 @@ td {padding:5px;font-size:small;}
 		// get the student table for the next semester and process each student
 
 		$sql				= "select * from $studentTableName 
-							   where semester='$nextSemester' 
-							   	and (response='Y' or response='')  
-							   order by call_sign ";
+								left join $userMasterTableName on user_call_sign = student_call_sign 
+							   where student_semester='$nextSemester' 
+							   	and (student_response='Y' or student_response='')  
+							   order by student_call_sign ";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $studentTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
+			handleWPDBError($jobname,$doDebug);
 		} else {
 			$numSRows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numSRows rows<br />";
+				echo "ran $sql<br />and found $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
+					$student_master_ID 					= $studentRow->user_ID;
+					$student_master_call_sign 			= $studentRow->user_call_sign;
+					$student_first_name 				= $studentRow->user_first_name;
+					$student_last_name 					= $studentRow->user_last_name;
+					$student_email 						= $studentRow->user_email;
+					$student_phone 						= $studentRow->user_phone;
+					$student_city 						= $studentRow->user_city;
+					$student_state 						= $studentRow->user_state;
+					$student_zip_code 					= $studentRow->user_zip_code;
+					$student_country_code 				= $studentRow->user_country_code;
+					$student_whatsapp 					= $studentRow->user_whatsapp;
+					$student_telegram 					= $studentRow->user_telegram;
+					$student_signal 					= $studentRow->user_signal;
+					$student_messenger 					= $studentRow->user_messenger;
+					$student_master_action_log 			= $studentRow->user_action_log;
+					$student_timezone_id 				= $studentRow->user_timezone_id;
+					$student_languages 					= $studentRow->user_languages;
+					$student_survey_score 				= $studentRow->user_survey_score;
+					$student_is_admin					= $studentRow->user_is_admin;
+					$student_role 						= $studentRow->user_role;
+					$student_master_date_created 		= $studentRow->user_date_created;
+					$student_master_date_updated 		= $studentRow->user_date_updated;
+
 					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= trim(strtoupper($studentRow->call_sign));
-					$student_first_name						= $studentRow->first_name;
-					$student_last_name						= stripslashes($studentRow->last_name);
-					$student_email  						= strtolower(strtolower($studentRow->email));
-					$student_phone  						= $studentRow->phone;
-					$student_ph_code						= $studentRow->ph_code;
-					$student_city  							= $studentRow->city;
-					$student_state  						= $studentRow->state;
-					$student_zip_code  						= $studentRow->zip_code;
-					$student_country  						= $studentRow->country;
-					$student_country_code					= $studentRow->country_code;
-					$student_time_zone  					= $studentRow->time_zone;
-					$student_timezone_id					= $studentRow->timezone_id;
-					$student_timezone_offset				= $studentRow->timezone_offset;
-					$student_whatsapp						= $studentRow->whatsapp_app;
-					$student_signal							= $studentRow->signal_app;
-					$student_telegram						= $studentRow->telegram_app;
-					$student_messenger						= $studentRow->messenger_app;					
-					$student_wpm 	 						= $studentRow->wpm;
-					$student_youth  						= $studentRow->youth;
-					$student_age  							= $studentRow->age;
-					$student_student_parent 				= $studentRow->student_parent;
-					$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-					$student_level  						= $studentRow->level;
-					$student_waiting_list 					= $studentRow->waiting_list;
-					$student_request_date  					= $studentRow->request_date;
-					$student_semester						= $studentRow->semester;
-					$student_notes  						= $studentRow->notes;
-					$student_welcome_date  					= $studentRow->welcome_date;
-					$student_email_sent_date  				= $studentRow->email_sent_date;
-					$student_email_number  					= $studentRow->email_number;
-					$student_response  						= strtoupper($studentRow->response);
-					$student_response_date  				= $studentRow->response_date;
-					$student_abandoned  					= $studentRow->abandoned;
-					$student_student_status  				= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->action_log;
-					$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->selected_date;
-					$student_no_catalog			 			= $studentRow->no_catalog;
-					$student_hold_override  				= $studentRow->hold_override;
-					$student_messaging  					= $studentRow->messaging;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->hold_reason_code;
-					$student_class_priority  				= $studentRow->class_priority;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
-					$student_excluded_advisor  				= $studentRow->excluded_advisor;
-					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->available_class_days;
-					$student_intervention_required  		= $studentRow->intervention_required;
-					$student_copy_control  					= $studentRow->copy_control;
-					$student_first_class_choice  			= $studentRow->first_class_choice;
-					$student_second_class_choice  			= $studentRow->second_class_choice;
-					$student_third_class_choice  			= $studentRow->third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-					$student_catalog_options				= $studentRow->catalog_options;
-					$student_flexible						= $studentRow->flexible;
-					$student_date_created 					= $studentRow->date_created;
-					$student_date_updated			  		= $studentRow->date_updated;
+					$student_call_sign						= $studentRow->student_call_sign;
+					$student_time_zone  					= $studentRow->student_time_zone;
+					$student_timezone_offset				= $studentRow->student_timezone_offset;
+					$student_youth  						= $studentRow->student_youth;
+					$student_age  							= $studentRow->student_age;
+					$student_parent 				= $studentRow->student_parent;
+					$student_parent_email  					= strtolower($studentRow->student_parent_email);
+					$student_level  						= $studentRow->student_level;
+					$student_waiting_list 					= $studentRow->student_waiting_list;
+					$student_request_date  					= $studentRow->student_request_date;
+					$student_semester						= $studentRow->student_semester;
+					$student_notes  						= $studentRow->student_notes;
+					$student_welcome_date  					= $studentRow->student_welcome_date;
+					$student_email_sent_date  				= $studentRow->student_email_sent_date;
+					$student_email_number  					= $studentRow->student_email_number;
+					$student_response  						= strtoupper($studentRow->student_response);
+					$student_response_date  				= $studentRow->student_response_date;
+					$student_abandoned  					= $studentRow->student_abandoned;
+					$student_status  						= strtoupper($studentRow->student_status);
+					$student_action_log  					= $studentRow->student_action_log;
+					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+					$student_selected_date  				= $studentRow->student_selected_date;
+					$student_no_catalog  					= $studentRow->student_no_catalog;
+					$student_hold_override  				= $studentRow->student_hold_override;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+					$student_class_priority  				= $studentRow->student_class_priority;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
+					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
+					$student_available_class_days  			= $studentRow->student_available_class_days;
+					$student_intervention_required  		= $studentRow->student_intervention_required;
+					$student_copy_control  					= $studentRow->student_copy_control;
+					$student_first_class_choice  			= $studentRow->student_first_class_choice;
+					$student_second_class_choice  			= $studentRow->student_second_class_choice;
+					$student_third_class_choice  			= $studentRow->student_third_class_choice;
+					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+					$student_catalog_options				= $studentRow->student_catalog_options;
+					$student_flexible						= $studentRow->student_flexible;
+					$student_date_created 					= $studentRow->student_date_created;
+					$student_date_updated			  		= $studentRow->student_date_updated;
+
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$student_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+						$student_country		= "UNKNOWN";
+						$student_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$student_country		= $countryRow->country_name;
+								$student_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$student_country			= "Unknown";
+							$student_ph_code			= "";
+						}
+					}
+
 				
-					$studentUpdateData			= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a>";
+					$studentUpdateData			= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>";
 					$possContent				= "<br />Processing student $student_last_name, $student_first_name ($studentUpdateData)<br />
 													&nbsp;&nbsp;&nbsp;Youth: $student_youth; age: $student_age<br />
 													&nbsp;&nbsp;&nbsp;Requesting a $student_level class<br />";
@@ -509,7 +538,7 @@ td {padding:5px;font-size:small;}
 					$updateStudent				= FALSE;
 					$carryForwardExclAdvisor	= '';
 					$newExclAdvisor				= '';
-					$studentUpdateData			= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$student_call_sign</a>";
+					$studentUpdateData			= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>";
 					if (!$sendEmail) {					// do the process, no emails sent
 						$studentUpdateParams	= array();	
 						$studentUpdateFormat	= array();			
@@ -521,9 +550,9 @@ td {padding:5px;font-size:small;}
 								   &nbsp;&nbsp;&nbsp;Hold Override: $student_hold_override<br />";
 						}
 						/// if student says is youth, must have an age and be 20 or less
-						if ($student_youth == 'Yes') {
+						if ($student_youth == 'Yes' || $student_youth == 'Y') {
 							if ($student_age == '') {
-								$studentUpdateParams[]			= "youth|N|s";
+								$studentUpdateParams[]			= "student_youth|N|s";
 								$updateStudent					= TRUE;
 								$updateLog						.= " / student says is a youth, age not given and youth set to no";
 								if ($doDebug) {
@@ -533,7 +562,7 @@ td {padding:5px;font-size:small;}
 								$invalidYouth++;
 							} else {
 								if ($student_age > 20) {
-									$studentUpdateParams[]			= "youth|N|s";
+									$studentUpdateParams[]			= "student_youth|N|s";
 									$updateLog						.= " / student age over 20, setting youth to No";
 									$updateStudent					= TRUE;
 									if ($doDebug) {
@@ -548,7 +577,7 @@ td {padding:5px;font-size:small;}
 							if ($doDebug) {
 								echo "setting no_catalog to blank<br />";
 							}
-							$studentUpdateParams[]					= "no_catalog||s";
+							$studentUpdateParams[]					= "student_no_catalog||s";
 							$updateLog								.= " removed no_catalog entry ";
 							$possContent							.= "&nbsp;&nbsp;&nbsp;removed no_catalog entry<br >";
 							$updateStudent							= TRUE;
@@ -576,97 +605,35 @@ td {padding:5px;font-size:small;}
 								$theLevel					= "";
 								$semesterTest				= "";
 								$sql						= "select * from $studentTableName 
-																where call_sign='$student_call_sign'
-																and semester != '$currentSemester' 
-																and semester != '$nextSemester' 
-																and semester != '$semesterTwo' 
-																and semester != '$semesterThree' 
-																order by date_created";
+																where student_call_sign='$student_call_sign'
+																and student_semester != '$currentSemester' 
+																and student_semester != '$nextSemester' 
+																and student_semester != '$semesterTwo' 
+																and student_semester != '$semesterThree' 
+																order by student_date_created";
 								$wpw1_cwa_student	= $wpdb->get_results($sql);
 								if ($wpw1_cwa_student === FALSE) {
-									$myError			= $wpdb->last_error;
-									$myQuery			= $wpdb->last_query;
-									if ($doDebug) {
-										echo "Reading $studentTableName table failed<br />
-											  wpdb->last_query: $myQuery<br />
-											  wpdb->last_error: $myError<br />";
-									}
-									$errorMsg			= "$jobname Reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-									sendErrorEmail($errorMsg);
+									handleWPDBError($jobname,$doDebug);
 								} else {
 									$numPSRows									= $wpdb->num_rows;
 									if ($doDebug) {
-										$myStr			= $wpdb->last_query;
-										echo "ran $myStr<br />and found $numPSRows rows in $studentTableName table<br />";
+										echo "ran $sql<br />and found $numPSRows rows in $studentTableName table<br />";
 									}
 									if ($numPSRows > 0) {
 										$myExcludedAdvisors								= array();
 										foreach ($wpw1_cwa_student as $studentRow) {
 											$pastStudent_ID							= $studentRow->student_id;
-											$pastStudent_call_sign						= trim(strtoupper($studentRow->call_sign));
-											$pastStudent_first_name					= $studentRow->first_name;
-											$pastStudent_last_name						= stripslashes($studentRow->last_name);
-											$pastStudent_email  						= strtolower(strtolower($studentRow->email));
-											$pastStudent_ph_code						= $studentRow->ph_code;
-											$pastStudent_phone  						= $studentRow->phone;
-											$pastStudent_city  						= $studentRow->city;
-											$pastStudent_state  						= $studentRow->state;
-											$pastStudent_zip_code  					= $studentRow->zip_code;
-											$pastStudent_country_code					= $studentRow->country_code;
-											$pastStudent_country  						= $studentRow->country;
-											$pastStudent_time_zone  					= $studentRow->time_zone;
-											$pastStudent_timezone_id					= $studentRow->timezone_id;
-											$pastStudent_timezone_offset				= $studentRow->timezone_offset;
-											$pastStudent_whatsapp						= $studentRow->whatsapp_app;
-											$pastStudent_signal						= $studentRow->signal_app;
-											$pastStudent_telegram						= $studentRow->telegram_app;
-											$pastStudent_messenger						= $studentRow->messenger_app;					
-											$pastStudent_wpm 	 						= $studentRow->wpm;
-											$pastStudent_youth  						= $studentRow->youth;
-											$pastStudent_age  							= $studentRow->age;
-											$pastStudent_student_parent 				= $studentRow->student_parent;
-											$pastStudent_student_parent_email  		= strtolower($studentRow->student_parent_email);
-											$pastStudent_level  						= $studentRow->level;
-											$pastStudent_waiting_list 					= $studentRow->waiting_list;
-											$pastStudent_request_date  				= $studentRow->request_date;
-											$pastStudent_semester						= $studentRow->semester;
-											$pastStudent_notes  						= $studentRow->notes;
-											$pastStudent_welcome_date  				= $studentRow->welcome_date;
-											$pastStudent_email_sent_date  				= $studentRow->email_sent_date;
-											$pastStudent_email_number  				= $studentRow->email_number;
-											$pastStudent_response  					= strtoupper($studentRow->response);
-											$pastStudent_response_date  				= $studentRow->response_date;
-											$pastStudent_abandoned  				= $studentRow->abandoned;
-											$pastStudent_student_status  				= strtoupper($studentRow->student_status);
-											$pastStudent_action_log  					= $studentRow->action_log;
-											$pastStudent_pre_assigned_advisor  		= $studentRow->pre_assigned_advisor;
-											$pastStudent_selected_date  				= $studentRow->selected_date;
-											$pastStudent_no_catalog		  			= $studentRow->no_catalog;
-											$pastStudent_hold_override  				= $studentRow->hold_override;
-											$pastStudent_messaging  					= $studentRow->messaging;
-											$pastStudent_assigned_advisor  			= $studentRow->assigned_advisor;
-											$pastStudent_advisor_select_date  			= $studentRow->advisor_select_date;
-											$pastStudent_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-											$pastStudent_hold_reason_code  			= $studentRow->hold_reason_code;
-											$pastStudent_class_priority  				= $studentRow->class_priority;
-											$pastStudent_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-											$pastStudent_promotable  					= $studentRow->promotable;
-											$pastStudent_excluded_advisor  			= $studentRow->excluded_advisor;
-											$pastStudent_student_survey_completion_date = $studentRow->student_survey_completion_date;
-											$pastStudent_available_class_days  		= $studentRow->available_class_days;
-											$pastStudent_intervention_required  		= $studentRow->intervention_required;
-											$pastStudent_copy_control  				= $studentRow->copy_control;
-											$pastStudent_first_class_choice  			= $studentRow->first_class_choice;
-											$pastStudent_second_class_choice  			= $studentRow->second_class_choice;
-											$pastStudent_third_class_choice  			= $studentRow->third_class_choice;
-											$pastStudent_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-											$pastStudent_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-											$pastStudent_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-											$pastStudent_date_created 					= $studentRow->date_created;
-											$pastStudent_date_updated			  		= $studentRow->date_updated;
+											$pastStudent_call_sign					= trim(strtoupper($studentRow->student_call_sign));
+											$pastStudent_level  					= $studentRow->student_level;
+											$pastStudent_semester					= $studentRow->student_semester;
+											$pastStudent_response  					= strtoupper($studentRow->student_response);
+											$pastStudent_status  					= strtoupper($studentRow->student_status);
+											$pastStudent_assigned_advisor			= $studentRow->student_assigned_advisor;
+											$pastStudent_promotable  				= $studentRow->student_promotable;
+											$pastStudent_excluded_advisor  			= $studentRow->student_excluded_advisor;
 
 											if ($doDebug) {
-												echo "&nbsp;&nbsp;&nbsp;Checking $pastStudent_semester. Response: $pastStudent_response; Status: $pastStudent_student_status; Promotable: $pastStudent_promotable<br />";
+												echo "&nbsp;&nbsp;&nbsp;Checking $pastStudent_semester. Response: $pastStudent_response; Status: $pastStudent_status; Promotable: $pastStudent_promotable<br />";
 											}
 											if ($pastStudent_excluded_advisor != '') {		// carry forward the do not assign
 												if ($doDebug) {
@@ -682,7 +649,7 @@ td {padding:5px;font-size:small;}
 													}
 												}
 											}
-											if ($pastStudent_student_status == 'Y') {
+											if ($pastStudent_status == 'Y') {
 												if ($pastStudent_call_sign != $student_call_sign) {
 													if ($doDebug) {
 														echo "&nbsp;&nbsp;&nbsp;Call sign mismatch: student $student_call_sign vs $pastStudent_call_sign<br />";
@@ -699,7 +666,7 @@ td {padding:5px;font-size:small;}
 														$semesterTest		= $thisSemesterTest;
 														$thePromotable		= $pastStudent_promotable;
 														$theLevel			= $pastStudent_level;
-														$theStudentStatus	= $pastStudent_student_status;
+														$theStudentStatus	= $pastStudent_status;
 														$theAdvisor			= $pastStudent_assigned_advisor;
 													}
 												}
@@ -747,7 +714,7 @@ td {padding:5px;font-size:small;}
 												$thePos		= strpos($student_action_log,"ASSGNPREP Student has taken");
 												if ($thePos == FALSE) {
 													$student_class_priority			= 1;
-													$studentUpdateParams[]			= "class_priority|$student_class_priority|d";
+													$studentUpdateParams[]			= "student_class_priority|$student_class_priority|d";
 													$updateLog						.= " / Student has taken a $theLevel class and is promotable";
 													$updateStudent					= TRUE;
 													if ($doDebug) {
@@ -838,7 +805,7 @@ td {padding:5px;font-size:small;}
 																}
 															}
 															$student_class_priority	= 1;
-															$studentUpdateParams[]			= "class_priority|$student_class_priority|s";
+															$studentUpdateParams[]			= "student_class_priority|$student_class_priority|s";
 															if ($inp_show == 'all') {
 																$doContent		= TRUE;
 															}
@@ -851,8 +818,8 @@ td {padding:5px;font-size:small;}
 														}
 													// if classOK is FALSE, student should not take the class
 													} else {														
-														$studentUpdateParams[]			= "hold_reason_code|H|s";
-														$studentUpdateParams[]			= "intervention_required|H|s";
+														$studentUpdateParams[]			= "student_hold_reason_code|H|s";
+														$studentUpdateParams[]			= "student_intervention_required|H|s";
 														$updateLog						.= " / Student took a $theLevel class, not promotable, wants to take higher next level. ";
 														$updateStudent			= TRUE;
 														$possContent 	.= "&nbsp;&nbsp;&nbsp;Student is not promotable<br />
@@ -875,7 +842,7 @@ td {padding:5px;font-size:small;}
 														if ($thePos === FALSE) {
 															$newExclAdvisor						= $theAdvisor;
 															$student_class_priority			= 1;
-															$studentUpdateParams[]			= "class_priority|$student_class_priority|s";
+															$studentUpdateParams[]			= "student_class_priority|$student_class_priority|s";
 															$updateLog						.= " / OK-Q Student has taken a $theLevel class, promotable is Q, taking same or lower class again";
 															$updateStudent	= TRUE;
 															$possContent 	.= "&nbsp;&nbsp;&nbsp;Student promotable is Q and the student is taking the $theLevel class again<br />
@@ -890,7 +857,7 @@ td {padding:5px;font-size:small;}
 															$qSameClass++;
 														}
 													} else {		// wanting to take a different class
-														$studentUpdateParams[]			= "hold_reason_code|Q|s";
+														$studentUpdateParams[]			= "student_hold_reason_code|Q|s";
 														$studentUpdateParams[]			= "intervention_required|Q|s"; 
 														$updateLog						.= " / Student has previously taken $theLevel class, promotable is Q, wants to take next higher level";
 														$updateStudent			= TRUE;							
@@ -928,8 +895,8 @@ td {padding:5px;font-size:small;}
 															$wSameClass++;
 														}
 													} else {				// taking a different class. Intervention required
-														$studentUpdateParams[]			= "hold_reason_code|W|s";
-														$studentUpdateParams[]			= "intervention_required|H|s";
+														$studentUpdateParams[]			= "student_hold_reason_code|W|s";
+														$studentUpdateParams[]			= "student_intervention_required|H|s";
 														$updateLog						.= " / Student withdrew from a $theLevel class, wants to take next higher level";
 														$updateStudent					= TRUE;
 														$possContent 	.= "&nbsp;&nbsp;&nbsp;Student withdrew from a $theLevel class.<br />
@@ -953,7 +920,7 @@ td {padding:5px;font-size:small;}
 																$newExclAdvisor						= $theAdvisor;
 															}
 															$student_class_priority				= 1;
-															$studentUpdateParams[]				= "class_priority|$student_class_priority|d";
+															$studentUpdateParams[]				= "student_class_priority|$student_class_priority|d";
 															$updateLog							.= " / OK-B Student has taken a $theLevel class, promotable is unknown, taking same or lower class again";
 															$updateStudent	= TRUE;
 															$possContent 	.= "&nbsp;&nbsp;&nbsp;Student was not evaluated.
@@ -972,8 +939,8 @@ td {padding:5px;font-size:small;}
 															$neSameClass++;
 														}
 													} else {				// taking a different class. Intervention required
-														$studentUpdateParams[]			= "hold_reason_code|E|s";
-														$studentUpdateParams[]			= "intervention_required|H|s";
+														$studentUpdateParams[]			= "student_hold_reason_code|E|s";
+														$studentUpdateParams[]			= "student_intervention_required|H|s";
 														$updateLog						.= " / Student has taken the $theLevel class, advisor $student_assigned_advisor has not completed the evaluation, student wants to take next higher level";
 														$updateStudent	= TRUE;
 														$possContent 	.= "&nbsp;&nbsp;&nbsp;Student was not evaluated.<br />
@@ -999,47 +966,6 @@ td {padding:5px;font-size:small;}
 					// see if should send an email
 					if ($sendEmail) {
 						$doEmail		= FALSE;
-						// see if there is an audio assessment record within the past 60 days
-/*
-						$sixtyDaytest				= FALSE;
-						$sql						= "select max(assessment_date) as this_assessment_date, 
-																	assessment_score 
-													   from $audioAssessmentTableName 
-													   where call_sign='$student_call_sign' 
-													   		and assessment_level = '$student_level'";
-						$wpw1_cwa_audio_assessment	= $wpdb->get_results($sql);
-						if ($wpw1_cwa_audio_assessment === FALSE) {
-							if ($doDebug) {
-								echo "Reading $audioAssessmentTableName table failed<br />";
-								echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-								echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-							}
-						} else {
-							$numAARows				= $wpdb->num_rows;
-							if ($doDebug) {
-								$myStr				= $wpdb->last_query;
-								echo "ran $myStr<br />and retrieved $numAARows rows from $audioAssessmentTableName table<br />";
-							}
-							if ($numAARows > 0) {
-								foreach($wpw1_cwa_audio_assessment as $this_assessment_row) {
-									$this_assessment_date		= $this_assessment_row->this_assessment_date;
-
-									if ($doDebug) {
-										echo "have an assessment date of $this_assessment_date<br />";
-									}
-									$myInt 						= strtotime($this_assessment_date);
-									$myNow 						= strtotime(date('Y-m-d H:i:s'));
-									$daysDiff					= round(($myNow - $myInt)/86000,0);
-									if ($doDebug) {
-										echo "Assessment date is $daysDiff old<br />";
-									}
-									if ($daysDiff < 61) {
-										$sixtyDaytest			= TRUE;
-									}
-								}
-							}
-						}
-*/						
 						
 						if ($student_hold_reason_code == 'H' and $student_intervention_required == 'H') {
 							$doEmail	= TRUE;			// not promotable, registered for higher class
@@ -1146,13 +1072,13 @@ td {padding:5px;font-size:small;}
 									$myStr		.= "&$thisAdvisor";
 								}
 							}
-							$studentUpdateParams[]	= "excluded_advisor|$myStr|s";
+							$studentUpdateParams[]	= "student_excluded_advisor|$myStr|s";
 							
 						}
 							
 						/// fix up the action log
 						$student_action_log				= "$student_action_log / $actionDate ASSGNPREP $updateLog";
-						$studentUpdateParams[]			= "action_log|$student_action_log|s";
+						$studentUpdateParams[]			= "student_action_log|$student_action_log|s";
 						$updateCount++;
 						if ($testMode) {
 							if ($doDebug) {
@@ -1160,14 +1086,6 @@ td {padding:5px;font-size:small;}
 									  &nbsp;&nbsp;&nbsp;Update parameters:<br /><pre>";
 									  print_r($studentUpdateParams);
 									  echo "</pre><br />";
-							}
-							if ($doContent) {
-//								$possContent 	.= "&nbsp;&nbsp;&nbsp;System is in test mode.<br />
-//													&nbsp;&nbsp;&nbsp;Following are the proposed updates:<br />";
-//								foreach($studentUpdateParams as $value) {
-//									$possContent	.= "&nbsp;&nbsp;&nbsp;$value<br />";
-//								}
-//								$doContent		= TRUE;
 							}
 						}
 						if ($updateMode) {
@@ -1229,224 +1147,147 @@ td {padding:5px;font-size:small;}
 			if ($doDebug) {
 				echo "<br /><br />Finished with students. Starting with the advisors<br />";
 			}
-			$content				.= "<h4>Processing Advisors</h4>";
-			$sql					= "select * from $advisorTableName 
-										where semester='$nextSemester' 
-										order by call_sign";
-			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisor === FALSE) {
-				$myError			= $wpdb->last_error;
-				$myQuery			= $wpdb->last_query;
-				if ($doDebug) {
-					echo "Reading $advisorTableName table failed<br />
-						  wpdb->last_query: $myQuery<br />
-						  wpdb->last_error: $myError<br />";
-				}
-				$errorMsg			= "$jobname Reading $advisorTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-				sendErrorEmail($errorMsg);
+			$content			.= "<h4>Processing Advisors</h4>";
+			// get a list of advisors with classes in the next semester
+			$sql				= "select distinct(advisorclass_call_sign) 
+									from $advisorClassTableName 
+									where advisorclass_semester = '$nextSemester' 
+									order by advisorclass_call_sign";
+			$wpw1_cwa_advisorCallSign	= $wpdb->get_results($sql);
+			if ($wpw1_cwa_advisorCallSign === FALSE) {
+				handleWPDBError($jobname,$doDebug);
 			} else {
-				$numARows			= $wpdb->num_rows;
+				$numACRows			= $wpdb->num_rows;
 				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br/>and found $numARows rows in $advisorTableName table<br />";
+					echo "ran $sql<br />and found $numACRows rows<br />";
 				}
-				if ($numARows > 0) {
-					foreach ($wpw1_cwa_advisor as $advisorRow) {
-						$advisor_ID							= $advisorRow->advisor_id;
-						$advisor_select_sequence 			= $advisorRow->select_sequence;
-						$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-						$advisor_first_name 				= $advisorRow->first_name;
-						$advisor_last_name 					= stripslashes($advisorRow->last_name);
-						$advisor_email 						= strtolower($advisorRow->email);
-						$advisor_phone						= $advisorRow->phone;
-						$advisor_ph_code					= $advisorRow->ph_code;				// new
-						$advisor_text_message 				= $advisorRow->text_message;
-						$advisor_city 						= $advisorRow->city;
-						$advisor_state 						= $advisorRow->state;
-						$advisor_zip_code 					= $advisorRow->zip_code;
-						$advisor_country 					= $advisorRow->country;
-						$advisor_country_code				= $advisorRow->country_code;		// new
-						$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-						$advisor_signal						= $advisorRow->signal_app;			// new
-						$advisor_telegram					= $advisorRow->telegram_app;		// new
-						$advisor_messenger					= $advisorRow->messenger_app;		// new
-						$advisor_time_zone 					= $advisorRow->time_zone;
-						$advisor_timezone_id				= $advisorRow->timezone_id;			// new
-						$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
-						$advisor_semester 					= $advisorRow->semester;
-						$advisor_survey_score 				= $advisorRow->survey_score;
-						$advisor_languages 					= $advisorRow->languages;
-						$advisor_fifo_date 					= $advisorRow->fifo_date;
-						$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
-						$advisor_verify_email_date 			= $advisorRow->verify_email_date;
-						$advisor_verify_email_number 		= $advisorRow->verify_email_number;
-						$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
-						$advisor_action_log 				= $advisorRow->action_log;
-						$advisor_class_verified 			= $advisorRow->class_verified;
-						$advisor_control_code 				= $advisorRow->control_code;
-						$advisor_date_created 				= $advisorRow->date_created;
-						$advisor_date_updated 				= $advisorRow->date_updated;
-
-						$advisorUpdateData			= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisor_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>$advisor_call_sign</a>";
-					
-						if ($advisor_call_sign != 'K1BG') {
+				if ($numACRows > 0) {
+					$updateAdvisor							= FALSE;
+					$doContent								= FALSE;
+					$evalsDone								= TRUE;
+					$alreadyNine							= FALSE;
+					$advisorUpdateParams					= array();
+					foreach ($wpw1_cwa_advisorCallSign as $advisorCallSignRow) {
+						$thisAdvisorCallSign	= $advisorCallSignRow->advisorclass_call_sign;
+			
+						if ($thisAdvisorCallSign != 'K1BG') {
 							if ($doDebug) {
-								echo "<br />Processing advisor $advisor_call_sign<br />";
+								echo "<br />Processing advisor $thisAdvisorCallSign<br />";
 							}
-					
-							if ($advisor_survey_score == 6 || $advisor_survey_score == 9 || $advisor_survey_score == 13) {
-								if ($doDebug) {
-									echo "Advisor $advisor_call_sign survey score = $advisor_survey_score. Bypassed<br />";
-								}
+							// get evaluation info from last semester, if any
+							$evalSql		= "select * 
+												from $advisorClassTableName 
+												left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+												where advisorclass_semester = '$prevSemester'
+													and advisorclass_call_sign = '$thisAdvisorCallSign'  
+												order by advisorclass_sequence";
+							$wpw1_cwa_advisorclass	= $wpdb->get_results($evalSql);
+							if ($wpw1_cwa_advisorclass === FALSE) {
+								handleWPDBError($jobname,$doDebug);
 							} else {
-								$updateAdvisor							= FALSE;
-								$doContent								= FALSE;
-								$advisorCount++;
-								$evalsDone								= TRUE;
-								$advisorUpdateParams					= array();
-											
-								$possContent			.= "<br />Processing Advisor $advisorUpdateData<br />";
-								// Get any class records for this advisor
-								$sql 					= "select * from $advisorClassTableName 
-															where semester='$prevSemester' 
-																and advisor_call_sign='$advisor_call_sign' 
-															order by sequence";
-								$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-								if ($wpw1_cwa_advisorclass === FALSE) {
-									$myError			= $wpdb->last_error;
-									$myQuery			= $wpdb->last_query;
-									if ($doDebug) {
-										echo "Reading $pastAdvisorClassTableName table failed<br />
-											  wpdb->last_query: $myQuery<br />
-											  wpdb->last_error: $myError<br />";
-									}
-									$errorMsg			= "$jobname Reading $advisorClassTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-									sendErrorEmail($errorMsg);
-								} else {
-									$numACRows			= $wpdb->num_rows;
-									if ($doDebug) {
-										$myStr			= $wpdb->last_query;
-										echo "ran $myStr<br />and found $numACRows rows in $advisorClassTableName table<br />";
-									}
-									if ($numACRows > 0) {
-										foreach ($wpw1_cwa_advisorclass as $past_advisorClassRow) {
-											$past_advisorClass_ID				 		= $past_advisorClassRow->advisorclass_id;
-											$past_advisorClass_advisor_callsign 		= $past_advisorClassRow->advisor_call_sign;
-											$past_advisorClass_advisor_first_name 		= $past_advisorClassRow->advisor_first_name;
-											$past_advisorClass_advisor_last_name 		= stripslashes($past_advisorClassRow->advisor_last_name);
-											$past_advisorClass_advisor_id 				= $past_advisorClassRow->advisor_id;
-											$past_advisorClass_sequence 				= $past_advisorClassRow->sequence;
-											$past_advisorClass_semester 				= $past_advisorClassRow->semester;
-											$past_advisorClass_timezone 				= $past_advisorClassRow->time_zone;
-											$past_advisorClass_timezone_id				= $past_advisorClassRow->timezone_id;		// new
-											$past_advisorClass_timezone_offset			= $past_advisorClassRow->timezone_offset;	// new
-											$past_advisorClass_level 					= $past_advisorClassRow->level;
-											$past_advisorClass_class_size 				= $past_advisorClassRow->class_size;
-											$past_advisorClass_class_schedule_days 		= $past_advisorClassRow->class_schedule_days;
-											$past_advisorClass_class_schedule_times 	= $past_advisorClassRow->class_schedule_times;
-											$past_advisorClass_class_schedule_days_utc 	= $past_advisorClassRow->class_schedule_days_utc;
-											$past_advisorClass_class_schedule_times_utc	= $past_advisorClassRow->class_schedule_times_utc;
-											$past_advisorClass_action_log 				= $past_advisorClassRow->action_log;
-											$past_advisorClass_class_incomplete 		= $past_advisorClassRow->class_incomplete;
-											$past_advisorClass_date_created				= $past_advisorClassRow->date_created;
-											$past_advisorClass_date_updated				= $past_advisorClassRow->date_updated;
-											$past_advisorClass_student01 				= $past_advisorClassRow->student01;
-											$past_advisorClass_student02 				= $past_advisorClassRow->student02;
-											$past_advisorClass_student03 				= $past_advisorClassRow->student03;
-											$past_advisorClass_student04 				= $past_advisorClassRow->student04;
-											$past_advisorClass_student05 				= $past_advisorClassRow->student05;
-											$past_advisorClass_student06 				= $past_advisorClassRow->student06;
-											$past_advisorClass_student07 				= $past_advisorClassRow->student07;
-											$past_advisorClass_student08 				= $past_advisorClassRow->student08;
-											$past_advisorClass_student09 				= $past_advisorClassRow->student09;
-											$past_advisorClass_student10 				= $past_advisorClassRow->student10;
-											$past_advisorClass_student11 				= $past_advisorClassRow->student11;
-											$past_advisorClass_student12 				= $past_advisorClassRow->student12;
-											$past_advisorClass_student13 				= $past_advisorClassRow->student13;
-											$past_advisorClass_student14 				= $past_advisorClassRow->student14;
-											$past_advisorClass_student15 				= $past_advisorClassRow->student15;
-											$past_advisorClass_student16 				= $past_advisorClassRow->student16;
-											$past_advisorClass_student17 				= $past_advisorClassRow->student17;
-											$past_advisorClass_student18 				= $past_advisorClassRow->student18;
-											$past_advisorClass_student19 				= $past_advisorClassRow->student19;
-											$past_advisorClass_student20 				= $past_advisorClassRow->student20;
-											$past_advisorClass_student21 				= $past_advisorClassRow->student21;
-											$past_advisorClass_student22 				= $past_advisorClassRow->student22;
-											$past_advisorClass_student23 				= $past_advisorClassRow->student23;
-											$past_advisorClass_student24 				= $past_advisorClassRow->student24;
-											$past_advisorClass_student25 				= $past_advisorClassRow->student25;
-											$past_advisorClass_student26 				= $past_advisorClassRow->student26;
-											$past_advisorClass_student27 				= $past_advisorClassRow->student27;
-											$past_advisorClass_student28 				= $past_advisorClassRow->student28;
-											$past_advisorClass_student29 				= $past_advisorClassRow->student29;
-											$past_advisorClass_student30 				= $past_advisorClassRow->student30;
-											$class_number_students						= $past_advisorClassRow->number_students;
-											$class_evaluation_complete 					= $past_advisorClassRow->evaluation_complete;
-											$class_comments								= $past_advisorClassRow->class_comments;
-											$copycontrol								= $past_advisorClassRow->copy_control;
-
-											if ($doDebug) {
-												echo "&nbsp;&nbsp;&nbsp;Class: $past_advisorClass_advisor_callsign sequence: $past_advisorClass_sequence; evals: $class_evaluation_complete<br />";
-											}
-											if ($class_evaluation_complete != 'Y' && $class_number_students > 0) {			// evaluations are not done
-												if ($doDebug) {
-													echo "&nbsp;&nbsp;&nbsp;Setting advisor score to 9<br />";
-												}
-												$evalsDone								= FALSE;
-											}
-										}
-										if (!$evalsDone) {
-											$advisorUpdateParams[]					= "survey_score|9|d";
-											$possContent							.= "&nbsp;&nbsp;&nbsp;Evaluations are incomplete. Setting survey score to 9<br />";
-											$doContent								= TRUE;
-											$updateAdvisor							= TRUE;
-											$advisorEvalNOK++;
-											$actionLogData	= "Evaluations incomplete. Set survey score to 9 ";
-										} else {						// evals are done
-											$advisorEvalOK++;
-										}
-									}
+								$numACRows			= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $evalSql<br />and found $numACRows rows<br />";
 								}
-								if ($updateAdvisor) {
-									if ($testMode) {
+								if ($numACRows > 0) {
+									foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+										$advisorClass_master_ID 				= $advisorClassRow->user_ID;
+										$advisorClass_master_call_sign			= $advisorClassRow->user_call_sign;
+										$advisorClass_first_name 				= $advisorClassRow->user_first_name;
+										$advisorClass_last_name 				= $advisorClassRow->user_last_name;
+										$advisorClass_email 					= $advisorClassRow->user_email;
+										$advisorClass_phone 					= $advisorClassRow->user_phone;
+										$advisorClass_city 						= $advisorClassRow->user_city;
+										$advisorClass_state 					= $advisorClassRow->user_state;
+										$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
+										$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+										$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
+										$advisorClass_telegram 					= $advisorClassRow->user_telegram;
+										$advisorClass_signal 					= $advisorClassRow->user_signal;
+										$advisorClass_messenger 				= $advisorClassRow->user_messenger;
+										$advisorClass_master_action_log 		= $advisorClassRow->user_action_log;
+										$advisorClass_timezone_id 				= $advisorClassRow->user_timezone_id;
+										$advisorClass_languages 				= $advisorClassRow->user_languages;
+										$advisorClass_survey_score 				= $advisorClassRow->user_survey_score;
+										$advisorClass_is_admin					= $advisorClassRow->user_is_admin;
+										$advisorClass_role 						= $advisorClassRow->user_role;
+										$advisorClass_master_date_created 		= $advisorClassRow->user_date_created;
+										$advisorClass_master_date_updated 		= $advisorClassRow->user_date_updated;
+					
+										$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
+										$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+										$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+										$advisorCount++;
+
 										if ($doDebug) {
-											echo "&nbsp;&nbsp;&nbsp;updateAdvisor is TRUE and so is testMode<br />
-												  &nbsp;&nbsp;&nbsp;Update parameters:<br /><pre>";
-												  print_r($advisorUpdateParams);
-												  echo "</pre><br />";
+											echo "&nbsp;&nbsp;&nbsp;Class: $thisAdvisorCallSign sequence: $advisorClass_sequence; evals: $advisorClass_class_evaluation_complete; students: $advisorClass_number_students<br />";
 										}
-//										$possContent 	.= "&nbsp;&nbsp;&nbsp;System is in test mode.<br />
-//														&nbsp;&nbsp;&nbsp;Following are the proposed updates:<br />";
-//										foreach($advisorUpdateParams as $value) {
-//											$possContent	.= "&nbsp;&nbsp;&nbsp;$value<br />";
-//										}
-									}
-									if ($updateMode) {
-										if ($doDebug) {
-											echo "&nbsp;&nbsp;&nbsp;updateMode is TRUE so updating advisor2 pod<br />";
-										}
-										$advisor_action_log			= "$advisor_action_log / $actionDate ASSGNPREP $userName $actionLogData";
-										$advisorUpdateParams[]		= "action_log|$advisor_action_log|s";
-										$advisorUpdateData		= array('tableName'=>$advisorTableName,
-																		'inp_method'=>'update',
-																		'inp_data'=>$advisorUpdateParams,
-																		'jobname'=>$jobname,
-																		'inp_id'=>$advisor_ID,
-																		'inp_callsign'=>$advisor_call_sign,
-																		'inp_semester'=>$advisor_semester,
-																		'inp_who'=>$userName,
-																		'testMode'=>$testMode,
-																		'doDebug'=>$doDebug);
-										$updateResult	= updateAdvisor($advisorUpdateData);
-										if ($updateResult[0] === FALSE) {
-											$myError	= $wpdb->last_error;
-											$mySql		= $wpdb->last_query;
-											$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+										if ($advisorClass_survey_score == 9) {
 											if ($doDebug) {
-												echo $errorMsg;
+												echo "&nbsp;&nbsp;&nbsp;Advisor $advisorClass_call_sign survey score = $advisorClass_survey_score. Bypassed<br />";
 											}
-											sendErrorEmail($errorMsg);
-											$content		.= "Unable to update content in $advisorTableName<br />";
+											$alreadyNine			= TRUE;
+										}
+										if ($advisorClass_class_evaluation_complete != 'Y' && $advisorClass_number_students > 0) {			// evaluations are not done
+											if ($doDebug) {
+												echo "&nbsp;&nbsp;&nbsp;Setting advisor score to 9<br />";
+											}
+											$evalsDone					= FALSE;
+										}
+									}
+									if (!$evalsDone) {
+										$advisorUpdateParams[]			= "user_survey_score|9|d";
+										$possContent					.= "&nbsp;&nbsp;&nbsp;Evaluations are incomplete. Setting survey score to 9<br />";
+										$doContent						= TRUE;
+										$updateAdvisor					= TRUE;
+										$advisorEvalNOK++;
+										$actionLogData					= "Evaluations incomplete. Set survey score to 9 ";
+									} else {						// evals are done
+										$advisorEvalOK++;
+										if ($alreadyNine) {			// set survey score back to blank
+											$advisorUpdateParams[]			= "user_survey_score|0|d";
+											$possContent					.= "&nbsp;&nbsp;&nbsp;Evaluations are complete. Setting survey score from 9 to 0<br />";
+											$doContent						= TRUE;
+											$updateAdvisor					= TRUE;
+											$actionLogData					= "Evaluations complete. Set survey score to 0 ";
+										}
+									}
+									if ($updateAdvisor) {
+										if ($testMode) {
+											if ($doDebug) {
+												echo "&nbsp;&nbsp;&nbsp;updateAdvisor is TRUE and so is testMode<br />
+													  &nbsp;&nbsp;&nbsp;Update parameters:<br /><pre>";
+													  print_r($advisorUpdateParams);
+													  echo "</pre><br />";
+											}
+										}
+										if ($updateMode) {
+											if ($doDebug) {
+												echo "&nbsp;&nbsp;&nbsp;updateMode is TRUE so updating advisor2 pod<br />";
+											}
+											$advisor_action_log			= "$advisor_action_log / $actionDate ASSGNPREP $userName $actionLogData";
+											$advisorUpdateParams[]		= "user_action_log|$advisor_action_log|s";
+											$advisorUpdateData		= array('tableName'=>$userMasterTableName,
+																			'inp_method'=>'update',
+																			'inp_data'=>$advisorUpdateParams,
+																			'jobname'=>$jobname,
+																			'inp_id'=>$advisorClass_master_ID,
+																			'inp_callsign'=>$thisAdvisorCallSign,
+																			'inp_semester'=>$nextSemester,
+																			'inp_who'=>$userName,
+																			'testMode'=>$testMode,
+																			'doDebug'=>$doDebug);
+											$updateResult	= update_user_master($advisorUpdateData);
+											if ($updateResult[0] === FALSE) {
+												$myError	= $wpdb->last_error;
+												$mySql		= $wpdb->last_query;
+												$errorMsg	= "$jobname Processing $thisAdvisorCallSign in $userMasterTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+												if ($doDebug) {
+													echo $errorMsg;
+												}
+												sendErrorEmail($errorMsg);
+												$content		.= "Unable to update content in $advisorTableName<br />";
+											}
 										}
 									}
 								}
@@ -1457,7 +1298,7 @@ td {padding:5px;font-size:small;}
 						}
 					}				// end of big advisor while loop
 				} else {			// end of numberRecords loop
-					$content	.= "No records were found in $advisorTableName pod<br />";	
+					$content	.= "No records were found in $advisorTableName table<br />";	
 				}
 			}
 		}

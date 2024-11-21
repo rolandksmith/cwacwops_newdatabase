@@ -1,4 +1,4 @@
-function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FALSE) {
+function get_student_last_class($inp_callsign = '',$doDebug=FALSE,$testMode=FALSE) {
 
 /*	Obtains from the student table the last class information
 	
@@ -36,12 +36,13 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	Modified 3Feb2023 by Roland to display the returned array if running in debug mode
 	Modified 26June23 by Roland to handle last class still being in the student table
 	Modified 12Jul23 by Roland to use current tables only
+	Modified 10Oct24 by Roland for new database
 */
 
 	global $wpdb;
 
 	if ($doDebug) {
-		echo "<br />Entering Function get_student_last_class with parameter $inp_call_sign<br />";
+		echo "<br /><b>Function get_student_last_class</b> with parameter $inp_callsign<br />";
 	}
 	if ($doDebug) {
 		ini_set('display_errors','1');
@@ -61,11 +62,11 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	$returnArray['Beginner']['Advisor class']		= '';
 	$returnArray['Beginner']['Promotable']			= '';
 	$returnArray['Beginner']['Status']				= '';
-	$returnArray['Fundamental']['Semester']				= '';
-	$returnArray['Fundamental']['Advisor']				= '';
-	$returnArray['Fundamental']['Advisor class']			= '';
-	$returnArray['Fundamental']['Promotable']				= '';
-	$returnArray['Fundamental']['Status']					= '';
+	$returnArray['Fundamental']['Semester']			= '';
+	$returnArray['Fundamental']['Advisor']			= '';
+	$returnArray['Fundamental']['Advisor class']	= '';
+	$returnArray['Fundamental']['Promotable']		= '';
+	$returnArray['Fundamental']['Status']			= '';
 	$returnArray['Intermediate']['Semester']		= '';
 	$returnArray['Intermediate']['Advisor']			= '';
 	$returnArray['Intermediate']['Advisor class']	= '';
@@ -85,12 +86,12 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	$levelArray										= array('Beginner','Intermediate','Fundamental','Advanced');
 
 	if ($testMode) {
-		$studentTableName			= "wpw1_cwa_consolidated_student2";
+		$studentTableName			= "wpw1_cwa_student2";
 		if ($doDebug) {
 			echo "Operating in testMode<br />";
 		}
 	} else {
-		$studentTableName			= "wpw1_cwa_consolidated_student";
+		$studentTableName			= "wpw1_cwa_student";
 		if ($doDebug) {
 			echo "Operating in Production mode<br />";
 		}
@@ -99,40 +100,35 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	// get the student info from student table for each level
 	
 	foreach($levelArray as $thisLevel) {
-		$sql				= "select call_sign, 
-									  level, 
-									  assigned_advisor, 
-									  assigned_advisor_class, 
-									  promotable, 
-									  semester, 
+		$sql				= "select student_call_sign, 
+									  student_level, 
+									  student_assigned_advisor, 
+									  student_assigned_advisor_class, 
+									  student_promotable, 
+									  student_semester, 
 									  student_status 
 								from $studentTableName 
-								where call_sign='$inp_call_sign' 
+								where student_call_sign='$inp_callsign' 
 								and (student_status = 'Y' or student_status = 'S') 
-								and level = '$thisLevel'
-								order by request_date DESC 
+								and student_level = '$thisLevel'
+								order by student_request_date DESC 
 								limit 1";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			if ($doDebug) {
-				echo "Reading $studentTableName table failed<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
+			handWPDBError("FUNCTION: Get Student Last Class", $doDebug);
 		} else {
 			$numPSRows									= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numPSRows rows in $studentTableName table<br />";
+				echo "ran $sql<br />and found $numPSRows rows in $studentTableName table<br />";
 			}
 			if ($numPSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
-					$student_call_sign						= strtoupper($studentRow->call_sign);
-					$student_level  						= $studentRow->level;
-					$student_semester						= $studentRow->semester;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
+					$student_call_sign						= strtoupper($studentRow->student_call_sign);
+					$student_level  						= $studentRow->student_level;
+					$student_semester						= $studentRow->student_semester;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
 					$student_status	  						= $studentRow->student_status;
 
 					$returnArray[$thisLevel]['Semester']		 	= $student_semester;
@@ -149,18 +145,20 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	}
 	
 	/// now get the most current record in the student table regardless of level
-	$sql				= "select call_sign, 
-								  level, 
-								  assigned_advisor, 
-								  assigned_advisor_class, 
-								  promotable, 
-								  semester, 
+	$sql				= "select student_call_sign, 
+								  student_level, 
+								  student_assigned_advisor, 
+								  student_assigned_advisor_class, 
+								  student_promotable, 
+								  student_semester, 
 								  student_status 
 						  from $studentTableName 
-						  where call_sign='$inp_call_sign' 
+						  where student_call_sign='$inp_callsign' 
 						   and (student_status = 'Y' or student_status = 'S') 
-						   and (semester = '$semesterTwo' or semester = '$semesterThree' or semester='$semesterFour') 
-						   order by date_created DESC 
+						   and (student_semester = '$semesterTwo' 
+						   or student_semester = '$semesterThree' 
+						   or student_semester='$semesterFour') 
+						   order by student_date_created DESC 
 						   limit 1";
 	$wpw1_cwa_student		= $wpdb->get_results($sql);
 	if ($wpw1_cwa_student === FALSE) {
@@ -172,28 +170,27 @@ function get_student_last_class($inp_call_sign = '',$doDebug=FALSE,$testMode=FAL
 	} else {
 		$numSRows			= $wpdb->num_rows;
 		if ($doDebug) {
-			$myStr			= $wpdb->last_query;
-			echo "ran $myStr<br />and found $numSRows rows<br />";
+			echo "ran $sql<br />and found $numSRows rows<br />";
 		}
 		if ($numSRows > 0) {
 			foreach ($wpw1_cwa_student as $studentRow) {
-				$student_call_sign						= strtoupper($studentRow->call_sign);
-				$student_level  						= $studentRow->level;
-				$student_semester  						= $studentRow->semester;
-				$student_assigned_advisor  				= $studentRow->assigned_advisor;
-				$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-				$student_promotable  					= $studentRow->promotable;
-				$student_student_status  				= $studentRow->student_status;
+				$student_call_sign						= strtoupper($studentRow->student_call_sign);
+				$student_level  						= $studentRow->student_level;
+				$student_semester  						= $studentRow->student_semester;
+				$student_assigned_advisor  				= $studentRow-student_>assigned_advisor;
+				$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+				$student_promotable  					= $studentRow->student_promotable;
+				$student_status  						= $studentRow->student_status;
 
 				$returnArray['Current']['Semester']		 = $student_semester;
 				$returnArray['Current']['Advisor']		 = $student_assigned_advisor;
 				$returnArray['Current']['Advisor class'] = $student_assigned_advisor_class;
 				$returnArray['Current']['Promotable']	 = $student_promotable;
-				$returnArray['Current']['Status']		 = $student_student_status;
+				$returnArray['Current']['Status']		 = $student_status;
 				$returnArray['Current']['Level']		 = $student_level;
 				
 				if ($doDebug) {
-					echo "Loading up current data for $inp_call_sign<br />";
+					echo "Loading up current data for $inp_callsign<br />";
 				}
 			}
 		}

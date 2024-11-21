@@ -15,7 +15,7 @@ function search_joblog_func() {
 	$validTestmode		= $initializationArray['validTestmode'];
 	$siteURL			= $initializationArray['siteurl'];
 	
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 
@@ -34,6 +34,7 @@ function search_joblog_func() {
 	$inp_search					= "";
 	$inp_search2				= "";
 	$inp_who					= "";
+	$jobname					= "SearchJoblog";
 
 	$theURL						= "$siteURL/cwa-search-joblog/";
 
@@ -87,75 +88,74 @@ function search_joblog_func() {
 	
 	
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
-		$testModeOption	= "
-<tr><td colspan='2'>Verbose Debugging?</td>
-	<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
-		<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
+		$testModeOption	= "<tr><td colspan='2'>Verbose Debugging?</td>
+								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
+									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 	} else {
 		$testModeOption	= '';
 	}
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -175,28 +175,28 @@ td:last-child {
 		}
 		
 		$content 		.= "<h3>Search the Joblog</h3>
-<p>
-<form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data'>
-<input type='hidden' name='strpass' value='2'>
-Select the field and the search criteria:<br /><br '>
-<table>
-<tr><td style='border-style=none;width=6px;vertical-align:top;'><input type='radio' class='formInputButton' name='inp_field' value='searchJobName'></td>
-	<td style='vertical-align:top;'>Job Name</td>
-	<td style='border-style=none;'>like: <input type='text' class='formInputText' name='inp_search' size='50' maxlength='150'></td></tr>
-<tr><td style='border-style=none;vertical-align:top;'><input type='radio' class='formInputButton' name='inp_field' value='searchDate'></td>
-	<td style='vertical-align:top;'>Date Run</td>
-	<td style='border-style=none;vertical-align:top;'>Date between <em>(yyyy-mm-dd)</em><input type='text' class='formInputText' name='inp_date' size='30' maxlength='30'> 
-		and <em>(yyyy-mm-dd)</em> inclusive<input type='text' class='formInputText' name='inp_date2' size='30' maxlength='30'></td></tr>
-<tr><td style='border-style=none;'><input type='radio' class='formInputButton' name='inp_field' value='searchWho'></td>
-	<td>Who</td>
-	<td style='border-style=none;'><input type='text' class='formInputText' name='inp_who' size='20' maxlength='20'></td></tr>
-<tr><td style='border-style=none;'><input type='radio' class='formInputButton' name='inp_field' value='searchTime'></td>
-	<td>Time</td>
-	<td style='border-style=none;'><input type='text' class='formInputText' name='inp_date3' size='30' maxlength='30'></td></tr>
-$testModeOption
-<tr><td colspan='3'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
-</form></p>";
+							<p>
+							<form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data'>
+							<input type='hidden' name='strpass' value='2'>
+							Select the field and the search criteria:<br /><br '>
+							<table>
+							<tr><td style='border-style=none;width=6px;vertical-align:top;'><input type='radio' class='formInputButton' name='inp_field' value='searchJobName'></td>
+								<td style='vertical-align:top;'>Job Name</td>
+								<td style='border-style=none;'>like: <input type='text' class='formInputText' name='inp_search' size='50' maxlength='150'></td></tr>
+							<tr><td style='border-style=none;vertical-align:top;'><input type='radio' class='formInputButton' name='inp_field' value='searchDate'></td>
+								<td style='vertical-align:top;'>Date Run</td>
+								<td style='border-style=none;vertical-align:top;'>Date between <em>(yyyy-mm-dd)</em><input type='text' class='formInputText' name='inp_date' size='30' maxlength='30'> 
+									and <em>(yyyy-mm-dd)</em> inclusive<input type='text' class='formInputText' name='inp_date2' size='30' maxlength='30'></td></tr>
+							<tr><td style='border-style=none;'><input type='radio' class='formInputButton' name='inp_field' value='searchWho'></td>
+								<td>Who</td>
+								<td style='border-style=none;'><input type='text' class='formInputText' name='inp_who' size='20' maxlength='20'></td></tr>
+							<tr><td style='border-style=none;'><input type='radio' class='formInputButton' name='inp_field' value='searchTime'></td>
+								<td>Time</td>
+								<td style='border-style=none;'><input type='text' class='formInputText' name='inp_date3' size='30' maxlength='30'></td></tr>
+							$testModeOption
+							<tr><td colspan='3'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+							</form></p>";
 
 ///// Pass 2 -- do the work
 
@@ -206,11 +206,11 @@ $testModeOption
 			$content	.= "Invalid file or search term entered";
 		} else {
 			if ($doDebug) {
-				echo "At pass 2 with inp_field of $inp_field and search criteria of:<br />
-inp_search: $inp_search<br />
-inp_date: $inp_date<br />
-inp_date2: $inp_date2<br />
-inp_who: $inp_who<br />";
+				echo "<br />At pass 2 with inp_field of $inp_field and search criteria of:<br />
+						inp_search: $inp_search<br />
+						inp_date: $inp_date<br />
+						inp_date2: $inp_date2<br />
+						inp_who: $inp_who<br />";
 			}
 		
 // job name|date (y-m-d)|time (h:i:s)|who|mode|data type|additional info|ip addr		
@@ -247,7 +247,7 @@ inp_who: $inp_who<br />";
 			}
 			if ($searchWhere != '') {
 			
-				$sql				= "select * from wpw1_cwa_joblog $searchWhere order by job_date ASC, job_time ASC";
+				$sql				= "select * from wpw1_cwa_joblog $searchWhere order by job_date DESC, job_time DESC";
 				$wpw1_cwa_joblog			= $wpdb->get_results($sql);
 				if ($wpw1_cwa_joblog === FALSE) {
 					if ($doDebug) {
@@ -284,15 +284,14 @@ inp_who: $inp_who<br />";
 							$job_addl_info	= $joblogRow->job_addl_info;
 							$job_ip_addr	= $joblogRow->job_ip_addr;
 							$job_date_created	= $joblogRow->job_date_created;
-							$content	.= "
-<tr><td>$job_name</td>
-	<td>$job_date $job_time</td>
-	<td>$job_who</td>
-	<td>$job_mode</td>
-	<td>$job_data_type</td>
-	<td>$job_addl_info</td>
-	<td>$job_ip_addr</td>
-	<td>$job_date_created</td></tr>";
+							$content	.= "<tr><td>$job_name</td>
+												<td>$job_date $job_time</td>
+												<td>$job_who</td>
+												<td>$job_mode</td>
+												<td>$job_data_type</td>
+												<td>$job_addl_info</td>
+												<td>$job_ip_addr</td>
+												<td>$job_date_created</td></tr>";
 						}
 					} else {
 						$content			.= "<h3> Results of Searching Job Log $inp_field for $inp_search</h3>No data found matching the search criteria";

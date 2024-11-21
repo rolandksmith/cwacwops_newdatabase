@@ -67,6 +67,14 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 		$myStr				= $wpdb->last_error;
 		return array('FALSE',$myStr);
 	} else {
+		if ($doDebug) {
+			$insertID			= $wpdb->insert_id;
+			echo "write to $joblogTableName was successful<br />
+					id $insertID was inserted<br />
+					updateParams:<br /><pre>";
+			print_r($updateParams);
+			echo "</pre><br />";
+		}
 		return array('SUCCESS','Write was successful');
 	}
 

@@ -10,6 +10,7 @@ function advisor_class_report_func() {
 	
 	Modified 15Apr23 by Roland to correct action log handling
 	Modified 12Jul23 by Roland to use consolidated tables
+	Modified 11Oct24 by Roland for new database
 	
 */
 
@@ -30,10 +31,17 @@ function advisor_class_report_func() {
 	$siteURL			= $initializationArray['siteurl'];
 	
 //	CHECK THIS!								//////////////////////
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 
+	$currentSemester		= $initializationArray['currentSemester'];
+	$nextSemester			= $initializationArray['nextSemester'];
+	if ($currentSemester == 'Not in Session') {
+		$theSemester		= $nextSemester;
+	} else {
+		$theSemester		= $currentSemester;
+	}
 
 //	if ($doDebug) {
 		ini_set('display_errors','1');
@@ -89,85 +97,87 @@ function advisor_class_report_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
 		if ($doDebug) {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
-		$advisorTableName		= "wpw1_cwa_consolidated_advisor2";
-		$advisorClassTableName	= "wpw1_cwa_consolidated_advisorclass2";
-		$studentTableName		= "wpw1_cwa_consolidated_student2";
+		$advisorTableName		= "wpw1_cwa_advisor2";
+		$advisorClassTableName	= "wpw1_cwa_advisorclass2";
+		$studentTableName		= "wpw1_cwa_student2";
+		$userMasterTableName 	= "wpw1_cwa_user_master2";
 	} else {
-		$advisorTableName		= "wpw1_cwa_consolidated_advisor";
-		$advisorClassTableName	= "wpw1_cwa_consolidated_advisorclass";
-		$studentTableName		= "wpw1_cwa_consolidated_student";
+		$advisorTableName		= "wpw1_cwa_advisor";
+		$advisorClassTableName	= "wpw1_cwa_advisorclass";
+		$studentTableName		= "wpw1_cwa_student";
+		$userMasterTableName 	= "wpw1_cwa_user_master";
 	}
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
 								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
 									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
-								<tr><td>Verbose Debugging?</td>
+							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 		} else {
@@ -198,115 +208,153 @@ td:last-child {
 
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
-			echo "Arrived at pass 2<br />";
+			echo "<br />Arrived at pass 2<br />";
 		}
 		
-		$content				.= "<h3>Advisor Class Report</h3>";
+		$content				.= "<h3>$jobname for $theSemester Semester</h3>";
 		
-		$currentSemester		= $initializationArray['currentSemester'];
-		$nextSemester			= $initializationArray['nextSemester'];
-		if ($currentSemester == 'Not in Session') {
-			$theSemester		= $nextSemester;
-		} else {
-			$theSemester		= $currentSemester;
-		}
 		////////	Get all the advisors and their classes and stick in an array
 
 		$prevAdvisor	= '';
-		$sql			= "select a.call_sign, 
-								  a.last_name, 
-								  a.first_name, 
-								  a.ph_code, 
-								  a.phone, 
-								  a.email, 
-								  a.city,
-								   a.state, 
-								   a.country, 
-								   a.timezone_id, 
-								   a.timezone_offset, 
-								   b.sequence, 
-								   b.level, 
-								   b.class_size, 
-								   b.class_schedule_days, 
-								   b.class_schedule_times, 
-								   b.class_schedule_days_utc, 
-								   b.class_schedule_times_utc, 
-								   b.class_incomplete 
-							from $advisorTableName as a 
-							join $advisorClassTableName as b 
-							where a.call_sign=b.advisor_call_sign 
-							and a.semester = '$theSemester' 
-							and a.semester = b.semester 
-							order by b.advisor_call_sign, 
-									b.sequence";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $advisorTableName/$advisorClassTableName tables failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname Reading $advisorTableName/$advisorClassTableName tables failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
+		$sql					= "select * from $advisorClassTableName 
+									left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+									where advisorclass_semester = '$theSemester' 
+									order by advisorclass_call_sign";
+		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+		if ($wpw1_cwa_advisorclass === FALSE) {
+			handleWPDBError($jobname,$doDebug);
 		} else {
-			$numARows			= $wpdb->num_rows;
+			$numACRows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
+				echo "ran $sql<br />and found $numACRows rows<br />";
 			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_call_sign 						= strtoupper($advisorRow->call_sign);
-					$advisor_first_name 					= $advisorRow->first_name;
-					$advisor_last_name 						= stripslashes($advisorRow->last_name);
-					$advisor_email 							= strtolower($advisorRow->email);
-					$advisor_phone							= $advisorRow->phone;
-					$advisor_ph_code						= $advisorRow->ph_code;				// new
-					$advisor_city 							= $advisorRow->city;
-					$advisor_state 							= $advisorRow->state;
-					$advisor_country 						= $advisorRow->country;
-					$advisor_timezone_id					= $advisorRow->timezone_id;			// new
-					$advisor_timezone_offset				= $advisorRow->timezone_offset;		// new
-					$advisorClass_sequence 					= $advisorRow->sequence; 
-					$advisorClass_level 					= $advisorRow->level; 
-					$advisorClass_class_size 				= $advisorRow->class_size; 
-					$advisorClass_class_schedule_days		= $advisorRow->class_schedule_days; 
-					$advisorClass_class_schedule_times 		= $advisorRow->class_schedule_times; 
-					$advisorClass_class_schedule_days_utc 	= $advisorRow->class_schedule_days_utc; 
-					$advisorClass_class_schedule_times_utc 	= $advisorRow->class_schedule_times_utc; 
-					$advisorClass_class_incomplete 			= $advisorRow->class_incomplete;
+			if ($numACRows > 0) {
+				foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+					$user_ID 								= $advisorClassRow->user_ID;
+					$user_call_sign							= $advisorClassRow->user_call_sign;
+					$user_first_name 						= $advisorClassRow->user_first_name;
+					$user_last_name 						= $advisorClassRow->user_last_name;
+					$user_email 							= $advisorClassRow->user_email;
+					$user_phone 							= $advisorClassRow->user_phone;
+					$user_city 								= $advisorClassRow->user_city;
+					$user_state 							= $advisorClassRow->user_state;
+					$user_zip_code 							= $advisorClassRow->user_zip_code;
+					$user_country_code 						= $advisorClassRow->user_country_code;
+					$user_whatsapp 						= $advisorClassRow->user_whatsapp;
+					$user_telegram 						= $advisorClassRow->user_telegram;
+					$user_signal 						= $advisorClassRow->user_signal;
+					$user_messenger 					= $advisorClassRow->user_messenger;
+					$user_action_log 						= $advisorClassRow->user_action_log;
+					$user_timezone_id 						= $advisorClassRow->user_timezone_id;
+					$user_languages 						= $advisorClassRow->user_languages;
+					$user_survey_score 						= $advisorClassRow->user_survey_score;
+					$user_is_admin							= $advisorClassRow->user_is_admin;
+					$user_role 								= $advisorClassRow->user_role;
+					$user_date_created 						= $advisorClassRow->user_date_created;
+					$user_date_updated 						= $advisorClassRow->user_date_updated;
 
-					$advisor_last_name 					= no_magic_quotes($advisor_last_name);
+					$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+					$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+					$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+					$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+					$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+					$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+					$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+					$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+					$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+					$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+					$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+					$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+					$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+					$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+					$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+					$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+					$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+					$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+					$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+					$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+					$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+					$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+					$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+					$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+					$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+					$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+					$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+					$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+					$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+					$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+					$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+					$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+					$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+					$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+					$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+					$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+					$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+					$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+					$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+					$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+					$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+					$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+
+
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$user_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
+						$user_country		= "UNKNOWN";
+						$user_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$user_country		= $countryRow->country_name;
+								$user_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$user_country			= "Unknown";
+							$user_ph_code			= "";
+						}
+					}
 
 					if ($doDebug) {
-						echo "<br />Processing $advisor_call_sign<br />";
+						echo "<br />Processing $advisorClass_call_sign<br />";
 					}
 					if ($advisorClass_class_incomplete == 'Y') {
-						$errorArray[]						= "Advisor $advisor_call_sign Class $advisorClass_sequence class_incomplete is $advisorClass_class_incomplete<br />";
+						$errorArray[]						= "Advisor $advisorClass_call_sign Class $advisorClass_sequence class_incomplete is $advisorClass_class_incomplete<br />";
 					}
 					if ($doDebug) {
 						echo "&nbsp;&nbsp;&nbsp;&nbsp;Doing class $advisorClass_sequence<br />";
 					}
-					if ($advisor_call_sign != $prevAdvisor) {
-						$advisorDataArray[$advisor_call_sign]['name']		= "$advisor_last_name, $advisor_first_name";
-						$advisorDataArray[$advisor_call_sign]['email']		= $advisor_email;
-						$advisorDataArray[$advisor_call_sign]['phone']		= $advisor_phone;
-						$advisorDataArray[$advisor_call_sign]['ph_code']	= $advisor_ph_code;
-						$advisorDataArray[$advisor_call_sign]['city']		= $advisor_city;
-						$advisorDataArray[$advisor_call_sign]['state']		= $advisor_state;
-						$advisorDataArray[$advisor_call_sign]['country']	= $advisor_country;
-						$advisorDataArray[$advisor_call_sign]['tz']			= "$advisor_timezone_id $advisor_timezone_offset";
-						$prevAdvisor		= $advisor_call_sign;
+					if ($advisorClass_call_sign != $prevAdvisor) {
+						$advisorDataArray[$advisorClass_call_sign]['name']		= "$user_last_name, $user_first_name";
+						$advisorDataArray[$advisorClass_call_sign]['email']		= $user_email;
+						$advisorDataArray[$advisorClass_call_sign]['phone']		= $user_phone;
+						$advisorDataArray[$advisorClass_call_sign]['ph_code']	= $user_ph_code;
+						$advisorDataArray[$advisorClass_call_sign]['city']		= $user_city;
+						$advisorDataArray[$advisorClass_call_sign]['state']		= $user_state;
+						$advisorDataArray[$advisorClass_call_sign]['country']	= $user_country;
+						$advisorDataArray[$advisorClass_call_sign]['tz']			= "$user_timezone_id $advisorClass_timezone_offset";
+						$prevAdvisor		= $advisorClass_call_sign;
 					}
 
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['level']				= $advisorClass_level;
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['class size']		= $advisorClass_class_size;
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['schedule utc']		= "$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc";
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['schedule local']	= "$advisorClass_class_schedule_times $advisorClass_class_schedule_days";
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['count']				= 0;
-					$advisorClassArray[$advisor_call_sign][$advisorClass_sequence]['incomplete']		= $advisorClass_class_incomplete;
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['level']			= $advisorClass_level;
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['class size']		= $advisorClass_class_size;
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['schedule utc']		= "$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc";
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['schedule local']	= "$advisorClass_class_schedule_times $advisorClass_class_schedule_days";
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['count']			= 0;
+					$advisorClassArray[$advisorClass_call_sign][$advisorClass_sequence]['incomplete']		= $advisorClass_class_incomplete;
 				}
 			} else {
 				if ($doDebug) {
@@ -335,93 +383,116 @@ td:last-child {
 					echo "<br />getting the student counts<br />";
 				}
 				$sql			 	= "select * from $studentTableName 
-										where semester='$theSemester' 
-										and response='Y'
-										 and (student_status='Y' or student_status='S') order 
-										 by call_sign";
-				$wpw1_cwa_student		= $wpdb->get_results($sql);
+										left join $userMasterTableName on user_call_sign = student_call_sign 
+										where student_semester='$theSemester' 
+										and student_response='Y'
+										 and (student_status='Y' 
+										 	or student_status='S') 
+										 	order by student_call_sign";
+				$wpw1_cwa_student	= $wpdb->get_results($sql);
 				if ($wpw1_cwa_student === FALSE) {
-					$myError			= $wpdb->last_error;
-					$myQuery			= $wpdb->last_query;
-					if ($doDebug) {
-						echo "Reading $studentTableName table failed<br />
-							  wpdb->last_query: $myQuery<br />
-							  wpdb->last_error: $myError<br />";
-					}
-					$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-					sendErrorEmail($errorMsg);
+					handleWPDBError($jobname,$doDebug);
 				} else {
-					$numSRows			= $wpdb->num_rows;
+					$numSRows									= $wpdb->num_rows;
 					if ($doDebug) {
-						$myStr			= $wpdb->last_query;
-						echo "ran $myStr<br />and found $numSRows rows<br />";
+						echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
 					}
 					if ($numSRows > 0) {
 						foreach ($wpw1_cwa_student as $studentRow) {
+							$user_ID 								= $studentRow->user_ID;
+							$user_call_sign 						= $studentRow->user_call_sign;
+							$user_first_name 						= $studentRow->user_first_name;
+							$user_last_name 						= $studentRow->user_last_name;
+							$user_email 							= $studentRow->user_email;
+							$user_phone 							= $studentRow->user_phone;
+							$user_city 								= $studentRow->user_city;
+							$user_state 							= $studentRow->user_state;
+							$user_zip_code 							= $studentRow->user_zip_code;
+							$user_country_code 						= $studentRow->user_country_code;
+							$user_whatsapp 						= $studentRow->user_whatsapp;
+							$user_telegram 						= $studentRow->user_telegram;
+							$user_signal 						= $studentRow->user_signal;
+							$user_messenger 					= $studentRow->user_messenger;
+							$user_action_log 						= $studentRow->user_action_log;
+							$user_timezone_id 						= $studentRow->user_timezone_id;
+							$user_languages 						= $studentRow->user_languages;
+							$user_survey_score 						= $studentRow->user_survey_score;
+							$user_is_admin							= $studentRow->user_is_admin;
+							$user_role 								= $studentRow->user_role;
+							$user_date_created 						= $studentRow->user_date_created;
+							$user_date_updated 						= $studentRow->user_date_updated;
+		
 							$student_ID								= $studentRow->student_id;
-							$student_call_sign						= strtoupper($studentRow->call_sign);
-							$student_first_name						= $studentRow->first_name;
-							$student_last_name						= stripslashes($studentRow->last_name);
-							$student_email  						= strtolower(strtolower($studentRow->email));
-							$student_phone  						= $studentRow->phone;
-							$student_ph_code						= $studentRow->ph_code;
-							$student_city  							= $studentRow->city;
-							$student_state  						= $studentRow->state;
-							$student_zip_code  						= $studentRow->zip_code;
-							$student_country  						= $studentRow->country;
-							$student_country_code					= $studentRow->country_code;
-							$student_time_zone  					= $studentRow->time_zone;
-							$student_timezone_id					= $studentRow->timezone_id;
-							$student_timezone_offset				= $studentRow->timezone_offset;
-							$student_whatsapp						= $studentRow->whatsapp_app;
-							$student_signal							= $studentRow->signal_app;
-							$student_telegram						= $studentRow->telegram_app;
-							$student_messenger						= $studentRow->messenger_app;					
-							$student_wpm 	 						= $studentRow->wpm;
-							$student_youth  						= $studentRow->youth;
-							$student_age  							= $studentRow->age;
+							$student_call_sign						= $studentRow->student_call_sign;
+							$student_time_zone  					= $studentRow->student_time_zone;
+							$student_timezone_offset				= $studentRow->student_timezone_offset;
+							$student_youth  						= $studentRow->student_youth;
+							$student_age  							= $studentRow->student_age;
 							$student_student_parent 				= $studentRow->student_parent;
 							$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-							$student_level  						= $studentRow->level;
-							$student_waiting_list 					= $studentRow->waiting_list;
-							$student_request_date  					= $studentRow->request_date;
-							$student_semester						= $studentRow->semester;
-							$student_notes  						= $studentRow->notes;
-							$student_welcome_date  					= $studentRow->welcome_date;
-							$student_email_sent_date  				= $studentRow->email_sent_date;
-							$student_email_number  					= $studentRow->email_number;
-							$student_response  						= strtoupper($studentRow->response);
-							$student_response_date  				= $studentRow->response_date;
-							$student_abandoned  				= $studentRow->abandoned;
+							$student_level  						= $studentRow->student_level;
+							$student_waiting_list 					= $studentRow->student_waiting_list;
+							$student_request_date  					= $studentRow->student_request_date;
+							$student_semester						= $studentRow->student_semester;
+							$student_notes  						= $studentRow->student_notes;
+							$student_welcome_date  					= $studentRow->student_welcome_date;
+							$student_email_sent_date  				= $studentRow->student_email_sent_date;
+							$student_email_number  					= $studentRow->student_email_number;
+							$student_response  						= strtoupper($studentRow->student_response);
+							$student_response_date  				= $studentRow->student_response_date;
+							$student_abandoned  					= $studentRow->student_abandoned;
 							$student_student_status  				= strtoupper($studentRow->student_status);
-							$student_action_log  					= stripslashes($studentRow->action_log);
-							$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-							$student_selected_date  				= $studentRow->selected_date;
-							$student_no_catalog			 			= $studentRow->no_catalog;
-							$student_hold_override  				= $studentRow->hold_override;
-							$student_messaging  					= $studentRow->messaging;
-							$student_assigned_advisor  				= $studentRow->assigned_advisor;
-							$student_advisor_select_date  			= $studentRow->advisor_select_date;
-							$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-							$student_hold_reason_code  				= $studentRow->hold_reason_code;
-							$student_class_priority  				= $studentRow->class_priority;
-							$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-							$student_promotable  					= $studentRow->promotable;
-							$student_excluded_advisor  				= $studentRow->excluded_advisor;
+							$student_action_log  					= $studentRow->student_action_log;
+							$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+							$student_selected_date  				= $studentRow->student_selected_date;
+							$student_no_catalog  					= $studentRow->student_no_catalog;
+							$student_hold_override  				= $studentRow->student_hold_override;
+							$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+							$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+							$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+							$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+							$student_class_priority  				= $studentRow->student_class_priority;
+							$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+							$student_promotable  					= $studentRow->student_promotable;
+							$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
 							$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-							$student_available_class_days  			= $studentRow->available_class_days;
-							$student_intervention_required  		= $studentRow->intervention_required;
-							$student_copy_control  					= $studentRow->copy_control;
-							$student_first_class_choice  			= $studentRow->first_class_choice;
-							$student_second_class_choice  			= $studentRow->second_class_choice;
-							$student_third_class_choice  			= $studentRow->third_class_choice;
-							$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-							$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-							$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-							$student_date_created 					= $studentRow->date_created;
-							$student_date_updated			  		= $studentRow->date_updated;
-
-							$student_last_name 						= no_magic_quotes($student_last_name);
+							$student_available_class_days  			= $studentRow->student_available_class_days;
+							$student_intervention_required  		= $studentRow->student_intervention_required;
+							$student_copy_control  					= $studentRow->student_copy_control;
+							$student_first_class_choice  			= $studentRow->student_first_class_choice;
+							$student_second_class_choice  			= $studentRow->student_second_class_choice;
+							$student_third_class_choice  			= $studentRow->student_third_class_choice;
+							$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+							$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+							$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+							$student_catalog_options				= $studentRow->student_catalog_options;
+							$student_flexible						= $studentRow->student_flexible;
+							$student_date_created 					= $studentRow->student_date_created;
+							$student_date_updated			  		= $studentRow->student_date_updated;
+		
+							// if you need the country name and phone code, include the following
+							$countrySQL		= "select * from wpw1_cwa_country_codes  
+												where country_code = '$user_country_code'";
+							$countrySQLResult	= $wpdb->get_results($countrySQL);
+							if ($countrySQLResult === FALSE) {
+								handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
+								$user_country		= "UNKNOWN";
+								$user_ph_code		= "";
+							} else {
+								$numCRows		= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+								}
+								if($numCRows > 0) {
+									foreach($countrySQLResult as $countryRow) {
+										$user_country		= $countryRow->country_name;
+										$user_ph_code		= $countryRow->ph_code;
+									}
+								} else {
+									$user_country			= "Unknown";
+									$user_ph_code			= "";
+								}
+							}
 					
 							if ($doDebug) {
 								echo "<br />Processing student $student_call_sign<br />";

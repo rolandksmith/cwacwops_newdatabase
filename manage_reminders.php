@@ -1,32 +1,38 @@
 function manage_reminders_func() {
 
+/*
+
+
+	Modified 1Oct24 by Roland for new database
+*/
+
 	global $wpdb;
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
-/*
-	if ($validUser == 'N') {				// turn off debug and testmode
-		$doDebug					= FALSE;
-		$testMode					= FALSE;
-	}
-*/
-	$versionNumber				 	= "1";
+	$versionNumber				 	= "2";
+	$userName						= $initializationArray['userName'];
+	$currentTimestamp				= $initializationArray['currentTimestamp'];
+	$validTestmode					= $initializationArray['validTestmode'];
+	$siteURL						= $initializationArray['siteurl'];
+	
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	
 //	CHECK THIS!								//////////////////////
-	if ($validUser == "N") {
+	if ($userName == "") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
+
+//	if ($userRole != 'administrator') {				// turn off debug and testmode
+//		$doDebug					= FALSE;
+//		$testMode					= FALSE;
+//	}
+
 
 //	ini_set('memory_limit','256M');
 //	ini_set('max_execution_time',0);
@@ -132,6 +138,10 @@ function manage_reminders_func() {
 				$resolved = $str_value;
 				$resolved = filter_var($resolved,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key == "inp_id") {
+				$inp_id = $str_value;
+				$inp_id = filter_var($inp_id,FILTER_UNSAFE_RAW);
+			}
 		}
 	}
 	
@@ -149,65 +159,65 @@ function manage_reminders_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -215,10 +225,10 @@ td:last-child {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
 		$extMode					= 'tm';
-		$TableName					= "wpw1_cwa_reminders";
+		$TableName					= "wpw1_cwa_reminders2";
 	} else {
 		$extMode					= 'pd';
-		$TableName					= "wpw1_cwa_reminders2";
+		$TableName					= "wpw1_cwa_reminders";
 	}
 
 
@@ -232,7 +242,7 @@ td:last-child {
 							<table style='border-collapse:collapse;'>
 							<tr><td colspan='2'><input type='radio' class='formInputButton' name='inp_method' value='add'> Add a new reminder</td></tr>
 							<tr><td colspan='2'><input type='radio' class='formInputButton' name='inp_method' value='modify'> Modify an exising reminder</td></tr>
-							<tr><td colspan='2'><input type='radio' class='formInputButton' name='inp_method' value='delete'> Delete a reminder</td></tr>
+							<tr><td colspan='2'><input type='radio' class='formInputButton' name='inp_method' value='close'> Close a reminder</td></tr>
 							$testModeOption
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 							</form></p>";
@@ -289,8 +299,9 @@ td:last-child {
 	
 
 			
-		} elseif ($inp_method = 'modify' || $inp_method == 'delete') {
+		} elseif ($inp_method == 'modify' || $inp_method == 'close') {
 			$content		.= "<h3>$jobname</h3>
+								<h4>Displaying Most Recent 50 Reminders</h4>
 								<form method='post' action='$theURL' 
 								name='menu_form' ENCTYPE='multipart/form-data'>
 								<input type='hidden' name='strpass' value='3'>
@@ -314,8 +325,16 @@ td:last-child {
 									<th>Date Modified</th></tr>";
 								
 			// get a list of reminders
-			$sql			= "select * from wpw1_cwa_reminders 
-								order by date_created";	
+			if ($inp_method == 'close') {
+				$sql			= "select * from wpw1_cwa_reminders 
+									where resolved != 'Y' 
+									order by date_created DESC 
+									limit 50";	
+			} else {
+				$sql			= "select * from wpw1_cwa_reminders 
+									order by date_created DESC 
+									limit 50";	
+			}
 			$reminderResult	= $wpdb->get_results($sql);
 			if ($reminderResult === FALSE) {
 				$lastError	= $wpdb->last_error;
@@ -345,19 +364,19 @@ td:last-child {
 						$date_modified		= $reminderRow->date_modified;
 	
 						$content			.= "<tr><td style='vertical-align:top;'><input type='radio' class='formInputButton' name='inp_id' value='$record_id'></td>
-												<td style='vertical-align:top;text-align:center;'>$record_id</td>
-												<td style='vertical-align:top;'>$effective_date</td>
-												<td style='vertical-align:top;'>$close_date</td>
-												<td style='vertical-align:top;'>$resolved_date</td>
-												<td style='vertical-align:top;text-align:center;'>$send_reminder</td>
-												<td style='vertical-align:top;'>$call_sign</td>
-												<td style='vertical-align:top;'>$role</td>
-												<td style='vertical-align:top;width:250px;'>$email_text</td>
-												<td style='vertical-align:top;width:250px;'>$reminder_text</td>
-												<td style='vertical-align:top;text-align:center;'>$resolved</td>
-												<td style='vertical-align:top;'>$token</td>
-												<td style='vertical-align:top;'>$date_created</td>
-												<td style='vertical-align:top;'>$date_modified</td></tr>";
+													<td style='vertical-align:top;text-align:center;'>$record_id</td>
+													<td style='vertical-align:top;'>$effective_date</td>
+													<td style='vertical-align:top;'>$close_date</td>
+													<td style='vertical-align:top;'>$resolved_date</td>
+													<td style='vertical-align:top;text-align:center;'>$send_reminder</td>
+													<td style='vertical-align:top;'>$call_sign</td>
+													<td style='vertical-align:top;'>$role</td>
+													<td style='vertical-align:top;width:250px;'>$email_text</td>
+													<td style='vertical-align:top;width:250px;'>$reminder_text</td>
+													<td style='vertical-align:top;text-align:center;'>$resolved</td>
+													<td style='vertical-align:top;'>$token</td>
+													<td style='vertical-align:top;'>$date_created</td>
+													<td style='vertical-align:top;'>$date_modified</td></tr>";
 		
 					}
 				}
@@ -366,7 +385,98 @@ td:last-child {
 			}
 		}
 	} elseif ("3" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 3 with inp_method of $inp_method and inp_id of $inp_id<br />";
+		}
+		$content			.= "<h3>$jobname</h3>";
+		if ($inp_method == 'close') {
+			// see if there is really a record to be closed
+			$checkVar		= $wpdb->get_var("select count(record_id) from $TableName 
+												where record_id = $inp_id");
+			if ($checkVar == NULL || $checkVar == 0) {		// no record
+				$content	.= "<p>No record found in the $TableName table with the 
+								ID of $inp_id</p>";
+				if ($doDebug) {
+					echo "no $inp_id record found<br />";
+				}
+			} else {
+				if ($doDebug) {
+					echo "record found for ID $inp_id. Closing.<br />";
+				}
+				$actionDate		= date('Y-m-d H:i:s');
+	 			$closeResult	= $wpdb->update($TableName,
+	 											array('resolved'=>'Y',
+	 												  'resolved_date'=>$actionDate), 
+	 											array('record_id'=>$inp_id),
+	 											array('%s','%s'),
+	 											array('%d'));
+	 			if ($closeResult === FALSE) {
+	 				handleWPDBError($jobname,$doDebug);
+	 				$content	.= "<p>Closing the reminder failed</p>";
+	 			} else {
+	 				$content	.= "<p>Reminder with id of $inp_id closed</p>";
+	 			}
+			}
+		} elseif ($inp_method == 'modify') {
+			echo "hah!";
+
+			$sql			= "select * from wpw1_cwa_reminders 
+								where record_id = $inp_id"; 
+			}
+			$reminderResult	= $wpdb->get_results($sql);
+			if ($reminderResult === FALSE) {
+				$lastError	= $wpdb->last_error;
+				$lastQuery	=	$wpdb->last_query;
+				if ($doDebug) {
+					echo "unable to access wpw1_cwa_reminders. Error:$lastError<br />$lastQuery<br />";
+				}
+			} else {
+				$numRows	= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $sql<br />and retrieved $numRows rows<br />";
+				}
+				if ($numRows > 0) {
+					foreach($reminderResult as $reminderRow) {
+						$record_id			= $reminderRow->record_id;
+						$effective_date		= $reminderRow->effective_date;
+						$close_date			= $reminderRow->close_date;
+						$resolved_date		= $reminderRow->resolved_date;
+						$send_reminder		= $reminderRow->send_reminder;
+						$call_sign			= $reminderRow->call_sign;
+						$role				= $reminderRow->role;
+						$email_text			= $reminderRow->email_text;
+						$reminder_text		= $reminderRow->reminder_text;
+						$resolved			= $reminderRow->resolved;
+						$token				= $reminderRow->token;
+						$date_created		= $reminderRow->date_created;
+						$date_modified		= $reminderRow->date_modified;
 	
+						$content			.= "<h3>$jobname</h3>
+												<h4>Modify a Reminder</h4>
+												<tr><td style='vertical-align:top;'>Record ID</td>
+													<td>$record_id</td></tr>
+												<tr><td style='vertical-align:top;'>Effective Date</td>
+													<td><input type='text' class='formInputText' name='inp_effective_date' size='20' maxlength='20' value='$effective_date'></td></tr>
+												<tr><td style='vertical-align:top;'>Close Date</td>
+													<td><input type='text' class='formInputText' name='inp_close_date' size='20' maxlength='20' value='$close_date'></td></tr>
+												<tr><td style='vertical-align:top;'>Resolved Date</td>
+													<td><input type='text' class='formInputText' name='inp_resolved_date' length='20' maxlength='20' value='$resolved_date'></td></tr>
+													<td style='vertical-align:top;text-align:center;'>$send_reminder</td>
+													<td style='vertical-align:top;'>$call_sign</td>
+													<td style='vertical-align:top;'>$role</td>
+													<td style='vertical-align:top;width:250px;'>$email_text</td>
+													<td style='vertical-align:top;width:250px;'>$reminder_text</td>
+													<td style='vertical-align:top;text-align:center;'>$resolved</td>
+													<td style='vertical-align:top;'>$token</td>
+													<td style='vertical-align:top;'>$date_created</td>
+													<td style='vertical-align:top;'>$date_modified</td></tr>";
+
+
+
+
+
+
+		}
 	} elseif ("5" == $strPass) {
 		if ($doDebug) {
 			echo "<br />At pass 5 with:<br/>

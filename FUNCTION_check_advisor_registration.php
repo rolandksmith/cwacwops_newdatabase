@@ -1,4 +1,4 @@
-function check_advisor_registration($inp_call_sign = '',$doDebug=FALSE,$testMode=FALSE) {
+function check_advisor_registration($inp_callsign = '',$doDebug=FALSE,$testMode=FALSE) {
 
 /*	Looks in the current advisor table and returns information about an advisor's registration
 	
@@ -28,7 +28,7 @@ function check_advisor_registration($inp_call_sign = '',$doDebug=FALSE,$testMode
 	global $wpdb;
 
 	if ($doDebug) {
-		echo "<br />Entering Function check_advisor_registration with parameter $inp_call_sign<br />";
+		echo "<br />Entering Function check_advisor_registration with parameter $inp_callsign<br />";
 	}
 	if ($doDebug) {
 		ini_set('display_errors','1');
@@ -84,7 +84,7 @@ function check_advisor_registration($inp_call_sign = '',$doDebug=FALSE,$testMode
 								  phone, 
 								  survey_score 
 							from $advisorTableName 
-							where call_sign='$inp_call_sign' 
+							where call_sign='$inp_callsign' 
 							order by date_created DESC 
 							limit 1";
 	$wpw1_cwa_adviisor	= $wpdb->get_results($sql);
@@ -119,7 +119,7 @@ function check_advisor_registration($inp_call_sign = '',$doDebug=FALSE,$testMode
 				$returnArray['advisor']['survey_score']	= $advisor_survey_score;
 
 				if ($doDebug) {
-					echo "loaded up advisor data for $inp_call_sign. Getting class info<br />";
+					echo "loaded up advisor data for $inp_callsign. Getting class info<br />";
 				}
 				
 				// get the classes for the advisor
@@ -134,7 +134,7 @@ function check_advisor_registration($inp_call_sign = '',$doDebug=FALSE,$testMode
 											  class_schedule_times_utc, 
 											  class_incomplete 
 										from $advisorClassTableName 
-										where advisor_call_sign = '$inp_call_sign' 
+										where advisor_call_sign = '$inp_callsign' 
 										and semester = '$advisor_semester' 
 										order by sequence";
 				$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);

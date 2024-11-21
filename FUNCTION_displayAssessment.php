@@ -224,7 +224,7 @@ function displayAssessment($inp_callsign='',$inp_token='',$doDebug=FALSE) {
 												"bestResultBeginner=$bestResultBeginner&didBeginner=$didBeginner&bestResultFundamental=$bestResultFundamental&didFundamental=$didFundamental&bestResultIntermediate=$bestResultIntermediate&didIntermediate=$didIntermediate&bestResultAdvanced=$bestResultAdvanced&didAdvanced=$didAdvanced");
 
 			} else {
-				$retvar					= array(FALSE,'no assessment records found','');
+				$retVal					= array(FALSE,'no assessment records found','');
 			}
 		}
 	}

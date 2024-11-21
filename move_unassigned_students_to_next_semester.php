@@ -20,6 +20,7 @@ function move_unassigned_students_to_next_semester_func() {
  Modified 13Jul23 by Roland to use conslidated tables
  Modified 11Sep23 by Roland to include student's name and callsign in the email
  Modified 12Jan24 by Roland to update timezone offset
+ Modified 20Oct24 by Roland for new database
 */
 
 	global $wpdb;
@@ -31,7 +32,7 @@ function move_unassigned_students_to_next_semester_func() {
 	$validTestmode			= $initializationArray['validTestmode'];
 	$siteURL				= $initializationArray['siteurl'];
 
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	ini_set('max_execution_time',0);
@@ -112,105 +113,100 @@ function move_unassigned_students_to_next_semester_func() {
 
 // The content to be returned initially includes the special style information.
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;vertical-align:top;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;vertical-align:top;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 
 	if ($testMode) {
-		$studentTableName	= "wpw1_cwa_consolidated_student2";
+		$studentTableName	= "wpw1_cwa_student2";
+		$userMasterTableName	= 'wpw1_cwa_user_master2';
 		$run_mode		= 'tm';
 		$content 		.= "<p><strong>Function under development.</strong></p>";
 		if ($doDebug) {
 			echo "Function under development.<br />";
 		}
 	} else {
-		$studentTableName	= "wpw1_cwa_consolidated_student";
+		$studentTableName	= "wpw1_cwa_student";
+		$userMasterTableName	= 'wpw1_cwa_user_master';
 		$run_mode		= 'pm';
 	}
 		
 
 
-	
-
-	
-/*
- * When strPass is equal to 1 then get the run type
- *
-*/
 	if ("1" == $strPass) {
-	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
-		if ($doDebug) {
-			echo "offering testModeOption<br />";
+		if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
+			if ($doDebug) {
+				echo "<br />offering testModeOption<br />";
+			}
+			$testModeOption	= "Operation Mode<br />
+								<input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE<br />
+								<br />Verbosity<br />
+								<input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Normal Output<br />
+								<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Verbose<br />";
+		} else {
+			if ($doDebug) {
+				echo "No testMode offered<br />";
+			}
+			$testModeOption	= '';
 		}
-		$testModeOption	= "Operation Mode<br />
-							<input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-							<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE<br />
-							<br />Verbosity<br />
-							<input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Normal Output<br />
-							<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Verbose<br />";
-	} else {
-		if ($doDebug) {
-			echo "No testMode offered<br />";
-		}
-		$testModeOption	= '';
-	}
 
 	
 		$content .= "<h3>$jobname</h3>
@@ -242,87 +238,68 @@ td:last-child {
 //// pass 2 display student information		
 		
 	} elseif ("2" == $strPass) {
-	
-		$content .= "<h3>Move Unassigned Students to Next Semester</h3>";
-		
-		if ($inp_type != 'NOTIFY' && $inp_type != 'MOVE') {
-			$content		.= "Type of run is invalid. Function aborted.";
-			return $content;
-		}
-		
-		$currentSemester			= $initializationArray['currentSemester'];
-		$nextSemester				= $initializationArray['nextSemester'];
-		$semesterTwo				= $initializationArray['semesterTwo'];
-		if ($currentSemester == "Not in Session") {
-			if ($inp_type == 'NOTIFY') {
-				$currentSemester			= $nextSemester;
-				$nextSemester				= $semesterTwo;
-			} else {
-				$content			.= "There isn't a semester in session so MOVE is not a valid option.";
-				return $content;
-			}
-		} else {
-			if ($inp_type != 'MOVE') {
-				$content			.= "The semester is in session. MOVE is the appropriate option.";
-				return $content;
-			}
-		}
 		if ($doDebug) {
-			echo "At Pass 2. Current semester: $currentSemester.<br />
+			echo "<br />At Pass 2. Current semester: $currentSemester.<br />
 			Next Semester: $nextSemester<br />
 			Type of run: $inp_type<br />";
 		}
-		
-		// figure out when the verify email will be sent
-		$whenArray			= array('Jan/Feb'=>'November 15th',
-									'May/Jun'=>'March 15th',
-									'Sep/Oct'=>'July 15th');
-		$thisWhen			= "";
-		$myArray			= explode(" ",$nextSemester);
-		if (count($myArray) > 1) {
-			$thisStr		= $myArray[1];
-			$thisWhen		= $whenArray[$thisStr];
-		} else {
-			$content		.= "Unable to calculate when the verify email will be sent from $nextSemester<br />";
+		$content .= "<h3>$jobname</h3>";
+		$doProceed					= TRUE;
+		if ($inp_type != 'NOTIFY' && $inp_type != 'MOVE') {
+			$content		.= "Type of run is invalid. Function aborted.";
+			$doProceed		= FALSE;
 		}
-		
-		
-		$sql				= "select * from $studentTableName 
-								where semester='$currentSemester' 
-									and response='Y' 
-									and student_status='' 
-								order by call_sign";
-		$wpw1_cwa_student	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_student === FALSE) {
-			if ($doDebug) {
-				echo "Reading $studentTableName table failed<br />";
-				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
-		} else {
-			$numSRows		= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr		= $wpdb->last_query;
-				echo "ran $myStr<br />and retrieved $numSRows rows from $studentTableName table<br />";
-			}
-			if ($numSRows > 0) {
+		if ($doProceed) {		
+			$currentSemester			= $initializationArray['currentSemester'];
+			$nextSemester				= $initializationArray['nextSemester'];
+			$semesterTwo				= $initializationArray['semesterTwo'];
+			if ($currentSemester == "Not in Session") {
 				if ($inp_type == 'NOTIFY') {
-					$content	.= "<table style='width:1000px;'><tr>
-									<th>Call Sign</th>
-									<th>Name</th>
-									<th>City</th>
-									<th>State</th>
-									<th>Country</th>
-									<th>Phone</th>
-									<th>Email</th>
-									<th>TZ</th>
-									<th>Level</th>
-									<th>Class Priority</th>
-									</tr>";
-			
+					$currentSemester			= $nextSemester;
+					$nextSemester				= $semesterTwo;
 				} else {
-					$content	.= "<table style='width:1000px;'>
-									<tr>
+					$content			.= "There isn't a semester in session so MOVE is not a valid option.";
+					$doProceed			= FALSE;
+				}
+			} else {
+				if ($inp_type != 'MOVE') {
+					$content			.= "The semester is in session. MOVE is the appropriate option.";
+					$doProceed			= FALSE;
+				}
+			}
+		}
+		if ($doProceed) {
+			// figure out when the verify email will be sent
+			$whenArray			= array('Jan/Feb'=>'November 15th',
+										'May/Jun'=>'March 15th',
+										'Sep/Oct'=>'July 15th');
+			$thisWhen			= "";
+			$myArray			= explode(" ",$nextSemester);
+			if (count($myArray) > 1) {
+				$thisStr		= $myArray[1];
+				$thisWhen		= $whenArray[$thisStr];
+			} else {
+				$content		.= "Unable to calculate when the verify email will be sent from $nextSemester<br />";
+			}
+			
+			
+			$sql				= "select * from $studentTableName 
+									left join $userMasterTableName on user_call_sign = student_call_sign 
+									where student_semester='$currentSemester' 
+										and student_response='Y' 
+										and student_status='' 
+									order by student_call_sign";
+			$wpw1_cwa_student	= $wpdb->get_results($sql);
+			if ($wpw1_cwa_student === FALSE) {
+				handleWPDBError($jobname,$doDebug);
+			} else {
+				$numSRows		= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br />";
+				}
+				if ($numSRows > 0) {
+					if ($inp_type == 'NOTIFY') {
+						$content	.= "<table style='width:1000px;'><tr>
 										<th>Call Sign</th>
 										<th>Name</th>
 										<th>City</th>
@@ -330,207 +307,252 @@ td:last-child {
 										<th>Country</th>
 										<th>Phone</th>
 										<th>Email</th>
-									</tr><tr>
+										<th>TZ</th>
 										<th>Level</th>
-										<th>Current Semester</th>
-										<th>Next Semester</th>
-										<th>Current Priority</th>
-										<th>New Priority</th>
-										<th>Intervention<br />Required</td>
-										<th>&nbsp;</th>
-									</tr>";
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= strtoupper($studentRow->call_sign);
-						$student_first_name						= $studentRow->first_name;
-						$student_last_name						= stripslashes($studentRow->last_name);
-						$student_email  						= strtolower(strtolower($studentRow->email));
-						$student_phone  						= $studentRow->phone;
-						$student_ph_code						= $studentRow->ph_code;
-						$student_city  							= $studentRow->city;
-						$student_state  						= $studentRow->state;
-						$student_zip_code  						= $studentRow->zip_code;
-						$student_country  						= $studentRow->country;
-						$student_country_code					= $studentRow->country_code;
-						$student_time_zone  					= $studentRow->time_zone;
-						$student_timezone_id					= $studentRow->timezone_id;
-						$student_timezone_offset				= $studentRow->timezone_offset;
-						$student_whatsapp						= $studentRow->whatsapp_app;
-						$student_signal							= $studentRow->signal_app;
-						$student_telegram						= $studentRow->telegram_app;
-						$student_messenger						= $studentRow->messenger_app;					
-						$student_wpm 	 						= $studentRow->wpm;
-						$student_youth  						= $studentRow->youth;
-						$student_age  							= $studentRow->age;
-						$student_student_parent 				= $studentRow->student_parent;
-						$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->level;
-						$student_waiting_list 					= $studentRow->waiting_list;
-						$student_request_date  					= $studentRow->request_date;
-						$student_semester						= $studentRow->semester;
-						$student_notes  						= $studentRow->notes;
-						$student_welcome_date  					= $studentRow->welcome_date;
-						$student_email_sent_date  				= $studentRow->email_sent_date;
-						$student_email_number  					= $studentRow->email_number;
-						$student_response  						= strtoupper($studentRow->response);
-						$student_response_date  				= $studentRow->response_date;
-						$student_abandoned  					= $studentRow->abandoned;
-						$student_student_status  				= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->action_log;
-						$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->selected_date;
-						$student_no_catalog			 			= $studentRow->no_catalog;
-						$student_hold_override  				= $studentRow->hold_override;
-						$student_messaging  					= $studentRow->messaging;
-						$student_assigned_advisor  				= $studentRow->assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->hold_reason_code;
-						$student_class_priority  				= $studentRow->class_priority;
-						$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-						$student_promotable  					= $studentRow->promotable;
-						$student_excluded_advisor  				= $studentRow->excluded_advisor;
-						$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->available_class_days;
-						$student_intervention_required  		= $studentRow->intervention_required;
-						$student_copy_control  					= $studentRow->copy_control;
-						$student_first_class_choice  			= $studentRow->first_class_choice;
-						$student_second_class_choice  			= $studentRow->second_class_choice;
-						$student_third_class_choice  			= $studentRow->third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-						$student_date_created 					= $studentRow->date_created;
-						$student_date_updated			  		= $studentRow->date_updated;
-
-						$student_last_name 						= no_magic_quotes($student_last_name);
+										<th>Class Priority</th>
+										</tr>";
 				
-						$sendEmail								= FALSE;
-						$promoString							= '';
-						if ($doDebug) {
-							echo  "<br />Processing $student_call_sign<br />
-									&nbsp;&nbsp;&nbsp;&nbsp;Response: $student_response<br />
-									&nbsp;&nbsp;&nbsp;&nbsp;Status: $student_student_status<br />
-									&nbsp;&nbsp;&nbsp;&nbsp;Class Priority: $student_class_priority<br />";
-						}				
-						$updateStr								= '';
-						$the_level		= substr($student_level,0,3);
-
-						$studentCount++;
-						if ($doDebug) {
-							echo "inp_type is $inp_type<br />";
-						}
-				
-						if ($inp_type == 'MOVE') {
-							if ($doDebug) {
-								echo "class_priority is 0. Setting class_priority to 1. Student will be moved<br />";
-							}	
-							$new_priority = '1';
-							$student_action_log 	= "$student_action_log / $myDate REASSIGN student moved to the next semester $nextSemester";
-
-							$newActionLog			= formatActionLog($student_action_log);
-							$content	.= "<tr>
-												<td>$student_call_sign</td>
-												<td>$student_last_name, $student_first_name</td>
-												<td>$student_city</td>
-												<td>$student_state</td>
-												<td>$student_country</td>
-												<td>$student_phone</td>
-												<td>$student_email</td>
-											</tr><tr>
-												<td>$student_level</td>
-												<td>$student_semester</td>
-												<td>$nextSemester</td>
-												<td>$student_class_priority</td>
-												<td>$new_priority</td>
-												<td>$student_intervention_required</td>
-												<td></td>
-											</tr><tr>
-												<td colspan='7'>$newActionLog</td></tr>";
-												
-							$thisOffset		= getOffsetFromIdentifier($student_timezone_id,$nextSemester,$doDebug);
-												
-							$updateParams	= array();
-							$updateFormat	= array();
-							$updateParams['semester']				= $nextSemester;
-							$updateFormat[]							= '%s';
-							$updateParams['timezone_offset']		= $thisOffset;
-							$updateFormat[]							= '%f';
-							$updateParams['class_priority']			= 1;
-							$updateFormat[]							= '%d';
-							$updateParams['action_log']				= $student_action_log;
-							$updateFormat[]							= '%s';
-							$updateParams['response']				= '';
-							$updateFormat[]							= '%s';
-							$updateParams['response_date']			= '';
-							$updateFormat[]							= '%s';
-							$updateParams['student_status']			= '';
-							$updateFormat[]							= '%s';
-							$updateParams['hold_override']			= '';
-							$updateFormat[]							= '%s';
-							$updateParams['intervention_required']	= '';
-							$updateFormat[]							= '%s';
-							$updateParams['pre_assigned_advisor']	= '';
-							$updateFormat[]							= '%s';
-							$updateParams['assigned_advisor']		= '';
-							$updateFormat[]							= '%s';
-							$updateParams['advisor_class_timezone']	= -99;
-							$updateFormat[]							= '%d';
-							$updateParams['advisor_select_date']	= '';
-							$updateFormat[]							= '%s';
-							$updateParams['welcome_date']			= '';
-							$updateFormat[]							= '%s';
-							$updateParams['email_sent_date']		= '';
-							$updateFormat[]							= '%s';
-							$updateParams['email_number']			= 0;
-							$updateFormat[]							= '%d';
-							$updateParams['assigned_advisor_class'] = 0;
-							$updateFormat[]							= '%d';
-							$updateParams['first_class_choice']		= 'None';
-							$updateFormat[]							= '%s';
-							$updateParams['second_class_choice']	= 'None';
-							$updateFormat[]							= '%s';
-							$updateParams['third_class_choice']		= 'None';
-							$updateFormat[]							= '%s';
-							$updateParams['first_class_choice_utc']	= '';
-							$updateFormat[]							= '%s';
-							$updateParams['second_class_choice_utc'] = '';
-							$updateFormat[]							= '%s';
-							$updateParams['third_class_choice_utc']	= '';
-							$updateFormat[]							= '%s';
-							$updateParams['no_catalog']				= 'Y';
-							$updateFormat[]							= '%s';
-							$updateParams['waiting_list']			= '';
-							$updateFormat[]							= '%s';
-							$updateParams['abandoned']				= 'N';
-							$updateFormat[]							= '%s';
-
-							$studentUpdateData		= array('tableName'=>$studentTableName,
-															'inp_data'=>$updateParams,
-															'inp_format'=>$updateFormat,
-															'inp_method'=>'update',
-															'jobname'=>$jobname,
-															'inp_id'=>$student_ID,
-															'inp_callsign'=>$student_call_sign,
-															'inp_semester'=>$student_semester,
-															'inp_who'=>$userName,
-															'testMode'=>$testMode,
-															'doDebug'=>$doDebug);
-							$updateResult	= updateStudent($studentUpdateData);
-							if ($updateResult[0] === FALSE) {
+					} else {
+						$content	.= "<table style='width:1000px;'>
+										<tr>
+											<th>Call Sign</th>
+											<th>Name</th>
+											<th>City</th>
+											<th>State</th>
+											<th>Country</th>
+											<th>Phone</th>
+											<th>Email</th>
+										</tr><tr>
+											<th>Level</th>
+											<th>Current Semester</th>
+											<th>Next Semester</th>
+											<th>Current Priority</th>
+											<th>New Priority</th>
+											<th>Intervention<br />Required</td>
+											<th>&nbsp;</th>
+										</tr>";
+						foreach ($wpw1_cwa_student as $studentRow) {
+							$student_master_ID 					= $studentRow->user_ID;
+							$student_master_call_sign 			= $studentRow->user_call_sign;
+							$student_first_name 				= $studentRow->user_first_name;
+							$student_last_name 					= $studentRow->user_last_name;
+							$student_email 						= $studentRow->user_email;
+							$student_phone 						= $studentRow->user_phone;
+							$student_city 						= $studentRow->user_city;
+							$student_state 						= $studentRow->user_state;
+							$student_zip_code 					= $studentRow->user_zip_code;
+							$student_country_code 				= $studentRow->user_country_code;
+							$student_whatsapp 					= $studentRow->user_whatsapp;
+							$student_telegram 					= $studentRow->user_telegram;
+							$student_signal 					= $studentRow->user_signal;
+							$student_messenger 					= $studentRow->user_messenger;
+							$student_master_action_log 			= $studentRow->user_action_log;
+							$student_timezone_id 				= $studentRow->user_timezone_id;
+							$student_languages 					= $studentRow->user_languages;
+							$student_survey_score 				= $studentRow->user_survey_score;
+							$student_is_admin					= $studentRow->user_is_admin;
+							$student_role 						= $studentRow->user_role;
+							$student_master_date_created 		= $studentRow->user_date_created;
+							$student_master_date_updated 		= $studentRow->user_date_updated;
+		
+							$student_ID								= $studentRow->student_id;
+							$student_call_sign						= $studentRow->student_call_sign;
+							$student_time_zone  					= $studentRow->student_time_zone;
+							$student_timezone_offset				= $studentRow->student_timezone_offset;
+							$student_youth  						= $studentRow->student_youth;
+							$student_age  							= $studentRow->student_age;
+							$student_student_parent 				= $studentRow->student_parent;
+							$student_parent_email  					= strtolower($studentRow->student_parent_email);
+							$student_level  						= $studentRow->student_level;
+							$student_waiting_list 					= $studentRow->student_waiting_list;
+							$student_request_date  					= $studentRow->student_request_date;
+							$student_semester						= $studentRow->student_semester;
+							$student_notes  						= $studentRow->student_notes;
+							$student_welcome_date  					= $studentRow->student_welcome_date;
+							$student_email_sent_date  				= $studentRow->student_email_sent_date;
+							$student_email_number  					= $studentRow->student_email_number;
+							$student_response  						= strtoupper($studentRow->student_response);
+							$student_response_date  				= $studentRow->student_response_date;
+							$student_abandoned  					= $studentRow->student_abandoned;
+							$student_status  						= strtoupper($studentRow->student_status);
+							$student_action_log  					= $studentRow->student_action_log;
+							$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+							$student_selected_date  				= $studentRow->student_selected_date;
+							$student_no_catalog  					= $studentRow->student_no_catalog;
+							$student_hold_override  				= $studentRow->student_hold_override;
+							$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+							$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+							$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+							$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+							$student_class_priority  				= $studentRow->student_class_priority;
+							$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+							$student_promotable  					= $studentRow->student_promotable;
+							$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+							$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
+							$student_available_class_days  			= $studentRow->student_available_class_days;
+							$student_intervention_required  		= $studentRow->student_intervention_required;
+							$student_copy_control  					= $studentRow->student_copy_control;
+							$student_first_class_choice  			= $studentRow->student_first_class_choice;
+							$student_second_class_choice  			= $studentRow->student_second_class_choice;
+							$student_third_class_choice  			= $studentRow->student_third_class_choice;
+							$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+							$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+							$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+							$student_catalog_options				= $studentRow->student_catalog_options;
+							$student_flexible						= $studentRow->student_flexible;
+							$student_date_created 					= $studentRow->student_date_created;
+							$student_date_updated			  		= $studentRow->student_date_updated;
+					
+							// if you need the country name and phone code, include the following
+							$countrySQL		= "select * from wpw1_cwa_country_codes  
+												where country_code = '$student_country_code'";
+							$countrySQLResult	= $wpdb->get_results($countrySQL);
+							if ($countrySQLResult === FALSE) {
 								handleWPDBError($jobname,$doDebug);
-								$content		.= "Unable to update content in $studentTableName<br />";
+								$student_country		= "UNKNOWN";
+								$student_ph_code		= "";
 							} else {
+								$numCRows		= $wpdb->num_rows;
 								if ($doDebug) {
-									echo "current student record updated. Preparing to send email<br />";
+									echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
 								}
-								
-								$studentsMoved++;
-								$stringToPass	= "studentid=$student_ID&inp_mode=$run_mode&program_action=valid";
-								$enstr			= base64_encode($stringToPass);
+								if($numCRows > 0) {
+									foreach($countrySQLResult as $countryRow) {
+										$student_country		= $countryRow->country_name;
+										$student_ph_code		= $countryRow->ph_code;
+									}
+								} else {
+									$student_country			= "Unknown";
+									$student_ph_code			= "";
+								}
+							}
 
-								$my_subject	= "CW Academy Update to your Registration Request";	
-								$my_message = "To: $student_last_name, $student_first_name ($student_call_sign):
+							$sendEmail								= FALSE;
+							$promoString							= '';
+							if ($doDebug) {
+								echo  "<br />Processing $student_call_sign<br />
+										&nbsp;&nbsp;&nbsp;&nbsp;Response: $student_response<br />
+										&nbsp;&nbsp;&nbsp;&nbsp;Status: $student_status<br />
+										&nbsp;&nbsp;&nbsp;&nbsp;Class Priority: $student_class_priority<br />";
+							}				
+							$updateStr		= '';
+							$the_level		= substr($student_level,0,3);
+	
+							$studentCount++;
+							if ($doDebug) {
+								echo "inp_type is $inp_type<br />";
+							}
+					
+							if ($inp_type == 'MOVE') {
+								if ($doDebug) {
+									echo "class_priority is 0. Setting class_priority to 1. Student will be moved<br />";
+								}	
+								$new_priority = '1';
+								$student_action_log 	= "$student_action_log / $myDate REASSIGN student moved to the next semester $nextSemester";
+	
+								$newActionLog			= formatActionLog($student_action_log);
+								$content	.= "<tr>
+													<td>$student_call_sign</td>
+													<td>$student_last_name, $student_first_name</td>
+													<td>$student_city</td>
+													<td>$student_state</td>
+													<td>$student_country</td>
+													<td>$student_phone</td>
+													<td>$student_email</td>
+												</tr><tr>
+													<td>$student_level</td>
+													<td>$student_semester</td>
+													<td>$nextSemester</td>
+													<td>$student_class_priority</td>
+													<td>$new_priority</td>
+													<td>$student_intervention_required</td>
+													<td></td>
+												</tr><tr>
+													<td colspan='7'>$newActionLog</td></tr>";
+													
+								$thisOffset		= getOffsetFromIdentifier($student_timezone_id,$nextSemester,$doDebug);
+													
+								$updateParams	= array();
+								$updateFormat	= array();
+								$updateParams['student_semester']				= $nextSemester;
+								$updateFormat[]							= '%s';
+								$updateParams['student_timezone_offset']		= $thisOffset;
+								$updateFormat[]							= '%f';
+								$updateParams['student_class_priority']			= 1;
+								$updateFormat[]							= '%d';
+								$updateParams['student_action_log']				= $student_action_log;
+								$updateFormat[]							= '%s';
+								$updateParams['student_response']				= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_response_date']			= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_status']			= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_hold_override']			= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_intervention_required']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_pre_assigned_advisor']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_assigned_advisor']		= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_advisor_class_timezone']	= -99;
+								$updateFormat[]							= '%d';
+								$updateParams['student_advisor_select_date']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_welcome_date']			= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_email_sent_date']		= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_email_number']			= 0;
+								$updateFormat[]							= '%d';
+								$updateParams['student_assigned_advisor_class'] = 0;
+								$updateFormat[]							= '%d';
+								$updateParams['student_first_class_choice']		= 'None';
+								$updateFormat[]							= '%s';
+								$updateParams['student_second_class_choice']	= 'None';
+								$updateFormat[]							= '%s';
+								$updateParams['student_third_class_choice']		= 'None';
+								$updateFormat[]							= '%s';
+								$updateParams['student_first_class_choice_utc']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_second_class_choice_utc'] = '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_third_class_choice_utc']	= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_no_catalog']				= 'Y';
+								$updateFormat[]							= '%s';
+								$updateParams['student_waiting_list']			= '';
+								$updateFormat[]							= '%s';
+								$updateParams['student_abandoned']				= 'N';
+								$updateFormat[]							= '%s';
+	
+								$studentUpdateData		= array('tableName'=>$studentTableName,
+																'inp_data'=>$updateParams,
+																'inp_format'=>$updateFormat,
+																'inp_method'=>'update',
+																'jobname'=>$jobname,
+																'inp_id'=>$student_ID,
+																'inp_callsign'=>$student_call_sign,
+																'inp_semester'=>$student_semester,
+																'inp_who'=>$userName,
+																'testMode'=>$testMode,
+																'doDebug'=>$doDebug);
+								$updateResult	= updateStudent($studentUpdateData);
+								if ($updateResult[0] === FALSE) {
+									handleWPDBError($jobname,$doDebug);
+									$content		.= "Unable to update content in $studentTableName<br />";
+								} else {
+									if ($doDebug) {
+										echo "current student record updated. Preparing to send email<br />";
+									}
+									
+									$studentsMoved++;
+									$stringToPass	= "studentid=$student_ID&inp_mode=$run_mode&program_action=valid";
+									$enstr			= base64_encode($stringToPass);
+	
+									$my_subject	= "CW Academy Update to your Registration Request";	
+									$my_message = "To: $student_last_name, $student_first_name ($student_call_sign):
 <p>Thank you for your interest in attending the $student_level CW Academy class 
 for the $currentSemester semester. Unfortunately, either the class was full for this semester or there 
 was no advisor available for your requested class choices. You have been 
@@ -548,32 +570,32 @@ CW Academy</p>
 <br />Please refer to the appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Class 
 Resolution</a> for assistance.</b></span><br /></p>";
 
-								$sendEmail			= TRUE;
-							}
+									$sendEmail			= TRUE;
+								}
 
 //////////////////////						
 						
-						} elseif ($inp_type == 'NOTIFY') {				//// type run is NOTIFY					
-							$studentPromoInfo		= 'Notified and will Possibly be moved to the next semester';
-							$promoString			= "Otherwise CW Academy will update you again early in the semester and 
+							} elseif ($inp_type == 'NOTIFY') {				//// type run is NOTIFY					
+								$studentPromoInfo		= 'Notified and will Possibly be moved to the next semester';
+								$promoString			= "Otherwise CW Academy will update you again early in the semester and 
 automatically move your registration to $nextSemester semester.";
-							if ($student_class_priority > 0) {
-								$studentPromoInfo	= 'Notified Only. Will not be moved to the next semester';
-								$promoString		= "Otherwise CW Academy will update you again with another email early in the semester.";
-							}
-							$content	.= "<tr><td>$student_call_sign</td>
-												<td>$student_last_name, $student_first_name</td>
-												<td>$student_city</td>
-												<td>$student_state</td>
-												<td>$student_country</td>
-												<td>$student_phone</td>
-												<td>$student_email</td>
-												<td>$the_level</td>
-												<td>$student_class_priority</td></tr>
-												<tr><td colspan='9'>$student_action_log
-												<br /><br />$studentPromoInfo</td></tr>";
-							$my_subject	= "CW Academy Update to your Registration Request";	
-							$my_message = "<p>To: $student_last_name, $student_first_name ($student_call_sign):</p>
+								if ($student_class_priority > 0) {
+									$studentPromoInfo	= 'Notified Only. Will not be moved to the next semester';
+									$promoString		= "Otherwise CW Academy will update you again with another email early in the semester.";
+								}
+								$content	.= "<tr><td>$student_call_sign</td>
+													<td>$student_last_name, $student_first_name</td>
+													<td>$student_city</td>
+													<td>$student_state</td>
+													<td>$student_country</td>
+													<td>$student_phone</td>
+													<td>$student_email</td>
+													<td>$the_level</td>
+													<td>$student_class_priority</td></tr>
+													<tr><td colspan='9'>$student_action_log
+													<br /><br />$studentPromoInfo</td></tr>";
+								$my_subject	= "CW Academy Update to your Registration Request";	
+								$my_message = "<p>To: $student_last_name, $student_first_name ($student_call_sign):</p>
 <p>Thank you for your interest in attending the $student_level CW Academy class 
 for the $currentSemester semester. Unfortunately, there was no class available that meets your time preferences 
 or the number of students for the semester exceeds the available seats 
@@ -585,77 +607,78 @@ CW Academy</p>
 <br /><p><span style='color:red;font-size:medium;'><b>Do not reply to this email as the address is not monitored. 
 <br />Please refer to the appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Class 
 Resolution</a> for assistance.</b></span><br /></p>";
-							$sendEmail 	= TRUE;
-					
-						} else {
-							if ($doDebug) {
-								echo "inp_type of $inp_type was invalid<br />";
-							}
-						}
-						if ($sendEmail) {
-							// send the email
-							if ($testMode) {
-								$theRecipient	= "rolandksmith@gmail.com";
-								$my_subject		= "TESTMODE $my_subject";
-								$my_message 	= "<p>Email would have been sent to $student_email ($student_call_sign)</p>$my_message";
-								$mailCode		= 2;
-								$increment++;
-							} else {
-								$theRecipient	= $student_email;
-								$mailCode		= 13;
-							}
+								$sendEmail 	= TRUE;
 						
-							$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-																		'theSubject'=>$my_subject,
-																		'jobname'=>$jobname,
-																		'theContent'=>$my_message,
-																		'mailCode'=>$mailCode,
-																		'increment'=>$increment,
-																		'testMode'=>$testMode,
-																		'doDebug'=>$doDebug));
-							if ($mailResult === TRUE) {
-								if ($doDebug) {
-									echo "An email was sent to $theRecipient<br />";
-								}
-								if ($inp_type == 'NOTIFY') {
-									$content .= "<tr><td colspan='10'>An email was sent to $theRecipient</td></tr>
-									<tr><td colspan='10'><hr></td></tr>";
-								} else {
-									$content .= "<tr><td colspan='8'>An email was sent to $theRecipient $updateStr</td></tr>
-									<tr><td colspan='8'><hr></td></tr>";
-								}
-								$emailsSent++;
 							} else {
 								if ($doDebug) {
-									echo "The email function failed for $theRecipient ($student_call_sign)" . $wp_error->get_error_message() . "<br />";
-								}
-								if ($inp_type == 'NOTIFY') {
-									$content .= "<tr><td colspan='8'>The mail send function to $theRecipient failed.</td></tr>
-									<tr><td colspan='8'><hr></td></tr>";
-								} else {
-									$content .= "<tr><td colspan='8'>The mail send function to $theRecipient failed. The table was updated.</td></tr>
-									<tr><td colspan='10'><hr></td></tr>";
+									echo "inp_type of $inp_type was invalid<br />";
 								}
 							}
-							$sendEmail			= FALSE;
-						}
-					}			/// end of student while
-				}				
-			} else {
-				if ($doDebug) {
-					echo "No $studentTableName students. Aborting.";
+							if ($sendEmail) {
+								// send the email
+								if ($testMode) {
+									$theRecipient	= "rolandksmith@gmail.com";
+									$my_subject		= "TESTMODE $my_subject";
+									$my_message 	= "<p>Email would have been sent to $student_email ($student_call_sign)</p>$my_message";
+									$mailCode		= 2;
+									$increment++;
+								} else {
+									$theRecipient	= $student_email;
+									$mailCode		= 13;
+								}
+							
+								$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+																			'theSubject'=>$my_subject,
+																			'jobname'=>$jobname,
+																			'theContent'=>$my_message,
+																			'mailCode'=>$mailCode,
+																			'increment'=>$increment,
+																			'testMode'=>$testMode,
+																			'doDebug'=>$doDebug));
+								if ($mailResult === TRUE) {
+									if ($doDebug) {
+										echo "An email was sent to $theRecipient<br />";
+									}
+									if ($inp_type == 'NOTIFY') {
+										$content .= "<tr><td colspan='10'>An email was sent to $theRecipient</td></tr>
+										<tr><td colspan='10'><hr></td></tr>";
+									} else {
+										$content .= "<tr><td colspan='8'>An email was sent to $theRecipient $updateStr</td></tr>
+										<tr><td colspan='8'><hr></td></tr>";
+									}
+									$emailsSent++;
+								} else {
+									if ($doDebug) {
+										echo "The email function failed for $theRecipient ($student_call_sign)" . $wp_error->get_error_message() . "<br />";
+									}
+									if ($inp_type == 'NOTIFY') {
+										$content .= "<tr><td colspan='8'>The mail send function to $theRecipient failed.</td></tr>
+										<tr><td colspan='8'><hr></td></tr>";
+									} else {
+										$content .= "<tr><td colspan='8'>The mail send function to $theRecipient failed. The table was updated.</td></tr>
+										<tr><td colspan='10'><hr></td></tr>";
+									}
+								}
+								$sendEmail			= FALSE;
+							}
+						}			/// end of student while
+					}				
+				} else {
+					if ($doDebug) {
+						echo "No $studentTableName students. Aborting.";
+					}
 				}
 			}
-		}
-		$content		.= "</table><p>$numSRows Total Records Processed<br />
-							$emailsSent: Emails were sent</p>";
-		if ($inp_type == 'NOTIFY') {
-			$content	.= "$notify: students notified, but won't be moved<br />
-							$notifyAndMove: students notified that they will possibly be moved<br />";
-		} else {
-			$content	.= "$studentsMoved: Students moved to the $nextSemester semester<br />
-							$studentsBypassed0: Students bypassed due to class priority greater than 0<br />
-							$studentsBypassedH: Students bypassed due to being on hold<br />";
+			$content		.= "</table><p>$numSRows Total Records Processed<br />
+								$emailsSent: Emails were sent</p>";
+			if ($inp_type == 'NOTIFY') {
+				$content	.= "$notify: students notified, but won't be moved<br />
+								$notifyAndMove: students notified that they will possibly be moved<br />";
+			} else {
+				$content	.= "$studentsMoved: Students moved to the $nextSemester semester<br />
+								$studentsBypassed0: Students bypassed due to class priority greater than 0<br />
+								$studentsBypassedH: Students bypassed due to being on hold<br />";
+			}
 		}
 	}
 	$thisTime 		= date('Y-m-d H:i:s');

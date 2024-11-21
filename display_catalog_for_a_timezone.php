@@ -29,6 +29,10 @@ function display_catalog_for_a_timezone_func() {
 	$inp_timezone_id		= '';
 	$inp_timezone_offset	= -99.00;
 	$inp_semester			= "";
+	
+	if ($userName == '') {
+		return "You are not authorized";
+	}
 
 
 //	if ($doDebug) {
@@ -160,11 +164,11 @@ td:last-child {
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-	<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
-<tr><td>Verbose Debugging?</td>
-	<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
-		<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+							<tr><td>Verbose Debugging?</td>
+								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
+									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 	} else {
 		$testModeOption	= '';
 	}

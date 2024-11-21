@@ -3,10 +3,11 @@ function display_advisor_evaluation_statistics_func() {
 /*
 	Modified 15Apr23 by Roland to fix action_log
 	Modified 13Jul23 by Roland to use consolidated files
+	Modified 12Oct24 by Roland for new database
 */
-	global $wpdb, $evaluateAdvisorTableName, $doDebug, $testMode;
+	global $wpdb, $evaluateAdvisorTableName, $doDebug, $testMode, $jobname;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -14,14 +15,21 @@ function display_advisor_evaluation_statistics_func() {
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	if ($validUser == "N") {
+	$validUser 	= $initializationArray['validUser'];
+	$userName	= $initializationArray['userName'];
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	$userName			= $initializationArray['userName'];
 	$validTestmode		= $initializationArray['validTestmode'];
 	$siteURL			= $initializationArray['siteurl'];
 	$jobname			= "Display Advisor Evaluation Statistics";
+	$currentSemester	= $initializationArray['currentSemester'];
+	$prevSemester		= $initializationArray['prevSemester'];
+	if ($currentSemester == 'Not in Session') {
+		$theSemester	= $prevSemester;
+	} else {
+		$theSemester	= $currentSemester;
+	}		
 
 //	if ($doDebug) {
 		ini_set('display_errors','1');
@@ -34,7 +42,6 @@ function display_advisor_evaluation_statistics_func() {
 	$strPass					= "1";
 	$requestType				= '';
 	$evaluateid					= '';
-	$theSemester				= '';
 	$newSemester				= '';
 	$theURL						= "$siteURL/cwa-display-advisor-evaluation-statistics/";
 
@@ -69,46 +76,35 @@ function display_advisor_evaluation_statistics_func() {
 
 	function getAdvisorName($evaluateAdvisor_advisor_callsign,$evaluateAdvisor_advisor_semester) {
 	
-		global $wpdb, $evaluateAdvisorTableName, $doDebug, $testMode;
+		global $wpdb, $evaluateAdvisorTableName, $doDebug, $testMode, $jobname;
 	
 		if ($doDebug) {
 			echo "At FUNCTION getAdvisorName $evaluateAdvisor_advisor_callsign,$evaluateAdvisor_advisor_semester<br />";
 		}
 		
 		if ($testMode) {
-			$advisorTableName		= "wpw1_cwa_consolidated_advisor2";
+			$userMasterTableName	= 'wpw1_cwa_user_master2';
 		} else {
-			$advisorTableName		= "wpw1_cwa_consolidated_advisor";
+			$userMasterTableName	= 'wpw1_cwa_user_master';
 		}
-		$sql				= "select first_name, 
-							          last_name 
-							   from $advisorTableName 
-							   where call_sign='$evaluateAdvisor_advisor_callsign' 
-								and semester='$evaluateAdvisor_advisor_semester'";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
+		$sql				= "select user_first_name, 
+							          user_last_name 
+							   from $userMasterTableName 
+							   where user_call_sign='$evaluateAdvisor_advisor_callsign' ";
+		$sqlResult		= $wpdb->get_results($sql);
+		if ($sqlResult === FALSE) {
+			handleWPDBError("$jobname getAdvisorName $evaluateAdvisor_advisor_callsign",$doDebug);
+		} else {
+			$numRows	= $wpdb->num_rows;
 			if ($doDebug) {
-				echo "Reading $advisorTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
+				echo "ran $sql<br />and retrieved $numRows rows<br />";
 			}
-			$errorMsg			= "$jobname Reading $advisorTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
-			return "Unknown";
-		} else {	
-			$numPARows				= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr				= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numPARows rows in $advisorTableName<br />";
-			}
-			if ($numPARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_first_name 				= $advisorRow->first_name;
-					$advisor_last_name 				= stripslashes($advisorRow->last_name);
+			if ($numRows > 0) {
+				foreach($sqlResult as $sqlRow) {
+					$advisor_first_name 				= $sqlRow->user_first_name;
+					$advisor_last_name 					= $sqlRow->user_last_name;
+					return "$advisor_last_name, $advisor_first_name";
 				}
-				return "$advisor_last_name, $advisor_first_name";
 			} else {
 				if ($doDebug) {
 					echo "No records found in $advisorTableName table for $evaluateAdvisor_advisor-callsign<br />";
@@ -120,65 +116,65 @@ function display_advisor_evaluation_statistics_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -193,37 +189,31 @@ td:last-child {
 
 	if ("1" == $strPass) {
 		if ($doDebug) {
-			echo "Function starting.<br />";
+			echo "<br />Function starting.<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$prevSemester		= $initializationArray['prevSemester'];
-		if ($currentSemester == 'Not in Session') {
-			$theSemester	= $prevSemester;
-		} else {
-			$theSemester	= $currentSemester;
-		}		
 
 		$content 		.= "<h3>$jobname</h3>
 							<p>Specify the semester and click Submit to Start the Process</p>
 							<p><form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
-							<input type='radio' name='theSemester' value='$theSemester' class='formInputButton'> $theSemester<br />
-							<input type='radio' name='theSemester' value='specified' class='formInputButton'> Specify semester:<br />
-							<input type='text' name='newSemester' class='formInputText' size='15' maxlength='15'><br />
-							<input class='formInputButton' type='submit' value='Submit' />
+							<table>
+							<tr><td style='vertical-align:top;'>Which Semester?</td>
+								<td><input type='radio' name='theSemester' value='$theSemester' class='formInputButton'> $theSemester<br />
+									<input type='radio' name='theSemester' value='specified' class='formInputButton'> Specify semester:<br />
+									<input type='text' name='newSemester' class='formInputText' size='15' maxlength='15'></td></tr>
+							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr>
+							</table>
 							</form></p>";
-		return $content;
-
 ///// Pass 2 -- do the work
 
 
 	} elseif ("2" == $strPass) {
 
 		if ($doDebug) {
-			echo "at pass 2. theSemester: $theSemester, newSemester: $newSemester<br />";
+			echo "<br />at pass 2. theSemester: $theSemester, newSemester: $newSemester<br />";
 		}
-
+		$content					.= "<h3>$jobname</h3>";
 		$countsArray				= array();
 		$totalResponses				= 0;
 		$anonymousResponses			= 0;
@@ -245,25 +235,25 @@ td:last-child {
 
 // Set up the studentRespondingArray
 		$arrayCategories = array(
-'effective',
-'expectations',
-'curriculum',
-'scales',
-'morse_runner',
-'morse_trainer',
-'rufzxp',
-'lcwo',
-'cwt',
-'short_stories',
-'qsos',
-'enjoy_class'
-);
+								'effective',
+								'expectations',
+								'curriculum',
+								'scales',
+								'morse_runner',
+								'morse_trainer',
+								'rufzxp',
+								'lcwo',
+								'cwt',
+								'short_stories',
+								'qsos',
+								'enjoy_class'
+								);
 		$arrayTypes = array(
-'Beginner',
-'Fundamental',
-'Intermediate',
-'Advanced'
-);
+							'Beginner',
+							'Fundamental',
+							'Intermediate',
+							'Advanced'
+							);
 		foreach($arrayTypes as $value) {
 			foreach($arrayCategories as $value1) {
 				$countsArray[$value][$value1]['responses'] = 0;
@@ -288,7 +278,7 @@ td:last-child {
 //			echo "</pre><br />";
 //		}
 
-// Get the semester info
+		// Get the semester info
 		if ($theSemester == 'SPECIFIED') { 		// semester info in newSemester
 			$theSemester			= $newSemester;	
 		} else {
@@ -308,13 +298,6 @@ td:last-child {
 							where advisor_semester='$theSemester' 
 							order by advisor_callsign";
 		$wpw1_cwa_evaluate_advisor	= $wpdb->get_results($sql);
-		if ($doDebug) {
-			echo "Reading $evaluateAdvisorTableName table<br />";
-			echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-			if ($wpdb->last_error != '') {
-				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-			}
-		}
 		if ($wpw1_cwa_evaluate_advisor !== FALSE) {
 			$numEARows									= $wpdb->num_rows;
 			if ($doDebug) {
@@ -492,8 +475,7 @@ td:last-child {
 				}
 
 
-				$content	.= "<h3>$jobname</h3>
-								<table style='width:900px;'>
+				$content	.= "<table style='width:900px;'>
 								<tr><td colspan='2'>Total Responses</td>
 									<td style='text-align:center;'>$totalResponses</td>
 									<td colspan='5' style='text-align:left;'>$responseRate% Response Rate</td></tr>
@@ -692,12 +674,10 @@ td:last-child {
 
 
 			} else {		// end of number of records loop
-				$content	.= "<p>No records found in the evaluate_advisor pod</p>";
+				$content	.= "<p>No records found in the evaluate_advisor table</p>";
 			}
 		} else {
-			if ($doDebug) {
-				echo "Either $evaluateAdvisorTableName not found or bad $sql 01<br />";
-			}
+			handleWPDBError($jobname,$doDebug);
 		}
 
 
@@ -715,14 +695,9 @@ td:last-child {
 			  						   where evaluate_id=$theID 
 			  						   order by advisor_callsign";
 				$wpw1_cwa_evaluate_advisor	= $wpdb->get_results($sql);
-				if ($doDebug) {
-					echo "Reading $evaluateAdvisorTableName table<br />";
-					echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-					if ($wpdb->last_error != '') {
-						echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-					}
-				}
-				if ($wpw1_cwa_evaluate_advisor !== FALSE) {
+				if ($wpw1_cwa_evaluate_advisor === FALSE) {
+					handleWPDBError("$jobname pass3 $theID",$doDebug);
+				} else {
 					$numEARows									= $wpdb->num_rows;
 					if ($doDebug) {
 						echo "found $numEARows rows in $evaluateAdvisorTableName table<br />";
@@ -794,14 +769,9 @@ td:last-child {
 						$content	.= "Record not found for some reason";
 					}
 				  }
-				} else {
-					if ($doDebug) {
-						echo "Either $evaluateAdvisorTableName not found or bad $sql 02<br />";
-					}
 				}
 			}
-			$content			.= "<br />
-To go back to resubmit the report click <a href='$theURL'>HERE</a>";
+			$content			.= "<br />To go back to resubmit the report click <a href='$theURL'>HERE</a>";
 		}
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
@@ -816,7 +786,7 @@ To go back to resubmit the report click <a href='$theURL'>HERE</a>";
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("Display Advisor Evaluation Satistics|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
 	if ($result == 'FAIL') {
 		$content	.= "<p>writing to joblog.txt failed</p>";
 	}

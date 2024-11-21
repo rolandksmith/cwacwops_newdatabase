@@ -12,30 +12,37 @@ function display_all_advisors_func() {
 // Modified 24Oct22 by Roland for the new Timezone table format
 // Modified 15Apr23 by Roland to fix action_log
 // modified 13Jul23 by Roland to use consolidated tables
+// modified 13Oct24 by Roland for new database
 	
 	global $wpdb;
 	
+	$doDebug			= FALSE;
+	$testMode			= FALSE;
 	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
-	if ($validUser == "N") {
+	$validUser			= $initializationArray['validUser'];
+	$userName			= $initializationArray['userName'];
+	$siteURL			= $initializationArray['siteurl'];
+	$currentSemester	= $initializationArray['currentSemester'];
+	$nextSemester	    = $initializationArray['nextSemester'];
+	$semesterTwo	    = $initializationArray['semesterTwo'];
+	$semesterThree  	= $initializationArray['semesterThree'];
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	
-/// get the time that the process started
+	/// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$doDebug			= FALSE;
-	$testMode			= FALSE;
-	$userName			= $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];
 	$inp_semester		= '';
 //	$inp_semester		= $initializationArray['nextSemester'];
 	$strPass			= "1";
 	$theURL				= "$siteURL/cwa-display-all-advisors/";
+	$jobname			= "Display all advisors";
 	
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
-// get the input information
+
+	// get the input information
 	if (isset($_REQUEST)) {
 		foreach($_REQUEST as $str_key => $str_value) {
 			if ($doDebug) {
@@ -53,74 +60,70 @@ function display_all_advisors_func() {
     }
 
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 	
 	if ("1" == $strPass) {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$nextSemester	    = $initializationArray['nextSemester'];
-		$semesterTwo	    = $initializationArray['semesterTwo'];
-		$semesterThree  	= $initializationArray['semesterThree'];
 		$optionList		= "";
 		if ($currentSemester != "Not in Session") {
 			$optionList	.= "<option value='$currentSemester'>$currentSemester</option>";
@@ -129,104 +132,121 @@ td:last-child {
 		$optionList		.= "<option value='$semesterTwo'>$semesterTwo</option>";
 		$optionList		.= "<option value='$semesterThree'>$semesterThree</option>";
 	
-		$content 		.= "<h3>Select the Semester of Interest</h3>
-<p>Select from the list below:</p>
-<form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data''>
-<input type='hidden' name='strpass' value='2'>
-<table style='border-collapse:collapse;'><tr><td style='width:150px;'>Semester</td><td>
-<select name='inp_semester' required='required' size='5' autofocus class='formSelect'>
-$optionList
-</select></td></tr>
-<tr><td>&nbsp</td><td><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
-</form>";
-		return $content;
+		$content 		.= "<h3>$jobname</h3>
+							<p>Select the semester of interest from the list below:</p>
+							<form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data''>
+							<input type='hidden' name='strpass' value='2'>
+							<table style='border-collapse:collapse;'><tr><td style='width:150px;'>Semester</td><td>
+							<select name='inp_semester' required='required' size='5' autofocus class='formSelect'>
+							$optionList
+							</select></td></tr>
+							<tr><td>&nbsp</td><td><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+							</form>";
 
 //////////////
 
 	} elseif ("2" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 2<br />";
+		}
 		if ($testMode) {
-			$advisorTableName		= 'wpw1_cwa_consolidated_advisor2';
-			$advisorClassTableName		= 'wpw1_cwa_consolidated_advisorclass2';
+			$advisorTableName			= 'wpw1_cwa_advisor2';
+			$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
+			$userMasterTableName		= 'wpw1_cwa_user_master2';
 			if ($doDebug) {
 				echo "Operating in testMode<br />";
 			}
 			$content					.= "<p><b>Operating in Test Mode</b></p>";
 		} else {
-			$advisorTableName		= 'wpw1_cwa_consolidated_advisor';
-			$advisorClassTableName		= 'wpw1_cwa_consolidated_advisorclass';
+			$advisorTableName			= 'wpw1_cwa_advisor';
+			$advisorClassTableName		= 'wpw1_cwa_advisorclass';
+			$userMasterTableName		= 'wpw1_cwa_user_master';
 		}
 
 		$advisorCount					= 0;
 		$classesCount					= 0;
-		$content 						.= "<h3>Display all advisors for $inp_semester Semester</h3><table>";
+		$content 						.= "<h3>$jobname for $inp_semester Semester</h3><table>";
 	
 		$sql					= "select * from $advisorTableName 
-									where  semester='$inp_semester' 
-									order by call_sign";
+									left join $userMasterTableName on user_call_sign = advisor_call_sign 
+									where  advisor_semester='$inp_semester' 
+									order by advisor_call_sign";
 		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisor === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $advisorTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname Reading $advisorTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
+			handleWPDBError($jobname,$doDebug);
 		} else {
-			$numARows									= $wpdb->num_rows;
+			$numARows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;	
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
+				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
 			}
 			if ($numARows > 0) {
 				foreach ($wpw1_cwa_advisor as $advisorRow) {
+					$advisor_master_ID 					= $advisorRow->user_ID;
+					$advisor_master_call_sign			= $advisorRow->user_call_sign;
+					$advisor_first_name 				= $advisorRow->user_first_name;
+					$advisor_last_name 					= $advisorRow->user_last_name;
+					$advisor_email 						= $advisorRow->user_email;
+					$advisor_phone 						= $advisorRow->user_phone;
+					$advisor_city 						= $advisorRow->user_city;
+					$advisor_state 						= $advisorRow->user_state;
+					$advisor_zip_code 					= $advisorRow->user_zip_code;
+					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
+					$advisor_telegram 					= $advisorRow->user_telegram;
+					$advisor_signal 					= $advisorRow->user_signal;
+					$advisor_messenger 					= $advisorRow->user_messenger;
+					$advisor_master_action_log 			= $advisorRow->user_action_log;
+					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
+					$advisor_languages 					= $advisorRow->user_languages;
+					$advisor_survey_score 				= $advisorRow->user_survey_score;
+					$advisor_is_admin					= $advisorRow->user_is_admin;
+					$advisor_role 						= $advisorRow->user_role;
+					$advisor_master_date_created 		= $advisorRow->user_date_created;
+					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
+
 					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_select_sequence 			= $advisorRow->select_sequence;
-					$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-					$advisor_first_name 				= $advisorRow->first_name;
-					$advisor_last_name 					= stripslashes($advisorRow->last_name);
-					$advisor_email 						= strtolower($advisorRow->email);
-					$advisor_phone						= $advisorRow->phone;
-					$advisor_ph_code					= $advisorRow->ph_code;				// new
-					$advisor_text_message 				= $advisorRow->text_message;
-					$advisor_city 						= $advisorRow->city;
-					$advisor_state 						= $advisorRow->state;
-					$advisor_zip_code 					= $advisorRow->zip_code;
-					$advisor_country 					= $advisorRow->country;
-					$advisor_country_code				= $advisorRow->country_code;		// new
-					$advisor_whatsapp					= $advisorRow->whatsapp_app;		// new
-					$advisor_signal						= $advisorRow->signal_app;			// new
-					$advisor_telegram					= $advisorRow->telegram_app;		// new
-					$advisor_messenger					= $advisorRow->messenger_app;		// new
-					$advisor_time_zone 					= $advisorRow->time_zone;
-					$advisor_timezone_id				= $advisorRow->timezone_id;			// new
-					$advisor_timezone_offset			= $advisorRow->timezone_offset;		// new
-					$advisor_semester 					= $advisorRow->semester;
-					$advisor_survey_score 				= $advisorRow->survey_score;
-					$advisor_languages 					= $advisorRow->languages;
-					$advisor_fifo_date 					= $advisorRow->fifo_date;
-					$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
-					$advisor_action_log 				= $advisorRow->action_log;
-					$advisor_class_verified 			= $advisorRow->class_verified;
-					$advisor_control_code 				= $advisorRow->control_code;
-					$advisor_date_created 				= $advisorRow->date_created;
-					$advisor_date_updated 				= $advisorRow->date_updated;
+					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
+					$advisor_semester 					= $advisorRow->advisor_semester;
+					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
+					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+					$advisor_action_log 				= $advisorRow->advisor_action_log;
+					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+					$advisor_control_code 				= $advisorRow->advisor_control_code;
+					$advisor_date_created 				= $advisorRow->advisor_date_created;
+					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 
-					$advisor_last_name 					= no_magic_quotes($advisor_last_name);
+					// if you need the country name and phone code, include the following
+					$countrySQL		= "select * from wpw1_cwa_country_codes  
+										where country_code = '$advisor_country_code'";
+					$countrySQLResult	= $wpdb->get_results($countrySQL);
+					if ($countrySQLResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+						$advisor_country		= "UNKNOWN";
+						$advisor_ph_code		= "";
+					} else {
+						$numCRows		= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+						}
+						if($numCRows > 0) {
+							foreach($countrySQLResult as $countryRow) {
+								$advisor_country		= $countryRow->country_name;
+								$advisor_ph_code		= $countryRow->ph_code;
+							}
+						} else {
+							$advisor_country			= "Unknown";
+							$advisor_ph_code			= "";
+						}
+					}
 
-				
 					if ($doDebug) {
 						echo "<br />Processing $advisor_call_sign<br />";
 					}
 		
-					$myInt						= strtotime($advisor_fifo_date);
-					$advisor_fifo_date			= date('d/m/Y H:i',$myInt);
 					$advisorCount++;
 					
 					$content					.= "<tr><th>Call Sign</th>
@@ -237,7 +257,6 @@ $optionList
 														<th>City</th>
 														<th>State</th>
 														<th>Country</th>
-														<th>FIFO Date</th>
 														<th>Survey Score</th>
 														<th>Verify Response</th>
 														<th>Timezone</th></tr>
@@ -249,66 +268,49 @@ $optionList
 														<td>$advisor_city</td>
 														<td>$advisor_state</td>
 														<td>$advisor_country</td>
-														<td>$advisor_fifo_date</td>
 														<td>$advisor_survey_score</td>
 														<td>$advisor_verify_response</td>
-														<td>$advisor_timezone_id $advisor_timezone_offset</td></tr>
+														<td>$advisor_timezone_id</td></tr>
 													<tr><td><b>Class</b></td>
 														<td><b>Class Size</b></td>
 														<td><b>Level</b></td>
 														<td><b>Class Teaching Times</b></td>
 														<td colspan='2'><b>Class Teaching Days</b></td>
 														<td colspan='3'><b>Class Teaching Times UTC</b></td>
-														<td colspan='3'><b>Class Teaching Days UTC</b></td>
+														<td colspan='2'><b>Class Teaching Days UTC</b></td>
 													</tr>";
 
 					// now go get all the class records for this advisor
 					$firstTime				= TRUE;
 					$sql					= "select * from $advisorClassTableName 
-												where advisor_call_sign='$advisor_call_sign' 
-												and semester='$inp_semester' 
-												order by sequence";
-					$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
+												where advisorclass_call_sign='$advisor_call_sign' 
+												and advisorclass_semester='$inp_semester' 
+												order by advisorclass_sequence";
+					$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 					if ($wpw1_cwa_advisorclass === FALSE) {
-						$myError			= $wpdb->last_error;
-						$myQuery			= $wpdb->last_query;
-						if ($doDebug) {
-							echo "Reading $advisorClassTableName table failed<br />
-								  wpdb->last_query: $myQuery<br />
-								  wpdb->last_error: $myError<br />";
-						}
-						$errorMsg			= "$jobname Reading $advisorClassTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-						sendErrorEmail($errorMsg);
+						handleWPDBError($jobname,$doDebug);
 					} else {
-						$numACRows									= $wpdb->num_rows;
+						$numACRows			= $wpdb->num_rows;
 						if ($doDebug) {
-							$myStr			= $wpdb->last_query;
-							echo "ran $myStr<br />and obtained $numACRows from $advisorClassTableName table<br />";
+							echo "ran $sql<br />and found $numACRows rows<br />";
 						}
 						if ($numACRows > 0) {
 							foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
 								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-								$advisorClass_advisor_call_sign 		= $advisorClassRow->advisor_call_sign;
-								$advisorClass_advisor_first_name 		= $advisorClassRow->advisor_first_name;
-								$advisorClass_advisor_last_name 		= stripslashes($advisorClassRow->advisor_last_name);
-								$advisorClass_advisor_id 				= $advisorClassRow->advisor_id;
-								$advisorClass_sequence 					= $advisorClassRow->sequence;
-								$advisorClass_semester 					= $advisorClassRow->semester;
-								$advisorClass_timezone 					= $advisorClassRow->time_zone;
-								$advisorClass_timezone_id				= $advisorClassRow->timezone_id;		// new
-								$advisorClass_timezone_offset			= $advisorClassRow->timezone_offset;	// new
-								$advisorClass_level 					= $advisorClassRow->level;
-								$advisorClass_class_size 				= $advisorClassRow->class_size;
-								$advisorClass_class_schedule_days 		= $advisorClassRow->class_schedule_days;
-								$advisorClass_class_schedule_times 		= $advisorClassRow->class_schedule_times;
-								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->class_schedule_days_utc;
-								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->class_schedule_times_utc;
-								$advisorClass_action_log 				= $advisorClassRow->action_log;
-								$advisorClass_class_incomplete 			= $advisorClassRow->class_incomplete;
-								$advisorClass_date_created				= $advisorClassRow->date_created;
-								$advisorClass_date_updated				= $advisorClassRow->date_updated;
-
-								$advisorClass_advisor_last_name  		= no_magic_quotes($advisorClass_advisor_last_name);
+								$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+								$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+								$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+								$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+								$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+								$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+								$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+								$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+								$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+								$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+								$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+								$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
 						
 								$classesCount++;
 						
@@ -318,7 +320,7 @@ $optionList
 												<td>$advisorClass_class_schedule_times</td>
 												<td colspan='2'>$advisorClass_class_schedule_days</td>
 												<td colspan='3'>$advisorClass_class_schedule_times_utc</td>
-												<td colspan='3'>$advisorClass_class_schedule_days_utc</td>
+												<td colspan='2'>$advisorClass_class_schedule_days_utc</td>
 											</tr>";	
 							}
 						} else {
@@ -346,9 +348,9 @@ $optionList
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("Display All Advisors|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
 	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }

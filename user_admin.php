@@ -14,7 +14,7 @@ function user_admin_func() {
 	$userDisplayName	= $initializationArray['userDisplayName'];
 	$userRole			= $initializationArray['userRole'];
 
-	if ($validUser == 'N') {				
+	if ($userName == '') {				
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	if ($userRole != 'administrator') {
@@ -95,8 +95,8 @@ function user_admin_func() {
 	
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -190,7 +190,7 @@ function user_admin_func() {
 							<input type='hidden' name='strpass' value='2'>
 							<table style='border-collapse:collapse;'>
 							<tr><td style='vertical-align:top;'>Callsign to be managed</td>
-								<td style='vertical-align:top;'><input type='text' class='formInputText' size='30' maxlength='30' name='inp_callsign'></td></tr>
+								<td style='vertical-align:top;'><input type='text' class='formInputText' size='30' maxlength='30' name='inp_callsign' autofocus></td></tr>
 							<tr><td style='vertical-align:top;'>Action</td>
 								<td style='vertical-align:top;'><input type='radio' class='formInputButton' name='inp_direction' value='copy' checked>Take over account<br />
 															    <input type='radio' class='formInputButton' name='inp_direction' value='restore'>Restore account</td></tr>
@@ -207,206 +207,214 @@ function user_admin_func() {
 			echo "<br />at pass $strPass with inp_callsign: $inp_callsign and direction: $inp_direction<br />";
 		}	
 		$content			.= "<h3>$jobname</h3>";
-		if ($inp_direction == 'copy') {
-			if ($doDebug) {
-				echo "Taking over $inp_callsign account<br />";
-			}
-			$content		.= "Taking over $inp_callsign account<br />";
-			// Get the user record
-			$sql			= "select * from $userTableName 
-								where user_login = '$inp_callsign'";
-			$userResult		= $wpdb->get_results($sql);
-			if ($userResult === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numURows	= $wpdb->num_rows;
+		$doProceed			= TRUE;
+		$myStr				= strtolower($userName);
+		$myStr1				= strtolower($inp_callsign);
+		if ($myStr1 == $myStr) {
+			$content		.= "You can't take over your own account";
+			$doProceed		= FALSE;
+		}
+		if ($doProceed) {
+			if ($inp_direction == 'copy') {
 				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numURows rows<br />";
+					echo "Taking over $inp_callsign account<br />";
 				}
-				if ($numURows > 0) {
-					foreach($userResult as $userResultRow) {
-						$id						= $userResultRow->ID;
-						$user_login				= $userResultRow->user_login;
-						$user_pass				= $userResultRow->user_pass;
-						$user_nicename			= $userResultRow->user_nicename;
-						$user_email				= $userResultRow->user_email;
-						$user_url				= $userResultRow->user_url;
-						$user_registered		= $userResultRow->user_registered;
-						$user_activiatioin_key	= $userResultRow->user_activation_key;
-						$user_status			= $userResultRow->user_status;
-						$display_name			= $userResultRow->display_name;
-					}
-					if ($doDebug) {
-						echo "have a user record at id:$id<br />";
-					}
-					$content			.= "User data for $inp_callsign retrieved<br />";
-					
-					// make sure this user hasn't already been taken over
-					$sql				= "select count(record_id) 
-											from $tempTableName 
-											where callsign = '$inp_callsign' 
-											and token = 'admin'";
-					$thisInt			= $wpdb->get_var($sql);
-					if ($thisInt == NULL || $thisInt == 0) {
-						if ($doDebug) {
-							echo "ran $sql<br />and found count was $thisInt<br />";
-						}
-						$content		.= "$inp_callsign eligible to take over<br />";															
-					
-						// set up the data to be saved in temp_data
-						$dataArray			= array('email'=>$user_email,
-													'password'=>$user_pass);
-						$jsonData			= json_encode($dataArray);
-						$dateWritten		= date('Y-m-d H:i:s');
-						$addResult			= $wpdb->insert($tempTableName,
-													array('callsign'=>$inp_callsign,
-														  'token'=>'admin',
-														  'temp_data'=>$jsonData,
-														  'date_written'=>$dateWritten),
-													array('%s','%s','%s','%s'));
-						if ($addResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-						} else {
-							if ($doDebug) {
-								echo "added temp_data record<br />";
-							}
-						}
-						$content			.= "$inp_callsign user data saved. Taking over the account<br />";
-						
-						$newPass			= '$P$B1tU0lmTWuzzNd35QIy5rAIfTrPV7O1';
-						$newEmail			= '';
-						if ($userName == 'K7OJL') {
-							$newEmail		= "rolandksmith+$user_login@gmail.com";
-						}
-						if ($userName == 'WR7Q') {
-							$newEmail		= "kcgator+$user_login@gmail.com";
-							
-						}
-						if ($newEmail == '') {
-							$content		.= "No valid adminstrator found. Done<br />";
-							
-						} else {
-							$updateResult	= $wpdb->update($userTableName,
-															array('user_pass'=>$newPass,
-																   'user_email'=>$newEmail),
-															array('ID'=>$id),
-															array('%s','%s'),
-															array('%d'));
-							if ($updateResult === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								$content	.= "User record updated and available for login<br />
-												Username: $user_login<br />
-												Password: N3wPass2993<br />
-												Email: $newEmail<br />";
-							}
-						}
-					} else {
-						$content			.= "$inp_callsign is already taken over<br />";
-					}					
+				$content		.= "Taking over $inp_callsign account<br />";
+				// Get the user record
+				$sql			= "select * from $userTableName 
+									where user_login = '$inp_callsign'";
+				$userResult		= $wpdb->get_results($sql);
+				if ($userResult === FALSE) {
+					handleWPDBError($jobname,$doDebug);
 				} else {
-					$content					= "No $userTableName record for $inp_callsign<br />";
-				}
-			}
-		} elseif ($inp_direction == 'restore') {
-			if ($doDebug) {
-				echo "restoring $inp_callsign<br />";
-			}
-			$content				.= "Restoring $inp_callsign Account<br />";
-			// get the temp_data record for this user
-			$sql					= "select * from $tempTableName 
-										where callsign = '$inp_callsign' 
-										and token = 'admin'";
-			$tempResult				= $wpdb->get_results($sql);
-			if ($tempResult === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numTRows			= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numTRows rows<br />";
-				}
-				if ($numTRows > 0) {
-					foreach($tempResult as $tempResultRow) {
-						$record_id		= $tempResultRow->record_id;
-						$callsign		= $tempResultRow->callsign;
-						$token			= $tempResultRow->token;
-						$temp_data		= $tempResultRow->temp_data;
-						$date_written	= $tempResultRow->date_written;
+					$numURows	= $wpdb->num_rows;
+					if ($doDebug) {
+						echo "ran $sql<br />and retrieved $numURows rows<br />";
 					}
-					// unpack temp_data
-					$myArray			= json_decode($temp_data,TRUE);
-					$oldEmail			= $myArray['email'];
-					$oldPassword		= $myArray['password'];
-					
-					// now get the user record
-					$sql			= "select * from $userTableName 
-										where user_login = '$inp_callsign'";
-					$userResult		= $wpdb->get_results($sql);
-					if ($userResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						$numURows	= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $sql<br />and retrieved $numURows rows<br />";
+					if ($numURows > 0) {
+						foreach($userResult as $userResultRow) {
+							$id						= $userResultRow->ID;
+							$user_login				= $userResultRow->user_login;
+							$user_pass				= $userResultRow->user_pass;
+							$user_nicename			= $userResultRow->user_nicename;
+							$user_email				= $userResultRow->user_email;
+							$user_url				= $userResultRow->user_url;
+							$user_registered		= $userResultRow->user_registered;
+							$user_activiatioin_key	= $userResultRow->user_activation_key;
+							$user_status			= $userResultRow->user_status;
+							$display_name			= $userResultRow->display_name;
 						}
-						if ($numURows > 0) {
-							foreach($userResult as $userResultRow) {
-								$id						= $userResultRow->ID;
-								$user_login				= $userResultRow->user_login;
-								$user_pass				= $userResultRow->user_pass;
-								$user_nicename			= $userResultRow->user_nicename;
-								$user_email				= $userResultRow->user_email;
-								$user_url				= $userResultRow->user_url;
-								$user_registered		= $userResultRow->user_registered;
-								$user_activiatioin_key	= $userResultRow->user_activation_key;
-								$user_status			= $userResultRow->user_status;
-								$display_name			= $userResultRow->display_name;
-							}
+						if ($doDebug) {
+							echo "have a user record at id:$id<br />";
+						}
+						$content			.= "User data for $inp_callsign retrieved<br />";
+						
+						// make sure this user hasn't already been taken over
+						$sql				= "select count(record_id) 
+												from $tempTableName 
+												where callsign = '$inp_callsign' 
+												and token = 'admin'";
+						$thisInt			= $wpdb->get_var($sql);
+						if ($thisInt == NULL || $thisInt == 0) {
 							if ($doDebug) {
-								echo "have a user record at id:$id<br />";
+								echo "ran $sql<br />and found count was $thisInt<br />";
 							}
-							// update the user record
-							$updateResult				= $wpdb->update($userTableName,
-																		array('user_email'=>$oldEmail,
-																		      'user_pass'=>$oldPassword),
-																		array('ID'=>$id),
-																		array('%s','%s'),
-																		array('%d'));
-							if ($updateResult === FALSE) {
+							$content		.= "$inp_callsign eligible to take over<br />";															
+						
+							// set up the data to be saved in temp_data
+							$dataArray			= array('email'=>$user_email,
+														'password'=>$user_pass);
+							$jsonData			= json_encode($dataArray);
+							$dateWritten		= date('Y-m-d H:i:s');
+							$addResult			= $wpdb->insert($tempTableName,
+														array('callsign'=>$inp_callsign,
+															  'token'=>'admin',
+															  'temp_data'=>$jsonData,
+															  'date_written'=>$dateWritten),
+														array('%s','%s','%s','%s'));
+							if ($addResult === FALSE) {
 								handleWPDBError($jobname,$doDebug);
 							} else {
 								if ($doDebug) {
-									echo "updating $userTableName modified $updateResult rows<br />";
+									echo "added temp_data record<br />";
 								}
-								$content				.= "$inp_callsign user data has been restored<br />";
+							}
+							$content			.= "$inp_callsign user data saved. Taking over the account<br />";
+							
+							$newPass			= '$P$B1tU0lmTWuzzNd35QIy5rAIfTrPV7O1';
+							$newEmail			= '';
+							if ($userName == 'K7OJL') {
+								$newEmail		= "rolandksmith+$user_login@gmail.com";
+							}
+							if ($userName == 'WR7Q') {
+								$newEmail		= "kcgator+$user_login@gmail.com";
 								
-								// now delete the temp_data record
-								$deleteResult			= $wpdb->delete($tempTableName, 
-																	array('callsign'=>$inp_callsign,
-																		  'token'=>'admin'),
-																	array('%s','%s'));
-								if ($deleteResult === FALSE) {
+							}
+							if ($newEmail == '') {
+								$content		.= "No valid adminstrator found. Done<br />";
+								
+							} else {
+								$updateResult	= $wpdb->update($userTableName,
+																array('user_pass'=>$newPass,
+																	   'user_email'=>$newEmail),
+																array('ID'=>$id),
+																array('%s','%s'),
+																array('%d'));
+								if ($updateResult === FALSE) {
 									handleWPDBError($jobname,$doDebug);
 								} else {
-									if ($doDebug) {
-										echo "deleting $inp_callsign admin token resulted in deleting $deleteResult rows<br />";
-									}
-									$content			.= "Temp_data record for $inp_callsign has been deleted<br />
-															$inp_callsign user record has been restored<br />";
+									$content	.= "User record updated and available for login<br />
+													Username: $user_login<br />
+													Password: N3wPass2993<br />
+													Email: $newEmail<br />";
 								}
 							}
 						} else {
-							$content					.= "No user record found to restore for $inp_callsign<br />";
-						}
+							$content			.= "$inp_callsign is already taken over<br />";
+						}					
+					} else {
+						$content					= "No $userTableName record for $inp_callsign<br />";
 					}
-				} else {
-					$content							.= "No temp_data record found for $inp_callsign to restore<br />";
 				}
+			} elseif ($inp_direction == 'restore') {
+				if ($doDebug) {
+					echo "restoring $inp_callsign<br />";
+				}
+				$content				.= "Restoring $inp_callsign Account<br />";
+				// get the temp_data record for this user
+				$sql					= "select * from $tempTableName 
+											where callsign = '$inp_callsign' 
+											and token = 'admin'";
+				$tempResult				= $wpdb->get_results($sql);
+				if ($tempResult === FALSE) {
+					handleWPDBError($jobname,$doDebug);
+				} else {
+					$numTRows			= $wpdb->num_rows;
+					if ($doDebug) {
+						echo "ran $sql<br />and retrieved $numTRows rows<br />";
+					}
+					if ($numTRows > 0) {
+						foreach($tempResult as $tempResultRow) {
+							$record_id		= $tempResultRow->record_id;
+							$callsign		= $tempResultRow->callsign;
+							$token			= $tempResultRow->token;
+							$temp_data		= $tempResultRow->temp_data;
+							$date_written	= $tempResultRow->date_written;
+						}
+						// unpack temp_data
+						$myArray			= json_decode($temp_data,TRUE);
+						$oldEmail			= $myArray['email'];
+						$oldPassword		= $myArray['password'];
+						
+						// now get the user record
+						$sql			= "select * from $userTableName 
+											where user_login = '$inp_callsign'";
+						$userResult		= $wpdb->get_results($sql);
+						if ($userResult === FALSE) {
+							handleWPDBError($jobname,$doDebug);
+						} else {
+							$numURows	= $wpdb->num_rows;
+							if ($doDebug) {
+								echo "ran $sql<br />and retrieved $numURows rows<br />";
+							}
+							if ($numURows > 0) {
+								foreach($userResult as $userResultRow) {
+									$id						= $userResultRow->ID;
+									$user_login				= $userResultRow->user_login;
+									$user_pass				= $userResultRow->user_pass;
+									$user_nicename			= $userResultRow->user_nicename;
+									$user_email				= $userResultRow->user_email;
+									$user_url				= $userResultRow->user_url;
+									$user_registered		= $userResultRow->user_registered;
+									$user_activiatioin_key	= $userResultRow->user_activation_key;
+									$user_status			= $userResultRow->user_status;
+									$display_name			= $userResultRow->display_name;
+								}
+								if ($doDebug) {
+									echo "have a user record at id:$id<br />";
+								}
+								// update the user record
+								$updateResult				= $wpdb->update($userTableName,
+																			array('user_email'=>$oldEmail,
+																				  'user_pass'=>$oldPassword),
+																			array('ID'=>$id),
+																			array('%s','%s'),
+																			array('%d'));
+								if ($updateResult === FALSE) {
+									handleWPDBError($jobname,$doDebug);
+								} else {
+									if ($doDebug) {
+										echo "updating $userTableName modified $updateResult rows<br />";
+									}
+									$content				.= "$inp_callsign user data has been restored<br />";
+									
+									// now delete the temp_data record
+									$deleteResult			= $wpdb->delete($tempTableName, 
+																		array('callsign'=>$inp_callsign,
+																			  'token'=>'admin'),
+																		array('%s','%s'));
+									if ($deleteResult === FALSE) {
+										handleWPDBError($jobname,$doDebug);
+									} else {
+										if ($doDebug) {
+											echo "deleting $inp_callsign admin token resulted in deleting $deleteResult rows<br />";
+										}
+										$content			.= "Temp_data record for $inp_callsign has been deleted<br />
+																$inp_callsign user record has been restored<br />";
+									}
+								}
+							} else {
+								$content					.= "No user record found to restore for $inp_callsign<br />";
+							}
+						}
+					} else {
+						$content							.= "No temp_data record found for $inp_callsign to restore<br />";
+					}
+				}
+			} else {
+				$content									.= "Invalid information provided<br />";
 			}
-		} else {
-			$content									.= "Invalid information provided<br />";
-		}
-	
+		}	
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";

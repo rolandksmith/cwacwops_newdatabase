@@ -18,7 +18,7 @@ function generate_advisor_overall_statistics_v1_func() {
 	$siteURL			= $initializationArray['siteurl'];
 	
 //	CHECK THIS!								//////////////////////
-	if ($validUser == "N") {
+	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 
@@ -74,8 +74,8 @@ function generate_advisor_overall_statistics_v1_func() {
 	
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
-							<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
-								<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+									<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>
 							<tr><td>Verbose Debugging?</td>
 								<td><input type='radio' class='formInputButton' name='inp_verbose' value='N' checked='checked'> Standard Output<br />
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
@@ -85,65 +85,65 @@ function generate_advisor_overall_statistics_v1_func() {
 	
 	
 	$content = "<style type='text/css'>
-fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-input.formInputFile {color:#666;background:#fee;padding:2px;border:
-solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-select.formSelect {color:#666;background:#fee;padding:2px;
-border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-input.formInputButton {vertical-align:middle;font-weight:bolder;
-text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-cursor:pointer;position:relative;float:left;}
-
-input.formInputButton:hover {color:#f8f400;}
-
-input.formInputButton:active {color:#00ffff;}
-
-tr {color:#333;background:#eee;}
-
-table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-td {padding:5px;font-size:small;}
-
-th:first-child,
-td:first-child {
- padding-left: 10px;
-}
-
-th:last-child,
-td:last-child {
-	padding-right: 5px;
-}
-</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+				
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+				
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+				
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+				
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+				
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+				
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+				
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+				
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+				
+				input.formInputButton:hover {color:#f8f400;}
+				
+				input.formInputButton:active {color:#00ffff;}
+				
+				tr {color:#333;background:#eee;}
+				
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+				
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+				
+				td {padding:5px;font-size:small;}
+				
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+				
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	function Stand_Deviation($arr) {
 
@@ -182,17 +182,17 @@ td:last-child {
 
 	if ("1" == $strPass) {
 		$content 		.= "<h3>$jobname</h3>
-<p>
-<form method='post' action='$theURL' 
-name='selection_form' ENCTYPE='multipart/form-data'>
-<input type='hidden' name='strpass' value='2'>
-<table style='border-collapse:collapse;'>
-$testModeOption
-<tr><td>Save this report to the reports achive?</td>
-<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
-	<input type='radio' class='formInputButton' name='inp_rsave' value='Y'> Save a copy of the report the report</td></tr>
-<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
-</form></p>";
+							<p>
+							<form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data'>
+							<input type='hidden' name='strpass' value='2'>
+							<table style='border-collapse:collapse;'>
+							$testModeOption
+							<tr><td>Save this report to the reports achive?</td>
+							<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
+								<input type='radio' class='formInputButton' name='inp_rsave' value='Y'> Save a copy of the report the report</td></tr>
+							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+							</form></p>";
 	
 
 ///// Pass 2 -- do the work
@@ -304,100 +304,76 @@ $testModeOption
 									4=>'Advanced');
 	
 		// get the student records sorted by assigned advisor and level
-		$sql		= "select * from wpw1_cwa_consolidated_student 
-						where assigned_advisor != '' 
+		$sql		= "select * from wpw1_cwa_student 
+						where student_assigned_advisor != '' 
 						and student_status != 'N' 
-						order by assigned_advisor, level ";
+						order by student_assigned_advisor, student_level ";
 						
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			$myError			= $wpdb->last_error;
-			$myQuery			= $wpdb->last_query;
-			if ($doDebug) {
-				echo "Reading $studentTableName table failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
+			handleWPDBError($jobname,$doDebug);
 			$content		.= "Unable to obtain content from $studentTableName<br />";
 		} else {
 			$numSRows			= $wpdb->num_rows;
 			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numSRows rows<br />";
+				echo "ran $sql<br />and found $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
 					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= strtoupper($studentRow->call_sign);
-					$student_first_name						= $studentRow->first_name;
-					$student_last_name						= stripslashes($studentRow->last_name);
-					$student_email  						= strtolower(strtolower($studentRow->email));
-					$student_phone  						= $studentRow->phone;
-					$student_ph_code						= $studentRow->ph_code;
-					$student_city  							= $studentRow->city;
-					$student_state  						= $studentRow->state;
-					$student_zip_code  						= $studentRow->zip_code;
-					$student_country  						= $studentRow->country;
-					$student_country_code					= $studentRow->country_code;
-					$student_time_zone  					= $studentRow->time_zone;
-					$student_timezone_id					= $studentRow->timezone_id;
-					$student_timezone_offset				= $studentRow->timezone_offset;
-					$student_whatsapp						= $studentRow->whatsapp_app;
-					$student_signal							= $studentRow->signal_app;
-					$student_telegram						= $studentRow->telegram_app;
-					$student_messenger						= $studentRow->messenger_app;					
-					$student_wpm 	 						= $studentRow->wpm;
-					$student_youth  						= $studentRow->youth;
-					$student_age  							= $studentRow->age;
+					$student_call_sign						= $studentRow->student_call_sign;
+					$student_time_zone  					= $studentRow->student_time_zone;
+					$student_timezone_offset				= $studentRow->student_timezone_offset;
+					$student_youth  						= $studentRow->student_youth;
+					$student_age  							= $studentRow->student_age;
 					$student_student_parent 				= $studentRow->student_parent;
-					$student_student_parent_email  			= strtolower($studentRow->student_parent_email);
-					$student_level  						= $studentRow->level;
-					$student_waiting_list 					= $studentRow->waiting_list;
-					$student_request_date  					= $studentRow->request_date;
-					$student_semester						= $studentRow->semester;
-					$student_notes  						= $studentRow->notes;
-					$student_welcome_date  					= $studentRow->welcome_date;
-					$student_email_sent_date  				= $studentRow->email_sent_date;
-					$student_email_number  					= $studentRow->email_number;
-					$student_response  						= strtoupper($studentRow->response);
-					$student_response_date  				= $studentRow->response_date;
-					$student_abandoned  					= $studentRow->abandoned;
-					$student_student_status  				= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->action_log;
-					$student_pre_assigned_advisor  			= $studentRow->pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->selected_date;
-					$student_no_catalog			 			= $studentRow->no_catalog;
-					$student_hold_override  				= $studentRow->hold_override;
-					$student_messaging  					= $studentRow->messaging;
-					$student_assigned_advisor  				= $studentRow->assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->hold_reason_code;
-					$student_class_priority  				= $studentRow->class_priority;
-					$student_assigned_advisor_class 		= $studentRow->assigned_advisor_class;
-					$student_promotable  					= $studentRow->promotable;
-					$student_excluded_advisor  				= $studentRow->excluded_advisor;
+					$student_parent_email  					= strtolower($studentRow->student_parent_email);
+					$student_level  						= $studentRow->student_level;
+					$student_waiting_list 					= $studentRow->student_waiting_list;
+					$student_request_date  					= $studentRow->student_request_date;
+					$student_semester						= $studentRow->student_semester;
+					$student_notes  						= $studentRow->student_notes;
+					$student_welcome_date  					= $studentRow->student_welcome_date;
+					$student_email_sent_date  				= $studentRow->student_email_sent_date;
+					$student_email_number  					= $studentRow->student_email_number;
+					$student_response  						= strtoupper($studentRow->student_response);
+					$student_response_date  				= $studentRow->student_response_date;
+					$student_abandoned  					= $studentRow->student_abandoned;
+					$student_status  						= strtoupper($studentRow->student_status);
+					$student_action_log  					= $studentRow->student_action_log;
+					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+					$student_selected_date  				= $studentRow->student_selected_date;
+					$student_no_catalog  					= $studentRow->student_no_catalog;
+					$student_hold_override  				= $studentRow->student_hold_override;
+					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+					$student_class_priority  				= $studentRow->student_class_priority;
+					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+					$student_promotable  					= $studentRow->student_promotable;
+					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
 					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->available_class_days;
-					$student_intervention_required  		= $studentRow->intervention_required;
-					$student_copy_control  					= $studentRow->copy_control;
-					$student_first_class_choice  			= $studentRow->first_class_choice;
-					$student_second_class_choice  			= $studentRow->second_class_choice;
-					$student_third_class_choice  			= $studentRow->third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->third_class_choice_utc;
-					$student_date_created 					= $studentRow->date_created;
-					$student_date_updated			  		= $studentRow->date_updated;
+					$student_available_class_days  			= $studentRow->student_available_class_days;
+					$student_intervention_required  		= $studentRow->student_intervention_required;
+					$student_copy_control  					= $studentRow->student_copy_control;
+					$student_first_class_choice  			= $studentRow->student_first_class_choice;
+					$student_second_class_choice  			= $studentRow->student_second_class_choice;
+					$student_third_class_choice  			= $studentRow->student_third_class_choice;
+					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+					$student_catalog_options				= $studentRow->student_catalog_options;
+					$student_flexible						= $studentRow->student_flexible;
+					$student_date_created 					= $studentRow->student_date_created;
+					$student_date_updated			  		= $studentRow->student_date_updated;
 					
 					if ($doDebug) {
 						echo "<br />Have student $student_call_sign<br />
 							  semester: $student_semester<br />
 							  assigned_advisor: $student_assigned_advisor<br />
 							  level: $student_level<br />
-							  student_status: $student_student_status<br />
+							  student_status: $student_status<br />
 							  promotable: $student_promotable<br />";
 					}
 					$studentLevel				= $sortLevel[$student_level];
@@ -430,7 +406,7 @@ $testModeOption
 					if ($doDebug) {
 						echo "counting for advisorArray level: $studentLevel advisor: $student_assigned_advisor<br />";
 					}
-					if ($student_student_status == 'C') {
+					if ($student_status == 'C') {
 						$advisorArray[$studentLevel][$student_assigned_advisor]['studentcount']++;
 						$overallArray[$studentLevel]['studentcount']++;
 						$advisorArray[$studentLevel][$student_assigned_advisor]['dropped']++;
@@ -438,7 +414,7 @@ $testModeOption
 						if ($doDebug) {
 							echo "counted dropped<br />";
 						}
-					} elseif ($student_student_status == 'Y' || $student_student_status == 'S') {
+					} elseif ($student_status == 'Y' || $student_status == 'S') {
 						$advisorArray[$studentLevel][$student_assigned_advisor]['studentcount']++;
 						$overallArray[$studentLevel]['studentcount']++;
 						if ($student_promotable == 'P') {					
@@ -469,37 +445,28 @@ $testModeOption
 						// find if student has taken next level
 						if ($student_level != 'Advanced') {
 							$newLevel				= $levelUp[$student_level];
-							$newSQL					= "select * from wpw1_cwa_consolidated_student 
-													   where call_sign = '$student_call_sign' 
-													   and level = '$newLevel' 
-													   and response = 'Y' 
-													   order by date_created 
+							$newSQL					= "select * from wpw1_cwa_student 
+													   where student_call_sign = '$student_call_sign' 
+													   and student_level = '$newLevel' 
+													   and student_response = 'Y' 
+													   order by student_date_created 
 													   limit 1";
 							$levelUp_student		= $wpdb->get_results($newSQL);
 							if ($levelUp_student === FALSE) {
-								$myError			= $wpdb->last_error;
-								$myQuery			= $wpdb->last_query;
-								if ($doDebug) {
-									echo "Reading $studentTableName table failed<br />
-										  wpdb->last_query: $myQuery<br />
-										  wpdb->last_error: $myError<br />";
-								}
-								$errorMsg			= "$jobname reading $studentTableName failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-								sendErrorEmail($errorMsg);
+								handleWPDBError($jobname,$doDebug);
 								$content		.= "Unable to obtain content from $studentTableName<br />";
 							} else {
-								$numSRows			= $wpdb->num_rows;
+								$numSURows			= $wpdb->num_rows;
 								if ($doDebug) {
-									$myStr			= $wpdb->last_query;
-									echo "ran $myStr<br />and found $numSRows rows<br />";
+									echo "ran $newSQL<br />and found $numSURows rows<br />";
 								}
-								if ($numSRows > 0) {
+								if ($numSURows > 0) {
 									foreach ($levelUp_student as $levelUpRow) {
-										$levelUp_level  						= $levelUpRow->level;
-										$levelUp_semester						= $levelUpRow->semester;
-										$levelUp_response  						= strtoupper($levelUpRow->response);
+										$levelUp_level  						= $levelUpRow->student_level;
+										$levelUp_semester						= $levelUpRow->student_semester;
+										$levelUp_response  						= strtoupper($levelUpRow->student_response);
 										$levelUp_status  						= strtoupper($levelUpRow->student_status);
-										$levelUp_promotable  					= $levelUpRow->promotable;
+										$levelUp_promotable  					= $levelUpRow->student_promotable;
 									}
 						
 									$advisorArray[$studentLevel][$student_assigned_advisor]['nextlevel']++;
@@ -547,7 +514,6 @@ $testModeOption
 						print_r($advisorArray[$studentLevel][$student_assigned_advisor]);
 						echo "</pre><br />";
 					}
-
 				}					/// end of foreach
 				
 				if ($doDebug) {
@@ -803,50 +769,85 @@ $testModeOption
 					}
 					foreach($thisData as $thisAdvisor=>$thisValue) {
 						$thisStudents		= $thisValue['studentcount'];
-						$thisDropped		= $thisValue['dropped'];
-						$thisDroppedPC		= $thisDropped / $thisStudents;
-						$droppedArray[]		= $thisDroppedPC;
+						if ($thisStudents != 0) {
+							$thisDropped		= $thisValue['dropped'];
+							$thisDroppedPC		= $thisDropped / $thisStudents;
+							$droppedArray[]		= $thisDroppedPC;
+						} else {
+							$droppedArray[]		= 0.0;
+						}
 						
 						$thisPromotable		= $thisValue['promotable'];
-						$thisPromotablePC	= $thisPromotable / $thisStudents;
-						$promotableArray[]	= $thisPromotablePC;
-
-						$thisNotPromotable		= $thisValue['notpromotable'];
-						$thisNotPromotablePC	= $thisNotPromotable / $thisStudents;
-						$notpromotableArray[]	= $thisNotPromotablePC;
-
+						if ($thisStudents != 0) {
+							$thisPromotablePC	= $thisPromotable / $thisStudents;
+							$promotableArray[]	= $thisPromotablePC;
+	
+							$thisNotPromotable		= $thisValue['notpromotable'];
+							$thisNotPromotablePC	= $thisNotPromotable / $thisStudents;
+							$notpromotableArray[]	= $thisNotPromotablePC;
+						} else {
+							$promotableArray[]		= 0.0;
+							$notPromotableArray[]	= 0.0;
+						}
 						$thisWithdrew		= $thisValue['withdrew'];
-						$thisWithdrewPC		= $thisWithdrew / $thisStudents;
-						$withdrewArray[]	= $thisWithdrewPC;
-
+						if ($thisStudents != 0) {						
+							$thisWithdrewPC		= $thisWithdrew / $thisStudents;
+							$withdrewArray[]	= $thisWithdrewPC;
+						} else {
+							$withdrewArray[]	= 0.0;
+						}
 						$thisNotEval		= $thisValue['noteval'];
-						$thisNotEvalPC		= $thisNotEval / $thisStudents;
-						$notevalArray[]		= $thisNotEvalPC;
+						if ($thisStudents != 0) {
+							$thisNotEvalPC		= $thisNotEval / $thisStudents;
+							$notevalArray[]		= $thisNotEvalPC;
+						} else {
+							$notevalarray[]		= 0.0;
+						}
 
 						if ($thisLevel != 4) {
 							$thisNextLevel		= $thisValue['nextlevel'];
-							$thisNextLevelPC	= $thisNextLevel / $thisStudents;
-							$nextlevelArray[]	= $thisNextLevelPC;
-
+							if ($thisStudents != 0) {
+								$thisNextLevelPC	= $thisNextLevel / $thisStudents;
+								$nextlevelArray[]	= $thisNextLevelPC;
+							} else {
+								$nextlevelArray[]		= 0.0;
+							}
 							$thisNextDropped		= $thisValue['nextdropped'];
-							$thisNextDroppedPC		= $thisNextDropped / $thisStudents;
-							$nextdroppedArray[]		= $thisNextDroppedPC;
+							if ($thisStudents != 0) {
+								$thisNextDroppedPC		= $thisNextDropped / $thisStudents;
+								$nextdroppedArray[]		= $thisNextDroppedPC;
+							} else {
+								$nextDroppedArray[]		= 0.0;
+							}
 
 							$thisNextPromotable		= $thisValue['nextpromotable'];
-							$thisNextPromotablePC	= $thisNextPromotable / $thisStudents;
-							$nextpromotableArray[]	= $thisNextPromotablePC;
-
+							if ($thisStudents != 0) {
+								$thisNextPromotablePC	= $thisNextPromotable / $thisStudents;
+								$nextpromotableArray[]	= $thisNextPromotablePC;
+							} else {
+								$nextpromotableArray[]	= 0.0;
+							}
 							$thisNextNotPromotable		= $thisValue['nextnotpromotable'];
-							$thisNextNotPromotablePC	= $thisNextNotPromotable / $thisStudents;
-							$nextnotpromotableArray[]	= $thisNextNotPromotablePC;
-
+							if ($thisStudents != 0) {
+								$thisNextNotPromotablePC	= $thisNextNotPromotable / $thisStudents;
+								$nextnotpromotableArray[]	= $thisNextNotPromotablePC;
+							} else {
+								$nextnotpromotableArray[]	= 0.0;
+							}
 							$thisNextWithdrew		= $thisValue['nextwithdrew'];
-							$thisNextWithdrewPC		= $thisNextWithdrew / $thisStudents;
-							$nextwithdrewArray[]	= $thisNextWithdrewPC;
-
+							if ($thisStudents != 0) {
+								$thisNextWithdrewPC		= $thisNextWithdrew / $thisStudents;
+								$nextwithdrewArray[]	= $thisNextWithdrewPC;
+							} else {
+								$nextWithdrewArray[]	= 0.0;
+							}
 							$thisNextNotEval		= $thisValue['nextnoteval'];
-							$thisNextNotEvalPC		= $thisNextNotEval / $thisStudents;
-							$nextnotevalArray[]		= $thisNextNotEvalPC;
+							if ($thisStudents != 0) {
+								$thisNextNotEvalPC		= $thisNextNotEval / $thisStudents;
+								$nextnotevalArray[]		= $thisNextNotEvalPC;
+							} else {
+								$nextnotevalArray[]		= 0.0;
+							}
 						}
 					}	//// end of foreach for all advisors for this level
 					

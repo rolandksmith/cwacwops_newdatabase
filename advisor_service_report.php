@@ -1,5 +1,7 @@
 function advisor_service_report_func() {
 
+//	Modified 15Oct24 by Roland for new database
+
 	global $wpdb;
 
 	$doDebug						= FALSE;
@@ -54,6 +56,11 @@ function advisor_service_report_func() {
 	$jobname					= "Advisor Service Report V$versionNumber";
 	$categoryClass				= array(6,12,24,48,60);
 	$limit_categories			= 'Y';
+	
+	$monthsArray				= array('Jan/Feb'=>'1',
+										'May/Jun'=>'2',
+										'Apr/May'=>'2',
+										'Sep/Oct'=>'3');
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -175,11 +182,13 @@ function advisor_service_report_func() {
 		}
 		$extMode					= 'tm';
 		$advisorServiceTableName	= "wpw1_cwa_advisor_service2";
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor2";
+		$advisorTableName			= "wpw1_cwa_advisor2";
+		$userMasterTableName		= "wpw1_cwa_user_master2";
 	} else {
 		$extMode					= 'pd';
 		$advisorServiceTableName	= "wpw1_cwa_advisor_service";
-		$advisorTableName			= "wpw1_cwa_consolidated_advisor";
+		$advisorTableName			= "wpw1_cwa_advisor";
+		$userMasterTableName		= "wpw1_cwa_user_master";
 	}
 
 
@@ -234,6 +243,8 @@ function advisor_service_report_func() {
 				foreach($advisorServiceResult as $advisorServiceRow) {
 					$advisor		= $advisorServiceRow->advisorcallsign;
 					
+
+/*
 					// get the number of classes for the advisor
 					$sumSQL			= "select sum(classes) as advisorclasses 
 										from $advisorServiceTableName 
@@ -246,14 +257,55 @@ function advisor_service_report_func() {
 							$lastQuery	= $wpdb->last_query;
 							echo "ran $lastQuery<br />and retrieved $sumResult<br />";
 						}
-						if ($limit_categories == 'Y') {
-							if (in_array($sumResult,$categoryClass)) {
-								$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
-								$advisorInfoArray[]	= "$sumStr&$advisor";
+*/						
+					$sql		= "select * from $advisorServiceTableName 
+									where advisor='$advisor'"; 
+					$sqlResult	= $wpdb->get_results($sql);
+					if ($sqlResult === FALSE) {
+						handleWPDBError($jobname,$doDebug,"getting advisor records to count classes");
+					} else {
+						$numARows	= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $sql<br />and retrieved $numARows records<br />";
+						}
+						if ($numARows > 0) {
+							$sumResult			= 0;
+							$thisMaxSemester	= "20001";
+							$useSemester	 	= "";
+							foreach($sqlResult as $resultRow) {
+								$advisor		= $resultRow->advisor;
+								$classes		= $resultRow->classes;
+								$semester		= $resultRow->semester;
+								
+								$sumResult	 		= $sumResult + $classes;
+								$myArray			= explode(" ",$semester);
+								$thisYear			= $myArray[0];
+								$thisMonths			= $myArray[1];
+								if (isset($monthsArray[$thisMonths])) {
+									$monthsNumber	= $monthsArray[$thisMonths];
+									$myStr			= $thisYear . $monthsNumber;
+									if ($doDebug) {
+										echo "calculated $myStr out of $semester<br />";
+									}
+									if ($myStr > $thisMaxSemester) {
+										$thisMaxSemester	= $myStr;
+										$useSemester		= $semester;
+										if ($doDebug) {
+											echo "useSemester now $useSemester<br />";
+										}
+									}
+								}
 							}
-						} else {
-							$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
-							$advisorInfoArray[]	= "$sumStr&$advisor";
+						
+							if ($limit_categories == 'Y') {
+								if (in_array($sumResult,$categoryClass)) {
+									$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
+									$advisorInfoArray[]	= "$sumStr&$advisor&$useSemester";
+								}
+							} else {
+								$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
+								$advisorInfoArray[]	= "$sumStr&$advisor&$useSemester";
+							}
 						}
 					}
 				}
@@ -275,35 +327,17 @@ function advisor_service_report_func() {
 				print_r($advisorInfoArray);
 				echo "</pre><br />";
 			}
-//			$content		.= "<table style='width:auto'>
-//								<tr><th>Number Classes</th>
-//									<th>Advisor - Name - Latest Semester</th></tr>";
 			$content		.= "<pre>\nclasses\tcallsign\tname\tsemester\n";
 			foreach($advisorInfoArray as $thisData) {
 				$myArray			= explode("&",$thisData);
 				$classCount			= intval($myArray[0]);
 				$advisor			= $myArray[1];
+				$useSemester		= $myArray[2];
 
-/*		
-				if ($classCount != $prevCount) {
-					if ($firstTime) {
-						$firstTime	= FALSE;
-					} else {
-						$content	.= "<tr><td colspan='2'><hr></td></tr>";
-					}
-					$countStr		= $classCount;
-				} else {
-					$countStr		= "&nbsp;";
-				}
-				$prevCount			= $classCount;
-*/
-
-				$advisorSQL			= "select first_name,
-											   last_name,
-											   semester  
-										from $advisorTableName 
-										where call_sign = '$advisor' 
-										order by date_created DESC 
+				$advisorSQL			= "select * from $advisorTableName 
+										left join $userMasterTableName on user_call_sign = advisor_call_sign 
+										where advisor_call_sign = '$advisor' 
+										order by advisor_date_created DESC 
 										limit 1";
 				$advisorResult		= $wpdb->get_results($advisorSQL);
 				if ($advisorResult === FALSE) {
@@ -315,30 +349,57 @@ function advisor_service_report_func() {
 					}
 					if ($numARows > 0) {
 						foreach($advisorResult as $advisorResultRow) {
-							$advisorFirstName	= $advisorResultRow->first_name;
-							$advisorLastName	= $advisorResultRow->last_name;
-							$advisorSemester	= $advisorResultRow->semester;
-							$nameStr			= "$advisorLastName, $advisorFirstName";
+							$advisor_master_ID 					= $advisorResultRow->user_ID;
+							$advisor_master_call_sign			= $advisorResultRow->user_call_sign;
+							$advisor_first_name 				= $advisorResultRow->user_first_name;
+							$advisor_last_name 					= $advisorResultRow->user_last_name;
+							$advisor_email 						= $advisorResultRow->user_email;
+							$advisor_phone 						= $advisorResultRow->user_phone;
+							$advisor_city 						= $advisorResultRow->user_city;
+							$advisor_state 						= $advisorResultRow->user_state;
+							$advisor_zip_code 					= $advisorResultRow->user_zip_code;
+							$advisor_country_code 				= $advisorResultRow->user_country_code;
+							$advisor_whatsapp 					= $advisorResultRow->user_whatsapp;
+							$advisor_telegram 					= $advisorResultRow->user_telegram;
+							$advisor_signal 					= $advisorResultRow->user_signal;
+							$advisor_messenger 					= $advisorResultRow->user_messenger;
+							$advisor_master_action_log 			= $advisorResultRow->user_action_log;
+							$advisor_timezone_id 				= $advisorResultRow->user_timezone_id;
+							$advisor_languages 					= $advisorResultRow->user_languages;
+							$advisor_survey_score 				= $advisorResultRow->user_survey_score;
+							$advisor_is_admin					= $advisorResultRow->user_is_admin;
+							$advisor_role 						= $advisorResultRow->user_role;
+							$advisor_master_date_created 		= $advisorResultRow->user_date_created;
+							$advisor_master_date_updated 		= $advisorResultRow->user_date_updated;
+		
+							$advisor_ID							= $advisorResultRow->advisor_id;
+							$advisor_call_sign 					= strtoupper($advisorResultRow->advisor_call_sign);
+							$advisor_semester 					= $advisorResultRow->advisor_semester;
+							$advisor_welcome_email_date 		= $advisorResultRow->advisor_welcome_email_date;
+							$advisor_verify_email_date 			= $advisorResultRow->advisor_verify_email_date;
+							$advisor_verify_email_number 		= $advisorResultRow->advisor_verify_email_number;
+							$advisor_verify_response 			= strtoupper($advisorResultRow->advisor_verify_response);
+							$advisor_action_log 				= $advisorResultRow->advisor_action_log;
+							$advisor_class_verified 			= $advisorResultRow->advisor_class_verified;
+							$advisor_control_code 				= $advisorResultRow->advisor_control_code;
+							$advisor_date_created 				= $advisorResultRow->advisor_date_created;
+							$advisor_date_updated 				= $advisorResultRow->advisor_date_updated;
+							$advisor_replacement_status 		= $advisorResultRow->advisor_replacement_status;
+							$nameStr							= "$advisor_last_name, $advisor_first_name";
 						}
 					} else {
-						$advisorFirstName	= "";
-						$advisorLastName	= "";
-						$advisorSemester	= "";
+						$advisor_first_name	= "";
+						$advisor_last_name	= "";
+						$advisor_semester	= "";
 						$nameStr			= "";
 					}
 
 				}
 				
-				
-//				$content			.= "<tr><td>$countStr</td>
-//											<td>$advisor $nameStr</td></tr>";
-				$content			.= "$classCount\t$advisor\t$nameStr\t$advisorSemester\n";
+				$content			.= "$classCount\t$advisor\t$nameStr\t$useSemester\n";
 			}
-//			$content				.= "<tr><td colspan='2'><hr></td></tr></table>
 			$content				.= "</pre>
-										<p>If last semester is empty, it was before 2020 Jan/Feb</p>
-										<p>$myInt Advisors Reported</p>";
-			
+										<p>$myInt Advisors Reported</p>";	
 		}	
 	
 	}

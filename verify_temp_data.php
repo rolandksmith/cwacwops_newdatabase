@@ -23,19 +23,6 @@ function verify_temp_data_func() {
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
-/*
-	if ($validUser == 'N') {				// turn off debug and testmode
-		$doDebug					= FALSE;
-		$testMode					= FALSE;
-	}
-*/
-	$versionNumber				 	= "1";
-	if ($doDebug) {
-		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
-		echo "</pre><br />";
-	}
-	$userName			= $initializationArray['userName'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
 	$validTestmode		= $initializationArray['validTestmode'];
 	$siteURL			= $initializationArray['siteurl'];
@@ -43,6 +30,19 @@ function verify_temp_data_func() {
 	$userEmail			= $initializationArray['userEmail'];
 	$userDisplayName	= $initializationArray['userDisplayName'];
 	$userRole			= $initializationArray['userRole'];
+/*
+	if ($validUser == 'N') {				// turn off debug and testmode
+		$doDebug					= FALSE;
+		$testMode					= FALSE;
+	}
+*/
+
+	$versionNumber				 	= "1";
+	if ($doDebug) {
+		echo "Initialization Array:<br /><pre>";
+		print_r($initializationArray);
+		echo "</pre><br />";
+	}
 	$tokenList			= array('register','ignore','tracking');
 	$deleteList			= array();
 	$deleteCount		= 0;
@@ -78,65 +78,65 @@ function verify_temp_data_func() {
 	
 	
 	$content = "<style type='text/css'>
-		fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-		background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-		legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-		font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-		label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-		text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-		textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-		background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputFile {color:#666;background:#fee;padding:2px;border:
-		solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-		input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		select.formSelect {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-		select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-		input.formInputButton {vertical-align:middle;font-weight:bolder;
-		text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-		cursor:pointer;position:relative;float:left;}
-
-		input.formInputButton:hover {color:#f8f400;}
-
-		input.formInputButton:active {color:#00ffff;}
-
-		tr {color:#333;background:#eee;}
-
-		table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-		th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-		td {padding:5px;font-size:small;}
-
-		th:first-child,
-		td:first-child {
-		 padding-left: 10px;
-		}
-
-		th:last-child,
-		td:last-child {
-			padding-right: 5px;
-		}
-		</style>";	
+				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
+				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
+		
+				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
+				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
+		
+				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
+				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
+		
+				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
+				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+		
+				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+		
+				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+		
+				input.formInputText {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
+		
+				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+		
+				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
+		
+				input.formInputFile {color:#666;background:#fee;padding:2px;border:
+				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
+		
+				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
+		
+				select.formSelect {color:#666;background:#fee;padding:2px;
+				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
+		
+				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
+		
+				input.formInputButton {vertical-align:middle;font-weight:bolder;
+				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
+				cursor:pointer;position:relative;float:left;}
+		
+				input.formInputButton:hover {color:#f8f400;}
+		
+				input.formInputButton:active {color:#00ffff;}
+		
+				tr {color:#333;background:#eee;}
+		
+				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
+		
+				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
+		
+				td {padding:5px;font-size:small;}
+		
+				th:first-child,
+				td:first-child {
+				 padding-left: 10px;
+				}
+		
+				th:last-child,
+				td:last-child {
+					padding-right: 5px;
+				}
+				</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -167,40 +167,7 @@ function verify_temp_data_func() {
 		$content			.= "<h3>$jobname Process Automatically Executed</h3>";
 		$userName			= "CRON";
 
-		$dst				= date('I');
-		if ($dst == 1) {
-			$checkBegin 	= strtotime('13:50:00');
-			$checkEnd 		= strtotime('14:30:00');
-			$thisTime 		= date('H:i:s');
-		
-		} else {
-			$checkBegin 	= strtotime('12:50:00');
-			$checkEnd 		= strtotime('13:30:00');
-			$thisTime 		= date('H:i:s');
-		}
-
-		$nowTime = strtotime($thisTime);
-		if ($nowTime >= $checkBegin && $nowTime <= $checkEnd) {
-			$runTheJob = TRUE;
-		} else {
-			$runTheJob = FALSE;
-			$userName	= "CRON Aborted";
-			if ($doDebugLog) {
-				$debugLog .= "runTheJob is FALSE<br />";
-			}
-			$theRecipient	= 'rolandksmith@gmail.com';
-			$theSubject		= 'CW Academy - Cron Triggered';
-			$theContent		= "$jobname was triggered at $thisTime. It did not run. 
-checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
-			$mailCode		= 16;
-			$result			= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-													'theSubject'=>$theSubject,
-													'jobname'=>$jobname,
-													'theContent'=>$theContent,
-													'mailCode'=>$mailCode,
-													'testMode'=>$testMode,
-													'doDebug'=>FALSE));
-		}
+		$runTheJob			= allow_job_to_run($doDebug);
 	}
 	if ($runTheJob) {
 
@@ -378,7 +345,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 			$myStr		= "Process completed";
 			return $myStr;
 		} else {
-			$myStr .= "<br />The final mail send function to $myTo failed.<br /><br />";
+			$myStr .= "<br />The final mail send function failed.<br /><br />";
 			return $myStr;
 		}
 
