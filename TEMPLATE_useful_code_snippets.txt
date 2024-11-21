@@ -1,0 +1,584 @@
+// Useful Code Snippets
+
+// get the list of past semesters and process them one at a time
+		$pastSemesters			= $initializationArray['pastSemesters'];
+		$pastSemesterArray		= explode("|",$pastSemesters);
+		if ($doDebug) {
+			echo "past semesters:<br /><pre>";
+			print_r($pastSemesterArray);
+			echo "</pre><br />";
+		}
+		$myInt					= count($pastSemesterArray) - 1;
+		for ($ii=$myInt;$ii>-1;$ii--) {
+			$thisSemester		= $pastSemesterArray[$ii];
+			if ($doDebug) {
+				echo "<br />processing past semester $thisSemester<br />";
+			}
+
+
+
+	ini_set('max_execution_time',360);
+
+
+
+			for ($snum=1;$snum<31;$snum++) {
+				if ($snum < 10) {
+					$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+				} else {
+					$strSnum		= strval($snum);
+				}
+				$theInfo			= ${'class_student' . $strSnum};
+				if ($theInfo != '') {
+					$studentCount++;
+					$studentArray	= explode(",",$theInfo);
+					$studentCallSign = $studentArray[0];
+					$studentid		= $studentArray[1];
+
+
+/// javascript alert box
+&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:window.alert('Text Here');\">
+<span style='color:orange;'>??</span>
+
+
+// link to display and update student
+<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>
+
+
+
+///////  Box with color boundary
+
+<table style='border:4px solid red;'><tr><td>
+<p>YOUR TEXT HERE</p></td></tr></table>
+
+
+////////  Print the page:
+<button onClick=\"window.print()\">Print this page</button>
+
+
+
+
+///// log that the job was run
+		$thisDate			= date('Y-m-d');
+		$thisTime			= date('H:i:s');
+		if ($testMode) {
+			$thisMode		= "testMode";
+		} else {
+			$thisMode		= "Production";
+		}
+		$joblog				= "cwa_push_advisor_class_v2|$thisDate|$thisTime|$userName|thisMode|Initiated for $request_info ";
+		$result				= write_joblog_func($joblog);
+		if ($result[0] == 'fail') {
+			echo "write joblog failed<br />";
+		}
+
+
+
+
+// onclick
+					$content .= "To DELETE the student, click 
+<a href='$theURL?studentid=$student_ID&strpass=5&request_table=$request_table' 
+onclick=\"return confirm('Are you sure you want to delete this student id?');\">HERE</a><br /><br />";
+
+
+
+// Pre-assign Student to an Advisor|$thisDate|$thisTime|$user_name|Execution|$thisMode|Initiated for student $inp_student_callsign advisor $inp_advisor_callsign
+
+/// get the time that the process started
+	$startingMicroTime			= microtime(TRUE);
+
+	$endingMicroTime = microtime(TRUE);
+	$elapsedTime	= $endingMicroTime - $startingMicroTime;
+	$elapsedTime	= number_format($elapsedTime, 4, '.', ',');
+	$content		.= "<p>Report pass $strPass took $elapsedTime seconds to run</p>";
+	$nowDate		= date('Y-m-d');
+	$nowTime		= date('H:i:s');
+	$thisStr			= 'Production';
+	if ($testMode) {
+		$thisStr		= 'Testmode';
+	}
+	$result			= write_joblog_func("Push Advisor Class|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
+	if ($result == 'FAIL') {
+		$content	.= "<p>writing to joblog.txt failed</p>";
+	}
+	
+	
+	
+	
+mysqli_report(MYSQLI_REPORT_ERROR);
+$mysqli = new mysqli("localhost","cwopsorg_wp843","T.72mSpR(4","cwopsorg_wp843");
+
+
+/////// base64 encode
+	$stringToPass	= "inp_callsign=$student_call_sign&inp_phone=$passPhone&inp_email=$student_email";
+	$enstr			= base64_encode($stringToPass);
+	<a href='url?enstr=$enstr&inp_mode=''&strpass=2'>Somewhere</a>
+
+	$stringReceived	= base64_decode($stringToPass);
+
+	if ($str_key 				== 'enstr') {
+		$enstr					= $str_value;
+		$stringToPass			= base64_decode($enstr);
+		$myArray				= explode("&",$stringToPass);
+		foreach($myArray as $myValue) {
+			$thisArray			= explode("=",$myValue);
+			${$thisArray[0]}	= $thisArray[1];
+		}
+	}
+
+
+
+/////// testModeOption
+
+	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
+		$testModeOption	= "<tr><td>Operation Mode</td>
+<td><input type='radio' class='formInputButton' name='inp_mode' value='Production' checked='checked'> Production<br />
+	<input type='radio' class='formInputButton' name='inp_mode' value='TESTMODE'> TESTMODE</td></tr>";
+	} else {
+		$testModeOption	= '';
+	}
+
+
+
+/// generic update:
+					$result		= $wpdb->update($past_advisorClassTableName,
+												array('field'=>'value',
+													  'field'=>value),
+												array('advisorclass_id=$advisorClass_ID),
+												array('%s','%d'),
+												array('%d'));
+
+
+/// updateParam has the format: field|value|s or d
+					if ($updateRecord) {
+						$needComma = FALSE;
+						$sql 						= "update $past_advisorclassTableName set ";
+						foreach($updateParam as $myValue) {
+							$myArray 				= explode("|",$myValue);
+							$field 					= $myArray[0];
+							$fieldValue 			= $myArray[1];
+							$fieldFormat		 	= $myArray[2];
+							if ($needComma) {
+								$sql 				.= ", ";
+							}
+							$sql 					.= "$field=";
+							if ($fieldFormat == "s") {
+								$sql 				.= "'$fieldValue'";
+							} else {
+								$sql 				.= "$fieldValue";
+							}
+							$needComma = TRUE;
+						}
+						$sql						.= " where student_id=$student_ID";
+						
+						
+//// update using the wpdb update format where updateParam has the format: field|value|s/d
+
+						$updateArray				= array();
+						$formatArray				= array();
+						foreach($updateParam as $myValue) {
+							$myArray				= explode("|",$myValue);
+							$field					= $myArray[0];
+							$fieldValue				= $myArray[1];
+							$fieldFormat			= $myArray[2];
+							$updateArray[$field]	= $fieldValue;
+							$formatArray[]			= "'%$fieldFormat'";
+						}
+						$result			= $wpdb->update($tableName,
+														$updateArray,
+														array('id field'=>$id_number),
+														$formatArray,
+														array('%d'));
+						if ($result === FALSE) {
+							if ($doDebug) {
+									echo "Updating $??? record at $id_number failed<br />
+											Result: $result<br />
+											wpdb->last_query: " . $wpdb->last_query . "<br />";
+								if ($wpdb->last_error != '') {
+									$myStr	= "<b>wpdb->last_error: " . $wpdb->last_error;
+									echo "$myStr<br /><br />";
+								}
+								/////	send an email about the error to Roland
+//								$theRecipient		= 'rolandksmith@gmail.com';
+//								$mailCode			= 1;
+//								$theSubject			= "CWA Database SQL Error";
+//								$theContent			= "The following database error occurred: $myStr";
+							}
+						} else {
+							if ($doDebug) {
+								echo "Successfully updated $student_call_sign record at $student_ID<br />
+										Result: $result<br />
+										wpdb->last_query: " . $wpdb->last_query . "<br />";
+								if ($wpdb->last_error != '') {
+									echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
+								}
+
+							}
+						}
+
+						
+						
+// sending data to the auditlog
+
+	$fieldTest	= array('action_log','control_code');
+
+
+
+
+/// write student audit log
+
+					if ($testMode) {
+						$log_mode		= 'TESTMODE';
+					} else {
+						$log_mode		= 'PRODUCTION';
+					}
+					$submitArray		= array('logtype'=>'STUDENT',
+												'logsubtype'=>'STUDENT',
+												'logmode'=>$log_mode,
+												'logaction'=>'UPDATE',
+												'logsemester'=>$inp_semester,
+												'logdate'=>date('Y-m-d H:i:s'),
+												'logprogam'=>$jobname,
+												'logwho'=>$userName,
+												'logid'=>$student_ID);
+					foreach($updateParams as $myKey=>$myValue) {
+						if (!in_array($myKey,$fieldTest)) {
+							$submitArray[$myKey]	= $myValue;
+						}
+					}
+					$logResult			= storeAuditLogData_v3($submitArray);
+					if ($logResult[0] != 'SUCCESS') {
+						if ($doDebug) {
+							echo "writing audit log failed: $logResult[1]<br />";
+						}
+						sendErrorEmail("$jobname Writing Action Log failed: $logResult[1]");
+						return "nok|writing audit log for student record failed";
+					}
+
+
+
+
+// how to count
+						$sql			= "SELECT count(student_id) as student_count 
+										   from $studentTableName 
+											where semester='$currentSemester' 
+											and assigned_advisor='$advisor_call_sign' 
+											and student_status='Y'";
+						$student_count	= $wpdb->get_var($sql);
+
+
+
+/// testing the phone number last 4 digits
+								$testPhone		= substr($advisor_phone,-4,4);
+								$last4Digits	= substr($inp_phone,-4,4);
+								if ($testPhone != $last4Digits) {
+									$content	.= "Supplied phone number doesn't match<br />";
+									$doProceed	= FALSE;
+								}	
+
+
+
+// how to get attributes from a shortcode
+
+function copy_current_data_to_backup_data_func($atts) {
+
+	// get any attributes
+	$attrib		= '';
+	$attributes = shortcode_atts(
+			array(
+			   'attrib' => '',
+			 ), 
+			$atts
+		);
+		
+	$attrib		= $attributes['attrib'];
+
+
+
+
+///// cycling through students in advisorclass table
+			for ($snum=1;$snum<31;$snum++) {
+				if ($snum < 10) {
+					$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+				} else {
+					$strSnum		= strval($snum);
+				}
+				$studentCallSign	= ${'class_student' . $strSnum};
+				if ($studentCallSign != '') {
+					$studentCount++;
+
+					...
+
+
+
+//// play an audio clip once only
+<figure class="wp-block-audio audio-play-once-true">
+<audio controls src="https://cwa.cwops.org/wp-content/uploads/codesample.mp3"></audio>
+</figure>
+
+
+
+
+			$myHeaders 			= array('Content-Type: text/html; charset=UTF-8',
+										'Bcc: rolandksmith@gmail.com',
+									    'from: CW Academy <cwacademy@cwa.cwops.org>',
+										'Reply-To: no reply <noreply@cwa.cwops.org>');
+
+
+
+// sending mail using emailFromCWA function
+
+			$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+													    'theSubject'=>$theSubject,
+													    'theContent'=>$advisorAssignedStudents,
+													    'theCc'=>$ccString,
+													    'mailCode'=>$emailCode,
+													    'increment'=>$increment1,
+													    'testMode'=>$testMode,
+													    'doDebug'=>$doDebug));
+	
+	mailCode is an integer of the following
+	1 Test Mode to Roland
+	2 Test Mode to Roland, Bob
+	3 Test Mode to Andy
+	4 Test Mode to Andy and Bob
+	5 Test Mode to Andy, Roland, Bob
+	6 Test Mode to Bob tcc Roland, Andy
+
+	10 to theRecipient tcc Roland
+	11 to theRecipient tcc Roland, Bob, Andy
+	12 to theRecipient  tcc Joe, Roland, Bob, Andy
+	13 to theRecipient bcc Roland, Bob, Tcc Andy
+	14 to theRecipient bcc Joe Tcc Roland, Bob, Andy
+	15 to theRecipient Tcc Roland, Bob, Andy	(same as 11)
+	16 to Roland
+	17 to Bob, tcc Roland, Andy
+	18 to Bob, Roland, Andy
+	19 to Bob tcc Roland, Andy
+	20 to Bob, Joe Tcc Roland, Andy
+	21 to theRecipient Bcc Bob, Joe, Roland, Andy
+	
+	Note that testMode must be true for 1-5 to work
+
+
+
+//// https://linuxize.com/post/how-to-use-sed-to-find-and-replace-string-in-files/
+//// SED example
+	 sed -i.bak 's/\$advisorRow->email/strtolower(\$advisorRow->email)/' student_registration_v2.php
+	 sed -i.bak 's/response_number/abandoned/g' verify_advisor_class.php 
+	 
+		$filesArray = array(
+		);
+
+		foreach($filesArray as $thisFile) {
+			$output = null;
+			$retvalue = null;
+			exec("sed -i.bak 's/request_pod/request_table/g' $thisFile", $output, $retvalue);
+			echo "Ran $thisFile. Returned with a value of $retvalue\n";
+		//	print_r($output);
+			echo "Next File\n";
+		}
+	 
+	 
+//// move records to deleted table then delete
+			//// first move the record to the deleted table
+				$deletedTableName		= ??;
+				$realTableName			= ??;
+			
+			$sql		= "insert into $deletedTableName select * from $realTableName where id = $id";
+			$myResult	= $wpdb->get_results($sql);
+			if ($myResult === FALSE) {
+				handledWPDBError($jobname,$doDebug);
+				$content .= "<p>The deletion was not successful. Sys Admin has been notified</p>";
+			} else {
+				//// then, if the move was successful, delete the record
+				$myResult	= $wpdb->delete($realTableName,
+										array('id'=>$ID),
+										array('%d'));
+				if ($myResult === FALSE) {
+					handleWPDBError($jobname,$doDebug);
+					$content	.= "<p>The deletion was not successful. Sys Admin has been notified</p>";
+				}
+			}
+
+
+/*
+	How to change the style.css
+	
+	Change the style.css file in the theme
+	edit functions.php
+	       // Theme stylesheet.
+        wp_enqueue_style( 'twentyseventeen-style', get_stylesheet_uri(), array(), '20201209' );
+	change the serial number
+	
+	
+	fix the width of pages:
+	modify style.css
+	find:
+	       body.page-two-column #comments {
+        }
+
+	remove the float right and width constraints
+*/
+
+
+///// replace a character in a column using sql
+	update wpw1_cwa_student2 set request_date = replace(request_date,'/','-') where request_date like '%/%'
+	
+	
+/// find duplicates in a table
+
+SELECT 
+    country_code, 
+    COUNT(country_code)
+FROM
+    wpw1_cwa_country_codes 
+GROUP BY country_code
+HAVING COUNT(country_code) > 1;
+
+SELECT 
+    call_sign, 
+    COUNT(call_sign)
+FROM
+    wpw1_cwa_consolidated_advisor 
+GROUP BY call_sign
+HAVING COUNT(call_sign) = 1
+
+
+/// timezone identifiers
+$timezone_identifiers = DateTimeZone::listIdentifiers( DateTimeZone::PER_COUNTRY, 'UA' );
+$myInt = count($timezone_identifiers);
+print_r($timezone_identifiers);
+
+
+
+
+/// move a record to a table with same format
+						$sql		= "insert into $pastStudentTableName select * from $studentTableName where student_id = $student_ID";
+						$myResult	= $wpdb->get_results($sql);
+						if (sizeof($myResult) != 0) {
+							$myStr				= $wpdb->last_error;
+							sendErrorEmail("Display and Update Student: attempting to copy id $studentID from $request_table to $studentDeletedTableName failed. Last error: $myStr");
+							$content .= "<p>The move was not successful. $myStr failed</p>";
+						} else {
+							$studentsMoved++;
+							// now delete the student record
+							$result			= $wpdb->delete($studentTableName,
+															array('student_id'=>$student_ID),
+															array('%d'));
+							if ($result === FALSE) {
+								if ($doDebug) {
+									echo "deleting $student_call_sign record from $studentTableName table failed<br />
+										  wpdb->last_query: " . $wpdb->last_query . "<br />
+										  <b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
+								}
+							} else {
+								if ($doDebug) {
+									echo "Successfully deleted $student_call_sign record at $student_ID<br />";
+								}
+								$content		.= "Student $student_call_sign with response of $student_response and a status of $student_student_status moved to past student<br />";
+							}
+						}
+
+
+
+
+/// convert minutes to hours and minutes
+	$newTime			= date('Hi', mktime(0,$minutesValue));
+	
+
+
+
+
+/// mysql workbench
+/// create a table from an existing table
+		create table (newtablename) like (oldtablename);
+
+/// copy a table to an existing table
+		truncate (targettablename);
+		insert into (targettablename) select * from (sourcetablename);
+		
+
+//// calculate days between two dates
+$now = time(); // or your date as well
+$your_date = strtotime("2010-01-31");
+$datediff = $now - $your_date;
+
+echo round($datediff / (60 * 60 * 24));
+
+
+
+
+/// how to get the color code of a cell in excel
+https://www.exceldemy.com/excel-get-cell-color/
+
+
+/// add return to program list
+	$content 		.= "<br /><br /><a href='$siteURL/program-list/'>Return to Student Portal</a>
+						<br /><br /><p>V$versionNumber. Prepared at $thisTime</p>";
+
+
+//// resolve a reminder
+			if ($token != '') {
+				$resolveResult				= resolve_reminder($inp_callsign,$token,$testMode,$doDebug);
+				if ($resolveResult === FALSE) {
+					if ($doDebug) {
+						echo "resolve_reminder for $inp_callsign and $token failed<br />";
+					}
+				}
+			}
+
+
+
+///// dump mysql tables matching a name
+mysql cwacwops_wp540 -u cwacwops_wp540 -p -N -e 'show tables like "wpw1_cwa\_%"' | xargs mysqldump cwacwops_wp540 -u cwacwops_wp540 -p --no-tablespaces> prefixedtable_dump.sql
+
+
+///// calling the Morse code assessment
+$thisCallsign		= 						// person doing the assessment
+$thiscpm			= 						// word per minute
+$thiseff			= 						// effective speed
+$thisFreq			= 						// list of frequencies 400 - 700
+$thisQuestions		= 						// number of questions 
+$thisWords			= 						// number of words per question
+$thisCharacters		= 						// max characters per word 3,4,5,6
+$thisCallsigns		= 						// how many callsigns to include 2(2-5)
+$thisAnswers		= 						// how many answers to display
+$thisLevel			=						// level of the exam
+$token				= mt_rand();			// token to identify this activity
+$thisVocab			= "threek";				// either threek or original
+$thisInfor			=						// reason for the assessment
+
+$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&words=$thisWords&characters=$thisCharacters&callsigns=$thisCallsigns&answers=$thisAnswers&level=$thisLevel&token=$token&vocab=$thisVocab&infor=$thisInfor";
+$myStr		= "$siteURL/cwa-advisor-request-student-assessment/?strpass=10&inp_callsign=$student_call_sign&token=$token";
+$returnurl	= urlencode($myStr);
+$url		= "$url" . "&returnurl=$returnurl'>Perform Assessment</a>";
+
+
+
+/// calculating a date plus days
+$futureDate = date('Y-m-d', strtotime($currentDate . ' +10 days'));
+
+// regex to check for callsign format
+'/^[a-zA-Z0-9]{1,3}[0-9][a-zA-Z0-9]{0,3}[a-zA-Z]+$/'
+
+
+
+
+
+// Amazon SES Suppression List
+
+To enable your account-level suppression list, you have to specify at least one reason for the suppressed-reasons parameter. You can specify either BOUNCE or COMPLAINT, or you can specify both, as shown in the preceding example.
+
+To configure your account-level suppression list using the SES console:
+Sign in to the AWS Management Console and open the Amazon SES console at https://console.aws.amazon.com/ses/.
+
+In the navigation pane, under Configuration, choose Suppression list.
+
+In the Account-level settings pane, choose Edit.
+
+In Suppression list, check the Enabled box.
+
+In Suppression reasons, select one of the reasons for which recipient email addresses should be automatically added to your account-level suppression list.
+
+Choose Save changes.
+

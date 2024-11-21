@@ -1,0 +1,266 @@
+<p style="text-align: center;"><span style="color: #ff0000;"><em>Note: We encourage you to read this page completely. <br> It contains important information that we think you'll find worthwhile.</em></span></p>
+
+<ul>
+<li><strong><u>Students</u></strong>
+	<ul>
+ 	<li><u>Response</u>
+		<ul>
+ 		<li>blank - No response</li>
+ 		<li>Y - Wants to take Class</li>
+ 		<li>R - Refused the Class</li>
+ 		</ul>
+	<br />
+	<li><u>Student Status</u>
+		<ul>
+ 		<li>C -	Student has been replaced. Is not on the waiting list</li>
+ 		<li>N - Advisor declined replacement student</li>
+ 		<li>R -	Advisor has requested a replacement. Student will not be put on the waiting list</li>
+ 		<li>S -	Assigned advisor has not yet verified student</li>
+    	<li>V -	Advisor has requested a replacement. Student will be unassigned and put on hold</li>
+   	     <li>Y -	Student verified desire to take the class</li>							
+		</ul>
+	<br />
+	<li><u>Intervention Required</u>
+		<ul>
+ 		<li>H -	On Hold. See Hold Reason Code for explanation</li>
+		</ul>
+	<br />	
+ 	<li><u>Promotable</u>
+		<ul>
+ 		<li>P -	Advisor says student is ready for the next level</li>
+ 		<li>N - Advisor says student not ready for the next level</li>
+        <li>Q -	Advisor quit (so we don't look at two fields)</li>
+        <li>W -	Student withdrawn from class</li>								
+		</ul>
+	<br />				
+ 	<li><u>Hold Reason Code	(for Intervention Required)</u>
+		<ul>
+ 		<li>X -	Don’t assign to same Assigned Advisor</li>
+ 		<li>E -	Student not evaluated but signed up for higher level of class. On Hold</li>
+ 		<li>H -	Student not promotable but signed up for next level of class. On Hold</li>
+                <li>Q -	Advisor quit, student not evaluated, but signed up for next level of class. On Hold</li>
+                <li>W -	Student withdrew from a class, but signed up for the next level of class. On Hold</li>
+                <li>M - Student moved, but signed up for the next level of class. On. Hold</li>	
+                <li>B - Student is in the Bad Actor table and needs clearance to be assigned to a class</li>					
+		</ul>
+	<br />
+ 	<li><u>Hold Override (for Intervention Required)</u>
+		<ul>
+ 		<li>blank - Not assigned	</li>
+ 		<li>Y -	Release</li>
+		</ul>
+	<br />
+ 	<li><u>Class Priority</u>
+		<ul>
+ 		<li>blank - Normal assignment</li>
+ 		<li>1 or higher - Priority assignment next semester</li>
+		</ul>
+	<br />
+	<li><u>Abandoned</u>
+		<ul>
+		<li>blank - normal ... student did not quit the registration process</li>
+		<li>Y - student abandoned the registration process prior to selecting classes</li>
+		<li>N - student updated the registration record and selected classes</li>
+		</ul>
+	<br />
+	<li><u>no_catalog</u>
+		<ul>
+		<li>blank - student registered when the complete catalog was available</li>
+		<li>Y - student registered using the abbreviated catalog</li>
+		<li>N - same as blank</li>
+		</ul>
+	<br />
+	<li><u>Flexible</u>
+		<ul>
+		<li>Blank or N - Student schedule choices only
+		<li>Y - Student has a flexible schedule
+		</ul>
+	<br />
+	<li><u>Catalog Options</u>
+		<ul>
+		<li>If the student registered before the catalog becomes available, the student 
+			can select from a list of times and days that the student would be available. 
+			Possible entries in this field:
+			<ul>
+			<li>MTM (Monday,Thursday Mornings); MTA (Monday,Thursday Afternoons); MTE (Monday,Thursday Evenings)
+			<li>TFM (Tuesday,Friday Mornings); TFA (Tuesday,Friday Afternoons); TFE (Tuesday,Friday Evenings)
+			<li>SWM (Sunday,Wednesday Mornings); SWA (Sunday,Wednesday Afternoons); SEE (Sunday,Wednesday Evenings)
+			<li>STM (Sunday,Thursday Mornings); STA (Sunday,Thursday Afternoons); STE (Sunday,Thursday Evenings)
+			</ul>
+		</ul>
+	<br />							
+ <li><strong><u>Advisors</u></strong>
+	<ul>
+ 	<li><u>Survey Score</u>
+		<ul>
+ 		<li>1 to 5 - (5 being best)</li>
+ 		<li>6 - Do not assign to teach - the field carries forward</li>
+                <li>7 - Assign any previous student to previous advisor</li>
+                <li>8 - Advisor requires intervention, prior to class assignments</li>
+ 		<li>9 - Not completed Evaluation - Can be voided by using CWA webpage sign up</li>
+                <li>13 - Signed up as an Advisor while trying to take class(es) or not promotable for the teaching level</li>
+		</ul>
+	</ul> 
+	<br />
+ 	<li><u>Advisor Response</u>
+		<ul>
+ 		<li>Y - Wants to teach this semester</li>
+ 		<li>R - Declined teaching this semester</li>
+	</ul>
+<br />
+ <li><strong><u>Pre-assign Student to an Advisor</u></strong>
+	<ul>
+ 	<li><u>Make Student Available</u>
+		<ul>
+ 		<li>Student "Verify" must be "Y"</li>
+ 		<li>"Student Status" must be blank</li>
+ 		<li>Put student in correct semester</li>
+		</ul>
+	</ul> 
+</ul>
+
+
+<h4>Usage Details</h4>
+<dl>
+	<dt>Student Response</dt>
+	<dd>If the student registers before students are sent the verification email (appx 45 
+		days before the semester starts), the response field is set to empty. If the student 
+		registers after the verification emails are sent, the response is automatically set to Y 
+		(student is verified). If the student responds to the verification request that the 
+		student does not want the class, response is set to R.</dd>
+	<dt>Waiting List</dt>
+	<dd>If the student registers after students have been assigned to classes, the system 
+		attempts to find a suitable class for the student. If the suggestions do not 
+		meet the student's needs, the student is placed on a waiting list by setting the 
+		waiting list field to N. <br /><br />
+		Note that if a suitable class is found and the advisor is accepting students, 
+		then the student is automatically assigned to the advisor.</dd>
+	<dt>No Catalog</dt>
+	<dd>If the student registers before the catalog is available, no_catalog is set to Y, 
+		indicating that the student did not have access to the class catalog. The student 
+		is given a generic list of days and times from which the student can indicate 
+		the sutdent's preferences for taking a class. These preferences are stored in the 
+		student_catalog_options field. No_catalog is set to N when the student verifies and 
+		makes catalog class selections.</dd>
+
+</dl>
+
+<h4>Student Registration Morse Code Proficiency Assessment</h4>
+
+<table>
+	<tr><th>Level</th>
+		<th>Character Speed</th>
+		<th>Effective Speed</th>
+		<th>Questions</th>
+		<th>Words</th>
+		<th>Characters</th>
+		<th>Answers</th></tr>
+	<tr><td>Beginner</td>
+		<td style='text-align:center;'>15wpm</td>
+		<td style='text-align:center;'>6wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Fundamental</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>6wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>3</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Intermediate</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>10wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>3</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Advanced</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>20wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>4</td>
+		<td style='text-align:center;'>7</td></tr>
+</table>
+
+<h4>End of Semester Morse Code ProficiencyAssessment</h4>
+
+<table>
+	<tr><th>Level</th>
+		<th>Character Speed</th>
+		<th>Effective Speed</th>
+		<th>Questions</th>
+		<th>Words</th>
+		<th>Characters</th>
+		<th>Answers</th></tr>
+	<tr><td>Beginner</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>6wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Fundamental</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>10wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>3</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Intermediate</td>
+		<td style='text-align:center;'>25wpm</td>
+		<td style='text-align:center;'>20wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>4</td>
+		<td style='text-align:center;'>5</td></tr>
+	<tr><td>Advanced</td>
+		<td style='text-align:center;'>30wpm</td>
+		<td style='text-align:center;'>20wpm</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>2</td>
+		<td style='text-align:center;'>5</td>
+		<td style='text-align:center;'>7</td></tr>
+</table>
+
+
+<h4>Synonym Table</h4>
+
+ A: [N,W]<br />
+ B: [D,V,6]<br />
+ C: [K,.,R]<br />
+ D: [B,G,6]<br />
+ E: [I,S]<br />
+ F: [L,Y,Q]<br />
+ G: [J,W,D]<br />
+ H: [S,5,I]<br />
+ I: [S,E]<br />
+ J: [G,1,W]<br />
+ K: [R,N]<br />
+ L: [F,Q]<br />
+ M: [O,T]<br />
+ N: [A,D]<br />
+ O: [M,9]<br />
+ P: [X,Z]<br />
+ Q: [Y,L,F]<br />
+ R: [K,A,N]<br />
+ S: [I,H,5]<br />
+ T: [M,O]<br />
+ U: [V,D,B]<br />
+ V: [B,U,D]<br />
+ W: [A,G]<br />
+ X: [P,Z]<br />
+ Y: [L,Q,F]<br />
+ Z: [X,G]<br />
+ 1: [A,J,W]<br />
+ 2: [U,1]<br />
+ 3: [2,S,V]<br />
+ 4: [V,H]<br />
+ 5: [S,H]<br />
+ 6: [B,D]<br />
+ 7: [Z,8,B]<br />
+ 8: [7,G]<br />
+ 9: [0,O]<br />
+ 0: [O,M,5]<br />
