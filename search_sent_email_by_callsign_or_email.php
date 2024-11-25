@@ -6,7 +6,7 @@ function search_sent_email_by_callsign_or_email_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {

@@ -7,7 +7,7 @@ function list_student_self_assessments_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -179,7 +179,7 @@ function list_student_self_assessments_func() {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
 		$extMode					= 'tm';
-		$assessmentTableName		= "wpw1_cwa_new_assessment_data";
+		$assessmentTableName		= "wpw1_cwa_new_assessment_data2";
 		$studentTableName			= "wpw1_cwa_student2";
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
 	} else {
@@ -243,9 +243,10 @@ function list_student_self_assessments_func() {
 		}
 
 		// get all assessment records meeting the date criteria
-		$sql					= "select * from wpw1_cwa_new_assessment_data 
+		$sql					= "select * from $assessmentTableName 
 									where date_written >= '$fromDate' 
-									and date_written <= '$today' 
+									and date_written <= '$today'  
+									and callsign != '' 
 									order by callsign, date_written";
 		$assessmentResult		= $wpdb->get_results($sql);
 		if ($assessmentResult === FALSE) {
@@ -275,6 +276,7 @@ function list_student_self_assessments_func() {
 					$thisDetail		= $newAssessment->details;
 					$thisDate		= $newAssessment->date_written;
 
+
 					if ($thisCallsign != $prevCallsign) {
 						$prevCallsign	= $thisCallsign;
 						// new student. Get the student info
@@ -300,11 +302,13 @@ function list_student_self_assessments_func() {
 									$student_first_name 				= $studentRow->user_first_name;
 									$student_last_name 					= $studentRow->user_last_name;
 									$student_email 						= $studentRow->user_email;
+									$student_ph_code					= $studentRow->user_ph_code;
 									$student_phone 						= $studentRow->user_phone;
 									$student_city 						= $studentRow->user_city;
 									$student_state 						= $studentRow->user_state;
 									$student_zip_code 					= $studentRow->user_zip_code;
 									$student_country_code 				= $studentRow->user_country_code;
+									$student_country 					= $studentRow->user_country;
 									$student_whatsapp 					= $studentRow->user_whatsapp;
 									$student_telegram 					= $studentRow->user_telegram;
 									$student_signal 					= $studentRow->user_signal;
@@ -365,30 +369,6 @@ function list_student_self_assessments_func() {
 									$student_flexible						= $studentRow->student_flexible;
 									$student_date_created 					= $studentRow->student_date_created;
 									$student_date_updated			  		= $studentRow->student_date_updated;
-				
-									// if you need the country name and phone code, include the following
-									$countrySQL		= "select * from wpw1_cwa_country_codes  
-														where country_code = '$student_country_code'";
-									$countrySQLResult	= $wpdb->get_results($countrySQL);
-									if ($countrySQLResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
-										$student_country		= "UNKNOWN";
-										$student_ph_code		= "";
-									} else {
-										$numCRows		= $wpdb->num_rows;
-										if ($doDebug) {
-											echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-										}
-										if($numCRows > 0) {
-											foreach($countrySQLResult as $countryRow) {
-												$student_country		= $countryRow->country_name;
-												$student_ph_code		= $countryRow->ph_code;
-											}
-										} else {
-											$student_country			= "Unknown";
-											$student_ph_code			= "";
-										}
-									}
 									
 									$haveStudent							= TRUE;
 								}
@@ -398,35 +378,31 @@ function list_student_self_assessments_func() {
 							$studentsDisplayed++;
 							$content				.= "<tr><th>Call Sign</th>
 															<th colspan='2'>Name</th>
-															<th>Email</th>
+															<th colspan='2'>Email</th>
 															<th>Phone</th>
-															<th>Country</th>
+															<th colspan='2'>Country</th>
 															<th>Level</th>
-															<th></th>
-															<th></th>
 															<th></th>
 															<th></th></tr>
 														<tr><td>$student_call_sign</td>
 															<td colspan='2'>$student_last_name, $student_first_name</td>
-															<td>$student_email</td>
+															<td colspan='2'>$student_email</td>
 															<td>$student_phone</td>
-															<td>$student_country</td>
+															<td colspan='2'>$student_country</td>
 															<td>$thisLevel</td>
 															<td></td>
-															<td></td>
-															<td></td>
 															<td></td></tr>
-														<tr><th>Score</th>
-															<th>Level</th>
-															<th>Char Speed</th>
-															<th>Eff Speed</th>
-															<th>Questions</th>
-															<th>Words</th>
-															<th>Word Length</th>
-															<th>Question</th>
-															<th>What Was Sent</th>
-															<th>What Was Copied</th>
-															<th>Points Gained</th></tr>";
+													 	<tr><td style='vertical-align:bottom;border-bottom:solid;'><b>Score</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Level</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Char Speed</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Eff Speed</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Questions</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Words</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Word Length</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Question</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>What Was Sent</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>What Was Copied</b></td>
+															<td style='vertical-align:bottom;border-bottom:solid;'><b>Points Gained</b></td></tr>";
 						
 						}
 					

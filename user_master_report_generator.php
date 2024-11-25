@@ -667,23 +667,14 @@ function user_master_report_generator_func() {
         $nameConversionArray['user_date_updated'] = 'User<br />Date Updated';
 
 		// Begin the Report Output
-		
-		$myInt = strpos($where,'futureSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('futureSemester',$futureSemester,$where);
-		}
-		$myInt = strpos($where,'proximateSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('proximateSemester',$proximateSemester,$where);
-		}
 
 		if ($inp_config == 'Y') {		// saving the report configuration
 			if ($inp_report_name != '') {
 				$whereStr					= htmlentities($where,ENT_QUOTES);
 				$reportConfig['where']		= $whereStr;
 				$reportConfig['orderby']	= $orderby;
-				$reportConfig['rg_table']	= $studentTableName;
-				$reportConfig['type']		= $output_type;
+				$reportConfig['rg_table']	= $userMasterTableName;
+				$reportConfig['output_type']		= $output_type;
 				$myStr						= date('Y-m-d H:i:s');
 				$rg_config					= addslashes(json_encode($reportConfig));
 				
@@ -723,7 +714,22 @@ where rg_report_name = '$inp_report_name'";
 			}
 		}
 		
+		$myInt = strpos($where,'futureSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('futureSemester',$futureSemester,$where);
+		}
+		$myInt = strpos($where,'proximateSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('proximateSemester',$proximateSemester,$where);
+		}
+		if ($inp_report_name != '') {
+			$myReportName		= "<h4>$inp_report_name</h4>";
+		} else{
+			$myReportName		= '';
+		}
+		
 		$content				.= "<h2>Generated Report from the $userMasterTableName Table</h2>
+									$myReportName
 									<p>Save report: $inp_report<br />";
 
 		$sql = "select * from $userMasterTableName ";

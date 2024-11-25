@@ -378,7 +378,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-recover-deleted-record/' target='_blank'>Recover Deleted Record</a>
 								<li><a href='$siteURL/cwa-remove-item/' target='_blank'>Remove Item</a>
 								<li><a href='$siteURL/cwa-repeating-student-statistics/' target='_blank'>Repeating Student Statistics</a>
-								<li><a href='$siteURL/cwa-run-saved-report-configuration/' target='_blank'>Run Saved Report Configuration</a>
+								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
 								<li><a href='$siteURL/cwa-search-audit-log/' target='_blank'>Search Audit Log</a>
 								<li><a href='$siteURL/cwa-search-joblog/' target='_blank'>Search Joblog</a>
 								<li><a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/' target='_blank'>Search Sent Email by Callsign or Email</a>
@@ -559,7 +559,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
 								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
-								<li><a href='$siteURL/cwa-run-saved-report-configuration/' target='_blank'>Run Saved Report Configuration</a>
+								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
 								<li><a href='$siteURL/cwa-update-advisor-service/' target='_blank'>Update Advisor Service</a>
 								<li><a href='$siteURL/rksmith-create-student-table/' target='_blank'>RKSMITH - Create Student Table</a>
 								<li><a href='$siteURL/rkstest-create-advisor-and-class-tables/' target='_blank'>RKSTEST - Create Advisor and Class Tables</a>
@@ -666,6 +666,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-maintenance-mode/' target='_blank'>Maintenance Mode</a>
 								<li><a href='$siteURL/cwa-manage-temp-data/' target='_blank'>Manage Temp Data</a>
 								<li><a href='$siteURL/cwa-recover-deleted-record/' target='_blank'>Recover Deleted Record</a>
+								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
 								<li><a href='$siteURL/cwa-search-audit-log/' target='_blank'>Search Audit Log</a>
 								<li><a href='$siteURL/cwa-search-joblog/' target='_blank'>Search Joblog</a>
 								<li><a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/' target='_blank'>Search Sent Email by Callsign or Email</a>

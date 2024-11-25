@@ -1186,7 +1186,7 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 		$doProceed				= TRUE;
 		// get the user_master record
 		$sql				= "select * from $userMasterTableName 
-								where user_call_sign = '$inp_callsign";
+								where user_call_sign = '$inp_callsign'";
 		$sqlResult			= $wpdb->get_results($sql);
 		if ($sqlResult === FALSE) {
 			handleWPDBError($jobname,$doDebug,"Pass 2 attempting to read user_master for $inp_callsign");

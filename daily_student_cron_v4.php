@@ -620,11 +620,13 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 						$student_first_name 				= $studentRow->user_first_name;
 						$student_last_name 					= $studentRow->user_last_name;
 						$student_email 						= $studentRow->user_email;
+						$student_ph_code 					= $studentRow->user_ph_code;
 						$student_phone 						= $studentRow->user_phone;
 						$student_city 						= $studentRow->user_city;
 						$student_state 						= $studentRow->user_state;
 						$student_zip_code 					= $studentRow->user_zip_code;
 						$student_country_code 				= $studentRow->user_country_code;
+						$student_country 					= $studentRow->user_country;
 						$student_whatsapp 					= $studentRow->user_whatsapp;
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
@@ -686,29 +688,6 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
 	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
 								
 						$student_last_name 						= no_magic_quotes($student_last_name);
 						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
@@ -1205,11 +1184,13 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 													$replace_first_name 				= $studentRow->user_first_name;
 													$replace_last_name 					= $studentRow->user_last_name;
 													$replace_email 						= $studentRow->user_email;
+													$replace_ph_code 					= $studentRow->user_ph_code;
 													$replace_phone 						= $studentRow->user_phone;
 													$replace_city 						= $studentRow->user_city;
 													$replace_state 						= $studentRow->user_state;
 													$replace_zip_code 					= $studentRow->user_zip_code;
 													$replace_country_code 				= $studentRow->user_country_code;
+													$replace_country 					= $studentRow->user_country;
 													$replace_whatsapp 					= $studentRow->user_whatsapp;
 													$replace_telegram 					= $studentRow->user_telegram;
 													$replace_signal 					= $studentRow->user_signal;
@@ -1479,10 +1460,12 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_last_name 					= $studentRow->user_last_name;
 					$student_email 						= $studentRow->user_email;
 					$student_phone 						= $studentRow->user_phone;
+					$student_ph_code 					= $studentRow->user_ph_code;
 					$student_city 						= $studentRow->user_city;
 					$student_state 						= $studentRow->user_state;
 					$student_zip_code 					= $studentRow->user_zip_code;
 					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
 					$student_whatsapp 					= $studentRow->user_whatsapp;
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
@@ -1544,29 +1527,6 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$student_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$student_country		= "UNKNOWN";
-						$student_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$student_country		= $countryRow->country_name;
-								$student_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$student_country			= "Unknown";
-							$student_ph_code			= "";
-						}
-					}
 
 					$debugLog .= "<br />Processing $student_call_sign<br />";
 					
@@ -2151,7 +2111,8 @@ set email_number to 4, and send the no Response email.
 																$update_action_log				.= "VERIFY Set email_number to 2 and sent verification email ";
 																$updateData[]					= "student_email_number|2|d";
 																$log_email_number				= '2';
-																$doUpdateStudent					= TRUE;
+																$doUpdateStudent				= TRUE;
+																$setReminder					= TRUE;
 																$email2Sent++;
 																$content						.= "VERIFY <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>Student $student_call_sign</a> ($student_level $student_semester) was sent the second verification email.<br />";
 															} else {
@@ -2174,7 +2135,8 @@ set email_number to 4, and send the no Response email.
 																$update_action_log				.= "VERIFY Set email_number to 3 and sent verification email ";
 																$updateData[]					= "student_email_number|3|d";
 																$log_email_number				= '3';
-																$doUpdateStudent					= TRUE;
+																$doUpdateStudent				= TRUE;
+																$setReminder					= TRUE;
 																$email3Sent++;
 																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the third verification email.<br />";
 															} else {
@@ -2302,7 +2264,11 @@ and to select your class preferences. The class catalog is now available. Your o
 3. You can move your registration to the $semesterThree semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=2&token=$token'>HERE</a><br /> 
 4. Finally, you can set your registration aside and sign up again in the future when your circumstances allow by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=3&token=$token'>Cancel  
 my registration</a>";
-																$closeStr			= strtotime("+20 days");
+																if ($student_email_number < 3) {
+																	$closeStr			= strtotime("+3 days");
+																} else {
+																	$closeStr			= strtotime("+10 days");
+																}
 																$close_date			= date('Y-m-d H:i:s',$closeStr);
 																$addReminder		= TRUE;
 															} else {
@@ -2326,7 +2292,11 @@ my registration</a>";
 but did not complete the registration process. If you are interested in being a student in the upcoming semester, you must complete your 
 registration. To do so, click <a href='$studentRegistrationURL?inp_verify=Y&token=$token&strpass=2&enstr=$encstr'>Student Registration</a>. 
 Update your information as needed and make your class preference choices.";
-																$closeStr			= strtotime("+20 days");
+																if ($student_email_number < 3) {
+																	$closeStr			= strtotime("+3 days");
+																} else {
+																	$closeStr			= strtotime("+10 days");
+																}
 																$close_date			= date('Y-m-d H:i:s',$closeStr);
 																$addReminder		= TRUE;
 															}
@@ -2767,11 +2737,13 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																	$replace_first_name 				= $studentRow->user_first_name;
 																	$replace_last_name 					= $studentRow->user_last_name;
 																	$replace_email 						= $studentRow->user_email;
+																	$replace_ph_code					= $studentRow->user_ph_code;
 																	$replace_phone 						= $studentRow->user_phone;
 																	$replace_city 						= $studentRow->user_city;
 																	$replace_state 						= $studentRow->user_state;
 																	$replace_zip_code 					= $studentRow->user_zip_code;
 																	$replace_country_code 				= $studentRow->user_country_code;
+																	$replace_country	 				= $studentRow->user_country;
 																	$replace_whatsapp 					= $studentRow->user_whatsapp;
 																	$replace_telegram 					= $studentRow->user_telegram;
 																	$replace_signal 					= $studentRow->user_signal;

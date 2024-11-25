@@ -21,6 +21,7 @@ function student_email_response_func() {
 	$studentID 				= '';
 	$strPass				= "1";
 	$increment				= 0;
+	$token					= '';
 	$initializationArray 	= data_initialization_func();
 	$validUser 				= $initializationArray['validUser'];
 	$userName				= $initializationArray['userName']; 
@@ -244,6 +245,7 @@ Class Resolution</a>.</p>";
 		}
 			
 		$sql				= "select * from $studentTableName 
+								left join $userMasterTableName on user_call_sign = student_call_sign 
 								where student_id='$studentID'";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
@@ -256,6 +258,32 @@ Class Resolution</a>.</p>";
 			}
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
+					$student_master_ID 					= $studentRow->user_ID;
+					$student_master_call_sign 			= $studentRow->user_call_sign;
+					$student_first_name 				= $studentRow->user_first_name;
+					$student_last_name 					= $studentRow->user_last_name;
+					$student_email 						= $studentRow->user_email;
+					$student_ph_code					= $studentRow->user_ph_code;
+					$student_phone 						= $studentRow->user_phone;
+					$student_city 						= $studentRow->user_city;
+					$student_state 						= $studentRow->user_state;
+					$student_zip_code 					= $studentRow->user_zip_code;
+					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
+					$student_whatsapp 					= $studentRow->user_whatsapp;
+					$student_telegram 					= $studentRow->user_telegram;
+					$student_signal 					= $studentRow->user_signal;
+					$student_messenger 					= $studentRow->user_messenger;
+					$student_master_action_log 			= $studentRow->user_action_log;
+					$student_timezone_id 				= $studentRow->user_timezone_id;
+					$student_languages 					= $studentRow->user_languages;
+					$student_survey_score 				= $studentRow->user_survey_score;
+					$student_is_admin					= $studentRow->user_is_admin;
+					$student_role 						= $studentRow->user_role;
+					$student_prev_callsign				= $studentRow->user_prev_callsign;
+					$student_master_date_created 		= $studentRow->user_date_created;
+					$student_master_date_updated 		= $studentRow->user_date_updated;
+
 					$student_ID								= $studentRow->student_id;
 					$student_call_sign						= $studentRow->student_call_sign;
 					$student_time_zone  					= $studentRow->student_time_zone;

@@ -58,10 +58,12 @@ function advisorclass_report_generator_func() {
     $user_last_name = '';
     $user_email = '';
     $user_phone = '';
+    $user_ph_code = '';
     $user_city = '';
     $user_state = '';
     $user_zip_code = '';
     $user_country_code = '';
+    $user_country = '';
     $user_whatsapp = '';
     $user_telegram = '';
     $user_signal = '';
@@ -144,10 +146,12 @@ function advisorclass_report_generator_func() {
     $user_last_name_checked = '';
     $user_email_checked = '';
     $user_phone_checked = '';
+    $user_ph_code_checked = '';
     $user_city_checked = '';
     $user_state_checked = '';
     $user_zip_code_checked = '';
     $user_country_code_checked = '';
+    $user_country_checked = '';
     $user_whatsapp_checked = '';
     $user_telegram_checked = '';
     $user_signal_checked = '';
@@ -302,6 +306,13 @@ function advisorclass_report_generator_func() {
                 if ($doDebug) {
                     echo "user_email included in report<br />";
                 }
+            if ($str_key == 'user_ph_code') {
+                $user_ph_code_checked = 'X';
+                $reportConfig['user_ph_code_checked'] = 'X';
+                if ($doDebug) {
+                    echo "user_ph_code included in report<br />";
+                }
+            }
             }
             if ($str_key == 'user_phone') {
                 $user_phone_checked = 'X';
@@ -336,6 +347,13 @@ function advisorclass_report_generator_func() {
                 $reportConfig['user_country_code_checked'] = 'X';
                 if ($doDebug) {
                     echo "user_country_code included in report<br />";
+                }
+            }
+            if ($str_key == 'user_country') {
+                $user_country_checked = 'X';
+                $reportConfig['user_country_checked'] = 'X';
+                if ($doDebug) {
+                    echo "user_country included in report<br />";
                 }
             }
             if ($str_key == 'user_whatsapp') {
@@ -1034,6 +1052,10 @@ function advisorclass_report_generator_func() {
                                     name='user_email' value='user_email'>
                                     <label for 'user_email'>user_email</label></td>
                                 <td>user_email</td></tr>
+                            <tr><td><input type='checkbox' class='formInputButton' id='user_ph_code' 
+                                    name='user_ph_code' value='user_ph_code'>
+                                    <label for 'user_ph_code'>user_ph_code</label></td>
+                                <td>user_ph_code</td></tr>
                             <tr><td><input type='checkbox' class='formInputButton' id='user_phone' 
                                     name='user_phone' value='user_phone'>
                                     <label for 'user_phone'>user_phone</label></td>
@@ -1054,6 +1076,10 @@ function advisorclass_report_generator_func() {
                                     name='user_country_code' value='user_country_code'>
                                     <label for 'user_country_code'>user_country_code</label></td>
                                 <td>user_country_code</td></tr>
+                            <tr><td><input type='checkbox' class='formInputButton' id='user_country' 
+                                    name='user_country' value='user_country'>
+                                    <label for 'user_country'>user_country</label></td>
+                                <td>user_country</td></tr>
                             <tr><td><input type='checkbox' class='formInputButton' id='user_whatsapp' 
                                     name='user_whatsapp' value='user_whatsapp'>
                                     <label for 'user_whatsapp'>user_whatsapp</label></td>
@@ -1368,7 +1394,7 @@ function advisorclass_report_generator_func() {
 							<input type='radio' id='student' name='mode_type' value='Prpdiction' checked='checked'> Production<br />
 							<input type='radio' id='student2' name='mode_type' value='testMode'> TestMode<br /></p>
 							
-							<p>Enter the 'Where' clause (<b>Note:</b> where clause can only use fields in the advisorClass table):<br />
+							<p>Enter the 'Where' clause:<br />
 							<textarea class='formInputText' id='where' name='where' rows='5' cols='80'>$thisWhere</textarea><br /></p>
 							
 							<p>Enter the 'Orderby' clause:<br />
@@ -1420,11 +1446,13 @@ function advisorclass_report_generator_func() {
         $nameConversionArray['user_first_name'] = 'user<br />first_name';
         $nameConversionArray['user_last_name'] = 'user<br />last_name';
         $nameConversionArray['user_email'] = 'user<br />email';
+        $nameConversionArray['user_ph_code'] = 'user<br />ph code';
         $nameConversionArray['user_phone'] = 'user<br />phone';
         $nameConversionArray['user_city'] = 'user<br />city';
         $nameConversionArray['user_state'] = 'user<br />state';
         $nameConversionArray['user_zip_code'] = 'user<br />zip_code';
         $nameConversionArray['user_country_code'] = 'user<br />country_code';
+        $nameConversionArray['user_country'] = 'user<br />country';
         $nameConversionArray['user_whatsapp'] = 'user<br />whatsapp';
         $nameConversionArray['user_telegram'] = 'user<br />telegram';
         $nameConversionArray['user_signal'] = 'user<br />signal';
@@ -1502,15 +1530,6 @@ function advisorclass_report_generator_func() {
 	
 	
 		// Begin the Report Output
-		
-		$myInt = strpos($where,'futureSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('futureSemester',$futureSemester,$where);
-		}
-		$myInt = strpos($where,'proximateSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('proximateSemester',$proximateSemester,$where);
-		}
 	
 		if ($inp_config == 'Y') {		// saving the report configuration
 			if ($doDebug) {
@@ -1520,8 +1539,8 @@ function advisorclass_report_generator_func() {
 				$whereStr					= htmlentities($where,ENT_QUOTES);
 				$reportConfig['where']		= $whereStr;
 				$reportConfig['orderby']	= $orderby;
-				$reportConfig['rg_table']	= $studentTableName;
-				$reportConfig['type']		= $output_type;
+				$reportConfig['rg_table']	= $advisorTableName;
+				$reportConfig['output_type']		= $output_type;
 				$myStr						= date('Y-m-d H:i:s');
 				$rg_config					= addslashes(json_encode($reportConfig));
 				
@@ -1533,13 +1552,13 @@ function advisorclass_report_generator_func() {
 					}
 					$reportQuery = "insert into wpw1_cwa_report_configurations 
 (rg_report_name, rg_table, rg_config, date_written) values 
-('$inp_report_name', 'student', '$rg_config', '$myStr')";
+('$inp_report_name', 'advisor', '$rg_config', '$myStr')";
 				} else {
 					if ($doDebug) {
 						echo "report name $inp_report_name is being updated<br />\n";
 					}
 					$reportQuery = "update wpw1_cwa_report_configurations 
-set rg_table = 'student', 
+set rg_table = 'advisor', 
 rg_config = '$rg_config', 
 date_written = '$myStr' 
 where rg_report_name = '$inp_report_name'";
@@ -1557,13 +1576,28 @@ where rg_report_name = '$inp_report_name'";
 			}
 		}
 		
+		$myInt = strpos($where,'futureSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('futureSemester',$futureSemester,$where);
+		}
+		$myInt = strpos($where,'proximateSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('proximateSemester',$proximateSemester,$where);
+		}
+		if ($inp_report_name != '') {
+			$myReportName		= "<h4>$inp_report_name</h4>";
+		} else{
+			$myReportName		= '';
+		}
+		
 		$content				.= "<h2>Generated Report from the $advisorClassTableName Table</h2>
+									$myReportName
 									<p>Save report: $inp_report<br />";
 	
-		$sql	= "SELECT * FROM `wpw1_cwa_advisorclass` as a 
-					left join wpw1_cwa_user_master as b on b.user_call_sign = a.advisorclass_call_sign 
-					left join wpw1_cwa_advisor as c on c.advisor_call_sign = a.advisorclass_call_sign 
-					and c.advisor_semester = a.advisorclass_semester";
+		$sql	= "SELECT * FROM `wpw1_cwa_advisorclass` 
+					left join wpw1_cwa_user_master on user_call_sign = advisorclass_call_sign 
+					left join wpw1_cwa_advisor on advisor_call_sign = advisorclass_call_sign 
+					and advisor_semester = advisorclass_semester";
 		if ($where != '') {
 			$sql	= "$sql where $where ";
 		}
@@ -1610,6 +1644,10 @@ where rg_report_name = '$inp_report_name'";
                 $headerName = $nameConversionArray['user_email'];
                 $content .= "<th>$headerName</th>";
            }
+            if ($user_ph_code_checked == 'X') {
+                $headerName = $nameConversionArray['user_ph_code'];
+                $content .= "<th>$headerName</th>";
+           }
             if ($user_phone_checked == 'X') {
                 $headerName = $nameConversionArray['user_phone'];
                 $content .= "<th>$headerName</th>";
@@ -1628,6 +1666,10 @@ where rg_report_name = '$inp_report_name'";
            }
             if ($user_country_code_checked == 'X') {
                 $headerName = $nameConversionArray['user_country_code'];
+                $content .= "<th>$headerName</th>";
+           }
+            if ($user_country_checked == 'X') {
+                $headerName = $nameConversionArray['user_country'];
                 $content .= "<th>$headerName</th>";
            }
             if ($user_whatsapp_checked == 'X') {
@@ -1979,6 +2021,15 @@ where rg_report_name = '$inp_report_name'";
                 $content .= $headerName;
                 $needComma = TRUE;
             }
+            if ($user_ph_code_checked == 'X') {
+                if ($needComma) {
+                    $content .= '	';
+                }
+                $headerName = $nameConversionArray['user_ph_code'];
+                $headerName = str_replace('<br />','_',$headerName);
+                $content .= $headerName;
+                $needComma = TRUE;
+            }
             if ($user_phone_checked == 'X') {
                 if ($needComma) {
                     $content .= '	';
@@ -2020,6 +2071,15 @@ where rg_report_name = '$inp_report_name'";
                     $content .= '	';
                 }
                 $headerName = $nameConversionArray['user_country_code'];
+                $headerName = str_replace('<br />','_',$headerName);
+                $content .= $headerName;
+                $needComma = TRUE;
+            }
+            if ($user_country_checked == 'X') {
+                if ($needComma) {
+                    $content .= '	';
+                }
+                $headerName = $nameConversionArray['user_country'];
                 $headerName = str_replace('<br />','_',$headerName);
                 $content .= $headerName;
                 $needComma = TRUE;
@@ -2708,15 +2768,17 @@ where rg_report_name = '$inp_report_name'";
 					$user_first_name						= $advisorClassRow->user_first_name;
 					$user_last_name							= $advisorClassRow->user_last_name;
 					$user_email								= $advisorClassRow->user_email;
+					$user_ph_code							= $advisorClassRow->user_ph_code;
 					$user_phone								= $advisorClassRow->user_phone;
 					$user_city								= $advisorClassRow->user_city;
 					$user_state								= $advisorClassRow->user_state;
 					$user_zip_code							= $advisorClassRow->user_zip_code;
 					$user_country_code						= $advisorClassRow->user_country_code;
-					$user_whatsapp						= $advisorClassRow->user_whatsapp;
-					$user_telegram						= $advisorClassRow->user_telegram;
-					$user_signal						= $advisorClassRow->user_signal;
-					$user_messenger						= $advisorClassRow->user_messenger;
+					$user_country							= $advisorClassRow->user_country;
+					$user_whatsapp							= $advisorClassRow->user_whatsapp;
+					$user_telegram							= $advisorClassRow->user_telegram;
+					$user_signal							= $advisorClassRow->user_signal;
+					$user_messenger							= $advisorClassRow->user_messenger;
 					$user_action_log						= $advisorClassRow->user_action_log;
 					$user_timezone_id						= $advisorClassRow->user_timezone_id;
 					$user_languages							= $advisorClassRow->user_languages;
@@ -2811,6 +2873,9 @@ where rg_report_name = '$inp_report_name'";
                         if ($user_email_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$user_email</td>";
                          }
+                        if ($user_ph_code_checked == 'X') {
+                            $content .= "<td style='vertical-align:top'>$user_ph_code</td>";
+                         }
                         if ($user_phone_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$user_phone</td>";
                          }
@@ -2825,6 +2890,9 @@ where rg_report_name = '$inp_report_name'";
                          }
                         if ($user_country_code_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$user_country_code</td>";
+                         }
+                        if ($user_country_checked == 'X') {
+                            $content .= "<td style='vertical-align:top'>$user_country</td>";
                          }
                         if ($user_whatsapp_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$user_whatsapp</td>";
@@ -3086,6 +3154,13 @@ where rg_report_name = '$inp_report_name'";
                             $content .= $user_email;
                             $needComma = TRUE;
                         }
+                        if ($user_ph_code_checked == 'X') {
+                            if ($needComma) {
+                                $content .= '	';
+                            }
+                            $content .= $user_ph_code;
+                            $needComma = TRUE;
+                        }
                         if ($user_phone_checked == 'X') {
                             if ($needComma) {
                                 $content .= '	';
@@ -3119,6 +3194,13 @@ where rg_report_name = '$inp_report_name'";
                                 $content .= '	';
                             }
                             $content .= $user_country_code;
+                            $needComma = TRUE;
+                        }
+                        if ($user_country_checked == 'X') {
+                            if ($needComma) {
+                                $content .= '	';
+                            }
+                            $content .= $user_country;
                             $needComma = TRUE;
                         }
                         if ($user_whatsapp_checked == 'X') {

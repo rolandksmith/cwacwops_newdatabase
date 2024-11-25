@@ -212,6 +212,7 @@ function student_report_generator_func() {
 	$where							= '';
 	$orderby						= 'student_call_sign';
 	$output_type					= 'table';
+	$inp_report_name				= '';
 	
 	
 
@@ -1304,7 +1305,7 @@ function student_report_generator_func() {
         $nameConversionArray['student_abandoned'] = 'student<br />abandoned';
         $nameConversionArray['student_status'] = 'student<br />status';
         $nameConversionArray['student_action_log'] = 'student<br />action_log';
-        $nameConversionArray['student_pre_assigned_advisor'] = 'student_pre_assigned_advisor';
+        $nameConversionArray['student_pre_assigned_advisor'] = 'student<br />pre_assigned_advisor';
         $nameConversionArray['student_selected_date'] = 'student<br />selected_date';
         $nameConversionArray['student_no_catalog'] = 'student<br />no_catalog';
         $nameConversionArray['student_hold_override'] = 'student<br />hold_override';
@@ -1319,7 +1320,7 @@ function student_report_generator_func() {
         $nameConversionArray['student_excluded_advisor'] = 'student<br />excluded_advisor';
         $nameConversionArray['student_survey_completion_date'] = 'student<br />survey_completion_date';
         $nameConversionArray['student_available_class_days'] = 'student<br />available_class_days';
-        $nameConversionArray['istudent_ntervention_required'] = 'istudent<br />ntervention_required';
+        $nameConversionArray['istudent_ntervention_required'] = 'istudent<br />intervention_required';
         $nameConversionArray['student_copy_control'] = 'student<br />copy_control';
         $nameConversionArray['student_first_class_choice'] = 'student<br />first_class_choice';
         $nameConversionArray['student_second_class_choice'] = 'student<br />second_class_choice';
@@ -1333,27 +1334,24 @@ function student_report_generator_func() {
         $nameConversionArray['student_date_updated'] = 'student<br />date_updated';
 
 		// Begin the Report Output
-		
-		$myInt = strpos($where,'futureSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('futureSemester',$futureSemester,$where);
-		}
-		$myInt = strpos($where,'proximateSemester');
-		if ($myInt !== FALSE) {
-			$where = str_replace('proximateSemester',$proximateSemester,$where);
-		}
 
 		if ($inp_config == 'Y') {		// saving the report configuration
 			if ($inp_report_name != '') {
-				$whereStr					= htmlentities($where,ENT_QUOTES);
-				$reportConfig['where']		= $whereStr;
-				$reportConfig['orderby']	= $orderby;
-				$reportConfig['rg_table']	= $studentTableName;
-				$reportConfig['type']		= $output_type;
-				$myStr						= date('Y-m-d H:i:s');
-				$rg_config					= addslashes(json_encode($reportConfig));
+				$whereStr						= htmlentities($where,ENT_QUOTES);
+				$reportConfig['where']			= $whereStr;
+				$reportConfig['orderby']		= $orderby;
+				$reportConfig['output_type']	= $output_type;
+				$reportConfig['mode_type']		= $mode_type;
+				if ($doDebug) {
+					$reportConfig['inp_debug']	= 'Y';
+				} else {
+					$reportConfig['inp_debug']	= 'N';
+				}
+				$reportConfig['inp_config']		= 'N';
+				$myStr							= date('Y-m-d H:i:s');
+				$rg_config						= addslashes(json_encode($reportConfig));
 				
-				// if the report name alreaady exists, update else insert
+				// if the report name already exists, update else insert
 				$reportNameCount			= $wpdb->get_var("select count(rg_report_name) from wpw1_cwa_report_configurations where rg_report_name = '$inp_report_name'");
 				if ($reportNameCount == 0) {
 					if ($doDebug) {
@@ -1389,7 +1387,22 @@ where rg_report_name = '$inp_report_name'";
 			}
 		}
 		
+		$myInt = strpos($where,'futureSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('futureSemester',$futureSemester,$where);
+		}
+		$myInt = strpos($where,'proximateSemester');
+		if ($myInt !== FALSE) {
+			$where = str_replace('proximateSemester',$proximateSemester,$where);
+		}
+		if ($inp_report_name != '') {
+			$myReportName		= "<h4>$inp_report_name</h4>";
+		} else{
+			$myReportName		= '';
+		}
+		
 		$content				.= "<h2>Generated Report from the $studentTableName Table</h2>
+									$myReportName
 									<p>Save report: $inp_report<br />";
 
 		$sql = "select * from $studentTableName 

@@ -92,6 +92,13 @@ if (array_key_exists('callsign',$dataArray)) {
 		echo "callsign: $callsign\n";
 	}
 }
+if ($callsign == '') {
+	$doProceed	= FALSE;
+	if ($doDebug) {
+		echo "callsign is empty\n";
+	}
+}
+
 if (array_key_exists('level',$dataArray)) {
 	$level = $dataArray['level'];
 	if ($doDebug) {
