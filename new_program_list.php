@@ -583,6 +583,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-push-advisor-class/' target='_blank'>Push Advisor Class</a><br /><br />
 								<li><a href='$siteURL/cwa-user-administration/' target='_blank'>User Administration</a> (Take Over an Acct)<br /><br />
 								<li><a href='$siteURL/cwa-student-management/?strpass=90' target='_blank'>Assign a Student to an Advisor regardless</a>
+								<li><a href='$siteURL/cwa-display-cw-assessment-for-a-callsign/' target='_blank'>Display CW Assessment for a Callsign</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=70' target='_blank'>Find Possible Classes for a Student</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=80' target='_blank'>Find Possible Students for an Advisor's Class</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=50' target='_blank'>Unassign a Student Regardless of Status</a>

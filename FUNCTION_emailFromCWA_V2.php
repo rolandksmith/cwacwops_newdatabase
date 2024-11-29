@@ -122,15 +122,6 @@ function emailFromCWA_v2($mailParameters) {
 	$thisTcc		= '';
 
 
-	$myInt					= strpos($siteURL,'localhost');
-	if ($myInt !== FALSE) {
-		$mailCode			= 99;
-		
-		if ($doDebug) {
-			echo "dockerMode. setting mailCode to 99<br />";
-		}
-	}
-
 	switch($mailCode) {
 		case 1:								// Test Mode to Roland
 			if ($doDebug) {
@@ -276,14 +267,6 @@ function emailFromCWA_v2($mailParameters) {
 			}
 			$thisTo			= $theRecipient;
 			$thisBcc		= "$bob,$roland,$andy";
-			$thisTcc		= "";
-			break;
-		case 99:					// docker mode. Send only to Roland
-			if ($doDebug) {
-				echo "doing case 99 (docker mode)<br />";
-			}
-			$thisTo			= $roland;
-			$thisBcc		= "";
 			$thisTcc		= "";
 			break;
 		

@@ -646,7 +646,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1300,7 +1300,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 														$mailCode				= 14;
 													}
 														
-													$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
+													$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_call_sign):</p>
 																				<p>You have requested a replacement student for 
 																				$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
 																				<p>A replacement student has been added to your class. Please login to 
@@ -1309,7 +1309,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 																				Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
 																				<p>Thanks for your service as an advisor!<br />
 																				CW Academy</p>";
-													$mailResult				= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+													$mailResult				= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
 																									'theSubject'=>$theSubject,
 																									'theContent'=>$thisContent,
 																									'jobname'=>$jobname,
@@ -1317,15 +1317,17 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 																									'testMode'=>$testMode,
 																									'doDebug'=>FALSE));
 													// $mailResult = TRUE;
-													if ($mailResult === TRUE) {
-														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to $theRecipient.<br />";
+													if ($mailResult[0] === TRUE) {
+														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$advisorClass_call_sign&strpass=2' target='_blank'>$theRecipient</a>.<br />";
 														if ($doDebugLog) {
+															$debugLog .= $mailResult[1];
 															$debugLog .= "Replacement email sent to the advisor at $theRecipient<br />";
 														}
 														$studentEmailCount--;
 													} else {
 														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.</p><br />";
 														if ($doDebugLog) {
+															$debugLog .= $mailResult[1];
 															$debugLog .= "Replacement email FAILED to advisor at $theRecipient<br />";
 														}
 													}
@@ -1924,7 +1926,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 									// is the email in the emailContent the same as the current student
 								
 								
-									$mailResult			= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+									$mailResult			= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
 																			  'theSubject'=>$theSubject,
 																			  'jobname'=>$jobname,
 																			  'theContent'=>$emailContent,
@@ -1932,9 +1934,12 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 																			  'testMode'=>$testMode,
 																			  'increment'=>$increment,
 																			  'doDebug'=>$doDebug));
-									if ($mailResult === TRUE) {
-										$content 	.= "WELCOME An email was sent to <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) at email address $theRecipient<br />";
+									if ($mailResult[0] === TRUE) {
+										$content 	.= "WELCOME An email was sent to <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+											target='_blank'>$student_call_sign</a> ($student_level $student_semester) at email address <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_email=$theRecipient&strpass=2' 
+											target='_blank'>$theRecipient</a><br />";
 										if ($doDebugLog) {
+											$debugLog .= $mailResult[1];
 											$debugLog .= "Welcome email sent to $theRecipient<br />";
 										}
 										$studentEmailCount--;
@@ -1942,6 +1947,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 									} else {
 										$content .= "The Welcome email send function failed. Student: <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>; email: $theRecipient<br />";
 										if ($doDebugLog) {
+											$debugLog .= $mailResult[1];
 											$debugLog .= "The email send function failed<br />";
 										}
 									}
@@ -2093,7 +2099,9 @@ set email_number to 4, and send the no Response email.
 															$log_email_number					= '1';
 															$email1Sent++;
 															$studentsSentFirstEmail++;
-															$content							.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the first verification email.<br />";
+															$content							.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+ 																target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the first 
+ 																<a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$student_call_sign&strpass=2' target= '_blank'>verification email</a>.<br />";
 															$sendEmail							= TRUE;
 															$setReminder						= TRUE;
 															break;
@@ -2114,7 +2122,9 @@ set email_number to 4, and send the no Response email.
 																$doUpdateStudent				= TRUE;
 																$setReminder					= TRUE;
 																$email2Sent++;
-																$content						.= "VERIFY <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>Student $student_call_sign</a> ($student_level $student_semester) was sent the second verification email.<br />";
+																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																	target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the second 
+																	<a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$student_call_sign&strpass=2' target= '_blank'>verification email</a>.<br />";
 															} else {
 																// $content .= "&nbsp;&nbsp;&nbsp;Not enough time has passed between $student_email_sent_date and $todaysDate. No email sent<br />";
 																$notEnoughTime++;
@@ -2138,7 +2148,9 @@ set email_number to 4, and send the no Response email.
 																$doUpdateStudent				= TRUE;
 																$setReminder					= TRUE;
 																$email3Sent++;
-																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the third verification email.<br />";
+																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																	target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the third 
+																	<a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$student_call_sign&strpass=2' target='_blank'>verification email</a>.<br />";
 															} else {
 																// $content 						.= "&nbsp;&nbsp;&nbsp;Not enough time has passed between $student_email_sent_date and $todaysDate. No email sent<br />";
 																$notEnoughTime++;
@@ -2178,7 +2190,9 @@ set email_number to 4, and send the no Response email.
 																$log_mail_number				= '4';
 																$doUpdateStudent					= TRUE;
 																$email4Sent++;
-																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the Final Notice email.<br />";
+																$content						.= "VERIFY Student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																	target='_blank'>$student_call_sign</a> ($student_level $student_semester) was sent the 
+																	<a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$student_call_sign&strpass=2' target='_blank'>Final Notice</a> email.<br />";
 															} else {					
 																$notEnoughTime++;
 															}
@@ -2190,179 +2204,182 @@ set email_number to 4, and send the no Response email.
 															$sendEmail							= FALSE;
 															break;
 													}
-													if ($student_no_catalog == 'Y') {
+														
+													if ($sendEmail) {
 														if ($doDebugLog) {
-															$debugLog .= "student_no_catalog is 'Y'<br />";
+															$debugLog .= "sendEmail is TRUE<br />";
 														}
-														if ($sendEmail) {
+														$classChoiceMsg				= "";
+														if ($student_abandoned != 'Y') {
 															if ($doDebugLog) {
-																$debugLog .= "sendEmail is TRUE<br />";
+																$debugLog .= "student_abandoned is NOT Y. Setting up new catalog Class Choice Msg<br />";
 															}
-															$classChoiceMsg				= "";
-															if ($student_abandoned != 'Y') {
-																if ($doDebugLog) {
-																	$debugLog .= "student_abandoned is NOT Y. Setting up new catalog Class Choice Msg<br />";
+							
+															$emailContent 	= "To: $student_last_name, $student_first_name ($student_call_sign):
+																				$finalNotice
+																				<p>Thank you for your interest in CW Academy!!</p><p><b>Please read this email all the way through as there are 
+																				actions you MUST take in order to be considered for assignment to a CW Academy class.</b> </p><p>You are 
+																				receiving this email because you previously signed up for a CW Academy class.  You have been 
+																				selected to potentially be a student in one of these classes.  CW Academy is 
+																				currently preparing to form classes for the $nextSemester Semester and needs to verify 
+																				that you are available for the upcoming semester and that you have selected your class preferences.  
+																				Please note that we cannot guarantee that every student will be able to take a class.  This depends on 
+																				the number of students who respond and the availability of advisor classes.  We make every 
+																				effort to accommodate students but some students may have to be put on a waiting 
+																				list or moved to the next semester.</p>";
+															if ($student_catalog_options != '' && $student_catalog_options != 'None') {
+																$myArray	= explode(",",$student_catalog_options);
+																$myStr		= 'When you signed up, you indicated your possible availability as:<br />';
+																foreach($myArray as $thisValue) {
+																	$newStr	= $matrixConvert[$thisValue];
+																	$myStr	.= "&nbsp;&nbsp;&nbsp;&nbsp;$newStr<br />";
 																}
-								
-																$emailContent 	= "To: $student_last_name, $student_first_name ($student_call_sign):
-																					$finalNotice
-																					<p>Thank you for your interest in CW Academy!!</p><p><b>Please read this email all the way through as there are 
-																					actions you MUST take in order to be considered for assignment to a CW Academy class.</b> </p><p>You are 
-																					receiving this email because you previously signed up for a CW Academy class.  You have been 
-																					selected to potentially be a student in one of these classes.  CW Academy is 
-																					currently preparing to form classes for the $nextSemester Semester and needs to verify 
-																					that you are available for the upcoming semester and that you have selected your class preferences.  
-																					Please note that we cannot guarantee that every student will be able to take a class.  This depends on 
-																					the number of students who respond and the availability of advisor classes.  We make every 
-																					effort to accommodate students but some students may have to be put on a waiting 
-																					list or moved to the next semester.</p>";
-																if ($student_catalog_options != '' && $student_catalog_options != 'None') {
-																	$myArray	= explode(",",$student_catalog_options);
-																	$myStr		= 'When you signed up, you indicated your possible availability as:<br />';
-																	foreach($myArray as $thisValue) {
-																		$newStr	= $matrixConvert[$thisValue];
-																		$myStr	.= "&nbsp;&nbsp;&nbsp;&nbsp;$newStr<br />";
-																	}
-																	
-																	$emailContent	.= "$myStr";
-																}
-																$emailContent		.= "<br /><table style='border:4px solid red;'><tr><td>
-																					   <p><b>IMPORTANT!</b> The current catalog of CW Academy classes 
-																					   for the $theSemester semester is now available. You <span style='color:red;'><b>MUST</b></span> 
-																					   review your sign up information and update your class choice preferences or <u><b>you will 
-																					   not be eligible to be assigned to a class</b></u>.</p>
-																					   <p>Please log into <a href='$siteURL/login'>CW Academy</a> and follow the instructions there. You 
-																					   will have the options to select class choices, to change to a future semester, or cancel your 
-																					   registration.</p></table>
-																						<p>CW Academy requires all potential students meet the following requirements:
-																						<br />1. A serious commitment of 60 minutes of daily practice
-																						<br />2. Your availability to meet online 60 minutes twice a week for 8 weeks 
-																						<br />3. Have a working paddle for sending Morse code
-																						<br />4. Have a keyer or radio that the advisor and other students can hear your code
-																						<br />5. A high-speed internet connection that will allow you to 
-																						participate in classes held via Zoom or another online meeting program
-																						<br />6. Access to a Windows PC or the Windows Operating System is needed for the Intermediate and Advanced Level classes</p>
-																						<p>CW Academy has an automated process to assign students to advisor classes. Previous students 
-																						are given priority. With nearly a thousand 
-																						student sign-ups each semester, the demand for classes usually exceeds the supply. Consequently 
-																						you may not get a class this semester. Special requests are difficult to 
-																						honor in a timely fashion.</p>
-																						<table style='border:4px solid blue;'><tr><td>
-																						<p>If you have questions or concerns, <span style='color:red;'><b>PLEASE do not reply to this email</b></span> as the address is not monitored. 
-																						Instead refer to appropriate person at <a href='$classResolutionURL'>CWA Class 
-																						Resolution</a> for assistance.</p></td></tr></table>
-																						<p>Note: Please save this email in case you need to change something in the future....</p>
-																						<p>Regards,<br />
-																						CW Academy</p>";
-																						
-																						
-																$token				= mt_rand();
-																$reminder_text		= "<b>Select Class Schedule Preferences:</b> It is time to verify your availability to take a class in the upcoming semester 
+																
+																$emailContent	.= "$myStr";
+															}
+															$emailContent		.= "<br /><table style='border:4px solid red;'><tr><td>
+																				   <p><b>IMPORTANT!</b> The current catalog of CW Academy classes 
+																				   for the $theSemester semester is now available. You <span style='color:red;'><b>MUST</b></span> 
+																				   review your sign up information and update your class choice preferences or <u><b>you will 
+																				   not be eligible to be assigned to a class</b></u>.</p>
+																				   <p>Please log into <a href='$siteURL/login'>CW Academy</a> and follow the instructions there. You 
+																				   will have the options to select class choices, to change to a future semester, or cancel your 
+																				   registration.</p></table>
+																					<p>CW Academy requires all potential students meet the following requirements:
+																					<br />1. A serious commitment of 60 minutes of daily practice
+																					<br />2. Your availability to meet online 60 minutes twice a week for 8 weeks 
+																					<br />3. Have a working paddle for sending Morse code
+																					<br />4. Have a keyer or radio that the advisor and other students can hear your code
+																					<br />5. A high-speed internet connection that will allow you to 
+																					participate in classes held via Zoom or another online meeting program
+																					<br />6. Access to a Windows PC or the Windows Operating System is needed for the Intermediate and Advanced Level classes</p>
+																					<p>CW Academy has an automated process to assign students to advisor classes. Previous students 
+																					are given priority. With nearly a thousand 
+																					student sign-ups each semester, the demand for classes usually exceeds the supply. Consequently 
+																					you may not get a class this semester. Special requests are difficult to 
+																					honor in a timely fashion.</p>
+																					<table style='border:4px solid blue;'><tr><td>
+																					<p>If you have questions or concerns, <span style='color:red;'><b>PLEASE do not reply to this email</b></span> as the address is not monitored. 
+																					Instead refer to appropriate person at <a href='$classResolutionURL'>CWA Class 
+																					Resolution</a> for assistance.</p></td></tr></table>
+																					<p>Note: Please save this email in case you need to change something in the future....</p>
+																					<p>Regards,<br />
+																					CW Academy</p>";
+																					
+																					
+															$token				= mt_rand();
+															$reminder_text		= "<b>Select Class Schedule Preferences:</b> It is time to verify your availability to take a class in the upcoming semester 
 and to select your class preferences. The class catalog is now available. Your options are:<br />
 1. To verify your availability and select class choices click <a href='$studentRegistrationURL?inp_verify=Y&strpass=2&inp_verify=Y&token=$token&enstr=$encstr'>Select Class Choices</a><br />
 2. You can move your registration to the $semesterTwo semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=1&token=$token'>HERE</a><br />
 3. You can move your registration to the $semesterThree semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=2&token=$token'>HERE</a><br /> 
 4. Finally, you can set your registration aside and sign up again in the future when your circumstances allow by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=3&token=$token'>Cancel  
 my registration</a>";
-																if ($student_email_number < 3) {
-																	$closeStr			= strtotime("+3 days");
-																} else {
-																	$closeStr			= strtotime("+10 days");
-																}
-																$close_date			= date('Y-m-d H:i:s',$closeStr);
-																$addReminder		= TRUE;
+															if ($student_email_number < 3) {
+																$closeStr			= strtotime("+3 days");
 															} else {
-																// the student abandoned the signup
-																$emailContent = "To: $student_last_name, $student_first_name ($student_call_sign):
-																				$finalNotice
-																				<p>You previously started registering for a $student_level Level class
-																				but did not complete the registration process. If you are interested in 
-																				being a student in the upcoming semester, you must complete your 
-																				registration. In order to do that, go to <a href='$siteURL/login'>CW Academy</a> 
-																				and follow the instructions given there.</p>
-																				<table style='border:4px solid blue;'><tr><td>
-																				<p>If you have questions or concerns, <span style='color:red;'><b>PLEASE do not reply to this email</b></span> as the address is not monitored. 
-																				Instead refer to appropriate person at <a href='$classResolutionURL'>CWA Class 
-																				Resolution</a> for assistance.</p></td></tr></table>
-																				<p>Note: Please save this email in case you need to change something in the future....</p>
-																				<p>Regards,<br />
-																				CW Academy</p>";
-																$token			= mt_rand();
-																$reminder_text	= "<b>Complete Registration:</b> You previously started registering for a $student_level Level class
+																$closeStr			= strtotime("+10 days");
+															}
+															$close_date			= date('Y-m-d H:i:s',$closeStr);
+															$addReminder		= TRUE;
+														} else {
+															// the student abandoned the signup
+															$emailContent = "To: $student_last_name, $student_first_name ($student_call_sign):
+																			$finalNotice
+																			<p>You previously started registering for a $student_level Level class
+																			but did not complete the registration process. If you are interested in 
+																			being a student in the upcoming semester, you must complete your 
+																			registration. In order to do that, go to <a href='$siteURL/login'>CW Academy</a> 
+																			and follow the instructions given there.</p>
+																			<table style='border:4px solid blue;'><tr><td>
+																			<p>If you have questions or concerns, <span style='color:red;'><b>PLEASE do not reply to this email</b></span> as the address is not monitored. 
+																			Instead refer to appropriate person at <a href='$classResolutionURL'>CWA Class 
+																			Resolution</a> for assistance.</p></td></tr></table>
+																			<p>Note: Please save this email in case you need to change something in the future....</p>
+																			<p>Regards,<br />
+																			CW Academy</p>";
+															$token			= mt_rand();
+															$reminder_text	= "<b>Complete Registration:</b> You previously started registering for a $student_level Level class
 but did not complete the registration process. If you are interested in being a student in the upcoming semester, you must complete your 
 registration. To do so, click <a href='$studentRegistrationURL?inp_verify=Y&token=$token&strpass=2&enstr=$encstr'>Student Registration</a>. 
 Update your information as needed and make your class preference choices.";
-																if ($student_email_number < 3) {
-																	$closeStr			= strtotime("+3 days");
-																} else {
-																	$closeStr			= strtotime("+10 days");
-																}
-																$close_date			= date('Y-m-d H:i:s',$closeStr);
-																$addReminder		= TRUE;
+															if ($student_email_number < 3) {
+																$closeStr			= strtotime("+3 days");
+															} else {
+																$closeStr			= strtotime("+10 days");
 															}
+															$close_date			= date('Y-m-d H:i:s',$closeStr);
+															$addReminder		= TRUE;
+														}
 
+														if ($doDebugLog) {
+															$debugLog .= "email message is set up<br />";
+														}
+														if ($testMode) {
+															$theRecipient		= 'rolandksmith@gmail.com';
+															$theSubject			= "TESTMODE $theSubject";
+															$mailCode			= 2;
+															$increment++;
+														} else {
+															$theRecipient		= $student_email;
+															$mailCode			= 13;
+														}
+														$mailResult			= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
+																									'theSubject'=>$theSubject,
+																									'jobname'=>$jobname,
+																									'theContent'=>$emailContent,
+																									'mailCode'=>$mailCode,
+																									'testMode'=>$testMode,
+																									'increment'=>$increment,
+																									'doDebug'=>TRUE));
+														// $mailResult = TRUE;
+														if ($mailResult[0] === TRUE) {
 															if ($doDebugLog) {
-																$debugLog .= "email message is set up<br />";
+																$debugLog .= $mailResult[1];
+																$debugLog .= "&nbsp;&nbsp;&nbsp;A verification email was sent to $theRecipient ($student_level)<br />";
 															}
-															if ($testMode) {
-																$theRecipient		= 'rolandksmith@gmail.com';
-																$theSubject			= "TESTMODE $theSubject";
-																$mailCode			= 2;
-																$increment++;
-															} else {
-																$theRecipient		= $student_email;
-																$mailCode			= 13;
-															}
-															$mailResult			= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-																										'theSubject'=>$theSubject,
-																										'jobname'=>$jobname,
-																										'theContent'=>$emailContent,
-																										'mailCode'=>$mailCode,
-																										'testMode'=>$testMode,
-																										'increment'=>$increment,
-																										'doDebug'=>FALSE));
-															// $mailResult = TRUE;
-															if ($mailResult === TRUE) {
+															$content	.= "Verification email was sent to $student_call_sign at <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_email=$theRecipient&strpass=2' 
+																target='_blank'>$theRecipient</a><br />";
+															$verifyCount++;
+															$studentEmailCount--;
+															if ($addReminder && $setReminder) {
+																$addReminder		= FALSE;
+																$setReminder	 	= FALSE;
+																// add the reminder to the reminders table
 																if ($doDebugLog) {
-																	$debugLog .= "&nbsp;&nbsp;&nbsp;A verification email was sent to $theRecipient ($student_level)<br />";
+																	$debugLog .= "adding reminder to reminders table<br />";
 																}
-																$verifyCount++;
-																$studentEmailCount--;
-																if ($addReminder && $setReminder) {
-																	$addReminder		= FALSE;
-																	$setReminder	 	= FALSE;
-																	// add the reminder to the reminders table
+																$myStr				= date('Y-m-d H:i:s');
+																$inputParams		= array("effective_date|$myStr|s",
+																							"close_date|$close_date|s",
+																							"resolved_date||s",
+																							"send_reminder|N|s",
+																							"send_once|Y|s",
+																							"call_sign|$student_call_sign|s",
+																							"role||s",
+																							"email_text||s",
+																							"reminder_text|$reminder_text|s",
+																							"resolved|N|s",
+																							"token|$token|s");
+																$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+																if ($insertResult[0] === FALSE) {
 																	if ($doDebugLog) {
-																		$debugLog .= "adding reminder to reminders table<br />";
+																		$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
 																	}
-																	$myStr				= date('Y-m-d H:i:s');
-																	$inputParams		= array("effective_date|$myStr|s",
-																								"close_date|$close_date|s",
-																								"resolved_date||s",
-																								"send_reminder|N|s",
-																								"send_once|Y|s",
-																								"call_sign|$student_call_sign|s",
-																								"role||s",
-																								"email_text||s",
-																								"reminder_text|$reminder_text|s",
-																								"resolved|N|s",
-																								"token|$token|s");
-																	$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
-																	if ($insertResult[0] === FALSE) {
-																		if ($doDebugLog) {
-																			$debugLog .= "inserting reminder failed: $insertResult[1]<br />";
-																		}
-																		$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-																	}
+																	$content		.= "Inserting reminder failed: $insertResult[1]<br />";
 																}
-															} else {
-																$content .= "&nbsp;&nbsp;&nbsp;The verify mail send function failed. Student: $student_call_sign; email: $theRecipient<br />";
-																$emailErrors++;
 															}
 														} else {
-															if ($doDebugLog) {
-																$debugLog .= "sendEmail is FALSE. No email to be sent<br />";
+															$content .= "&nbsp;&nbsp;&nbsp;The verify mail send function failed. Student: $student_call_sign; email: $theRecipient<br />";
+															$emailErrors++;
+															if (doDebugLog) {
+																$debugLog	.= $mailResult[1];
+																$debugLog	.= "sending verification email failed<br />";
 															}
+														}
+													} else {
+														if ($doDebugLog) {
+															$debugLog .= "sendEmail is FALSE. No email to be sent<br />";
 														}
 													}
 												} else {
@@ -2971,7 +2988,7 @@ assignment that meet the criteria for your class.<p>";
 																				Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
 																				<p>Thanks for your service as an advisor!<br />
 																				CW Academy</p>";
-													$mailResult				= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+													$mailResult				= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
 																									'theSubject'=>$theSubject,
 																									'theContent'=>$thisContent,
 																									'jobname'=>$jobname,
@@ -2979,15 +2996,18 @@ assignment that meet the criteria for your class.<p>";
 																									'testMode'=>$testMode,
 																									'doDebug'=>FALSE));
 													// $mailResult = TRUE;
-													if ($mailResult === TRUE) {
-														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to $theRecipient.<br />";
+													if ($mailResult[0] === TRUE) {
+														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_email=$theRecipient&strpass=2' 
+															 target='_blank'>$theRecipient</a>.<br />";
 														if ($doDebugLog) {
+															$debugLog .= $mailResult[1];
 															$debugLog .= "Replacement email sent to the advisor at $theRecipient<br />";
 														}
 														$studentEmailCount--;
 													} else {
 														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.<br />";
 														if ($doDebugLog) {
+															$debugLog .= $mailResult[1];
 															$debugLog .= "Replacement email FAILED to advisor at $theRecipient<br />";
 														}
 													}

@@ -57,6 +57,7 @@ function advisor_class_history_func() {
 	$pastSemestersArray			= $initializationArray['pastSemestersArray'];
 	$currentSemester			= $initializationArray['currentSemester'];
 	$nextSemester				= $initializationArray['nextSemester'];
+	$prevSemester				= $initializationArray['prevSemester'];
 	$advisorData				= array();
 	$showArrayDetail			= FALSE;
 
@@ -225,6 +226,8 @@ function advisor_class_history_func() {
 
 
 		$content 		.= "<h3>$jobname</h3>
+							<p>This program shows the evolution of the students in 
+							an advisor's class from the data stored in the audit log<p>
 							<p>Select the semester and enter the advisor callsign<br />
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
@@ -525,294 +528,300 @@ function advisor_class_history_func() {
 // return $content;
 	//			ksort($classArray);
 			
-				if ($doDebug) {
-					echo "<br />classArray:<br /><pre>";
-					print_r($classArray);
-					echo "</pre><br />";
-				}
-	
-				ksort($classArray);
-	// $doDebug = TRUE;	
-				$mm						= 0;
-				$previd					= '';
-				$firstTime				= TRUE;
-				foreach($classArray as $logid=>$thisSequence) {
-					if ($logid != $previd) {
-						if ($doDebug) {
-							echo "<br />Hae a new logid of $logid<br />";
-						}
-						$thisName		= $advisorData[$logid]['name'];
-						$thisLevel		= $advisorData[$logid]['level'];
-						if ($firstTime) {
+				if (count($classArray) > 0) {
+			
+			
+					if ($doDebug) {
+						echo "<br />classArray:<br /><pre>";
+						print_r($classArray);
+						echo "</pre><br />";
+					}
+		
+					ksort($classArray);
+		// $doDebug = TRUE;	
+					$mm						= 0;
+					$previd					= '';
+					$firstTime				= TRUE;
+					foreach($classArray as $logid=>$thisSequence) {
+						if ($logid != $previd) {
 							if ($doDebug) {
-								echo "first time through, so no totals<br />";
+								echo "<br />Hae a new logid of $logid<br />";
 							}
-							$firstTime	= FALSE;
-							$mm++;
-							$content			.= "<h4>$thisName Class $mm $thisLevel</h4>
+							$thisName		= $advisorData[$logid]['name'];
+							$thisLevel		= $advisorData[$logid]['level'];
+							if ($firstTime) {
+								if ($doDebug) {
+									echo "first time through, so no totals<br />";
+								}
+								$firstTime	= FALSE;
+								$mm++;
+								$content			.= "<h4>$thisName Class $mm $thisLevel</h4>
+													<table style='width:1200px;'>";
+							} else {
+								if ($doDebug) {
+									echo "Finishing previous logid, starting a new one<br />";
+								}
+								$mm++;
+								$student01		= $advisorData[$previd]['student01'];
+								$student02		= $advisorData[$previd]['student02'];
+								$student03		= $advisorData[$previd]['student03'];
+								$student04		= $advisorData[$previd]['student04'];
+								$student05		= $advisorData[$previd]['student05'];
+								$student06		= $advisorData[$previd]['student06'];
+								$student07		= $advisorData[$previd]['student07'];
+								$student08		= $advisorData[$previd]['student08'];
+								$student09		= $advisorData[$previd]['student09'];
+								$student10		= $advisorData[$previd]['student10'];
+								$student11		= $advisorData[$previd]['student11'];
+								$student12		= $advisorData[$previd]['student12'];
+								$student13		= $advisorData[$previd]['student13'];
+								$student14		= $advisorData[$previd]['student14'];
+								$student15		= $advisorData[$previd]['student15'];
+								$student16		= $advisorData[$previd]['student16'];
+								$student17		= $advisorData[$previd]['student17'];
+								$student18		= $advisorData[$previd]['student18'];
+								$student19		= $advisorData[$previd]['student19'];
+								$student20		= $advisorData[$previd]['student20'];
+								$student21		= $advisorData[$previd]['student21'];
+								$student22		= $advisorData[$previd]['student22'];
+								$student23		= $advisorData[$previd]['student23'];
+								$student24		= $advisorData[$previd]['student24'];
+								$student25		= $advisorData[$previd]['student25'];
+								$student26		= $advisorData[$previd]['student26'];
+								$student27		= $advisorData[$previd]['student27'];
+								$student28		= $advisorData[$previd]['student28'];
+								$student29		= $advisorData[$previd]['student20'];
+								$student30		= $advisorData[$previd]['student30'];
+								$classSize		= $advisorData[$previd]['size'];
+								$classCount		= $advisorData[$previd]['count'];
+								$content	.= "<tr><td style='vertical-align:top;'><b>Current Class</b></td>
+													<td style='vertical-align:top;'>Student01/16</td>
+													<td style='vertical-align:top;'>Student02/17</td>
+													<td style='vertical-align:top;'>Student03/18</td>
+													<td style='vertical-align:top;'>Student04/19</td>
+													<td style='vertical-align:top;'>Student05/20</td>
+													<td style='vertical-align:top;'>Student06/21</td>
+													<td style='vertical-align:top;'>Student07/22</td>
+													<td style='vertical-align:top;'>Student08/23</td>
+													<td style='vertical-align:top;'>Student09/24</td>
+													<td style='vertical-align:top;'>Student10/25</td>
+													<td style='vertical-align:top;'>Student11/26</td>
+													<td style='vertical-align:top;'>Student12/27</td>
+													<td style='vertical-align:top;'>Student13/28</td>
+													<td style='vertical-align:top;'>Student14/29</td>
+													<td style='vertical-align:top;'>Student15/30</td></tr>
+												<tr><td style='vertical-align:top;'>$classSize&nbsp;&nbsp;$classCount</td>
+													<td style='vertical-align:top;'>$student01</td>
+													<td style='vertical-align:top;'>$student02</td>
+													<td style='vertical-align:top;'>$student03</td>
+													<td style='vertical-align:top;'>$student04</td>
+													<td style='vertical-align:top;'>$student05</td>
+													<td style='vertical-align:top;'>$student06</td>
+													<td style='vertical-align:top;'>$student07</td>
+													<td style='vertical-align:top;'>$student08</td>
+													<td style='vertical-align:top;'>$student09</td>
+													<td style='vertical-align:top;'>$student10</td>
+													<td style='vertical-align:top;'>$student11</td>
+													<td style='vertical-align:top;'>$student12</td>
+													<td style='vertical-align:top;'>$student13</td>
+													<td style='vertical-align:top;'>$student14</td>
+													<td style='vertical-align:top;'>$student15</td></tr>
+												<tr><td style='vertical-align:top;'></td>
+													<td style='vertical-align:top;'>$student16</td>
+													<td style='vertical-align:top;'>$student17</td>
+													<td style='vertical-align:top;'>$student18</td>
+													<td style='vertical-align:top;'>$student19</td>
+													<td style='vertical-align:top;'>$student20</td>
+													<td style='vertical-align:top;'>$student21</td>
+													<td style='vertical-align:top;'>$student22</td>
+													<td style='vertical-align:top;'>$student23</td>
+													<td style='vertical-align:top;'>$student24</td>
+													<td style='vertical-align:top;'>$student25</td>
+													<td style='vertical-align:top;'>$student26</td>
+													<td style='vertical-align:top;'>$student27</td>
+													<td style='vertical-align:top;'>$student28</td>
+													<td style='vertical-align:top;'>$student20</td>
+													<td style='vertical-align:top;'>$student30</td></tr>
+												</table>
+												<h4>$thisName Class $mm $thisLevel</h4>
 												<table style='width:1200px;'>";
-						} else {
-							if ($doDebug) {
-								echo "Finishing previous logid, starting a new one<br />";
 							}
-							$mm++;
-							$student01		= $advisorData[$previd]['student01'];
-							$student02		= $advisorData[$previd]['student02'];
-							$student03		= $advisorData[$previd]['student03'];
-							$student04		= $advisorData[$previd]['student04'];
-							$student05		= $advisorData[$previd]['student05'];
-							$student06		= $advisorData[$previd]['student06'];
-							$student07		= $advisorData[$previd]['student07'];
-							$student08		= $advisorData[$previd]['student08'];
-							$student09		= $advisorData[$previd]['student09'];
-							$student10		= $advisorData[$previd]['student10'];
-							$student11		= $advisorData[$previd]['student11'];
-							$student12		= $advisorData[$previd]['student12'];
-							$student13		= $advisorData[$previd]['student13'];
-							$student14		= $advisorData[$previd]['student14'];
-							$student15		= $advisorData[$previd]['student15'];
-							$student16		= $advisorData[$previd]['student16'];
-							$student17		= $advisorData[$previd]['student17'];
-							$student18		= $advisorData[$previd]['student18'];
-							$student19		= $advisorData[$previd]['student19'];
-							$student20		= $advisorData[$previd]['student20'];
-							$student21		= $advisorData[$previd]['student21'];
-							$student22		= $advisorData[$previd]['student22'];
-							$student23		= $advisorData[$previd]['student23'];
-							$student24		= $advisorData[$previd]['student24'];
-							$student25		= $advisorData[$previd]['student25'];
-							$student26		= $advisorData[$previd]['student26'];
-							$student27		= $advisorData[$previd]['student27'];
-							$student28		= $advisorData[$previd]['student28'];
-							$student29		= $advisorData[$previd]['student20'];
-							$student30		= $advisorData[$previd]['student30'];
-							$classSize		= $advisorData[$previd]['size'];
-							$classCount		= $advisorData[$previd]['count'];
-							$content	.= "<tr><td style='vertical-align:top;'><b>Current Class</b></td>
-												<td style='vertical-align:top;'>Student01/16</td>
-												<td style='vertical-align:top;'>Student02/17</td>
-												<td style='vertical-align:top;'>Student03/18</td>
-												<td style='vertical-align:top;'>Student04/19</td>
-												<td style='vertical-align:top;'>Student05/20</td>
-												<td style='vertical-align:top;'>Student06/21</td>
-												<td style='vertical-align:top;'>Student07/22</td>
-												<td style='vertical-align:top;'>Student08/23</td>
-												<td style='vertical-align:top;'>Student09/24</td>
-												<td style='vertical-align:top;'>Student10/25</td>
-												<td style='vertical-align:top;'>Student11/26</td>
-												<td style='vertical-align:top;'>Student12/27</td>
-												<td style='vertical-align:top;'>Student13/28</td>
-												<td style='vertical-align:top;'>Student14/29</td>
-												<td style='vertical-align:top;'>Student15/30</td></tr>
-											<tr><td style='vertical-align:top;'>$classSize&nbsp;&nbsp;$classCount</td>
-												<td style='vertical-align:top;'>$student01</td>
-												<td style='vertical-align:top;'>$student02</td>
-												<td style='vertical-align:top;'>$student03</td>
-												<td style='vertical-align:top;'>$student04</td>
-												<td style='vertical-align:top;'>$student05</td>
-												<td style='vertical-align:top;'>$student06</td>
-												<td style='vertical-align:top;'>$student07</td>
-												<td style='vertical-align:top;'>$student08</td>
-												<td style='vertical-align:top;'>$student09</td>
-												<td style='vertical-align:top;'>$student10</td>
-												<td style='vertical-align:top;'>$student11</td>
-												<td style='vertical-align:top;'>$student12</td>
-												<td style='vertical-align:top;'>$student13</td>
-												<td style='vertical-align:top;'>$student14</td>
-												<td style='vertical-align:top;'>$student15</td></tr>
-											<tr><td style='vertical-align:top;'></td>
-												<td style='vertical-align:top;'>$student16</td>
-												<td style='vertical-align:top;'>$student17</td>
-												<td style='vertical-align:top;'>$student18</td>
-												<td style='vertical-align:top;'>$student19</td>
-												<td style='vertical-align:top;'>$student20</td>
-												<td style='vertical-align:top;'>$student21</td>
-												<td style='vertical-align:top;'>$student22</td>
-												<td style='vertical-align:top;'>$student23</td>
-												<td style='vertical-align:top;'>$student24</td>
-												<td style='vertical-align:top;'>$student25</td>
-												<td style='vertical-align:top;'>$student26</td>
-												<td style='vertical-align:top;'>$student27</td>
-												<td style='vertical-align:top;'>$student28</td>
-												<td style='vertical-align:top;'>$student20</td>
-												<td style='vertical-align:top;'>$student30</td></tr>
-											</table>
-											<h4>$thisName Class $mm $thisLevel</h4>
-											<table style='width:1200px;'>";
-						}
-						$previd			= $logid;
-						ksort($thisSequence);
-						foreach($thisSequence as $myInc=>$myData) {
-							$logdate		= $myData['logdate'];
-							$logprogram		= $myData['program'];
-							$logaction		= $myData['logaction'];
-							$student01		= $myData['student01'];
-							$student02		= $myData['student02'];
-							$student03		= $myData['student03'];
-							$student04		= $myData['student04'];
-							$student05		= $myData['student05'];
-							$student06		= $myData['student06'];
-							$student07		= $myData['student07'];
-							$student08		= $myData['student08'];
-							$student09		= $myData['student09'];
-							$student10		= $myData['student10'];
-							$student11		= $myData['student11'];
-							$student12		= $myData['student12'];
-							$student13		= $myData['student13'];
-							$student14		= $myData['student14'];
-							$student15		= $myData['student15'];
-							$student16		= $myData['student16'];
-							$student17		= $myData['student17'];
-							$student18		= $myData['student18'];
-							$student19		= $myData['student19'];
-							$student20		= $myData['student20'];
-							$student21		= $myData['student21'];
-							$student22		= $myData['student22'];
-							$student23		= $myData['student23'];
-							$student24		= $myData['student24'];
-							$student25		= $myData['student25'];
-							$student26		= $myData['student26'];
-							$student27		= $myData['student27'];
-							$student28		= $myData['student28'];
-							$student29		= $myData['student20'];
-							$student30		= $myData['student30'];
-							$content	.= "<tr><td style='vertical-align:top;'>$logdate</td>
-												<td style='vertical-align:top;'>Student01/16</td>
-												<td style='vertical-align:top;'>Student02/17</td>
-												<td style='vertical-align:top;'>Student03/18</td>
-												<td style='vertical-align:top;'>Student04/19</td>
-												<td style='vertical-align:top;'>Student05/20</td>
-												<td style='vertical-align:top;'>Student06/21</td>
-												<td style='vertical-align:top;'>Student07/22</td>
-												<td style='vertical-align:top;'>Student08/23</td>
-												<td style='vertical-align:top;'>Student09/24</td>
-												<td style='vertical-align:top;'>Student10/25</td>
-												<td style='vertical-align:top;'>Student11/26</td>
-												<td style='vertical-align:top;'>Student12/27</td>
-												<td style='vertical-align:top;'>Student13/28</td>
-												<td style='vertical-align:top;'>Student14/29</td>
-												<td style='vertical-align:top;'>Student15/30</td></tr>
-											<tr><td style='vertical-align:top;'>$logprogram</td>
-												<td style='vertical-align:top;'>$student01</td>
-												<td style='vertical-align:top;'>$student02</td>
-												<td style='vertical-align:top;'>$student03</td>
-												<td style='vertical-align:top;'>$student04</td>
-												<td style='vertical-align:top;'>$student05</td>
-												<td style='vertical-align:top;'>$student06</td>
-												<td style='vertical-align:top;'>$student07</td>
-												<td style='vertical-align:top;'>$student08</td>
-												<td style='vertical-align:top;'>$student09</td>
-												<td style='vertical-align:top;'>$student10</td>
-												<td style='vertical-align:top;'>$student11</td>
-												<td style='vertical-align:top;'>$student12</td>
-												<td style='vertical-align:top;'>$student13</td>
-												<td style='vertical-align:top;'>$student14</td>
-												<td style='vertical-align:top;'>$student15</td></tr>
-											<tr><td style='vertical-align:top;'>$logaction</td>
-												<td style='vertical-align:top;'>$student16</td>
-												<td style='vertical-align:top;'>$student17</td>
-												<td style='vertical-align:top;'>$student18</td>
-												<td style='vertical-align:top;'>$student19</td>
-												<td style='vertical-align:top;'>$student20</td>
-												<td style='vertical-align:top;'>$student21</td>
-												<td style='vertical-align:top;'>$student22</td>
-												<td style='vertical-align:top;'>$student23</td>
-												<td style='vertical-align:top;'>$student24</td>
-												<td style='vertical-align:top;'>$student25</td>
-												<td style='vertical-align:top;'>$student26</td>
-												<td style='vertical-align:top;'>$student27</td>
-												<td style='vertical-align:top;'>$student28</td>
-												<td style='vertical-align:top;'>$student20</td>
-												<td style='vertical-align:top;'>$student30</td></tr>";
+							$previd			= $logid;
+							ksort($thisSequence);
+							foreach($thisSequence as $myInc=>$myData) {
+								$logdate		= $myData['logdate'];
+								$logprogram		= $myData['program'];
+								$logaction		= $myData['logaction'];
+								$student01		= $myData['student01'];
+								$student02		= $myData['student02'];
+								$student03		= $myData['student03'];
+								$student04		= $myData['student04'];
+								$student05		= $myData['student05'];
+								$student06		= $myData['student06'];
+								$student07		= $myData['student07'];
+								$student08		= $myData['student08'];
+								$student09		= $myData['student09'];
+								$student10		= $myData['student10'];
+								$student11		= $myData['student11'];
+								$student12		= $myData['student12'];
+								$student13		= $myData['student13'];
+								$student14		= $myData['student14'];
+								$student15		= $myData['student15'];
+								$student16		= $myData['student16'];
+								$student17		= $myData['student17'];
+								$student18		= $myData['student18'];
+								$student19		= $myData['student19'];
+								$student20		= $myData['student20'];
+								$student21		= $myData['student21'];
+								$student22		= $myData['student22'];
+								$student23		= $myData['student23'];
+								$student24		= $myData['student24'];
+								$student25		= $myData['student25'];
+								$student26		= $myData['student26'];
+								$student27		= $myData['student27'];
+								$student28		= $myData['student28'];
+								$student29		= $myData['student20'];
+								$student30		= $myData['student30'];
+								$content	.= "<tr><td style='vertical-align:top;'>$logdate</td>
+													<td style='vertical-align:top;'>Student01/16</td>
+													<td style='vertical-align:top;'>Student02/17</td>
+													<td style='vertical-align:top;'>Student03/18</td>
+													<td style='vertical-align:top;'>Student04/19</td>
+													<td style='vertical-align:top;'>Student05/20</td>
+													<td style='vertical-align:top;'>Student06/21</td>
+													<td style='vertical-align:top;'>Student07/22</td>
+													<td style='vertical-align:top;'>Student08/23</td>
+													<td style='vertical-align:top;'>Student09/24</td>
+													<td style='vertical-align:top;'>Student10/25</td>
+													<td style='vertical-align:top;'>Student11/26</td>
+													<td style='vertical-align:top;'>Student12/27</td>
+													<td style='vertical-align:top;'>Student13/28</td>
+													<td style='vertical-align:top;'>Student14/29</td>
+													<td style='vertical-align:top;'>Student15/30</td></tr>
+												<tr><td style='vertical-align:top;'>$logprogram</td>
+													<td style='vertical-align:top;'>$student01</td>
+													<td style='vertical-align:top;'>$student02</td>
+													<td style='vertical-align:top;'>$student03</td>
+													<td style='vertical-align:top;'>$student04</td>
+													<td style='vertical-align:top;'>$student05</td>
+													<td style='vertical-align:top;'>$student06</td>
+													<td style='vertical-align:top;'>$student07</td>
+													<td style='vertical-align:top;'>$student08</td>
+													<td style='vertical-align:top;'>$student09</td>
+													<td style='vertical-align:top;'>$student10</td>
+													<td style='vertical-align:top;'>$student11</td>
+													<td style='vertical-align:top;'>$student12</td>
+													<td style='vertical-align:top;'>$student13</td>
+													<td style='vertical-align:top;'>$student14</td>
+													<td style='vertical-align:top;'>$student15</td></tr>
+												<tr><td style='vertical-align:top;'>$logaction</td>
+													<td style='vertical-align:top;'>$student16</td>
+													<td style='vertical-align:top;'>$student17</td>
+													<td style='vertical-align:top;'>$student18</td>
+													<td style='vertical-align:top;'>$student19</td>
+													<td style='vertical-align:top;'>$student20</td>
+													<td style='vertical-align:top;'>$student21</td>
+													<td style='vertical-align:top;'>$student22</td>
+													<td style='vertical-align:top;'>$student23</td>
+													<td style='vertical-align:top;'>$student24</td>
+													<td style='vertical-align:top;'>$student25</td>
+													<td style='vertical-align:top;'>$student26</td>
+													<td style='vertical-align:top;'>$student27</td>
+													<td style='vertical-align:top;'>$student28</td>
+													<td style='vertical-align:top;'>$student20</td>
+													<td style='vertical-align:top;'>$student30</td></tr>";
+							}
 						}
 					}
-				}
-				if ($doDebug) {
-					echo "Done with all logids. Putting out final class makeup<br />";
-				}
-				$student01		= $advisorData[$logid]['student01'];
-				$student02		= $advisorData[$logid]['student02'];
-				$student03		= $advisorData[$logid]['student03'];
-				$student04		= $advisorData[$logid]['student04'];
-				$student05		= $advisorData[$logid]['student05'];
-				$student06		= $advisorData[$logid]['student06'];
-				$student07		= $advisorData[$logid]['student07'];
-				$student08		= $advisorData[$logid]['student08'];
-				$student09		= $advisorData[$logid]['student09'];
-				$student10		= $advisorData[$logid]['student10'];
-				$student11		= $advisorData[$logid]['student11'];
-				$student12		= $advisorData[$logid]['student12'];
-				$student13		= $advisorData[$logid]['student13'];
-				$student14		= $advisorData[$logid]['student14'];
-				$student15		= $advisorData[$logid]['student15'];
-				$student16		= $advisorData[$logid]['student16'];
-				$student17		= $advisorData[$logid]['student17'];
-				$student18		= $advisorData[$logid]['student18'];
-				$student19		= $advisorData[$logid]['student19'];
-				$student20		= $advisorData[$logid]['student20'];
-				$student21		= $advisorData[$logid]['student21'];
-				$student22		= $advisorData[$logid]['student22'];
-				$student23		= $advisorData[$logid]['student23'];
-				$student24		= $advisorData[$logid]['student24'];
-				$student25		= $advisorData[$logid]['student25'];
-				$student26		= $advisorData[$logid]['student26'];
-				$student27		= $advisorData[$logid]['student27'];
-				$student28		= $advisorData[$logid]['student28'];
-				$student29		= $advisorData[$logid]['student20'];
-				$student30		= $advisorData[$logid]['student30'];
-				$classSize		= $advisorData[$logid]['size'];
-				$classCount		= $advisorData[$logid]['count'];
-				$content	.= "<tr><td style='vertical-align:top;'><b>Current Class</b></td>
-									<td style='vertical-align:top;'>Student01/16</td>
-									<td style='vertical-align:top;'>Student02/17</td>
-									<td style='vertical-align:top;'>Student03/18</td>
-									<td style='vertical-align:top;'>Student04/19</td>
-									<td style='vertical-align:top;'>Student05/20</td>
-									<td style='vertical-align:top;'>Student06/21</td>
-									<td style='vertical-align:top;'>Student07/22</td>
-									<td style='vertical-align:top;'>Student08/23</td>
-									<td style='vertical-align:top;'>Student09/24</td>
-									<td style='vertical-align:top;'>Student10/25</td>
-									<td style='vertical-align:top;'>Student11/26</td>
-									<td style='vertical-align:top;'>Student12/27</td>
-									<td style='vertical-align:top;'>Student13/28</td>
-									<td style='vertical-align:top;'>Student14/29</td>
-									<td style='vertical-align:top;'>Student15/30</td></tr>
-								<tr><td style='vertical-align:top;'>$classSize&nbsp;&nbsp;$classCount</td>
-									<td style='vertical-align:top;'>$student01</td>
-									<td style='vertical-align:top;'>$student02</td>
-									<td style='vertical-align:top;'>$student03</td>
-									<td style='vertical-align:top;'>$student04</td>
-									<td style='vertical-align:top;'>$student05</td>
-									<td style='vertical-align:top;'>$student06</td>
-									<td style='vertical-align:top;'>$student07</td>
-									<td style='vertical-align:top;'>$student08</td>
-									<td style='vertical-align:top;'>$student09</td>
-									<td style='vertical-align:top;'>$student10</td>
-									<td style='vertical-align:top;'>$student11</td>
-									<td style='vertical-align:top;'>$student12</td>
-									<td style='vertical-align:top;'>$student13</td>
-									<td style='vertical-align:top;'>$student14</td>
-									<td style='vertical-align:top;'>$student15</td></tr>
-								<tr><td style='vertical-align:top;'></td>
-									<td style='vertical-align:top;'>$student16</td>
-									<td style='vertical-align:top;'>$student17</td>
-									<td style='vertical-align:top;'>$student18</td>
-									<td style='vertical-align:top;'>$student19</td>
-									<td style='vertical-align:top;'>$student20</td>
-									<td style='vertical-align:top;'>$student21</td>
-									<td style='vertical-align:top;'>$student22</td>
-									<td style='vertical-align:top;'>$student23</td>
-									<td style='vertical-align:top;'>$student24</td>
-									<td style='vertical-align:top;'>$student25</td>
-									<td style='vertical-align:top;'>$student26</td>
-									<td style='vertical-align:top;'>$student27</td>
-									<td style='vertical-align:top;'>$student28</td>
-									<td style='vertical-align:top;'>$student20</td>
-									<td style='vertical-align:top;'>$student30</td></tr>
-								</table>";
-				if ($doDebug) {
-					echo "all output finoshed<br />";
+					if ($doDebug) {
+						echo "Done with all logids. Putting out final class makeup<br />";
+					}
+					$student01		= $advisorData[$logid]['student01'];
+					$student02		= $advisorData[$logid]['student02'];
+					$student03		= $advisorData[$logid]['student03'];
+					$student04		= $advisorData[$logid]['student04'];
+					$student05		= $advisorData[$logid]['student05'];
+					$student06		= $advisorData[$logid]['student06'];
+					$student07		= $advisorData[$logid]['student07'];
+					$student08		= $advisorData[$logid]['student08'];
+					$student09		= $advisorData[$logid]['student09'];
+					$student10		= $advisorData[$logid]['student10'];
+					$student11		= $advisorData[$logid]['student11'];
+					$student12		= $advisorData[$logid]['student12'];
+					$student13		= $advisorData[$logid]['student13'];
+					$student14		= $advisorData[$logid]['student14'];
+					$student15		= $advisorData[$logid]['student15'];
+					$student16		= $advisorData[$logid]['student16'];
+					$student17		= $advisorData[$logid]['student17'];
+					$student18		= $advisorData[$logid]['student18'];
+					$student19		= $advisorData[$logid]['student19'];
+					$student20		= $advisorData[$logid]['student20'];
+					$student21		= $advisorData[$logid]['student21'];
+					$student22		= $advisorData[$logid]['student22'];
+					$student23		= $advisorData[$logid]['student23'];
+					$student24		= $advisorData[$logid]['student24'];
+					$student25		= $advisorData[$logid]['student25'];
+					$student26		= $advisorData[$logid]['student26'];
+					$student27		= $advisorData[$logid]['student27'];
+					$student28		= $advisorData[$logid]['student28'];
+					$student29		= $advisorData[$logid]['student20'];
+					$student30		= $advisorData[$logid]['student30'];
+					$classSize		= $advisorData[$logid]['size'];
+					$classCount		= $advisorData[$logid]['count'];
+					$content	.= "<tr><td style='vertical-align:top;'><b>Current Class</b></td>
+										<td style='vertical-align:top;'>Student01/16</td>
+										<td style='vertical-align:top;'>Student02/17</td>
+										<td style='vertical-align:top;'>Student03/18</td>
+										<td style='vertical-align:top;'>Student04/19</td>
+										<td style='vertical-align:top;'>Student05/20</td>
+										<td style='vertical-align:top;'>Student06/21</td>
+										<td style='vertical-align:top;'>Student07/22</td>
+										<td style='vertical-align:top;'>Student08/23</td>
+										<td style='vertical-align:top;'>Student09/24</td>
+										<td style='vertical-align:top;'>Student10/25</td>
+										<td style='vertical-align:top;'>Student11/26</td>
+										<td style='vertical-align:top;'>Student12/27</td>
+										<td style='vertical-align:top;'>Student13/28</td>
+										<td style='vertical-align:top;'>Student14/29</td>
+										<td style='vertical-align:top;'>Student15/30</td></tr>
+									<tr><td style='vertical-align:top;'>$classSize&nbsp;&nbsp;$classCount</td>
+										<td style='vertical-align:top;'>$student01</td>
+										<td style='vertical-align:top;'>$student02</td>
+										<td style='vertical-align:top;'>$student03</td>
+										<td style='vertical-align:top;'>$student04</td>
+										<td style='vertical-align:top;'>$student05</td>
+										<td style='vertical-align:top;'>$student06</td>
+										<td style='vertical-align:top;'>$student07</td>
+										<td style='vertical-align:top;'>$student08</td>
+										<td style='vertical-align:top;'>$student09</td>
+										<td style='vertical-align:top;'>$student10</td>
+										<td style='vertical-align:top;'>$student11</td>
+										<td style='vertical-align:top;'>$student12</td>
+										<td style='vertical-align:top;'>$student13</td>
+										<td style='vertical-align:top;'>$student14</td>
+										<td style='vertical-align:top;'>$student15</td></tr>
+									<tr><td style='vertical-align:top;'></td>
+										<td style='vertical-align:top;'>$student16</td>
+										<td style='vertical-align:top;'>$student17</td>
+										<td style='vertical-align:top;'>$student18</td>
+										<td style='vertical-align:top;'>$student19</td>
+										<td style='vertical-align:top;'>$student20</td>
+										<td style='vertical-align:top;'>$student21</td>
+										<td style='vertical-align:top;'>$student22</td>
+										<td style='vertical-align:top;'>$student23</td>
+										<td style='vertical-align:top;'>$student24</td>
+										<td style='vertical-align:top;'>$student25</td>
+										<td style='vertical-align:top;'>$student26</td>
+										<td style='vertical-align:top;'>$student27</td>
+										<td style='vertical-align:top;'>$student28</td>
+										<td style='vertical-align:top;'>$student20</td>
+										<td style='vertical-align:top;'>$student30</td></tr>
+									</table>";
+					if ($doDebug) {
+						echo "all output finished<br />";
+					}
+				} else {
+					$content	.= "<p>No student information available</p>";
 				}
 			} else {
 				if ($doDebug) {

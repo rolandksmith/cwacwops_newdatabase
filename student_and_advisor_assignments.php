@@ -40,7 +40,7 @@ function student_and_advisor_assignments_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$doDebug 					= FALSE;
+	$doDebug 					= TRUE;
 	$testMode					= FALSE;
 	$thisVersion				= '4';
 	$inp_semester				= $initializationArray['nextSemester'];
@@ -1066,7 +1066,7 @@ function getTheReason($strReasonCode) {
 					$content				.= "</table>
 												<p>$numSRows students</p>";
 				} else {
-					$content				.= "<p>No students matching this criteria/p>";
+					$content				.= "<p>No students matching this criteria</p>";
 				}
 			}
 			if ($doDebug) {
@@ -1629,7 +1629,7 @@ function getTheReason($strReasonCode) {
 																										$student_third_class_choice_utc</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_timezone_offset</td>
 																		<td style='vertical-align:top;'>$student_email</td>
-																		<td style='vertical-align:top;'>+$student_ph_code $student_phone ($student_messaging)</td>
+																		<td style='vertical-align:top;'>+$student_ph_code $student_phone</td>
 																		<td style='vertical-align:top;'>$student_state</td>
 																		<td style='vertical-align:top;'>$student_country</td>
 																		<td style='vertical-align:top;'>$reqDate</td>

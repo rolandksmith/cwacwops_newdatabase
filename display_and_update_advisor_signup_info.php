@@ -578,7 +578,7 @@ function display_and_update_advisor_info_func() {
 							<input class='formInputButton' type='radio' name='request_type' value='givenname'>Given Name<br />
 							<input class='formInputButton' type='radio' name='request_type' value='email'>Email</td></tr>
 					<tr><td>RequestInfo</td>
-						<td><input class='formInputText' type='text' maxlength='30' name='request_info' size=  autofocus ></td></tr>
+						<td><input class='formInputText' type='text' maxlength='50' name='request_info' size='30'  autofocus ></td></tr>
 					<tr><td>Data Depth</td>
 						<td><input type='radio' class='formInputButton' name='inp_depth' value='one' checked>Display most current data only<br />
 							<input type='radio' class='formInputButton' name='inp_depth' value='all'>Display all data</td></tr>
@@ -1745,6 +1745,7 @@ function display_and_update_advisor_info_func() {
 						$updateFormat[] = "%d";
 						$actionContent .= "Updated advisorclass_timezone_offset of $advisorClass_timezone_offset to $inp_advisorclass_timezone_offset. ";
 						$updateUTC	= TRUE;
+						$advisorClass_timezone_offset	= $inp_advisorclass_timezone_offset;
 					}
 					if ($inp_advisorclass_level != $advisorClass_level) {
 						$doTheUpdate = TRUE;
@@ -1764,6 +1765,7 @@ function display_and_update_advisor_info_func() {
 						$updateFormat[] = "%s";
 						$actionContent .= "Updated advisorclass_class_schedule_days of $advisorClass_class_schedule_days to $inp_advisorclass_class_schedule_days. ";
 						$updateUTC	= TRUE;
+						$advisorClass_class_schedule_days	= $inp_advisorclass_class_schedule_days;
 					}
 					if ($inp_advisorclass_class_schedule_times != $advisorClass_class_schedule_times) {
 						$doTheUpdate = TRUE;
@@ -1771,6 +1773,7 @@ function display_and_update_advisor_info_func() {
 						$updateFormat[] = "%s";
 						$actionContent .= "Updated advisorclass_class_schedule_times of $advisorClass_class_schedule_times to $inp_advisorclass_class_schedule_times. ";
 						$updateUTC	= TRUE;
+						$advisorClass_class_schedule_times	= $inp_advisorclass_class_schedule_times;
 					}
 					if ($inp_advisorclass_class_schedule_days_utc != $advisorClass_class_schedule_days_utc) {
 						$doTheUpdate = TRUE;
@@ -2017,7 +2020,7 @@ function display_and_update_advisor_info_func() {
 						if ($doDebug) {
 							echo "Updating UTC info due to a local time change<br />";
 						}
-						$utcResult		= utcConvert('toutc',$inp_advisorClass_timezone_offset,$inp_advisorClass_class_schedule_times,$inp_advisorClass_class_schedule_days,$doDebug);
+						$utcResult		= utcConvert('toutc',$advisorClass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days,$doDebug);
 						if ($utcResult[0] == 'FAIL') {
 							if ($doDebug) {
 								echo "converting $advisorClass_timezone_offset,$inp_class_schedule_times,$inp_class_schedule_days to UTC failed<br />";
@@ -2025,9 +2028,9 @@ function display_and_update_advisor_info_func() {
 						} else {
 							$inp_advisorClass_class_schedule_times_utc				= $utcResult[1];
 							$inp_advisorClass_class_schedule_days_utc				= $utcResult[2];
-							$updateParams['advisorclass_class_schedule_days_utc'] 	= $inp_class_schedule_days_utc;
+							$updateParams['advisorclass_class_schedule_days_utc'] 	= $utcResult[2];
 							$updateFormat[]											= '%s';
-							$updateParams['advisorclass_class_schedule_times_utc']	= $inp_class_schedule_times_utc;
+							$updateParams['advisorclass_class_schedule_times_utc']	= $utcResult[1];
 							$updateFormat[]											= '%s';
 							$doTheUpdate											= TRUE;
 						}
