@@ -32,19 +32,21 @@ function build_list_of_available_classes($semester='',$testMode=FALSE, $doDebug=
 		if ($theSemester == 'Not in Session') {
 			$theSemester			= $nextSemester;
 		}
+	} else {
+		$theSemester	= $semester;
 	}
 
 	if ($testMode) {
 		$studentTableName		= 'wpw1_cwa_student2';
 		$advisorTableName		= 'wpw1_cwa_advisor2';
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
-		$userMasterDataTabeName	= '2p21_cwa_user_master2';
+		$userMasterTableName	= 'wpw1_cwa_user_master2';
 		$modeInfo				= "<p><b>Program Running in TestMode</b></p>";
 	} else {
 		$studentTableName		= 'wpw1_cwa_student';
 		$advisorTableName		= 'wpw1_cwa_advisor';
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass';
-		$userMasterDataTabeName	= '2p21_cwa_user_master';
+		$userMasterTableName	= 'wpw1_cwa_user_master';
 		$modeInfo				= "";
 	}
 
@@ -79,37 +81,37 @@ function build_list_of_available_classes($semester='',$testMode=FALSE, $doDebug=
 				$advisorClass_first_name 				= $advisorClassRow->user_first_name;
 				$advisorClass_last_name 				= $advisorClassRow->user_last_name;
 				$advisorClass_email 					= $advisorClassRow->user_email;
+				$advisorClass_ph_code 					= $advisorClassRow->user_ph_code;
 				$advisorClass_phone 					= $advisorClassRow->user_phone;
 				$advisorClass_city 						= $advisorClassRow->user_city;
 				$advisorClass_state 					= $advisorClassRow->user_state;
 				$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
 				$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+				$advisorClass_country 					= $advisorClassRow->user_country;
 				$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
 				$advisorClass_telegram 					= $advisorClassRow->user_telegram;
 				$advisorClass_signal 					= $advisorClassRow->user_signal;
 				$advisorClass_messenger 				= $advisorClassRow->user_messenger;
-				$advisorClass_action_log 				= $advisorClassRow->user_action_log;
+				$advisorClass_master_action_log 		= $advisorClassRow->user_action_log;
 				$advisorClass_timezone_id 				= $advisorClassRow->user_timezone_id;
 				$advisorClass_languages 				= $advisorClassRow->user_languages;
 				$advisorClass_survey_score 				= $advisorClassRow->user_survey_score;
 				$advisorClass_is_admin					= $advisorClassRow->user_is_admin;
 				$advisorClass_role 						= $advisorClassRow->user_role;
+				$advisorClass_prev_callsign				= $advisorClassRow->user_prev_callsign;
 				$advisorClass_master_date_created 		= $advisorClassRow->user_date_created;
 				$advisorClass_master_date_updated 		= $advisorClassRow->user_date_updated;
 
-				$advisor_ID								= $advisorClassRow->advisor_id;
-				$advisor_call_sign 						= strtoupper($advisorClassRow->advisor_call_sign);
-				$advisor_semester 						= $advisorClassRow->advisor_semester;
-				$advisor_welcome_email_date 			= $advisorClassRow->advisor_welcome_email_date;
-				$advisor_verify_email_date 				= $advisorClassRow->advisor_verify_email_date;
-				$advisor_verify_email_number 			= $advisorClassRow->advisor_verify_email_number;
-				$advisor_verify_response 				= strtoupper($advisorClassRow->advisor_verify_response);
-				$advisor_action_log 					= $advisorClassRow->advisor_action_log;
-				$advisor_class_verified 				= $advisorClassRow->advisor_class_verified;
-				$advisor_control_code 					= $advisorClassRow->advisor_control_code;
-				$advisor_date_created 					= $advisorClassRow->advisor_date_created;
-				$advisor_date_updated 					= $advisorClassRow->advisor_date_updated;
-				$advisor_replacement_status 			= $advisorClassRow->advisor_replacement_status;
+				$advisorClass_welcome_email_date 		= $advisorClassRow->advisor_welcome_email_date;
+				$advisorClass_verify_email_date 		= $advisorClassRow->advisor_verify_email_date;
+				$advisorClass_verify_email_number 		= $advisorClassRow->advisor_verify_email_number;
+				$advisorClass_verify_response 			= strtoupper($advisorClassRow->advisor_verify_response);
+				$advisorClass_action_log 				= $advisorClassRow->advisor_action_log;
+				$advisorClass_class_verified 			= $advisorClassRow->advisor_class_verified;
+				$advisorClass_control_code 				= $advisorClassRow->advisor_control_code;
+				$advisorClass_date_created 				= $advisorClassRow->advisor_date_created;
+				$advisorClass_date_updated 				= $advisorClassRow->advisor_date_updated;
+				$advisorClass_replacement_status 		= $advisorClassRow->advisor_replacement_status;
 
 				$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
 				$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
@@ -161,31 +163,6 @@ function build_list_of_available_classes($semester='',$testMode=FALSE, $doDebug=
 				$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
 				$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 
-
-				// if you need the country name and phone code, include the following
-				$countrySQL		= "select * from wpw1_cwa_country_codes  
-									where country_code = '$advisorclass_country_code'";
-				$countrySQLResult	= $wpdb->get_results($countrySQL);
-				if ($countrySQLResult === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-					$advisorclass_country		= "UNKNOWN";
-					$advisorclass_ph_code		= "";
-				} else {
-					$numCRows		= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-					}
-					if($numCRows > 0) {
-						foreach($countrySQLResult as $countryRow) {
-							$advisorclass_country		= $countryRow->country_name;
-							$advisorclass_ph_code		= $countryRow->ph_code;
-						}
-					} else {
-						$advisorclass_country			= "Unknown";
-						$advisorclass_ph_code			= "";
-					}
-				}
-
 				$availableSeats						= 0;
 				$useAdvisor							= TRUE;
 				
@@ -195,28 +172,28 @@ function build_list_of_available_classes($semester='',$testMode=FALSE, $doDebug=
 						echo "advisor is $advisorClass_call_sign. Bypassed<br />";
 					}
 				}
-				if ($advisorclass_survey_score == 6 || $advisorclass_survey_score == 13) {
+				if ($advisorClass_survey_score == 6 || $advisorClass_survey_score == 13) {
 					$useAdvisor						= FALSE;
 					if($doDebug) {
-						echo "survey score is $advisorclass_survey_score. Bypassed<br />";
+						echo "survey score is $advisorClass_survey_score. Bypassed<br />";
 					}
 				}
-				if ($advisor_verify_response == 'R') {
+				if ($advisorClass_verify_response == 'R') {
 					$useAdvisor						= FALSE;
 					if($doDebug) {
-						echo "verify response is $advisor_verify_response. Bypassed<br />";
+						echo "verify response is $advisorClass_verify_response. Bypassed<br />";
 					}							
 				}
-				if ($advisor_replacement_status == 'N') {
+				if ($advisorClass_replacement_status == 'N') {
 					$useAdvisor						= FALSE;
 					if($doDebug) {
-						echo "replacement status is $advisor_replacement_status. Bypassed<br />";
+						echo "replacement status is $advisorClass_replacement_status. Bypassed<br />";
 					}							
 				}
 				if ($useAdvisor) {
 					// see if there are any seats available
-					if ($advisorClass_class_size - $advisorclass_number_students > 0) {
-						$availableSeats				= $advisorClass_class_size - $advisorclass_number_students;
+					if ($advisorClass_class_size - $advisorClass_number_students > 0) {
+						$availableSeats				= $advisorClass_class_size - $advisorClass_number_students;
 						if ($doDebug) {
 							echo "advisor's class has $availableSeats seats available<br />";
 						}
@@ -226,9 +203,9 @@ function build_list_of_available_classes($semester='',$testMode=FALSE, $doDebug=
 							echo "adding advisorclass info to the classArray<br />";
 						}
 						$myStr						= substr($advisorClass_class_schedule_times_utc,0,2);
-						$advisorClass_class_schedule_times_utc	= $myStr . "00"; 									$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_advisor_call_sign]['local'] 				= "$advisorClass_class_schedule_times $advisorClass_class_schedule_days";
+						$advisorClass_class_schedule_times_utc	= $myStr . "00"; 									$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['local'] 				= "$advisorClass_class_schedule_times $advisorClass_class_schedule_days";
 						$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['class size'] 		= $advisorClass_class_size;
-						$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['number_students'] 	= $advisorclass_number_students;
+						$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['number_students'] 	= $advisorClass_number_students;
 						$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['availableSeats'] 	= $availableSeats;
 						$classArray[$advisorClass_level]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"][$advisorClass_call_sign]['sequence'] 			= $advisorClass_sequence;
 						
