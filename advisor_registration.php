@@ -454,11 +454,13 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 				$user_first_name 					= $advisorRow->user_first_name;
 				$user_last_name 					= $advisorRow->user_last_name;
 				$user_email 						= $advisorRow->user_email;
+				$user_ph_code 						= $advisorRow->user_ph_code;
 				$user_phone 						= $advisorRow->user_phone;
 				$user_city 							= $advisorRow->user_city;
 				$user_state 						= $advisorRow->user_state;
 				$user_zip_code 						= $advisorRow->user_zip_code;
 				$user_country_code 					= $advisorRow->user_country_code;
+				$user_country	 					= $advisorRow->user_country;
 				$user_whatsapp 						= $advisorRow->user_whatsapp;
 				$user_telegram 						= $advisorRow->user_telegram;
 				$user_signal 						= $advisorRow->user_signal;
@@ -486,29 +488,6 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 				$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 				$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 
-				// if you need the country name and phone code, include the following
-				$countrySQL		= "select * from wpw1_cwa_country_codes  
-									where country_code = '$user_country_code'";
-				$countrySQLResult	= $wpdb->get_results($countrySQL);
-				if ($countrySQLResult === FALSE) {
-					handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
-					$user_country		= "UNKNOWN";
-					$user_ph_code		= "";
-				} else {
-					$numCRows		= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-					}
-					if($numCRows > 0) {
-						foreach($countrySQLResult as $countryRow) {
-							$user_country		= $countryRow->country_name;
-							$user_ph_code		= $countryRow->ph_code;
-						}
-					} else {
-						$user_country			= "Unknown";
-						$user_ph_code			= "";
-					}
-				}
 
 				$rtnResult	.= "<h4>User Master Data</h4>
 								<table style='width:900px;'>
@@ -668,7 +647,7 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 									if ($doDebug) {
 										echo "Not allowing update to the class record<br />";
 									}
-									$rtnContent	.= "</table>";
+									$rtnResult	.= "</table>";
 								}
 							}
 							if (!$noUpdate) {
@@ -682,6 +661,18 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 														<input class='formInputButton' type='submit' value='Add Another Class'>
 														</form></td></tr></table>";
 								$rtnResult			.= "<p>You may close this window</p>";
+							} else {
+								$rtnResult		.= "<p><form method='post' action='$theURL' 
+														name='class_option2_form' ENCTYPE='multipart/form-data'>
+														<input type='hidden' name='enstr' value='$enstr'>
+														<input type='hidden' name='classID' value='$advisorClass_ID'>
+														<input type='hidden' name='inp_callsign' value='$advisor_call_sign'>
+														<input type='hidden' name='strpass' value='5'>
+														<input type='hidden' name='classcount' value='$classcount'>
+														<input class='formInputButton' type='submit' value='Add Another Class'>
+														</form></p><br />";
+								$rtnResult			.= "<br /><p>You may close this window</p>";
+							
 							}
 						} else {
 							if ($doDebug) {
@@ -1571,8 +1562,8 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 					echo "No $inp_callsign advisor record found. Should not be able to happen<br />";
 				}
 				$content		.= "<b>Fatal Error</b> The sys admin has been notified";
+				sendErrorEmail("$jobname Pass 5 no advisor record found for $inp_callsign");
 			}
-			sendErrorEmail("$jobname Pass 5 no advisor record found for $inp_callsign");
 		}
 
 

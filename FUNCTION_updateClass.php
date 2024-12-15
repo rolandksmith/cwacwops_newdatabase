@@ -48,7 +48,7 @@
 												'inp_id'=>$advisorClass_ID,
 												'inp_callsign'=>$advisorClass_advisor_call_sign,
 												'inp_semester'=>$advisorClass_semester,
-												'inp_sequence'=?$advosprClass_sequence, 
+												'inp_sequence'=>$advisorClass_sequence, 
 												'inp_who'=>$userName,
 												'testMode'=>$testMode,
 												'doDebug'=>$doDebug);
