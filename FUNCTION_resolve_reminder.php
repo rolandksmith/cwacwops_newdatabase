@@ -58,6 +58,9 @@ function resolve_reminder($inp_callsign='',$token='',$testMode=FALSE,$doDebug=FA
 		}
 		return FALSE;
 	} else {
+		if ($doDebug) {
+			echo "reminder resolved. Returning<br /><br />";
+		}
 		return TRUE;
 	}
 

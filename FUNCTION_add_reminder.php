@@ -146,6 +146,8 @@ function add_reminder($inp_data=array(),$testMode=FALSE,$doDebug=FALSE) {
 		echo "returning<br /><hr><br />";
 	}
 	if ($updateIssue) {	
+		$lastError		= $wpdb->last_error;
+		$lastQuery		= $wpdb->last_query;
 		return array(FALSE,"Inserting failed. Error:$lastError<br />Query: $lastQuery");
 	} else {
 		return array(TRUE,'');
