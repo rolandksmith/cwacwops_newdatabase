@@ -111,7 +111,7 @@ function display_and_update_user_master_func() {
 				$request_type = filter_var($request_type,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "request_info") {
-				$request_info = strtoupper($str_value);
+				$request_info = $str_value;
 				$request_info = filter_var($request_info,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "doDebug") {
@@ -393,6 +393,7 @@ function display_and_update_user_master_func() {
 			echo "getting the user_master data<br />";
 		}
 		if ($request_type == 'callsign') {
+			$request_info	= strtoupper($request_info);
 			$sql			= "select * from $userMasterTableName 
 								where user_call_sign = '$request_info'";
 		} elseif ($request_type == 'id') {
@@ -596,8 +597,9 @@ function display_and_update_user_master_func() {
 									$haveUserMaster		= TRUE;
 								}
 							} else {
-								sendErrorEmail("$jobname. Pass2. No User Master record running $sql1. UserName: $userName");
+//								sendErrorEmail("$jobname. Pass2. No User Master record running $sql1. UserName: $userName");
 								$haveUserMaster			= FALSE;
+								$content				.= "<p>No User Master record found searching by callsign and searching previous callsign</p>";
 							}
 						}
 					}

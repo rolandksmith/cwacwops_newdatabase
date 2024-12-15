@@ -82,22 +82,40 @@ function assign_students_to_advisors_v3_func() {
 
 */
 
-	global $wpdb, $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray,
-	 $processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, $theIncrement, 
-	 $debugReport, $keepDebug; 
+	global $wpdb, $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray, 
+	$processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, $theIncrement, 
+	$doDebugReport, $keepDebug; 
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$bobTest						= FALSE;
 	$keepDebug						= TRUE;
+	$doDebugReport					= "";
 	
-	$debugReport					= "";
-	$initializationArray = data_initialization_func();
-	if ($keepDebug) {
-		$debugReport	.=  "Initialization Array:<br /><pre>";
-		$debugReport	.= print_r($initializationArray,TRUE);
-		$debugReport	.=  "</pre><br />\n";
+//// FUNCTION debugReport
+	function debugReport($debugValue) {
+	
+		global $wpdb, $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray,
+	 		$processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, $theIncrement, 
+	 		$doDebugReport, $keepDebug; 
+	
+	
+		$doDebugReport		.= $debugValue;
+		if ($doDebug) {
+			echo $debugValue;
+		}
+		return;
 	}
+	
+	
+	$initializationArray = data_initialization_func();
+		$thisStr	= "Initialization Array:<br /><pre>";
+		$thisStr 	.= print_r($initializationArray,TRUE);
+		$thisStr	.= "</pre><br />\n";
+		debugReport($thisStr);
+	
+	
+	
 	$validUser 				= $initializationArray['validUser'];
 	$userName				= $initializationArray['userName'];
 	$siteURL   				= $initializationArray['siteurl'];
@@ -114,12 +132,10 @@ function assign_students_to_advisors_v3_func() {
 	}
 
 
-//	if ($keepDebug) {
-		ini_set('display_errors','1');
-		error_reporting(E_ALL);	
-		ini_set('memory_limit','256M');
-		ini_set('max_execution_time',0);
-//	}
+	ini_set('display_errors','1');
+	error_reporting(E_ALL);	
+	ini_set('memory_limit','256M');
+	ini_set('max_execution_time',0);
 
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
@@ -212,16 +228,18 @@ function assign_students_to_advisors_v3_func() {
 // get the input information
 	if (isset($_REQUEST)) {
 		foreach($_REQUEST as $str_key => $str_value) {
-			if ($keepDebug) {
 				if (!is_array($str_value)) {
-					$debugReport	.=  "Key: $str_key | Value: $str_value <br />\n";
+					debugReport("Key: $str_key | Value: $str_value <br />\n");
 				} else {
-					$debugReport	.=  "Key: $str_key (array)<br />\n";
+					debugReport("Key: $str_key (array)<br />\n");
 				}
-			}
 			if ($str_key 		== "strpass") {
 				$strPass		 = $str_value;
 				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "doDebugReport") {
+				$doDebugReport		 = $str_value;
+//				$doDebugReport		 = filter_var($doDebugReport,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "force_class_size_beg") {
 				$force_class_size_beg		 = $str_value;
@@ -372,9 +390,7 @@ function assign_students_to_advisors_v3_func() {
 
 	if ($testMode) {
 		$theStatement	.= "<p><strong>Operating in Test Mode.</strong></p>";
-		if ($keepDebug) {
-			$debugReport	.=  "<p><strong>Operating in Test Mode.</strong></p>";
-		}
+			debugReport("<p><strong>Operating in Test Mode.</strong></p>");
 		$advisorTableName			= "wpw1_cwa_advisor2";
 		$advisorClassTableName		= "wpw1_cwa_advisorclass2";
 		$studentTableName			= "wpw1_cwa_student2";
@@ -393,42 +409,30 @@ function assign_students_to_advisors_v3_func() {
 	}
 	
 	
-	if ($keepDebug) {
-		$debugReport	.=  "nextSemester: $nextSemester<br />";
-	}
-
+	
 /////////// function to assign student to an advisor
 
 	function assignStudentToAdvisor($studentCallSign,$advisorCallSign,$advisorSequence) {
 	
 		global $wpdb, $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray, 
 				$processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, 
-				$theIncrement, $debugReport, $keepDebug; 
+				$theIncrement, $doDebugReort, $keepDebug; 
 
-		if ($keepDebug) {
-			$debugReport	.=  "<br />FUNCTION: assignStudentToAdvisor using$studentCallSign, $advisorCallSign, $advisorSequence<br />";
-		}	
+			debugReport("<br />FUNCTION: assignStudentToAdvisor using $studentCallSign, $advisorCallSign, $advisorSequence<br />");
 	
 		$advisorClassKey	= "$advisorCallSign|$advisorSequence";
 		if (array_key_exists($advisorClassKey,$advisorClassArray)) {
 			$advisorClassArray[$advisorClassKey][0]--;			/// decrement class size
-			if ($keepDebug) {
 				$myInt				= $advisorClassArray[$advisorClassKey][0];
-				$debugReport	.=  "Decremented the number of seats for $advisorClassKey:<br />
-					  New number of seats: $myInt<br />";
-			}
+				debugReport("Decremented the number of seats for $advisorClassKey:<br />New number of seats: $myInt<br />");
 			$theIncrement++;
 			$advisorClassArray[$advisorClassKey][$theIncrement]	= $studentCallSign;
 			$studentAssignedAdvisorArray[$studentCallSign]	= "$advisorCallSign|$advisorSequence";
-			if ($keepDebug) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student added to advisorClassArray [$advisorClassKey][$theIncrement]	= $studentCallSign<br />
-					  &nbsp;&nbsp;&nbsp;&nbsp;Student added to studentAssignedAdvisorArray $studentCallSign|$advisorCallSign|$advisorSequence<br />";								  
-			}
+				debugReport("Student added to advisorClassArray<br />
+					  		 Student added to studentAssignedAdvisorArray<br />");
 			return TRUE;
 		} else {
-			if ($keepDebug) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;ERROR No advisorClassArray with key of $advisorClassKey<br />";
-			}
+				debugReport("ERROR No advisorClassArray with key of $advisorClassKey<br />");
 			return FALSE;
 		}
 	}	
@@ -441,7 +445,7 @@ function assign_students_to_advisors_v3_func() {
 	
 	global $wpdb, $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray, 
 		   $processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, 
-		   $theIncrement, $debugReport, $keepDebug; 
+		   $theIncrement, $doDebugReport, $keepDebug; 
 
 /*
 	look for a key of studentLevel|classTime|classDays in the classArray
@@ -481,13 +485,11 @@ function assign_students_to_advisors_v3_func() {
 								'23'=>'2300|2200|2400');
 
 
-		if ($keepDebug) {
-			$debugReport	.=  "<br /><b>FUNCTION:</b> findAClass with $studentLevel<br />
+			debugReport("<br /><b>FUNCTION:</b> findAClass with $studentLevel<br />
 				  firstClassChoice: $firstClassChoice<br />
 				  secondClassChoice: $secondClassChoice<br />
 				  thirdClassChoice: $thirdClassChoice<br />
-				  excluded advisors: $excludedAdvisor<br />";
-		}
+				  excluded advisors: $excludedAdvisor<br />");
 				
 		$gotAClass			= FALSE;
 		$classData			= '';
@@ -502,9 +504,7 @@ function assign_students_to_advisors_v3_func() {
 				$thisSchedule	= $thirdClassChoice;
 			}
 			if (!$gotAClass) {			
-				if ($keepDebug) {
-					$debugReport	.=  "ii: $ii. Checking $thisSchedule schedule<br />";
-				}
+					debugReport("ii: $ii. Checking $thisSchedule schedule<br />");
 				$trackStudent		.= "Checking $thisSchedule<br />";
 				// see if there is actually a schedule
 				if ($thisSchedule != '' && $thisSchedule != 'None') {
@@ -512,13 +512,9 @@ function assign_students_to_advisors_v3_func() {
 					$thisTime			= $myArray[0];
 					$thisDays			= $myArray[1];
 					$classArrayKey		= "$studentLevel|$thisTime|$thisDays";
-					if ($keepDebug) {
-						$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;looking for $classArrayKey in classArray<br />";
-					}
+						debugReport("looking for $classArrayKey in classArray<br />");
 					if (array_key_exists($classArrayKey,$classArray)) {
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;$classArrayKey found in classArray<br />";
-						}
+							debugReport("$classArrayKey found in classArray<br />");
 						$thisChoiceArray = array();
 						foreach($classArray[$classArrayKey] as $myKey=>$myValue) {
 							foreach($myValue as $advisorCallSign=>$advisorSequence) {
@@ -527,30 +523,24 @@ function assign_students_to_advisors_v3_func() {
 									if ($advisorCallSign != 'K1BG' && $advisorCallSign != 'AC6AC') {
 										$thisSequence = $advisorSequence['seq'];
 										$thisChoiceArray[] = "$myKey|$advisorCallSign|$thisSequence";
-										if ($keepDebug) {
-											$debugReport	.=  "added $myKey|$advisorCallSign|$thisSequence to thisChoiceArray<br />";
-										}
+											debugReport("added $myKey|$advisorCallSign|$thisSequence to thisChoiceArray<br />");
 									}
 								} else {
-									if ($keepDebug) {
-										$debugReport	.=  "advisor $advisorCallSign is excluded<br />";
-									}
+										debugReport("advisor $advisorCallSign is excluded<br />");
 								}
 							}
 						}
 						sort($thisChoiceArray);
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Class options found:<br /><pre>";
-							$debugReport	.= print_r($thisChoiceArray,TRUE);
-							$debugReport	.=  "</pre><br />";
-						}
+							$thisStr	= "Class options found:<br /><pre>";
+							$thisStr	.= print_r($thisChoiceArray,TRUE);
+							$thisStr	= "</pre><br />";
+							debugReport($thisStr);
+
 						/// have a list of possible classes. Find the first one with seats available
 						if (count($thisChoiceArray) > 0) {
 							foreach($thisChoiceArray as $myValue) {
 								if (!$gotAClass) {
-									if ($keepDebug) {
-										$debugReport	.=  "Checking thisChoiceArray entry of $myValue for seats available<br />";
-									}
+										debugReport("Checking thisChoiceArray entry of $myValue for seats available<br />");
 									$choiceArray		= explode("|",$myValue);
 									$advisorChoice		= $choiceArray[2];
 									$seqChoice			= $choiceArray[3];
@@ -559,13 +549,9 @@ function assign_students_to_advisors_v3_func() {
 										$gotAClass	= TRUE;
 										$classData	= "$advisorChoice|$seqChoice";
 										$trackStudent	.= "Advisor $advisorChoice Sequence $seqChoice: Seats Available: $thisSeats; Class made available to student<br />";
-										if ($keepDebug) {
-											$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;$thisSeats seats available. Returning $advisorChoice|$seqChoice<br />";
-										}
+											debugReport("$thisSeats seats available. Returning $advisorChoice|$seqChoice<br />");
 									} else {
-										if ($keepDebug) {
-											$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;No seats available<br />";
-										}
+											debugReport("No seats available<br />");
 										$optionArray[]		= "$advisorChoice|$seqChoice|$thisSeats";
 										$trackStudent	.= "Advisor $advisorChoice Sequence $seqChoice: Seats Available: $thisSeats<br />";
 									}
@@ -573,26 +559,18 @@ function assign_students_to_advisors_v3_func() {
 							}
 						}
 					} else {
-						if ($keepDebug) {
-							$debugReport	.=  "No classArray entry for $classArrayKey<br />";
-						}
+							debugReport("No classArray entry for $classArrayKey<br />");
 					}
 				} else {
-					if ($keepDebug) {
-						$debugReport	.=  "schedule of $thisSchedule not valid to be checked<br />";
-					}
+						debugReport("schedule of $thisSchedule not valid to be checked<br />");
 				}
 			}
 		}
 		if ($gotAClass) {
-			if ($keepDebug) {
-				$debugReport	.=  "returning from findAClass with class found<br /><br />";
-			}
+				debugReport("returning from findAClass with class found<br /><br />");
 			return array(TRUE,$classData,$optionArray,$trackStudent);
 		} else {
-			if ($keepDebug) {
-				$debugReport	.=  "returning from findAClass with NO class found<br /><br />";
-			}
+				debugReport("returning from findAClass with NO class found<br /><br />");
 			return array(FALSE,'',$optionArray,$trackStudent);
 		}
 	}
@@ -606,7 +584,7 @@ function assign_students_to_advisors_v3_func() {
 
 		global $doDebug, $testMode, $advisorArray, $classArray, $advisorClassArray, 
 				$processStudentArray, $studentAssignedAdvisorArray, $arbitraryArray, 
-				$theIncrement, $debugReport, $keepDebug; 
+				$theIncrement, $doDebugReport, $keepDebug; 
 	
 		$forwardDays		= array('Monday,Thursday'=>'Tuesday,Friday',
 									'Tuesday,Friday'=>'Wednesday,Saturday',
@@ -624,9 +602,7 @@ function assign_students_to_advisors_v3_func() {
 									'Wednesday,Friday'=>'Tuesday,Thursday');
 	
 	
-		if ($keepDebug) {
-			$debugReport	.=  "<br />FUNCTION: moveThreeHours $direction, $time, $days<br />";
-		}
+			debugReport("<br />FUNCTION: moveThreeHours $direction, $time, $days<br />");
 	
 		if ($direction == 'forward') {
 			$time			= $time + 300;
@@ -655,17 +631,13 @@ function assign_students_to_advisors_v3_func() {
 			}
 			$time	= str_pad($time,4,'0',STR_PAD_LEFT);
 		}
-		if ($keepDebug) {
-			$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Finished conversion: $time, $days<br />";
-		}
+			debugReport("Finished conversion: $time, $days<br />");
 		return array($time,$days);
 	}
 
 
 	if ("1" == $strPass) {
-		if ($keepDebug) {
-			$debugReport	.=  "Function starting.<br />";
-		}
+			debugReport("<br />Pass 1: Function starting<br />");
 		$content .= "<h2>$jobname</h2>$theStatement";
 		
 		// get job log entries for the current month and display
@@ -696,7 +668,6 @@ function assign_students_to_advisors_v3_func() {
 		}
 		$sql							= "select settings from wpw1_cwa_program_settings 
 											where program_name = '$jobname' 
-											and mode = '$thisMode' 
 											and semester = '$theSemester' 
 											order by record_id DESC 
 											limit 1";
@@ -704,20 +675,17 @@ function assign_students_to_advisors_v3_func() {
 		if ($lastParameters != NULL) {
 			$lastParameters				= stripslashes($lastParameters);
 			$parametersArray			= json_decode($lastParameters,TRUE);
-			if ($keepDebug) {
-				$debugReport	.=  "parametersArray:<br /><pre>";
-				$debugReport	.= print_r($parametersArray,TRUE);
-				$debugReport	.=  "</pre><br />";
-			}
+				$thisStr	= "parametersArray:<br /><pre>";
+				$thisStr 	.= print_r($parametersArray,TRUE);
+				$thisStr	.= "</pre><br />";
+				debugReport($thisStr);
 			foreach($parametersArray as $thisKey=>$thisValue) {
 				${$thisKey}					= $thisValue;
 			}
 		} else {
-			if ($keepDebug) {
 				$myStr					= $wpdb->last_error;
 				$mySQL					= $wpdb->last_query;
-				$debugReport	.=  "failed to get the settings.<br />last_error; $myStr<br />last_query: $mySQL<br />";
-			}
+				debugReport("failed to get the settings.<br />last_error; $myStr<br />last_query: $mySQL<br />");
 		}
 		
 		
@@ -725,6 +693,7 @@ function assign_students_to_advisors_v3_func() {
 					<form method='post' action='$theURL' 
 					name='selection_form' ENCTYPE='multipart/form-data'>
 					<input type='hidden' name='strpass' value='2'>
+					<input type='hidden' name='doDebugReport' value='$doDebugReport'>
 					<table style='border-collapse:collapse;'>
 					<tr><td style='vertical-align:top;'><b>Advisors to Include</b></td>
 						<td><input type='radio' class='formInputButton' name='inp_advisors_param' $inp_advisors_param_all value='All' required>All<br />
@@ -775,20 +744,15 @@ function assign_students_to_advisors_v3_func() {
 						<td><input class='formInputButton' type='radio' name='verbosity' value='N' checked>Standard output (normal process)<br />
 						<input class='formInputButton' type='radio' name='verbosity' value='Y'>Highly Verbose (used for debugging purposess)</td></tr>
 					<tr><td><b>Save Report to Reports Table?</b></td>
-						<td><input type='radio' name='inp_report' class='formInputButton' value='N' checked='checked'> Do not save<br />
-						<input type='radio' name='inp_report' class='formInputButton' value='Y' > Save the report</td></tr>
+						<td><input type='radio' name='inp_report' class='formInputButton' value='N' > Do not save<br />
+						<input type='radio' name='inp_report' class='formInputButton' value='Y' checked > Save the report</td></tr>
 					<tr><td>&nbsp;</td>
 						<td><input class='formInputButton' type='submit' value='Submit' /></td></tr>
 					</table>
 					</form>";
 
-///// Pass 2 -- do the work
-
-
 	} elseif ("2" == $strPass) {
-		if ($keepDebug) {
-			$debugReport	.=  "<br />Arrived at pass 2<br />";
-		}
+		debugReport("<br />Arrived at pass 2<br />");
 		
 		$parameterArray 	= array('inp_advisors_param_all'=>'',
 									'inp_advisors_param_specific'=>'',
@@ -828,9 +792,7 @@ function assign_students_to_advisors_v3_func() {
 			$parameterArray['inp_advisor_verification_v']		= 'checked';
 			$verifiedAdvisors								= TRUE;
 			$content										.= "Processing only verified advisors<br />";
-			if ($keepDebug) {
-				$debugReport	.=  "set inp_advisor_verification_v to checked<br />";
-			}
+			debugReport("set inp_advisor_verification_v to checked<br />");
 		} else {
 			$parameterArray['inp_advisor_verification_u']		= 'checked';
 			$content										.= "Processing all advisors<br />";
@@ -843,16 +805,14 @@ function assign_students_to_advisors_v3_func() {
 			$parameterArray['inp_student_verification_u']	= 'checked';
 			$content										.= "Processing all students<br />";
 		}
-		if ($keepDebug) {
-			if ($allAdvisors) {
-				$debugReport	.=  "allAdvisors is TRUE<br />";
-			}
-			if ($specificAdvisors) {
-				$debugReport	.=  "specificAdvisors is TRUE<br />";
-			}
-		
-		
+		if ($allAdvisors) {
+			debugReport("allAdvisors is TRUE<br />");
 		}
+		if ($specificAdvisors) {
+			debugReport("specificAdvisors is TRUE<br />");
+		}
+		
+		
 		if ($force_class_size_beg != '' && (!is_numeric($force_class_size_beg))) {
 			$content		.= "Beginner class size override is not numeric. Setting to blank<br />";
 			$force_class_size_beg = '';
@@ -908,49 +868,70 @@ function assign_students_to_advisors_v3_func() {
 			$thisMode					= 'testMode';
 		}
 
-		if ($keepDebug) {
-			$debugReport	.=  "parameterArray:<br /><pre>";
-			$debugReport	.= print_r($parameterArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-		}
+		$thisStr	= "parameterArray:<br /><pre>";
+		$thisStr 	.= print_r($parameterArray,TRUE);
+		$thisStr	.= "</pre><br />";
+		debugReport($thisStr);
+
 		$settings			= json_encode($parameterArray);
 		$settings			= addslashes($settings);
-		$settingsResult		= $wpdb->insert('wpw1_cwa_program_settings',
-											array('program_name'=>$jobname,
-												  'semester'=>$theSemester,
-												  'settings'=>$settings,
-												  'mode'=>$thisMode),
-											array('%s','%s','%s','%s'));
-		if ($settingsResult === FALSE){
-			$myError		= $wpdb->last_error;
-			$myQuery		= $wpdb->last_query;
-			if ($keepDebug) {
-				$debugReport	.=  "Inserting into wpw1_cwa_program_settings failed<br />
-					  wpdb->last_query: $myQuery<br />
-					  wpdb->last_error: $myError<br />";
-			}
-			$errorMsg			= "$jobname Pass 2 Inserting into wpw1_cwa_program_settings failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
-			sendErrorEmail($errorMsg);
-			return "Unable to continue";
-		} 
+		// see if a record exists. If so, update otherwise insert
+		$settingsSQL		= "select * from wpw1_cwa_program_settings 
+								where program_name = '$jobname' 
+								and semester = '$theSemester' 
+								and mode = '$thisMode' 
+								order by record_id 
+								limit 1";
+		$sqlResult			= $wpdb->get_results($settingsSQL);
+		if ($sqlResult === FALSE) {
+			handleWPDBError($jobname,$doDebug,"Pass 2 seeing if program settings record exists");
+		} else {
+			$numSRows		= $wpdb->num_rows;
+			debugReport("ran $settingsSQL<br />and retrieved $numSRows rows<br />");
+			if ($numSRows	== 0) {		// no record. do insert
+				$settingsResult	= $wpdb->insert('wpw1_cwa_program_settings',
+												array('program_name'=>$jobname,
+													  'semester'=>$theSemester,
+													  'settings'=>$settings,
+													  'mode'=>$thisMode),
+												array('%s','%s','%s','%s'));
+			} else {		// update existing row
+				foreach($sqlResult as $resultRow) {
+					$thisID	= $resultRow->record_id;
+
+					$settingsResult	= $wpdb->update('wpw1_cwa_program_settings', 
+											array('settings'=>$settings),
+											array('record_id'=>$thisID), 
+											array('%s'), 
+											array('%d'));
+			
+				}
+			}			
+			if ($settingsResult === FALSE){
+				$myError		= $wpdb->last_error;
+				$myQuery		= $wpdb->last_query;
+					debugReport("Inserting into wpw1_cwa_program_settings failed<br />
+						  wpdb->last_query: $myQuery<br />
+						  wpdb->last_error: $myError<br />");
+				$errorMsg			= "$jobname Pass 2 Inserting into wpw1_cwa_program_settings failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
+				sendErrorEmail($errorMsg);
+				return "Unable to continue";
+			} 
+		}
 		
 //		return $content;
 
 		if ($request_type == 'B' || $request_type == 'F') { 		// password required
-			if ($keepDebug) {
-				$debugReport	.=  "Checking password 1<br />";
-			}
+				debugReport("Checking password 1<br />");
 			if ($request_pwd1 != 'dxcc') {
-				$debugReport	.=  "Proper password required to do updates and send emails.<br />";
+				debugReport("Proper password required to do updates and send emails.<br />");
 				return;
 			}
 		}
 		if ($request_type == 'D') { 		// password required
-			if ($keepDebug) {
-				$debugReport	.=  "Checking password 2<br />";
-			}
+				debugReport("Checking password 2<br />");
 			if ($request_pwd2 != 'udxa') {
-				$debugReport	.=  "Proper password required to do updates and send emails.<br />";
+				debugReport("Proper password required to do updates and send emails.<br />");
 				return;
 			}
 		}
@@ -965,275 +946,317 @@ function assign_students_to_advisors_v3_func() {
 		$AdvancedExemptions				= str_replace(" ","",$AdvancedExemptions);
 		$AdvancedExemptionsArray		= explode(",",$AdvancedExemptions);
 	
-// Build the advisor array and the advisorClass array
+		// Build the advisor array and the advisorClass array
 		$prevAdvisor		= "";
-		$sql				= "select * from $advisorClassTableName 
-								left join $advisorTableName on advisor_call_sign = advisorclass_call_sign 
-								left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
-								where advisorclass_semester = '$nextSemester' 
-								order by advisorclass_call_sign";
-		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisorclass === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+
+		// get the list of advisors with classes in nextSemester
+		$sql		= "select distinct(advisorclass_call_sign) as advisorclass_call_sign 
+						from $advisorClassTableName 
+						where advisorclass_semester = '$nextSemester' 
+						order by advisorclass_call_sign";
+		$wpw1_cwa_advisorCallSign	= $wpdb->get_results($sql);
+		if ($wpw1_cwa_advisorCallSign === FALSE) {
+			handleWPDBError($jobname,$doDebug,"pass2 geting list of advisor callsigns");
 		} else {
-			$numACRows			= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and found $numACRows rows<br />";
-			}
-			if ($numACRows > 0) {
-				foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-					$advisorClass_master_ID 				= $advisorClassRow->user_ID;
-					$advisorClass_master_call_sign			= $advisorClassRow->user_call_sign;
-					$advisorClass_first_name 				= $advisorClassRow->user_first_name;
-					$advisorClass_last_name 				= $advisorClassRow->user_last_name;
-					$advisorClass_email 					= $advisorClassRow->user_email;
-					$advisorClass_ph_code 					= $advisorClassRow->user_ph_code;
-					$advisorClass_phone 					= $advisorClassRow->user_phone;
-					$advisorClass_city 						= $advisorClassRow->user_city;
-					$advisorClass_state 					= $advisorClassRow->user_state;
-					$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
-					$advisorClass_country_code 				= $advisorClassRow->user_country_code;
-					$advisorClass_country	 				= $advisorClassRow->user_country;
-					$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
-					$advisorClass_telegram 					= $advisorClassRow->user_telegram;
-					$advisorClass_signal 					= $advisorClassRow->user_signal;
-					$advisorClass_messenger 				= $advisorClassRow->user_messenger;
-					$advisorClass_action_log 				= $advisorClassRow->user_action_log;
-					$advisorClass_timezone_id 				= $advisorClassRow->user_timezone_id;
-					$advisorClass_languages 				= $advisorClassRow->user_languages;
-					$advisorClass_survey_score 				= $advisorClassRow->user_survey_score;
-					$advisorClass_is_admin					= $advisorClassRow->user_is_admin;
-					$advisorClass_role 						= $advisorClassRow->user_role;
-					$advisorClass_master_date_created 		= $advisorClassRow->user_date_created;
-					$advisorClass_master_date_updated 		= $advisorClassRow->user_date_updated;
-
-					$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-					$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-					$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-					$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-					$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-					$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-					$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-					$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-					$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-					$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-					$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-					$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-					$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-					$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-					$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-					$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-					$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-					$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-					$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-					$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-					$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-					$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-					$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-					$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-					$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-					$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-					$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-					$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-					$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-					$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-					$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-					$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-					$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-					$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-					$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-					$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-					$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-					$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-					$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-					$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-					$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-					$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-
-					$advisor_ID								= $advisorClassRow->advisor_id;
-					$advisor_call_sign 						= strtoupper($advisorClassRow->advisor_call_sign);
-					$advisor_semester 						= $advisorClassRow->advisor_semester;
-					$advisor_welcome_email_date 			= $advisorClassRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 				= $advisorClassRow->advisor_verify_email_date;
-					$advisor_verify_email_number 			= $advisorClassRow->advisor_verify_email_number;
-					$advisor_verify_response 				= strtoupper($advisorClassRow->advisor_verify_response);
-					$advisor_action_log 					= $advisorClassRow->advisor_action_log;
-					$advisor_class_verified 				= $advisorClassRow->advisor_class_verified;
-					$advisor_control_code 					= $advisorClassRow->advisor_control_code;
-					$advisor_date_created 					= $advisorClassRow->advisor_date_created;
-					$advisor_date_updated 					= $advisorClassRow->advisor_date_updated;
-					$advisor_replacement_status 			= $advisorClassRow->advisor_replacement_status;
-
-					$advisor_select_sequence				= 0;
-
-					$advisorUpdateLink	= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisor_call_sign&strpass=2&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisor_call_sign</a>";
-
-					if ($keepDebug) {
-						$debugReport	.=  "<br />Processing advisor $advisorClass_call_sign with survey_score: $advisorClass_survey_score and verified: $advisor_verify_response <br />";
-					}
-					$doAdvisor								= TRUE;
-					if ($advisorClass_survey_score == 6 || $advisorClass_survey_score == 13) {
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Advisor bypassed with survey_score of $advisorClass_survey_score<br />";
-						}
-						$doAdvisor							= FALSE;
-						$errorArray[]						= "Advisor $advisor_call_sign has a survey score of $advisorClass_survey_score. Bypassed<br />";
-					}
-					if ($advisor_verify_response  == 'R') {
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Advisor bypassed with verified of $advisor_verify_response <br />";
-						}
-						$doAdvisor							= FALSE;
-					}
-					if ($advisor_verify_email_number == '4' && $advisor_verify_response == '') {
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Advisor bypassed with verify_email_number of $advisor_verify_email_number<br />";
-						}
-						$doAdvisor							= FALSE;
-					}
-					if ($verifiedAdvisors && $advisor_verify_response != 'Y') {
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Advisor bypassed with verify_response of $advisor_verify_response<br />";
-						}
-						$doAdvisor							= FALSE;
-					}
-					if ($specificAdvisors) {
-						if (!in_array($advisor_call_sign,$specificAdvisorArray)) {
-							if ($keepDebug) {
-								$debugReport	.=  "doing specific advisors and $advisor_call_sign is not one of them. Bypassing<br />";
-							}
-							$doAdvisor						= FALSE;
-						}
-					}
-// changed 5Aug24 to allow zero class size					
-//					if ($advisorClass_class_size == '' || $advisorClass_class_size == 0) {
-//						$advisorClass_class_size		= $defaultClassSize;
-//					}
-					if ($advisorClass_level == 'Beginner' && $force_class_size_beg != '') {
-						if (!in_array($advisor_call_sign,$BeginnerExemptionsArray)) {
-							if ($advisorClass_class_size >= $force_class_size_beg) {
-								$overrideArray[]				= "$advisor_call_sign Beginner class size of $advisorClass_class_size overriden to $force_class_size_beg<br />";
-							}
-							$advisorClass_class_size		= $force_class_size_beg;
-						} 
-					}
-					if ($advisorClass_level == 'Fundamental' && $force_class_size_fun != '') {
-						if (!in_array($advisor_call_sign,$FundamentalExemptionsArray)) {
-							if ($advisorClass_class_size >= $force_class_size_fun) {
-								$overrideArray[]				= "$advisor_call_sign Fundamental class size of $advisorClass_class_size overriden to $force_class_size_fun<br />";
-							}
-							$advisorClass_class_size		= $force_class_size_fun;
-						}
-					}
-					if ($advisorClass_level == 'Intermediate' && $force_class_size_int != '') {
-						if (!in_array($advisor_call_sign,$IntermediateExemptionsArray)) {
-							if ($advisorClass_class_size >= $force_class_size_int) {
-								$overrideArray[]				= "$advisor_call_sign Intermediate class size of $advisorClass_class_size overriden to $force_class_size_int<br />";
-							}
-							$advisorClass_class_size		= $force_class_size_int;
-				}
-					}
-					if ($advisorClass_level == 'Advanced' && $force_class_size_adv != '') {
-						if (!in_array($advisor_call_sign,$AdvancedExemptionsArray)) {
-							if ($advisorClass_class_size >= $force_class_size_adv) {
-								$overrideArray[]				= "$advisor_call_sign Advanced class size of $advisorClass_class_size overriden to $force_class_size_adv<br />";
-							}
-							$advisorClass_class_size		= $force_class_size_adv;
-						}
-					}
-					$advisorOK								= TRUE;
-					if ($advisor_call_sign == $prevAdvisor) {
-						$advisorOK							= FALSE;
-					}
-					$prevAdvisor							= $advisor_call_sign;
-					if ($doAdvisor) {
-						if ($advisorOK) {
+			$numCSRows			= $wpdb->num_rows;
+				debugReport("ran $sql<br />and found $numCSRows rows<br />");
+			if ($numCSRows > 0) {
+				foreach ($wpw1_cwa_advisorCallSign as $callsignRow) {
+					$advisorCallSign		= $callsignRow->advisorclass_call_sign;
 					
-							$fifoDate						= strtotime($advisor_date_created);
-							if ($advisor_select_sequence == '') {
-								$advisor_select_sequence							= 0;
+					$haveUserMaster			= FALSE;
+					$haveAdvisor			= FALSE;
+
+					debugReport("<br />processing $advisorCallSign<br />");
+
+					// get the user_master record for advisorCallSign
+					$userMasterSQL		= "select * from $userMasterTableName 
+											where user_call_sign = '$advisorCallSign'";
+					$userMasterResult	= $wpdb->get_results($userMasterSQL);
+					if ($userMasterResult === FALSE) {
+						handleWPDBError($jobname,$doDebug,"pass2 getting user master for $advisorCallSign");
+					} else {
+						$numUMRows			= $wpdb->num_rows;
+						debugReport("ran $userMasterSQL<br />and found $numUMRows rows<br />");
+						if ($numUMRows > 0) {
+							foreach ($userMasterResult as $userMasterRow) {
+								$advisorClass_master_ID 				= $userMasterRow->user_ID;
+								$advisorClass_master_call_sign			= $userMasterRow->user_call_sign;
+								$advisorClass_first_name 				= $userMasterRow->user_first_name;
+								$advisorClass_last_name 				= $userMasterRow->user_last_name;
+								$advisorClass_email 					= $userMasterRow->user_email;
+								$advisorClass_ph_code 					= $userMasterRow->user_ph_code;
+								$advisorClass_phone 					= $userMasterRow->user_phone;
+								$advisorClass_city 						= $userMasterRow->user_city;
+								$advisorClass_state 					= $userMasterRow->user_state;
+								$advisorClass_zip_code 					= $userMasterRow->user_zip_code;
+								$advisorClass_country_code 				= $userMasterRow->user_country_code;
+								$advisorClass_country	 				= $userMasterRow->user_country;
+								$advisorClass_whatsapp 					= $userMasterRow->user_whatsapp;
+								$advisorClass_telegram 					= $userMasterRow->user_telegram;
+								$advisorClass_signal 					= $userMasterRow->user_signal;
+								$advisorClass_messenger 				= $userMasterRow->user_messenger;
+								$advisorClass_action_log 				= $userMasterRow->user_action_log;
+								$advisorClass_timezone_id 				= $userMasterRow->user_timezone_id;
+								$advisorClass_languages 				= $userMasterRow->user_languages;
+								$advisorClass_survey_score 				= $userMasterRow->user_survey_score;
+								$advisorClass_is_admin					= $userMasterRow->user_is_admin;
+								$advisorClass_role 						= $userMasterRow->user_role;
+								$advisorClass_master_date_created 		= $userMasterRow->user_date_created;
+								$advisorClass_master_date_updated 		= $userMasterRow->user_date_updated;
+								
+								$haveUserMaster							= TRUE;
 							}
-							$sequenceTransform										= array(3=>0,2=>1,1=>2,0=>3);
-							$selectSequence											= $sequenceTransform[$advisor_select_sequence];
-							$selectSequence 										= str_pad($selectSequence,4,'0',STR_PAD_LEFT);
-							$advisorCalcSequence									= "$selectSequence|$fifoDate";
-							$advisorArray[$advisor_call_sign]['first name'] 		= $advisorClass_first_name;
-							$advisorArray[$advisor_call_sign]['last name'] 			= $advisorClass_last_name;
-							$advisorArray[$advisor_call_sign]['email'] 				= $advisorClass_email;
-							$advisorArray[$advisor_call_sign]['phone'] 				= $advisorClass_phone;
-							$advisorArray[$advisor_call_sign]['text message'] 		= '';
-							$advisorArray[$advisor_call_sign]['state'] 				= $advisorClass_state;
-							$advisorArray[$advisor_call_sign]['country'] 			= $advisorClass_country;
-							$advisorArray[$advisor_call_sign]['time zone']			= $advisorClass_timezone_offset;
-							$advisorArray[$advisor_call_sign]['fifo date'] 			= $advisor_date_created;
-							$advisorArray[$advisor_call_sign]['ID'] 				= $advisor_ID;
+						} else {
+							$content	.= "<p>No User Master record found for $advisorCallSign</p>";
+							debugReport("No User Master record found for $advisorCallSign<br />");
 						}
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Processing advisorClass for $advisor_call_sign sequence $advisorClass_sequence<br />";
+						// get the advisor record
+						if ($haveUserMaster) {
+							$advisorSQL		= "select * from $advisorTableName 
+												where advisor_call_sign = '$advisorCallSign' 
+												and advisor_semester = '$nextSemester'";
+												
+							$advisorResult	= $wpdb->get_results($advisorSQL);
+							if ($advisorResult === FALSE) {
+								handleWPDBError($jobname,$doDebug,"pass2 getting advisor record for $advisorCallSign");
+							} else {
+								$numARows			= $wpdb->num_rows;
+								debugReport("ran $advisorSQL<br />and found $numARows rows<br />");
+								if ($numARows > 0) {
+									foreach ($advisorResult as $advisorRow) {
+										$advisor_ID								= $advisorRow->advisor_id;
+										$advisor_call_sign 						= strtoupper($advisorRow->advisor_call_sign);
+										$advisor_semester 						= $advisorRow->advisor_semester;
+										$advisor_welcome_email_date 			= $advisorRow->advisor_welcome_email_date;
+										$advisor_verify_email_date 				= $advisorRow->advisor_verify_email_date;
+										$advisor_verify_email_number 			= $advisorRow->advisor_verify_email_number;
+										$advisor_verify_response 				= strtoupper($advisorRow->advisor_verify_response);
+										$advisor_action_log 					= $advisorRow->advisor_action_log;
+										$advisor_class_verified 				= $advisorRow->advisor_class_verified;
+										$advisor_control_code 					= $advisorRow->advisor_control_code;
+										$advisor_date_created 					= $advisorRow->advisor_date_created;
+										$advisor_date_updated 					= $advisorRow->advisor_date_updated;
+										$advisor_replacement_status 			= $advisorRow->advisor_replacement_status;
+										
+										$haveAdvisor							= TRUE;
+									}
+								} else {
+									$content	.= "<p>No Advisor record found for $advisorCallSign</p>";
+									debugReport("No Advisor record found for $advisorCallSign<br />");
+								}
+							}
 						}
-						/// fix up the class schedule time
-						
-						$thisTime			= substr($advisorClass_class_schedule_times_utc,0,2) . "00";
-						$classKey			= "$advisorClass_level|$thisTime|$advisorClass_class_schedule_days_utc";
-						$classArray[$classKey][$advisorCalcSequence][$advisor_call_sign]['seq'] = $advisorClass_sequence;
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;added [$classKey][$advisorCalcSequence][$advisor_call_sign]['seq'] = $advisorClass_sequence to classArray<br />";
-						}
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"][0]				= $advisorClass_class_size;
-					
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['size']			= $advisorClass_class_size;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['seq']			= $advisorClass_sequence;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['level']		= $advisorClass_level;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time zone']	= $advisorClass_timezone_offset;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time utc']		= $advisorClass_class_schedule_times_utc;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days utc']		= $advisorClass_class_schedule_days_utc;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time local']	= $advisorClass_class_schedule_times;
-						$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days local']	= $advisorClass_class_schedule_days;
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;added all other advisorClass info to advisorClassArray<br />";
-						}
+					}
+					if ($haveUserMaster && $haveAdvisor) {
+						// Now we can process the advisorclass records
 
 
-						if ($keepDebug) {
-							$debugReport	.=  "Processed advisorClass call sign: $advisor_call_sign|$advisorClass_sequence<br />";
+						$advisorClassSQL	= "select * from $advisorClassTableName 
+												where advisorclass_call_sign = '$advisorCallSign' 
+												and advisorclass_semester = '$nextSemester' 
+												order by advisorclass_sequence";
+						$wpw1_cwa_advisorclass	= $wpdb->get_results($advisorClassSQL);
+						if ($wpw1_cwa_advisorclass === FALSE) {
+							handleWPDBError($jobname,$doDebug,"pass2 getting advisorclass records");
+						} else {
+							$numACRows			= $wpdb->num_rows;
+								debugReport("ran $advisorClassSQL<br />and found $numACRows rows<br />");
+							if ($numACRows > 0) {
+								foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+									$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+									$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+									$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+									$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+									$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+									$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+									$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+									$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+									$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+									$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+									$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+									$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+									$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+									$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+									$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+									$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+									$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+									$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+									$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+									$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+									$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+									$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+									$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+									$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+									$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+									$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+									$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+									$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+									$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+									$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+									$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+									$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+									$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+									$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+									$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+									$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+									$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+									$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+									$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+									$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+									$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+									$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+									$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+									$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+									$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+									$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+				
+				
+									$advisor_select_sequence				= 0;
+				
+									$advisorUpdateLink	= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisor_call_sign&strpass=2&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisor_call_sign</a>";
+				
+									debugReport("<br />Processing advisor $advisorClass_call_sign class $advisorClass_sequence with survey_score: $advisorClass_survey_score and verified: $advisor_verify_response <br />");
+									$doAdvisor								= TRUE;
+									if ($advisorClass_survey_score == 6 || $advisorClass_survey_score == 13) {
+										debugReport("Advisor bypassed with survey_score of $advisorClass_survey_score<br />");
+										$doAdvisor							= FALSE;
+										$errorArray[]						= "Advisor $advisor_call_sign has a survey score of $advisorClass_survey_score. Bypassed<br />";
+									}
+									if ($advisor_verify_response  == 'R') {
+										debugReport("Advisor bypassed with verified of $advisor_verify_response <br />");
+										$errorArray[]						= "Advisor $advisor_call_sign has a response of R. Bypassed<br />";
+										$doAdvisor							= FALSE;
+									}
+									if ($advisor_verify_email_number == '4' && $advisor_verify_response == '') {
+										debugReport("Advisor bypassed with verify_email_number of $advisor_verify_email_number<br />");
+										$errorArray[]						= "Advisor $advisor_call_sign has verify_email_nimber of 4 and has not verified. Bypassed<br />";
+										$doAdvisor							= FALSE;
+									}
+									if ($verifiedAdvisors && $advisor_verify_response != 'Y') {
+										debugReport("Advisor bypassed with verify_response of $advisor_verify_response<br />");
+										$errorArray[]						= "Advisor $advisor_call_sign is not verified. Bypassed<br />";
+										$doAdvisor							= FALSE;
+									}
+									if ($specificAdvisors) {
+										if (!in_array($advisor_call_sign,$specificAdvisorArray)) {
+											debugReport("doing specific advisors and $advisor_call_sign is not one of them. Bypassing<br />");
+											$doAdvisor						= FALSE;
+										}
+									}
+									if ($advisorClass_level == 'Beginner' && $force_class_size_beg != '') {
+										if (!in_array($advisor_call_sign,$BeginnerExemptionsArray)) {
+											if ($advisorClass_class_size >= $force_class_size_beg) {
+												$overrideArray[]				= "$advisor_call_sign Beginner class size of $advisorClass_class_size overriden to $force_class_size_beg<br />";
+											}
+											$advisorClass_class_size		= $force_class_size_beg;
+										} 
+									}
+									if ($advisorClass_level == 'Fundamental' && $force_class_size_fun != '') {
+										if (!in_array($advisor_call_sign,$FundamentalExemptionsArray)) {
+											if ($advisorClass_class_size >= $force_class_size_fun) {
+												$overrideArray[]				= "$advisor_call_sign Fundamental class size of $advisorClass_class_size overriden to $force_class_size_fun<br />";
+											}
+											$advisorClass_class_size		= $force_class_size_fun;
+										}
+									}
+									if ($advisorClass_level == 'Intermediate' && $force_class_size_int != '') {
+										if (!in_array($advisor_call_sign,$IntermediateExemptionsArray)) {
+											if ($advisorClass_class_size >= $force_class_size_int) {
+												$overrideArray[]				= "$advisor_call_sign Intermediate class size of $advisorClass_class_size overriden to $force_class_size_int<br />";
+											}
+											$advisorClass_class_size		= $force_class_size_int;
+										}
+									}
+									if ($advisorClass_level == 'Advanced' && $force_class_size_adv != '') {
+										if (!in_array($advisor_call_sign,$AdvancedExemptionsArray)) {
+											if ($advisorClass_class_size >= $force_class_size_adv) {
+												$overrideArray[]				= "$advisor_call_sign Advanced class size of $advisorClass_class_size overriden to $force_class_size_adv<br />";
+											}
+											$advisorClass_class_size		= $force_class_size_adv;
+										}
+									}
+									$advisorOK								= TRUE;
+									if ($advisor_call_sign == $prevAdvisor) {
+										$advisorOK							= FALSE;
+									}
+									$prevAdvisor							= $advisor_call_sign;
+									if ($doAdvisor) {
+										if ($advisorOK) {
+									
+											$fifoDate						= strtotime($advisor_date_created);
+											if ($advisor_select_sequence == '') {
+												$advisor_select_sequence							= 0;
+											}
+											$sequenceTransform										= array(3=>0,2=>1,1=>2,0=>3);
+											$selectSequence											= $sequenceTransform[$advisor_select_sequence];
+											$selectSequence 										= str_pad($selectSequence,4,'0',STR_PAD_LEFT);
+											$advisorCalcSequence									= "$selectSequence|$fifoDate";
+											$advisorArray[$advisor_call_sign]['first name'] 		= $advisorClass_first_name;
+											$advisorArray[$advisor_call_sign]['last name'] 			= $advisorClass_last_name;
+											$advisorArray[$advisor_call_sign]['email'] 				= $advisorClass_email;
+											$advisorArray[$advisor_call_sign]['phone'] 				= $advisorClass_phone;
+											$advisorArray[$advisor_call_sign]['text message'] 		= '';
+											$advisorArray[$advisor_call_sign]['state'] 				= $advisorClass_state;
+											$advisorArray[$advisor_call_sign]['country'] 			= $advisorClass_country;
+											$advisorArray[$advisor_call_sign]['time zone']			= $advisorClass_timezone_offset;
+											$advisorArray[$advisor_call_sign]['fifo date'] 			= $advisor_date_created;
+											$advisorArray[$advisor_call_sign]['ID'] 				= $advisor_ID;
+										}
+										debugReport("Processing advisorClass for $advisor_call_sign sequence $advisorClass_sequence<br />");
+										/// fix up the class schedule time
+										
+										$thisTime			= substr($advisorClass_class_schedule_times_utc,0,2) . "00";
+										$classKey			= "$advisorClass_level|$thisTime|$advisorClass_class_schedule_days_utc";
+										$classArray[$classKey][$advisorCalcSequence][$advisor_call_sign]['seq'] = $advisorClass_sequence;
+										debugReport("added $classKey $advisorCalcSequence $advisor_call_sign seq as $advisorClass_sequence to classArray<br />");
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"][0]				= $advisorClass_class_size;
+									
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['size']			= $advisorClass_class_size;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['seq']			= $advisorClass_sequence;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['level']		= $advisorClass_level;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time zone']	= $advisorClass_timezone_offset;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time utc']		= $advisorClass_class_schedule_times_utc;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days utc']		= $advisorClass_class_schedule_days_utc;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time local']	= $advisorClass_class_schedule_times;
+										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days local']	= $advisorClass_class_schedule_days;
+										debugReport("added all other advisorClass info to advisorClassArray<br />");
+				
+				
+										debugReport("Processed advisorClass call sign: $advisor_call_sign - $advisorClass_sequence<br />");
+									}
+								}
+							} else {
+								debugReport("No records found in $advisorClassTableName for $advisorCallSign<br />");
+								$errorArray[]			= "No records found in $advisorClassTableName for $advisorCallSign<br />";
+							}
 						}
 					}
 				}
-			} else {
-				if ($keepDebug) {
-					$debugReport	.=  "No records found in $advisorTableName / $advisorClassTableName<br />";
-				}
-				$errorArray[]			= "No records found in $advisorTableName / $advisorClassTableName<br />";
-			}
-		}
-		if ($keepDebug) {
-			$debugReport	.=  "<br /><b>Finished Processing Advisors</b><br />";
-		}
-/*
-		if ($keepDebug) {
-			$debugReport	.=  "<br />advisor Array:<br /><pre>";
-			$debugReport	.= print_r($advisorArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-		
-			$debugReport	.=  "<br />advisor Class Array:<br /><pre>";
-			$debugReport	.= print_r($advisorClassArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-		}
-		
-	return $content;
-*/
+				debugReport("<br /><b>Finished Processing Advisors</b><br />");
+
+				$thisStr	= "<br />advisor Array:<br /><pre>";
+				$thisStr 	.= print_r($advisorArray,TRUE);
+				$thisStr	.= "</pre><br />";
+				debugReport($thisStr);
 			
-///////		build the studentClass array
-		if ($keepDebug) {
-			$debugReport	.=  "<br />Reading $studentTableName table and <b>building studentClassArray</b><br />";
+				$thisStr	.= "<br />advisor Class Array:<br /><pre>";
+				$thisStr 	.= print_r($advisorClassArray,TRUE);
+				$thisStr	.= "</pre><br />";
+				debugReport($thisStr);
+				
+//				return $content;
+
+			} else {
+				$content			.= "<p>No records found in $advisorClassTablerName</p>";
+			}
 		}
+
+///////		build the studentClass array
+		debugReport("<br />Reading $studentTableName table and <b>building studentClassArray</b><br />");
 		$prevStudent		= '';
 		
 		$sql				= "select * from $studentTableName 
@@ -1243,12 +1266,10 @@ function assign_students_to_advisors_v3_func() {
 							   order by student_call_sign";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,"pass2 reading student table");
 		} else {
 			$numSRows									= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
-			}
+			debugReport("ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >");
 			if ($numSRows > 0) {
 				foreach ($wpw1_cwa_student as $studentRow) {
 					$student_master_ID 					= $studentRow->user_ID;
@@ -1282,7 +1303,7 @@ function assign_students_to_advisors_v3_func() {
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1309,7 +1330,7 @@ function assign_students_to_advisors_v3_func() {
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
@@ -1326,8 +1347,7 @@ function assign_students_to_advisors_v3_func() {
 
 					$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
 
-					if ($keepDebug) {
-						$debugReport	.=  "<br />Processing student $studentUpdateLink<br />
+					debugReport("<br />Processing student $studentUpdateLink<br />
 								pre-assigned Advisor: $student_pre_assigned_advisor $student_assigned_advisor_class<br />
 								Assigned Advisor: $student_assigned_advisor $student_assigned_advisor_class<br />
 								Abandoned: $student_abandoned<br />
@@ -1335,13 +1355,10 @@ function assign_students_to_advisors_v3_func() {
 								first_class_choice: $student_first_class_choice | $student_first_class_choice_utc<br />
 								second_class_choice: $student_second_class_choice | $student_second_class_choice_utc<br />
 								third_class_choice: $student_third_class_choice | $student_third_class_choice_utc<br />
-								";
-					}
+								Excluded advisors: $student_excluded_advisor<br />");
 					if ($student_call_sign == $prevStudent) {
 						$errorArray[]						= "Student $studentUpdateLink ($student_level) has a duplicate student record. Duplicate bypassed<br />";
-						if ($keepDebug) {
-							$debugReport	.=  "Student $studentUpdateLink ($student_level) has a duplicate student record. Duplicate bypassed<br />";
-						}
+						debugReport("Student $studentUpdateLink ($student_level) has a duplicate student record. Duplicate bypassed<br />");
 						$processStudent						= FALSE;
 						$prevStudent						= $student_call_sign;
 					}
@@ -1382,6 +1399,7 @@ function assign_students_to_advisors_v3_func() {
 						$studentArray[$student_call_sign]['signal']					= $student_signal;
 						$studentArray[$student_call_sign]['whatsapp']				= $student_whatsapp;
 						$studentArray[$student_call_sign]['excluded advisor']		= $student_excluded_advisor;
+						$studentArray[$student_call_sign]['pre_assigned advisor']	= $student_pre_assigned_advisor;						
 						$studentArray[$student_call_sign]['assigned advisor']		= $student_assigned_advisor;
 						$studentArray[$student_call_sign]['assigned advisor class']	= $student_assigned_advisor_class;
 
@@ -1389,27 +1407,34 @@ function assign_students_to_advisors_v3_func() {
 						$processStudent							= TRUE;
 						// if student is on hold, add to the hold array
 						if ($student_intervention_required == 'H') {
-							if ($keepDebug) {
-								$debugReport	.=  "&nbsp;&nbsp;&nbsp;Student is on Hold. Added to holdArray<br />";
-							}
+							debugReport("Student is on Hold. Added to holdArray<br />");
 							$holdArray[]	= $student_call_sign;
 							$totalStudentsOnHold++;
 							$processStudent		= FALSE;
 						}
 						if ($student_intervention_required == 'Q' && $student_hold_reason_code == 'Q') {
-							if ($keepDebug) {
-								$debugReport	.=  "&nbsp;&nbsp;&nbsp;Student is on Hold. Added to holdArray<br />";
-							}
+							debugReport("Student is on Hold. Added to holdArray<br />");
 							$holdArray[]	= $student_call_sign;
 							$totalStudentsOnHold++;
 							$processStudent		= FALSE;
 						}
 						if ($verifiedStudents && $student_response != 'Y') {
-							if ($keepDebug) {
-								$debugReport	.=  "&nbsp;&nbsp;&nbsp;Student not verified. Bypassed<br />";
-							}
+							debugReport("Student not verified. Bypassed<br />");
 							$processStudent		= FALSE;			
+						} 
+						// if student is already assigned, handle that situation
+						if ($processStudent && $student_assigned_advisor != '') {
+							$thisResult			= assignStudentToAdvisor($student_call_sign,$student_assigned_advisor,$student_assigned_advisor_class);
+							if ($thisResult) {
+								$processStudent	= FALSE;
+								debugReport("student assignment to assigned advisor $student_assigned_advisor accomplished<br />");
+							} else {
+								debugReport("Student $student_call_sign with level $student_level assigned to $student_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class. Student bypassed<br />");
+								$errorArray[]	= "Student $studentUpdateLink ($student_level) with level $student_level assigned to $student_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class. <b>Student Bypassed</b><br />";
+								$processStudent	= FALSE;
+							}							
 						}
+						
 						if ($processStudent) {
 							if ($student_first_class_choice == '' || $student_first_class_choice == 'None') {
 								$student_first_class_choice = 'None';
@@ -1519,27 +1544,21 @@ function assign_students_to_advisors_v3_func() {
 
 						// if the student is pre-assigned, do the pre-assign
 						if ($student_pre_assigned_advisor != '' && $student_assigned_advisor == '') {
-							if ($keepDebug) {
-								$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student pre-assigned to $student_pre_assigned_advisor sequence $student_assigned_advisor_class<br />";
-							}
+							debugReport("Student pre-assigned to $student_pre_assigned_advisor sequence $student_assigned_advisor_class<br />");
 							$doPreAssign				= TRUE;
 							// see if the advisor is excluded
 							if ($student_excluded_advisor != '') {
 								$myInt					= strpos($student_excluded_advisor,$student_pre_assigned_advisor);
 								if ($myInt !== FAlSE) {				// advisor excluded
 									$doPreAssign		= FALSE;
-									if ($keepDebug) {
-										$debugReport	.=  "advisor $student_pre_assigned_advisor is exlcuded. No assignment made<br />";
-									}
+									debugReport("advisor $student_pre_assigned_advisor is exlcuded. No assignment made<br />");
 								}
  							}
  							// if doing specific advisors, only assign if one of the specific advisors
  							if ($specificAdvisors) {
 								if (!in_array($student_pre_assigned_advisor,$specificAdvisorArray)) {
 									$doPreAssign		= FALSE;
-									if ($keepDebug) {
-										$debugReport	.=  "advisor $student_pre_assigned_advisor is not being processed. No assignment made<br />";
-									}
+									debugReport("advisor $student_pre_assigned_advisor is not being processed. No assignment made<br />");
 								} 								
  							}
 							if ($doPreAssign) {
@@ -1548,28 +1567,21 @@ function assign_students_to_advisors_v3_func() {
 									$processStudent	= FALSE;
 									$preAssignedCount++;
 									$preAssignedArray[]	= $student_call_sign;
-									if ($keepDebug) {
-										$debugReport	.=  "student pre-assignment to $student_pre_assigned_advisor accomplished<br />";
-									}
+									debugReport("student pre-assignment to $student_pre_assigned_advisor accomplished<br />");
 								} else {
-									if ($keepDebug) {
-										$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student $student_call_sign with level $student_level pre-assigned to $student_pre_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />";
-									}
+									debugReport("Student $student_call_sign with level $student_level pre-assigned to $student_pre_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />");
 									$errorArray[]	= "Student $studentUpdateLink ($student_level) with level $student_level pre-assigned to $student_pre_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />";
 									$processStudent	= TRUE;
 								}
 							}
-//						} else {				/// student is assigned. Keep the assignment
-						}
+						}					/// student is assigned. Keep the assignment
 						if ($student_assigned_advisor != '') {
  							// if doing specific advisors, only assign if one of the specific advisors
  							$doAssign				= TRUE;
  							if ($specificAdvisors) {
 								if (!in_array($student_assigned_advisor,$specificAdvisorArray)) {
 									$doAssign		= FALSE;
-									if ($keepDebug) {
-										$debugReport	.=  "advisor $student_assigned_advisor is not being processed. No assignment made<br />";
-									}
+									debugReport("advisor $student_assigned_advisor is not being processed. No assignment made<br />");
 								} 								
  							}
  							if ($doAssign) {
@@ -1578,13 +1590,9 @@ function assign_students_to_advisors_v3_func() {
 									$processStudent	= FALSE;
 									$preAssignedCount++;
 									$preAssignedArray[]	= $student_call_sign;
-									if ($keepDebug) {
-										$debugReport	.=  "student assignment to $student_assigned_advisor accomplished<br />";
-									}
+									debugReport("student assignment to $student_assigned_advisor accomplished<br />");
 								} else {
-									if ($keepDebug) {
-										$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student $student_call_sign with level $student_level assigned to $student_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />";
-									}
+									debugReport("Student $student_call_sign with level $student_level assigned to $student_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />");
 									$errorArray[]	= "Student $studentUpdateLink with level $student_level assigned to $student_assigned_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />";
 									$processStudent	= TRUE;
 								}
@@ -1595,35 +1603,25 @@ function assign_students_to_advisors_v3_func() {
 					// if student is a beginner youth, assign to K1BG
 					if ($processStudent) {
 						$doK1BG				= TRUE;
-						if ($student_level == 'Beginner' && $student_youth == 'Yes') {
-							if ($keepDebug) {
-								$debugReport	.=  "$student_call_sign is a youth. assign to K1BG?<br />";
-							}
+						if ($student_level == 'Beginner' && ($student_youth == 'Yes' || $student_youth == 'Y')) {
+							debugReport("$student_call_sign is a youth. assign to K1BG?<br />");
 							if ($specificAdvisors) {
 								if (!in_array('K1BG',$specificAdvisorArray)) {
 									$doK1BG		= FALSE;
-									if ($keepDebug) {
-										$debugReport	.=  "doing specificAdvisors and K1BG not included<br />";
-									}
+									debugReport("doing specificAdvisors and K1BG not included<br />");
 								}
 							}
 							if ($doK1BG) {
-								if ($keepDebug) {
-									$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student is a Beginner and a Youth. Assigning to K1BG<br />";
-								}
+								debugReport("Student is a Beginner and a Youth. Assigning to K1BG<br />");
 								$student_advisor				= 'K1BG';
 								$student_assigned_advisor_class	= '1';
 								$thisResult			= assignStudentToAdvisor($student_call_sign,'K1BG','1');
 								if ($thisResult) {
 									$processStudent	= FALSE;
 									$preAssignedCount++;
-									if ($keepDebug) {
-										$debugReport	.=  "youth student assignment to K1BG accomplished<br />";
-									}
+									debugReport("youth student assignment to K1BG accomplished<br />");
 								} else {
-									if ($keepDebug) {
-										$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student $student_call_sign with level $student_level pre-assigned to $student_advisor at sequence $student_assigned_advisor_class. Advisor does not have that classy<br />";
-									}
+									debugReport("Student $student_call_sign with level $student_level pre-assigned to $student_advisor at sequence $student_assigned_advisor_class. Advisor does not have that classy<br />");
 									$errorArray[]	= "Student $studentUpdateLink with level $student_level pre-assigned to $student_advisor at sequence $student_assigned_advisor_class. Advisor does not have that class<br />";
 									$processStudent	= FALSE;
 								}
@@ -1633,57 +1631,54 @@ function assign_students_to_advisors_v3_func() {
 					
 					// if processStudent then add to processStudentArray
 					if ($processStudent) {
-						$requestDate		= strtotime($student_request_date);
-						$processStudentArray[] = "$student_level|$student_class_priority|$requestDate|$student_call_sign|$student_first_class_choice_utc|$student_second_class_choice_utc|$student_third_class_choice_utc|$student_timezone_offset|$student_excluded_advisor";
-						if ($keepDebug) {
-							$debugReport	.=  "student assigned to processStudentArray<br />
-								  $student_level|$student_class_priority|$requestDate|$student_call_sign|$student_first_class_choice_utc|$student_second_class_choice_utc|$student_third_class_choice_utc|$student_timezone_offset|$student_excluded_advisor<br />";
-						}
+						$requestDate			= strtotime($student_request_date);
+						$processStudentArray[] 	= "$student_level|$student_class_priority|$requestDate|$student_call_sign|$student_first_class_choice_utc|$student_second_class_choice_utc|$student_third_class_choice_utc|$student_timezone_offset|$student_excluded_advisor";
+						debugReport("student assigned to processStudentArray<br />");
 					}
 				}
 			} else {
-				if ($keepDebug) {
-					$debugReport	.=  "No records found in $studentTableName table<br />";
-				}
+				debugReport("No records found in $studentTableName table<br />");
 				$errorArray[]	= "No records found in $studentTableName table. Student arrays are empty<br />";
 			}
 		}
+
+
 ///// student arrays built		
-		
-		
-		
+				
 		rsort($processStudentArray);
 		ksort($classArray);
 		
-		if ($keepDebug) {
-			$debugReport	.=  "<br />advisor Array:<br /><pre>";
-			$debugReport	.= print_r($advisorArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-		
-			$debugReport	.=  "<br />student Array:<br /><pre>";
-			$debugReport	.= print_r($studentArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-		
-			$debugReport	.=  "<br />class Array:<br /><pre>";
-			$debugReport	.= print_r($classArray,TRUE);
-			$debugReport	.=  "</pre><br />";
+		$thisStr	=  "<br />advisor Array:<br /><pre>";
+		$thisStr	.= print_r($advisorArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+	
+		$thisStr	=  "<br />student Array:<br /><pre>";
+		$thisStr	.= print_r($studentArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+	
+		$thisStr	=  "<br />class Array:<br /><pre>";
+		$thisStr	.= print_r($classArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
 
-			$debugReport	.=  "<br />advisor Class Array:<br /><pre>";
-			$debugReport	.= print_r($advisorClassArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-			
-			$debugReport	.=  "<br />student Assigned Advisor Array<br />";
-			ksort($studentAssignedAdvisorArray);
-			foreach($studentAssignedAdvisorArray as $myKey=>$myValue) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;$myKey = $myValue<br />";
-			}
-			
-			$debugReport	.=  "<br />process Student Array:<br /><pre>";
-			$debugReport	.= print_r($processStudentArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-			
+		$thisStr	=  "<br />advisor Class Array:<br /><pre>";
+		$thisStr	.= print_r($advisorClassArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+		
+		$thisStr	.=  "<br />student Assigned Advisor Array<br />";
+		ksort($studentAssignedAdvisorArray);
+		foreach($studentAssignedAdvisorArray as $myKey=>$myValue) {
+			debugReport("$myKey = $myValue<br />");
 		}
-
+		
+		$thisStr	.=  "<br />process Student Array:<br /><pre>";
+		$thisStr	.= print_r($processStudentArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+			
 //	return $content;
 
 //////////	assign students to advisors
@@ -1706,9 +1701,7 @@ function assign_students_to_advisors_v3_func() {
 
 */
 
-		if ($keepDebug) {
-			$debugReport	.=  "<br /><b>Assigning Students</b><br />";
-		}
+		debugReport("<br /><b>Assigning Students</b><br />");
 		foreach($processStudentArray as $studentValue) {
 			$myArray					= explode("|",$studentValue);
 			$studentLevel				= $myArray[0];
@@ -1721,39 +1714,30 @@ function assign_students_to_advisors_v3_func() {
 			$studentTimeZone			= $myArray[7];
 			$studentExcludedAdvisor		= $myArray[8];
 			
-			if ($keepDebug) {
-				$debugReport	.=  "<br />Processing $studentCallSign $studentLevel<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;first choice: $studentFirstClassChoice<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;second choice: $studentSecondClassChoice<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;third choice: $studentThirdClassChoice<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;time zone: $studentTimeZone<br />";						
-			}
+			debugReport("<br />Processing $studentCallSign $studentLevel<br />
+						first choice: $studentFirstClassChoice<br />
+						second choice: $studentSecondClassChoice<br />
+						third choice: $studentThirdClassChoice<br />
+						time zone: $studentTimeZone<br />");						
+
 			$gotAClass			= FALSE;
 			$studentTrace		.= "<br /><b>$studentCallSign</b><br />";
-			if ($keepDebug) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Look for a class for student choicex<br />";
-			}
+			debugReport("Look for a class for student choices<br />");
 			$thisResult		= findAClass($studentLevel,$studentFirstClassChoice,$studentSecondClassChoice,$studentThirdClassChoice,$studentExcludedAdvisor);
-//			$studentTrace	.= 
 			if ($thisResult[0] !== FALSE) {
 				$gotAClass	= TRUE;
 				$studentTrace		.= $thisResult[3];
-				if ($keepDebug) {
-					$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Got a class: $thisResult[1]<br />";
-				}
+				debugReport("Got a class: $thisResult[1]<br />");
 			} else {
 				$studentTrace		.= $thisResult[3];
-				if ($keepDebug) {
-					$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;No class match. Options checked:<br /><pre>";
-					$debugReport	.= print_r($thisResult[2],TRUE);
-					$debugReport	.=  "</pre><br />";
-				}
+				$thisStr			= "No class match. Options checked:<br /><pre>";
+				$thisStr			.= print_r($thisResult[2],TRUE);
+				$thisStr			.=  "</pre><br />";
+				debugReport($thisStr);
 			}
 
 			if (!$gotAClass) {	
-				if ($keepDebug) {
-					$debugReport	.=  "<br />no classes found. Attempting arbitrary assignment<br />";
-				}				
+				debugReport("<br />no classes found. Attempting arbitrary assignment<br />");
 				/// if still no match, look at a number of  options
 				$studentTrace		.= "Attempting arbitrary assignment<br />";
 				// figure out what 1900 in local time is in UTC
@@ -1791,9 +1775,7 @@ function assign_students_to_advisors_v3_func() {
 					$thisUTC		= $thisUTC + 2400;
 				}
 				$thirdUTC			= str_pad($thisUTC,4,'0',STR_PAD_LEFT);
-				if ($keepDebug) {
-					$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Attempting arbitrary assignment. TZ of $studentTimeZone at 1900 converted to UTC is $thisUTC<br />";
-				}
+				debugReport("Attempting arbitrary assignment. TZ of $studentTimeZone at 1900 converted to UTC is $thisUTC<br />");
 				foreach($daysTestArray as $myValue) {
 					$schedule1		= "$firstUTC $myValue";
 					$schedule2		= "$secondUTC $myValue";
@@ -1802,44 +1784,34 @@ function assign_students_to_advisors_v3_func() {
 					if ($thisResult[0] !== FALSE) {
 						$gotAClass		= TRUE;
 						$studentTrace		.= $thisResult[3];
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;findAClass matched $thisResult[1]<br />";
-						}
+						debugReport("findAClass matched $thisResult[1]<br />");
 						$arbitraryArray[]		= $studentCallSign;
 						$arbitraryAssignedCount++;
 						break;
 					} else {
 						$studentTrace		.= $thisResult[3];
-						if ($keepDebug) {
-							$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;No arbitrary class choice match. Options checked:<br /><pre>";
-							$debugReport	.= print_r($thisResult[2],TRUE);
-							$debugReport	.=  "</pre><br />";
-						}
+						$thisStr	=  "No arbitrary class choice match. Options checked:<br /><pre>";
+						$thisStr	.= print_r($thisResult[2],TRUE);
+						$thisStr	.=  "</pre><br />";
+						debugReport($thisStr);
 					}
 				}
 			}
 			
 			
 			if (!$gotAClass) { 		// now what: stick in unassigned array
-				if ($keepDebug) {
-					$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;No class option found for $studentCallSign ($studentLevel). Adding to unassignedArray<br />";
-				}
+				debugReport("No class option found for $studentCallSign ($studentLevel). Adding to unassignedArray<br />");
 				$unassignedArraySequence++;
 				$unassignedArray[$studentLevel][$unassignedArraySequence]	= $studentCallSign;
-//				$errorArray[]				= "Student $studentCallSign ($studentLevel) had class selections; either not in catalog or all seats full. Arbitrary checked and none found. Added to unassignedArray<br />";
 			} else {			//// assign student to the class
 				$myArray			= explode("|",$thisResult[1]);
 				$advisorCallSign	= $myArray[0];
 				$advisorSequence	= $myArray[1];
 				$thisResult			= assignStudentToAdvisor($studentCallSign,$advisorCallSign,$advisorSequence);
 				if ($thisResult) {
-					if ($keepDebug) {
-						$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;Student assigned to $advisorCallSign, $advisorSequence<br />";
-					}
+					debugReport("Student assigned to $advisorCallSign, $advisorSequence<br />");
 				} else {
-					if ($keepDebug) {
-						$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;ERROR No class for $studentCallSign ($studentLevel). Added to errorArray<br />";
-					}
+					debugReport("ERROR No class for $studentCallSign ($studentLevel). Added to errorArray<br />");
 					$errorArray[]		= "Attempt to assign student $studentUpdateLink with level $student_level to $advisorCallSign at sequence $advisorSequence failed. Advisor does not have that class<br />";
 					$unassignedArraySequence++;
 					$unassignedArray[$studentLevel][$unassignedArraySequence]	= $studentCallSign;
@@ -1848,150 +1820,35 @@ function assign_students_to_advisors_v3_func() {
 			
 		}				// done with the processStudent array
 				
-/*		
-		// Now backfill AC6AC if any available unavailable students meet his class times
-		
-		if ($keepDebug) {
-			$debugReport	.=  "<br /><b>Backfilling AC6AC</b><br />";
-		}
- 		
-		$ii							= 0;
-		$gotClass					= TRUE;
-		while ($gotClass) {
-			$ii++;
-			$myStr					= "AC6AC|$ii";
-			if (array_key_exists($myStr,$advisorClassArray)) {
-				$thisData				= $advisorClassArray["AC6AC|$ii"];
-			
-				$availableSeats			= $thisData[0];
-				$classSequence			= $thisData['seq'];
-				$classLevel				= $thisData['level'];
-				$classTimeUTC			= $thisData['time utc'];
-				$classDaysUTC			= $thisData['days utc'];
-				$advisorSchedule		= "$classTimeUTC $classDaysUTC";
-			
-				if ($keepDebug) {
-					$debugReport	.=  "Working to fill sequence $classSequence<br />
-							Available Seats: $availableSeats<br />
-							Level: $classLevel<br />
-							Class Time UTC: $classTimeUTC $classDaysUTC<br />";
-				}
-				if ($availableSeats > 0) {
-					if ($keepDebug) {
-						$debugReport	.=  "looking for potential students<br />";
-					}
-					$gotAMatch						= FALSE;
-					foreach($unassignedArray[$classLevel] as $thisSeq=>$thisStudent) {
-						if ($gotAMatch == FALSE) {
-							if ($keepDebug) {
-								$debugReport	.=  "looking at student $thisStudent<br />";
-							}
-							if (array_key_exists($thisStudent,$studentArray)) {
-								$thisTimeZone		= $studentArray[$thisStudent]['time_zone'];
-								$thisFirstChoice	= $studentArray[$thisStudent]['first choice utc'];
-								$thisSecondChoice	= $studentArray[$thisStudent]['second choice utc'];
-								$thisThirdChoice	= $studentArray[$thisStudent]['third choice utc'];
-								$thisExclAdvisor	= $studentArray[$thisStudent]['excluded advisor'];
-								
-								$thisFirstChoice	= str_replace('30','00',$thisFirstChoice);
-								$thisSecondChoice	= str_replace('30','00',$thisSecondChoice);
-								$thisThirdChoice	= str_replace('30','00',$thisThirdChoice);
-								if (strpos($thisExclAdvisor,'AC6AC') === FALSE) {
-									if ($keepDebug) {
-										$debugReport	.=  "checking advisor schedule $advisorSchedule against student first choice $thisFirstChoice<br />";
-									}
-									if ($advisorSchedule == $thisFirstChoice) {
-										/// assign the student
-										$thisResult			= assignStudentToAdvisor($thisStudent,'AC6AC',$classSequence);
-										$gotAMatch			= TRUE;
-										unset($unassignedArray[$classLevel][$thisSeq]);
-										if ($keepDebug) {
-											$debugReport	.=  "assigned this student<br />";
-										}
-									} else {
-										if ($keepDebug) {
-											$debugReport	.=  "no match<br />";
-										}
-									}
-									if (!$gotAMatch) {
-										if ($keepDebug) {
-											$debugReport	.=  "checking advisor schedule $advisorSchedule against student first choice $thisSecondChoice<br />";
-										}
-										if ($advisorSchedule == $thisSecondChoice) {
-											/// assign the student
-											$thisResult			= assignStudentToAdvisor($thisStudent,'AC6AC',$classSequence);
-											$gotAMatch			= TRUE;
-											unset($unassignedArray[$classLevel][$thisSeq]);
-											if ($keepDebug) {
-												$debugReport	.=  "assigned this student<br />";
-											}
-										} else {
-											if ($keepDebug) {
-												$debugReport	.=  "no match<br />";
-											}
-										}
-									}
-									if (!$gotAMatch) {
-										if ($keepDebug) {
-											$debugReport	.=  "checking advisor schedule $advisorSchedule against student first choice $thisThirdChoice<br />";
-										}
-										if ($advisorSchedule == $thisThirdChoice) {
-											/// assign the student
-											$thisResult			= assignStudentToAdvisor($thisStudent,'AC6AC',$classSequence);
-											$gotAMatch			= TRUE;
-											unset($unassignedArray[$classLevel][$thisSeq]);
-										if ($keepDebug) {
-												$debugReport	.=  "assigned this student<br />";
-											}
-										} else {
-											if ($keepDebug) {
-												$debugReport	.=  "no match<br />";
-											}
-										}
-									}									
-								}
-							}
-						}
-					}
-				} else {
-					if ($keepDebug) {
-						$debugReport	.=  "no seats available. Bypassing this class<br />";
-				 	}
-				}
-			} else {
-				$gotClass				= FALSE;
-			}
-		}		
-/*	
 		////// dump the arrays
 
 		sort($arbitraryArray);
 		ksort($studentAssignedAdvisorArray);
 		ksort($unassignedArray);
 		
-		if ($keepDebug) {
-			$debugReport	.=  "<br />advisor Class Array:<br /><pre>";
-			$debugReport	.= print_r($advisorClassArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-			
-			$debugReport	.=  "<br />student Assigned Advisor Array<br />";
-			foreach($studentAssignedAdvisorArray as $myKey=>$myValue) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;$myKey = $myValue<br />";
-			}
-			
-			$debugReport	.=  "<br />Arbitrary Array:<br /><pre>";
-			$debugReport	.= print_r($arbitraryArray,TRUE);
-			$debugReport	.=  "</pre><br />";
-			
-			$debugReport	.=  "<br />Unassigned Array:<br /><pre>";
-				$debugReport	.= print_r($unassignedArray,TRUE);
-				$debugReport	.=  "</pre><br />";
-			
-			$debugReport	.=  "<br />Hold Array:<br />";
-			foreach($holdArray as $myValue) {
-				$debugReport	.=  "&nbsp;&nbsp;&nbsp;&nbsp;$myValue<br />";
-			}
-			
+		$thisStr	.=  "<br />advisor Class Array:<br /><pre>";
+		$thisStr	.= print_r($advisorClassArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+		
+		debugReport("<br />student Assigned Advisor Array<br />");
+		foreach($studentAssignedAdvisorArray as $myKey=>$myValue) {
+			debugReport("$myKey = $myValue<br />");
+		}
+		
+		$thisStr	.=  "<br />Arbitrary Array:<br /><pre>";
+		$thisStr	.= print_r($arbitraryArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+		
+		$thisStr	=  "<br />Unassigned Array:<br /><pre>";
+		$thisStr	.= print_r($unassignedArray,TRUE);
+		$thisStr	.=  "</pre><br />";
+		debugReport($thisStr);
+		
+		debugReport("<br />Hold Array:<br />");
+		foreach($holdArray as $myValue) {
+			debugReport("$myValue<br />");
 		}
 
 
@@ -2005,9 +1862,7 @@ function assign_students_to_advisors_v3_func() {
 	prepare the email to the advisor. Only send if requested
 	
 */
-		if ($keepDebug) {
-			$debugReport	.=  "<br />Preparing Advisors and Classes Report<br />";
-		}
+		debugReport("<br />Preparing Advisors and Classes Report<br />");
 		if ($testMode) {
 			$thisMode	= 'TM';
 		} else {
@@ -2057,9 +1912,7 @@ function assign_students_to_advisors_v3_func() {
 			$advisor_ID				= $advisorArray[$advisorCallSign]['ID'];
 			
 			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisorCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisorCallSign</a>";
-			if ($keepDebug) {
-				$debugReport	.=  "<br />Processing advisor $advisorUpdateLink<br />";
-			}
+			debugReport("<br />Processing advisor $advisorUpdateLink<br />");
 			$thisNumberAdvisors++;
 								
 			$content				.= "<table>
@@ -2076,16 +1929,12 @@ function assign_students_to_advisors_v3_func() {
 				
 			$studentCount			= 0;
 			// get the advisorClass records
-			if ($keepDebug) {
-				$debugReport	.=  "Getting advisorClass records<br />";
-			}
+			debugReport("Getting advisorClass records<br />");
 			$doOnce											= TRUE;
 			for($ii=1;$ii<=5;$ii++) {
 				$advisorClassKey			= "$advisorCallSign|$ii";
 				if (array_key_exists($advisorClassKey,$advisorClassArray)) {
-					if ($keepDebug) {
-						$debugReport	.=  "Found a class for key $advisorClassKey<br />";
-					}
+					debugReport("Found a class for key $advisorClassKey<br />");
 					
 					$advisorClass_class_size				= $advisorClassArray["$advisorCallSign|$ii"]['size'];
 					$advisorClass_sequence					= $advisorClassArray["$advisorCallSign|$ii"]['seq'];
@@ -2144,26 +1993,20 @@ function assign_students_to_advisors_v3_func() {
 							$student_second_choice	= $studentArray[$thisStudent]['second choice utc'];
 							$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
 							
-							$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$thisStudent&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisStudent</a>";
-							if ($keepDebug) {
-								$debugReport	.=  "Adding line for $thisStudent<br />";
-							}
+							$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$thisStudent&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisStudent</a>";
+							debugReport("Adding line for $thisStudent<br />");
 							$hasAssessment			= FALSE;
 							$assessmentStr			= '';
 							$sql					= "select * from $audioAssessmentTableName 
 														where call_sign='$thisStudent'";
 							$wpw1_cwa_audio_assessment	= $wpdb->get_results($sql);
 							if ($wpw1_cwa_audio_assessment === FALSE) {
-								if ($keepDebug) {
-									$debugReport	.=  "Reading $audioAssessmentTableName table failed<br />
+								debugReport("reading $audioAssessmentTableName table failed<br />
 										  wpdb->last_query: " . $wpdb->last_query . "<br />
-										  <b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-								}
+										  <b>wpdb->last_error: " . $wpdb->last_error . "</b><br />");
 							} else {
 								$numAARows									= $wpdb->num_rows;
-								if ($keepDebug) {
-									$debugReport	.=  "retrieved $numAARows rows from wpw1_cwa_audio_assessment table<br />";
-								}
+								debugReport("retrieved $numAARows rows from wpw1_cwa_audio_assessment table<br />");
 								if ($numAARows > 0) {
 									$hasAssessment	= TRUE;
 									$enstr			= base64_encode("advisor_call_sign=$advisorCallSign&inp_callsign=$thisStudent");
@@ -2233,12 +2076,10 @@ function assign_students_to_advisors_v3_func() {
 					if ($thisClassStudents < 4) {
 						$smallClassesArray[] =	"$advisorCallSign|$advisorClass_sequence|$thisClassStudents|$advisorClass_class_size|$advisorClass_level|$advisorClass_timezone|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc";
 					}
-					if ($keepDebug) {
-						$debugReport	.=  "calculating seatsOpen. advisorClass_class_size: $advisorClass_class_size; thisClassStudents: $thisClassStudents<br />";
-					}
+					debugReport("calculating seatsOpen. advisorClass_class_size: $advisorClass_class_size; thisClassStudents: $thisClassStudents<br />");
 					$seatsOpen 				= $advisorClass_class_size - $thisClassStudents;
 					if ($seatsOpen > 0) {
-						$seatsOpenArray[]	= "$advisorCallSign|$seatsOpen|$advisorClass_class_size|$advisorClass_level|$advisorClass_timezone|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc";
+						$seatsOpenArray[]	= "$advisorCallSign|$seatsOpen|$advisorClass_class_size|$advisorClass_level|$advisorClass_timezone|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc|$thisClassStudents";
 					}
 				}
 			
@@ -2285,9 +2126,7 @@ function assign_students_to_advisors_v3_func() {
 													'doDebug'=>$doDebug);
 					$mailResult		= emailFromCWA_v2($emailArray);
 					if ($mailResult === TRUE) {
-						if ($keepDebug) {
-							$debugReport	.=  "An email with student info was sent to $theRecipient<br />";
-						}
+						debugReport("An email with student info was sent to $theRecipient<br />");
 						$advisorMailCount++;
 					} else {
 						$content .= "The mail send function to $theRecipient failed.<br /><br />";
@@ -2325,13 +2164,8 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 												"token|$token|s");
 					$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
 					if ($insertResult[0] === FALSE) {
-						if ($keepDebug) {
-							$debugReport	.=  "inserting reminder failed: $insertResult[1]<br />";
-						}
+						debugReport("inserting reminder failed: $insertResult[1]<br />");
 						$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-// changed 5Aug24 by roland. Don't need the info
-//					} else {
-//						$content		.= "Reminder successfully added<br />";
 					}
 
 					
@@ -2339,9 +2173,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 					if ($request_type == 'B' || $request_type == 'D' || $request_type == 'F') {			/// update advisor action log?
 		
 						///// update advisor action log
-						if ($keepDebug) {
-							$debugReport	.=  "Updating advisor after sending the email<br />";
-						}
+						debugReport("Updating advisor after sending the email<br />");
 						$sql 					= "select action_log 
 												   from $advisorTableName 
 												   where advisor_id=$advisor_ID";
@@ -2349,19 +2181,16 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 						if ($wpw1_cwa_advisor === FALSE) {
 							$myError			= $wpdb->last_error;
 							$myQuery			= $wpdb->last_query;
-							if ($keepDebug) {
-								$debugReport	.=  "Reading $advisorTableName table failed<br />
+							debugReport("Reading $advisorTableName table failed<br />
 									  wpdb->last_query: $myQuery<br />
-									  wpdb->last_error: $myError<br />";
-							}
+									  wpdb->last_error: $myError<br />");
 							$errorMsg			= "$jobname Reading $advisorTableName table failed. <p>SQL: $myQuery</p><p> Error: $myError</p>";
 							sendErrorEmail($errorMsg);
 						} else {
 							$numARows			= $wpdb->num_rows;
-							if ($keepDebug) {
-								$myStr			= $wpdb->last_query;
-								$debugReport	.=  "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-							}
+							$myStr			= $wpdb->last_query;
+							debugReport("ran $myStr<br />and found $numARows rows in $advisorTableName table<br />");
+
 							if ($numARows > 0) {
 								foreach ($wpw1_cwa_advisor as $advisorRow) {
 									$advisor_action_log					= $advisorRow->action_log;
@@ -2386,21 +2215,15 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 									$myError	= $wpdb->last_error;
 									$mySql		= $wpdb->last_query;
 									$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-									if ($keepDebug) {
-										$debugReport	.=  $errorMsg;
-									}
+									debugReport($errorMsg);
 									sendErrorEmail($errorMsg);
 									$content		.= "Unable to update content in $advisorTableName<br />";
 								} else {
-									if ($keepDebug) {
-										$debugReport	.=  "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
-										$debugReport	.=  "Advisor $advisorCallSign (ID: $advisor_ID) action log updated<br />";
-									}
+									debugReport("Successfully updated $advisor_call_sign record at $advisor_ID<br />");
+									debugReport("Advisor $advisorCallSign (ID: $advisor_ID) action log updated<br />");
 								}
 							} else {
-								if ($keepDebug) {
-									$debugReport	.=  "No record found in $advisorTableName table for $advisor_ID to update<br />";
-								}
+								debugReport("No record found in $advisorTableName table for $advisor_ID to update<br />");
 								$errorArray[]	= "No record found in $advisorTableName table for $advisor_ID to update<br />";
 							}
 						}
@@ -2419,9 +2242,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 
 ////////////	Unassigned students report
-		if ($keepDebug) {
-			$debugReport	.=  "Doing Unassigned Students Report<br />";
-		}
+		debugReport("Doing Unassigned Students Report<br />");
 //	unassignedArray[studentLevel][sequence]	= student_call_sign
 
 		$firstTime		= TRUE;
@@ -2446,14 +2267,8 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			foreach($thisData as $thisSeq => $thisStudent) {
 				$studentCallSign		= $thisStudent;
 				$student_level			= $thisLevel;
-//				if ($keepDebug) {
-//					$debugReport	.=  "processing unassigned array $thisLevel => $thisStudent<br />";
-//				}
 			
 				if ($thisLevel != $prevLevel) {
-//					if ($keepDebug) {
-//						$debugReport	.=  "Got a new level of $student_level<br />";
-//					}
 					if ($firstTime) {
 						$firstTime		= FALSE;
 					} else {
@@ -2481,7 +2296,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 				$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
 				$student_excluded_advisor	= $studentArray[$thisStudent]['excluded advisor'];
 			
-				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$studentCallSign</a>";
+				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
 				$findClassLink			= "<a href='$studentManagementURL?strpass=70&inp_student_callsign=$studentCallSign&inp_mode=$inp_mode' target='_blank'><b>Find Class</b></a>";
 
 				$unassignedCount++;
@@ -2502,9 +2317,9 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 				}
 				$content				.= "<tr><td style='vertical-align:top;'>$student_level</td>
 												<td style='vertical-align:top;'>$student_last_name, $student_first_name ($studentUpdateLink) <br />
-																				$student_first_choice</td>
-												<td style='vertical-align:top;'>$student_email<br />$student_second_choice</td>
-												<td style='vertical-align:top;'>$student_phone ($student_text_message)<br />$student_third_choice</td>
+																				$student_first_choice utc</td>
+												<td style='vertical-align:top;'>$student_email<br />$student_second_choice utc</td>
+												<td style='vertical-align:top;'>$student_phone ($student_text_message)<br />$student_third_choice utc</td>
 												<td style='vertical-align:top;'>$student_state</td>
 												<td style='vertical-align:top;'>$student_country</td>
 												<td style='vertical-align:top;'>$student_excluded_advisor<br />($findClassLink)</td></tr>";	
@@ -2526,9 +2341,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 //	studentAssignedAdvisorArray[student_call_sign] = |	student_advisor|student_assigned_advisor_class
 
-		if ($keepDebug) {
-			$debugReport	.=  "Doing the student assignment information report<br />";
-		}
+		debugReport("Doing the student assignment information report<br />");
 		ksort($studentAssignedAdvisorArray);
 		$content				.= "<a name='report2'><h3>Student Assignment Information Report</h3></a>
 									<table style='width:1000px;'>
@@ -2644,14 +2457,12 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			$content	.= "<tr><td colspan='9'>No Students arbitrarily assigned</td></tr>";
 		}
 		$content			.= "</table>
-<p>$myInt Students arbitrarily assigned</p>";
+								<p>$myInt Students arbitrarily assigned</p>";
 
 
 
 ///////////// 	small classes report
-		if ($keepDebug) {
-			$debugReport	.=  "<br />Starting the small classes report<br />";
-		}
+		debugReport("<br />Starting the small classes report<br />");
 //	smallClassesArray[advisorCallSign|advisorClass_sequence|studentCount|advisorClass_class_size|advisorClass_level|advisorClass_timezone]
 		sort($smallClassesArray);
 		$availSeats		= 0;
@@ -2678,16 +2489,16 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 					
 			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
 
-		$smallClassCount++;
-		$myInt				= $thisSize - $thisStudents;
-		$availSeats			= $availSeats + $myInt;
-		$content		.= "<tr><td style='vertical-align:top;'>$advisorUpdateLink</td>
-								<td style='vertical-align:top;'>$thisClass</td>
-								<td style='vertical-align:top;'>$thisLevel</td>
-								<td style='vertical-align:top;'>$thisTZ</td>
-								<td style='text-align:center;vertical-align:top;'>$thisSize</td>
-								<td style='text-align:center;vertical-align:top;'>$thisStudents</td>
-								<td>$thisLocal Local<br />$thisUTC UTC</td></tr>";
+			$smallClassCount++;
+			$myInt				= $thisSize - $thisStudents;
+			$availSeats			= $availSeats + $myInt;
+			$content		.= "<tr><td style='vertical-align:top;'>$advisorUpdateLink</td>
+									<td style='vertical-align:top;'>$thisClass</td>
+									<td style='vertical-align:top;'>$thisLevel</td>
+									<td style='vertical-align:top;'>$thisTZ</td>
+									<td style='text-align:center;vertical-align:top;'>$thisSize</td>
+									<td style='text-align:center;vertical-align:top;'>$thisStudents</td>
+									<td>$thisLocal Local<br />$thisUTC UTC</td></tr>";
 		}
 		$content			.= "</table>
 								<p>$smallClassCount Total Small Classes<br />
@@ -2695,15 +2506,10 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 /////////////	end of small classes report
 
-
-
 /////////////	Start of advisors with seats open report
 
-		if ($keepDebug) {
-			$debugReport	.=  "<br />Starting the advisors with open seats report<br />";
-		}
-//	seatsOpenArray[advisorCallSign|seatsOpen|advisorClass_class_size|advisorClass_level|advisorClass_timezone|advisorClass_class_schedule_times advisorClass_class_schedule_days|advisorClass_class_schedule_times_utc advisorClass_class_schedule_days_utc";
-
+		debugReport("<br />Starting the advisors with open seats report<br />");
+		
 		sort($seatsOpenArray);
 		$content		.= "<a name='reportY'><h3>Advisors With Open Seats</h3></a>
 							<table>
@@ -2711,6 +2517,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 								<th>Level</th>
 								<th>TZ</th>
 								<th>Class Size</th>
+								<th>Students</th>
 								<th>Open Seats</th>
 								<th>Class Schedule</th></tr>";
 		$seatsOpenCount	= 0;
@@ -2723,6 +2530,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			$thisTZ			= $myArray[4];
 			$thisLocal		= $myArray[5];
 			$thisUTC		= $myArray[6];
+			$thisStudents	= $myArray[7];
 					
 			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
 			
@@ -2731,20 +2539,19 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 									<td style='vertical-align:top;'>$thisLevel</td>
 									<td style='vertical-align:top;'>$thisTZ</td>
 									<td style='text-align:center;vertical-align:top;'>$thisSize</td>
+									<td style='text-align:center;vertical-align:top;'>$thisStudents</td>
 									<td style='text-align:center;vertical-align:top;'>$thisOpen</td>
 									<td>$thisLocal Local<br />$thisUTC UTC</td></tr>";
 		}
 		$content			.= "</table>
 								<p>$seatsOpenCount Total Seats Open</p>";
 
-
+	
 /////////////	End of advisors with seats open report
 
 
 ////////////	 students on hold report
-		if ($keepDebug) {
-			$debugReport	.=  "Doing Students On Hold Report<br />";
-		}
+		debugReport("Doing Students On Hold Report<br />");
 //	holdArray[studentCallSign]
 		$content		.= "<a name='reportH'><h3>Students On Hold Report</h3></a>
 							<table>
@@ -2802,11 +2609,9 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 								<p>$holdCount Students on hold</p>";
 
 //////////////	end of students on hold report
-
+	
 //////////////	override report
-		if ($keepDebug) {
-			$debugReport	.=  "Doing the override Report<br />";
-		}
+		debugReport("Doing the override Report<br />");
 
 		$content		.= "<a name='reportO'><h3>Advisor Class Size Overriden Report</h3></a>
 							<table>
@@ -2822,9 +2627,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 
 //////////////	error report
-		if ($keepDebug) {
-			$debugReport	.=  "Doing the error Report<br />";
-		}
+		debugReport("Doing the error Report<br />");
 //	errorArray[error]
 		$content		.= "<a name='reportE'><h3>Errors Report</h3></a>
 							<table>
@@ -2848,9 +2651,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 		if ($request_type == 'B' || $request_type == 'D' || $request_type == 'F') {			/// update students
 
-			if ($keepDebug) {
-				$debugReport	.=  "<br /><b>Updating Students with their assignments</b><br />";
-			}
+			debugReport("<br /><b>Updating Students with their assignments</b><br />");
 			foreach($studentAssignedAdvisorArray as $thisCallSign=>$myValue) {
 				if ($studentArray[$thisCallSign]['assigned advisor'] == '') {
 					$updateParams		= array();
@@ -2859,9 +2660,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 					$thisAdvisor	= $myArray[0];
 					$thisClass		= $myArray[1];
 
-					if ($keepDebug) {
-						$debugReport	.=  "<br />Processing student $thisCallSign assigned to advisor $thisAdvisor class $thisClass<br />";
-					}
+					debugReport("<br />Processing student $thisCallSign assigned to advisor $thisAdvisor class $thisClass<br />");
 				
 					$arbitrarilyAssigned		= '';
 					if (in_array($thisCallSign,$arbitraryArray)) {
@@ -2884,9 +2683,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 								
 					$addResult			= add_remove_student($inp_data);
 					if ($addResult[0] === FALSE) {
-						if ($keepDebug) {
-							$debugReport	.=  "<b>adding student $thisCallSign to advisor $thisAdvisor $thisClass failed: $addResult[1]</b><br />";
-						}
+						debugReport("<b>adding student $thisCallSign to advisor $thisAdvisor $thisClass failed: $addResult[1]</b><br />");
 						$content		.= "could not find an open slot for student $thisCallSign in $thisAdvisor class $thisClass<br />";
 						sendErrorEmail("$jobname adding student $thisCallSign to advisor $thisAdvisor $thisClass failed: $addResult[1]");
 					}
@@ -2900,9 +2697,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 		
 		if ($request_type == 'B' || $request_type == 'D' || $request_type == 'E') {
 
-			if ($keepDebug) {
-				$debugReport	.=  "<br /><b>Send Email to Arbitrarily Assigned Students</b><br />";
-			}
+			debugReport("<br /><b>Send Email to Arbitrarily Assigned Students</b><br />");
 
 			foreach($arbitraryArray as $thisCallSign) {
 				if (array_key_exists($thisCallSign,$studentAssignedAdvisorArray)) {
@@ -2926,21 +2721,16 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 					$thisClassDaysUTC			= $advisorClassArray[$advisorClassArrayKey]['days utc'];
 					$result						= utcConvert('tolocal',$thisTZ,$thisClassTimeUTC,$thisClassDaysUTC);
 					if ($result[0] == 'FAIL') {
-						if ($keepDebug) {
-							$debugReport	.=  "utcConvert failed 'tolocal',$thisTZ,$thisClassTimeUTC,$thisClassDaysUTC<br />
-								  Error: $result[3]<br />";
-						}
+						debugReport("utcConvert failed 'tolocal',$thisTZ,$thisClassTimeUTC,$thisClassDaysUTC<br />
+								  Error: $result[3]<br />");
 						$displayTimes			= 'ERROR';
 						$displayDays			= 'ERROR';
 					} else {
-						if ($keepDebug) {
-							$debugReport	.=  "utcConvert returned $result[1] $result[2]<br />";
-						}
+						debugReport("utcConvert returned $result[1] $result[2]<br />");
 						$displayTimes			= $result[1];
 						$displayDays			= $result[2];
 					}
-					if ($keepDebug) {
-						$debugReport	.=  "<br />Ready to send arbitrary email. Student data:<br />
+					debugReport("<br />Ready to send arbitrary email. Student data:<br />
 								Advisor: $thisAdvisor<br />
 								Class: $thisClass<br />
 								Student: $thisCallSign<br />
@@ -2951,9 +2741,9 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 								TZ: $thisTZ<br />
 								Email: $thisEmail<br />
 								Advisor class schedule: $thisClassTimeUTC $thisClassDaysUTC<br />
-								Local class schedule: $displayTimes $displayDays<br />";
+								Local class schedule: $displayTimes $displayDays<br />");
 
-					}
+
 					if ($thisFirstChoice == '') {
 						$thisContent			= "
 <p>To: $thisLastName, $thisFirstName ($thisCallSign):</p>
@@ -3006,9 +2796,7 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 															    'testMode'=>$testMode,
 															    'doDebug'=>$doDebug));
 					if ($mailResult === TRUE) {
-						if ($keepDebug) {
-							$debugReport	.=  "An email about the arbitrary assignment was sent to $theRecipient<br />";
-						}
+						debugReport("An email about the arbitrary assignment was sent to $theRecipient<br />");
 						$advisorMailCount++;
 					} else {
 						$content .= "The mail send function to $theRecipient failed.<br /><br />";
@@ -3016,22 +2804,13 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 				}
 			}
 		}
-		// store the studentTrace 
-//		$content		.= "<h4>Student Trace</h4>
-//							$studentTrace";
-
-
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
-	if ($keepDebug) {
-		$debugReport	.=  "<br />Testing to save report: $inp_report<br />";
-	}
+	debugReport("<br />Testing to save report: $inp_report<br />");
 	if ($inp_report == 'Y') {
-		if ($keepDebug) {
-			$debugReport	.=  "Calling function to save the report as Assign Students to Advisors<br />";
-		}
-		$storeResult	= storeReportData_v2("Assign Students to Advisors",$content);
+		debugReport("Calling function to save the report as Assign Students to Advisors<br />");
+		$storeResult	= storeReportData_v2("Assign Students to Advisors",$content,0,0);
 		if ($storeResult[0] !== FALSE) {
 			$content	.= "<br />Report stored in reports table as $storeResult[1] with id $storeResult[2]";
 		} else {
@@ -3040,7 +2819,7 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 	}
 	if ("2" == $strPass) {	
 		if ($keepDebug) {
-			$storeResult	= storeReportData_v2("Assign Students to Advisors Debug",$debugReport);
+			$storeResult	= storeReportData_v2("Assign Students to Advisors Debug",$doDebugReport,0,0);
 			if ($storeResult !== FALSE) {
 				$content	.= "<br />Debug Report stored in reports table as $storeResult[1] with id $storeResult[2]
 								Click <a href='$siteURL/cwa-display-saved-report/?strpass=3&inp_id=$storeResult[2]' target='_blank'>HERE</a>";

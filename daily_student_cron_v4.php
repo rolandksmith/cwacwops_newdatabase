@@ -600,11 +600,11 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 		
 			$sql				= "select * from $studentTableName 
 									left join $userMasterTableName on user_call_sign = student_call_sign 
-								   where semester='$theSemester' 
-								   	and response='Y' 
+								   where student_semester='$theSemester' 
+								   	and student_response='Y' 
 								   	and student_status='' 
-								   	and email_number != 4 
-								   order by level, call_sign";
+								   	and student_email_number != 4 
+								   order by student_level, student_call_sign";
 			$wpw1_cwa_student		= $wpdb->get_results($sql);
 			if ($wpw1_cwa_student === FALSE) {
 				handleWPDBError($jobname,$doDebug);
@@ -941,22 +941,11 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 						}
 
 						// get the advisor class schedule
-						$sql			=  "select 
-												a.advisorclass_id, 
-												a.advisorclass_call_sign, 
-												a.advisorclass_sequence, 
-												a.advisorclass_class_schedule_days, 
-												a.advisorclass_class_schedule_times, 
-												a.advisorclass_class_schedule_days_utc, 
-												a.advisorclass_class_schedule_times_utc, 
-												b.user_first_name, 
-												b.user_last_name,
-												b.user_email  
-											from $advisorClassTableName as a 
-											left join $userMasterTableName as b 
-											on a.advisor_call_sign = b.call_sign 
-											where a.advisorclass_call_sign = '$replacement_call_sign' 
-											and a.advisorclass_sequence = $replacement_class";
+						$sql			= "select * from $advisorClassTableName  
+											left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+											where advisorclass_call_sign = '$replacement_call_sign' 
+											and advisorclass_sequence = $replacement_class 
+											and advisorclass_semester = '$theSemester'";
 
 						$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
 						if ($wpw1_cwa_advisorclass === FALSE) {
@@ -975,6 +964,8 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 									$advisorClass_advisor_last_name 		= $advisorClassRow->user_last_name;
 									$advisorEmail							= $advisorClassRow->user_email;
 									$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
+									$advisorClass_level						= $advisorClassRow->advisorclass_level;
+									$advisorClass_action_log				= $advisorClassRow->advisorclass_action_log;
 									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
 									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
@@ -1135,37 +1126,37 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 									}
 									$gotAReplacement			= FALSE;
 									if ($callSign1 != '') {
-										$replaceCallSign		= $callSign1;
-										$replaceSequence		= $sequence1;
+										$replacingCallSign		= $callSign1;
+										$replacingSequence		= $sequence1;
 										$gotAReplacement		= TRUE;
 										if ($doDebugLog) {
-											$debugLog .= "$replaceCallSign (1) works as a replacement<br />";
+											$debugLog .= "$replacingCallSign (1) works as a replacement<br />";
 										}
 									} elseif ($callSign2 != '') {
-										$replaceCallSign		= $callSign2;
-										$replaceSequence		= $sequence2;
+										$replacingCallSign		= $callSign2;
+										$replacingSequence		= $sequence2;
 										$gotAReplacement		= TRUE;
 										if ($doDebugLog) {
-											$debugLog .= "$replaceCallSign (2) works as a replacement<br />";
+											$debugLog .= "$replacingCallSign (2) works as a replacement<br />";
 										}
 									} elseif ($callSign3 != '') {
-										$replaceCallSign		= $callSign3;
-										$replaceSequence		= $sequence2;
+										$replacingCallSign		= $callSign3;
+										$replacingSequence		= $sequence2;
 										$gotAReplacement		= TRUE;
 										if ($doDebugLog) {
-											$debugLog .= "$replaceCallSign (3) works as a replacement<br />";
+											$debugLog .= "$replacingCallSign (3) works as a replacement<br />";
 										}
 									}
 		
 									if ($gotAReplacement) {
 										if ($doDebugLog) {
-											$debugLog .= "Have a replacement $replaceCallSign. Getting student record<br />";
+											$debugLog .= "Have a replacement $replacingCallSign. Getting student record<br />";
 										}
 										///// get the replacement student record
 										$sql						= "select * from $studentTableName 
 																		left join $userMasterTableName on user_call_sign = student_call_sign 
 																		where student_semester='$theSemester' 
-																		and student_call_sign='$replaceCallSign'";
+																		and student_call_sign='$replacingCallSign'";
 										$wpw1_cwa_replace				= $wpdb->get_results($sql);
 										if ($wpw1_cwa_replace === FALSE) {
 											handleWPDBError($jobname,$doDebug);
@@ -1300,7 +1291,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 														$mailCode				= 14;
 													}
 														
-													$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_call_sign):</p>
+													$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
 																				<p>You have requested a replacement student for 
 																				$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
 																				<p>A replacement student has been added to your class. Please login to 
@@ -1318,7 +1309,7 @@ checkBegin: $checkBegin. checkEnd: $checkEnd. nowTime: $nowTime";
 																									'doDebug'=>FALSE));
 													// $mailResult = TRUE;
 													if ($mailResult[0] === TRUE) {
-														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$advisorClass_call_sign&strpass=2' target='_blank'>$theRecipient</a>.<br />";
+														$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$advisorClass_advisor_call_sign&strpass=2' target='_blank'>$theRecipient</a>.<br />";
 														if ($doDebugLog) {
 															$debugLog .= $mailResult[1];
 															$debugLog .= "Replacement email sent to the advisor at $theRecipient<br />";
@@ -2491,6 +2482,9 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 												}
 												$content		.= "Inserting reminder failed: $insertResult[1]<br />";
 											} else {
+												if ($doDebugLog) {
+													$debugLog	.= "On hold reminder set<br />";
+												}
 												// put the student on hold so the student does not get processed again
 												$updateData[] 	= 'student_intervention_required|H|s';
 												$updateData[]	= 'student_status||s';
@@ -2520,26 +2514,20 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 											}
 											sendErrorEmail("$jobname Attempting to remove $student_call_sign from $advisorClass_advisor_call_sign class failed:<br />$thisReason");
 											$content		.= "Attempting to remove $student_call_sign from $advisorClass_advisor_call_sign class failed:<br />$thisReason<br />";
+										} else {
+											if ($doDebugLog) {
+												$debugLog	.= "Student removed from advisor class<br />";
+											}
 										}
 										
 										/// figure out if there is a replacement student
 										//// get the advisor and advisorClass records
-										$sql			=  "select 
-																a.advisorclass_id, 
-																a.advisorclass_call_sign, 
-																a.advisorclass_sequence, 
-																a.advisorclass_class_schedule_days, 
-																a.advisorclass_class_schedule_times, 
-																a.advisorclass_class_schedule_days_utc, 
-																a.advisorclass_class_schedule_times_utc, 
-																b.user_first_name, 
-																b.user_last_name,
-																b.user_email  
-															from $advisorClassTableName as a 
-															left join $userMasterTableName as b 
-															on a.advisor_call_sign = b.call_sign 
-															where a.advisor_call_sign = '$replacement_call_sign' 
-															and a.sequence = $replacement_class";
+				
+										$sql			= "select * from $advisorClassTableName  
+															left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+															where advisorclass_call_sign = '$str_assigned_advisor' 
+															and advisorclass_sequence = $str_assigned_advisor_class 
+															and advisorclass_semester = '$theSemester'";
 				
 										$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
 										if ($wpw1_cwa_advisorclass === FALSE) {
@@ -2558,6 +2546,8 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 													$advisorClass_advisor_last_name 		= $advisorClassRow->user_last_name;
 													$advisorEmail							= $advisorClassRow->user_email;
 													$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
+													$advisorClass_level						= $advisorClassRow->advisorclass_level;
+													$advisorClass_action_log				= $advisorClassRow->advisorclass_action_log;
 													$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 													$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
 													$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
@@ -2591,7 +2581,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 														$thirdDays 			= $myArray[7];
 														$excludedAdvisor	= $myArray[8];
 							
-														$myInt				= strpos($excludedAdvisor,$advisor_call_sign);
+														$myInt				= strpos($excludedAdvisor,$advisorClass_advisor_call_sign);
 														if ($myInt === FALSE) {
 															if ($searchDays == $firstDays) {
 																if ($doDebugLog) {
@@ -2715,27 +2705,28 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 
 													$gotAReplacement			= FALSE;
 													if ($callSign1 != '') {
-														$replaceCallSign		= $callSign1;
-														$replaceSequence		= $sequence1;
+														$replacingCallSign		= $callSign1;
+														$replacingSequence		= $sequence1;
 														$gotAReplacement		= TRUE;
 													} elseif ($callSign2 != '') {
-														$replaceCallSign		= $callSign2;
-														$replaceSequence		= $sequence2;
+														$replacingCallSign		= $callSign2;
+														$replacingSequence		= $sequence2;
 														$gotAReplacement		= TRUE;
 													} elseif ($callSign3 != '') {
-														$replaceCallSign		= $callSign3;
-														$replaceSequence		= $sequence2;
+														$replacingCallSign		= $callSign3;
+														$replacingSequence		= $sequence3;
 														$gotAReplacement		= TRUE;
 													}
 						
 													if ($gotAReplacement) {
 														if ($doDebugLog) {
-															$debugLog .= "Have a replacement $replaceCallSign. Getting student record<br />";
+															$debugLog .= "Have a replacement $replacingCallSign. Getting student record<br />";
 														}
 														///// get the replacement student record
 														$sql						= "select * from $studentTableName 
+																						left join $userMasterTableName on user_call_sign = student_call_sign 
 																						where student_semester='$theSemester' 
-																						and student_call_sign='$replaceCallSign'";
+																						and student_call_sign='$replacingCallSign'";
 														$wpw1_cwa_replace				= $wpdb->get_results($sql);
 														if ($wpw1_cwa_replace === FALSE) {
 															handleWPDBError($jobname,$doDebug);
@@ -2745,88 +2736,85 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																$debugLog .= "ran $sql<br />and retrieved $numRRows rows from $studentTableName table<br />";
 															}
 															if ($numRRows > 0) {
-																if ($doDebugLog) {
-																	$debugLog .= "ran $sql<br />and found $numRRows rows in $studentTableName<br />";
-																}
 																foreach ($wpw1_cwa_replace as $replaceRow) {
-																	$replace_master_ID 					= $studentRow->user_ID;
-																	$replace_master_call_sign 			= $studentRow->user_call_sign;
-																	$replace_first_name 				= $studentRow->user_first_name;
-																	$replace_last_name 					= $studentRow->user_last_name;
-																	$replace_email 						= $studentRow->user_email;
-																	$replace_ph_code					= $studentRow->user_ph_code;
-																	$replace_phone 						= $studentRow->user_phone;
-																	$replace_city 						= $studentRow->user_city;
-																	$replace_state 						= $studentRow->user_state;
-																	$replace_zip_code 					= $studentRow->user_zip_code;
-																	$replace_country_code 				= $studentRow->user_country_code;
-																	$replace_country	 				= $studentRow->user_country;
-																	$replace_whatsapp 					= $studentRow->user_whatsapp;
-																	$replace_telegram 					= $studentRow->user_telegram;
-																	$replace_signal 					= $studentRow->user_signal;
-																	$replace_messenger 					= $studentRow->user_messenger;
-																	$replace_master_action_log 			= $studentRow->user_action_log;
-																	$replace_timezone_id 				= $studentRow->user_timezone_id;
-																	$replace_languages 					= $studentRow->user_languages;
-																	$replace_survey_score 				= $studentRow->user_survey_score;
-																	$replace_is_admin					= $studentRow->user_is_admin;
-																	$replace_role 						= $studentRow->user_role;
-																	$replace_master_date_created 		= $studentRow->user_date_created;
-																	$replace_master_date_updated 		= $studentRow->user_date_updated;
+																	$replace_master_ID 					= $replaceRow->user_ID;
+																	$replace_master_call_sign 			= $replaceRow->user_call_sign;
+																	$replace_first_name 				= $replaceRow->user_first_name;
+																	$replace_last_name 					= $replaceRow->user_last_name;
+																	$replace_email 						= $replaceRow->user_email;
+																	$replace_ph_code					= $replaceRow->user_ph_code;
+																	$replace_phone 						= $replaceRow->user_phone;
+																	$replace_city 						= $replaceRow->user_city;
+																	$replace_state 						= $replaceRow->user_state;
+																	$replace_zip_code 					= $replaceRow->user_zip_code;
+																	$replace_country_code 				= $replaceRow->user_country_code;
+																	$replace_country	 				= $replaceRow->user_country;
+																	$replace_whatsapp 					= $replaceRow->user_whatsapp;
+																	$replace_telegram 					= $replaceRow->user_telegram;
+																	$replace_signal 					= $replaceRow->user_signal;
+																	$replace_messenger 					= $replaceRow->user_messenger;
+																	$replace_master_action_log 			= $replaceRow->user_action_log;
+																	$replace_timezone_id 				= $replaceRow->user_timezone_id;
+																	$replace_languages 					= $replaceRow->user_languages;
+																	$replace_survey_score 				= $replaceRow->user_survey_score;
+																	$replace_is_admin					= $replaceRow->user_is_admin;
+																	$replace_role 						= $replaceRow->user_role;
+																	$replace_master_date_created 		= $replaceRow->user_date_created;
+																	$replace_master_date_updated 		= $replaceRow->user_date_updated;
 				
-																	$replace_ID								= $studentRow->student_id;
-																	$replace_call_sign						= $studentRow->student_call_sign;
-																	$replace_time_zone  					= $studentRow->student_time_zone;
-																	$replace_timezone_offset				= $studentRow->student_timezone_offset;
-																	$replace_youth  						= $studentRow->student_youth;
-																	$replace_age  							= $studentRow->student_age;
-																	$replace_replace_parent 				= $studentRow->student_parent;
-																	$replace_replace_parent_email  			= strtolower($studentRow->student_parent_email);
-																	$replace_level  						= $studentRow->student_level;
-																	$replace_waiting_list 					= $studentRow->student_waiting_list;
-																	$replace_request_date  					= $studentRow->student_request_date;
-																	$replace_semester						= $studentRow->student_semester;
-																	$replace_notes  						= $studentRow->student_notes;
-																	$replace_welcome_date  					= $studentRow->student_welcome_date;
-																	$replace_email_sent_date  				= $studentRow->student_email_sent_date;
-																	$replace_email_number  					= $studentRow->student_email_number;
-																	$replace_response  						= strtoupper($studentRow->student_response);
-																	$replace_response_date  				= $studentRow->student_response_date;
-																	$replace_abandoned  					= $studentRow->student_abandoned;
-																	$replace_replace_status  				= strtoupper($studentRow->student_status);
-																	$replace_action_log  					= $studentRow->student_action_log;
-																	$replace_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-																	$replace_selected_date  				= $studentRow->student_selected_date;
-																	$replace_no_catalog  					= $studentRow->student_no_catalog;
-																	$replace_hold_override  				= $studentRow->student_hold_override;
-																	$replace_assigned_advisor  				= $studentRow->student_assigned_advisor;
-																	$replace_advisor_select_date  			= $studentRow->student_advisor_select_date;
-																	$replace_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-																	$replace_hold_reason_code  				= $studentRow->student_hold_reason_code;
-																	$replace_class_priority  				= $studentRow->student_class_priority;
-																	$replace_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-																	$replace_promotable  					= $studentRow->student_promotable;
-																	$replace_excluded_advisor  				= $studentRow->student_excluded_advisor;
-																	$replace_replace_survey_completion_date	= $studentRow->student_survey_completion_date;
-																	$replace_available_class_days  			= $studentRow->student_available_class_days;
-																	$replace_intervention_required  		= $studentRow->student_intervention_required;
-																	$replace_copy_control  					= $studentRow->student_copy_control;
-																	$replace_first_class_choice  			= $studentRow->student_first_class_choice;
-																	$replace_second_class_choice  			= $studentRow->student_second_class_choice;
-																	$replace_third_class_choice  			= $studentRow->student_third_class_choice;
-																	$replace_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-																	$replace_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-																	$replace_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-																	$replace_catalog_options				= $studentRow->student_catalog_options;
-																	$replace_flexible						= $studentRow->student_flexible;
-																	$replace_date_created 					= $studentRow->student_date_created;
-																	$replace_date_updated			  		= $studentRow->student_date_updated;
+																	$replace_ID								= $replaceRow->student_id;
+																	$replace_call_sign						= $replaceRow->student_call_sign;
+																	$replace_time_zone  					= $replaceRow->student_time_zone;
+																	$replace_timezone_offset				= $replaceRow->student_timezone_offset;
+																	$replace_youth  						= $replaceRow->student_youth;
+																	$replace_age  							= $replaceRow->student_age;
+																	$replace_replace_parent 				= $replaceRow->student_parent;
+																	$replace_replace_parent_email  			= strtolower($replaceRow->student_parent_email);
+																	$replace_level  						= $replaceRow->student_level;
+																	$replace_waiting_list 					= $replaceRow->student_waiting_list;
+																	$replace_request_date  					= $replaceRow->student_request_date;
+																	$replace_semester						= $replaceRow->student_semester;
+																	$replace_notes  						= $replaceRow->student_notes;
+																	$replace_welcome_date  					= $replaceRow->student_welcome_date;
+																	$replace_email_sent_date  				= $replaceRow->student_email_sent_date;
+																	$replace_email_number  					= $replaceRow->student_email_number;
+																	$replace_response  						= strtoupper($replaceRow->student_response);
+																	$replace_response_date  				= $replaceRow->student_response_date;
+																	$replace_abandoned  					= $replaceRow->student_abandoned;
+																	$replace_replace_status  				= strtoupper($replaceRow->student_status);
+																	$replace_action_log  					= $replaceRow->student_action_log;
+																	$replace_pre_assigned_advisor  			= $replaceRow->student_pre_assigned_advisor;
+																	$replace_selected_date  				= $replaceRow->student_selected_date;
+																	$replace_no_catalog  					= $replaceRow->student_no_catalog;
+																	$replace_hold_override  				= $replaceRow->student_hold_override;
+																	$replace_assigned_advisor  				= $replaceRow->student_assigned_advisor;
+																	$replace_advisor_select_date  			= $replaceRow->student_advisor_select_date;
+																	$replace_advisor_class_timezone 		= $replaceRow->student_advisor_class_timezone;
+																	$replace_hold_reason_code  				= $replaceRow->student_hold_reason_code;
+																	$replace_class_priority  				= $replaceRow->student_class_priority;
+																	$replace_assigned_advisor_class 		= $replaceRow->student_assigned_advisor_class;
+																	$replace_promotable  					= $replaceRow->student_promotable;
+																	$replace_excluded_advisor  				= $replaceRow->student_excluded_advisor;
+																	$replace_replace_survey_completion_date	= $replaceRow->student_survey_completion_date;
+																	$replace_available_class_days  			= $replaceRow->student_available_class_days;
+																	$replace_intervention_required  		= $replaceRow->student_intervention_required;
+																	$replace_copy_control  					= $replaceRow->student_copy_control;
+																	$replace_first_class_choice  			= $replaceRow->student_first_class_choice;
+																	$replace_second_class_choice  			= $replaceRow->student_second_class_choice;
+																	$replace_third_class_choice  			= $replaceRow->student_third_class_choice;
+																	$replace_first_class_choice_utc  		= $replaceRow->student_first_class_choice_utc;
+																	$replace_second_class_choice_utc  		= $replaceRow->student_second_class_choice_utc;
+																	$replace_third_class_choice_utc  		= $replaceRow->student_third_class_choice_utc;
+																	$replace_catalog_options				= $replaceRow->student_catalog_options;
+																	$replace_flexible						= $replaceRow->student_flexible;
+																	$replace_date_created 					= $replaceRow->student_date_created;
+																	$replace_date_updated			  		= $replaceRow->student_date_updated;
 
 
 																	//// add student to the advisor's class
 																	$inp_data			= array('inp_student'=>$replace_call_sign,
 																								'inp_semester'=>$replace_semester,
-																								'inp_assigned_advisor'=>$advisor_call_sign,
+																								'inp_assigned_advisor'=>$advisorClass_advisor_call_sign,
 																								'inp_assigned_advisor_class'=>$advisorClass_sequence ,
 																								'inp_remove_status'=>'', 
 																								'inp_arbitrarily_assigned'=>'',
@@ -2835,6 +2823,11 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																								'userName'=>$userName,
 																								'testMode'=>$testMode,
 																								'doDebug'=>$doDebug);
+																	if ($doDebugLog) {
+																		$debugLog		.= "Attempting to add $replace_call_sign to $advisorClass_advisor_call_sign<br /><pre>";
+																		$debugLog		.= print_r($inp_data,TRUE);
+																		$debugLog		.= "</pre><br />";
+																	}
 								
 																	$addResult			= add_remove_student($inp_data);
 																	if ($addResult[0] === FALSE) {
@@ -2919,6 +2912,7 @@ assignment that meet the criteria for your class.<p>";
 																						'inp_id'=>$advisorClass_ID,
 																						'inp_callsign'=>$str_assigned_advisor,
 																						'inp_semester'=>$theSemester,
+																						'inp_sequence'=>$advisorClass_sequence,
 																						'inp_who'=>$userName,
 																						'testMode'=>$testMode,
 																						'doDebug'=>$doDebug);
@@ -2933,7 +2927,7 @@ assignment that meet the criteria for your class.<p>";
 															sendErrorEmail($errorMsg);
 															$content		.= "Unable to update content in $advisorClassTableName<br />";
 														} else {		// if update is successful, add the record to replacementRequests table
-															$replParams 	= array('call_sign'=>$advisor_call_sign,
+															$replParams 	= array('call_sign'=>$advisorClass_advisor_call_sign,
 																					'class'=>$advisorClass_sequence,
 																					'level'=>$advisorClass_level,
 																					'semester'=>$student_semester,
@@ -2973,14 +2967,14 @@ assignment that meet the criteria for your class.<p>";
 														$theSubject				= "TESTMODE $theSubject";
 														$mailCode				= 2;
 													} else {
-														$theRecipient			= $advisor_email;
+														$theRecipient			= $advisorEmail;
 														$mailCode				= 14;
 													}
 													$strSemester				= $currentSemester;
 													if ($currentSemester == 'Not in Session') {
 														$strSemester 			= $nextSemester;
 													}
-													$thisContent			= "<p>To: $advisor_last_name, $advisor_first_name ($advisor_call_sign):</p>
+													$thisContent			= "<p>To: $advisorClass_last_name, $advisorClass_first_name ($advisorClass_advisor_call_sign):</p>
 																				<p>You have requested a replacement student for $student_last_name, $student_first_name 
 																				($student_call_sign) in your $student_level class number $advisorClass_sequence.</p>
 																				$email_content

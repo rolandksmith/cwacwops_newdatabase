@@ -2,7 +2,7 @@ function display_and_update_student_signup_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -49,6 +49,8 @@ function display_and_update_student_signup_func() {
 	$jobname					= "Display and Update Student Signup Information V$versionNumber";
 	$inp_depth					= "one";
 	$updateMaster				= "$siteURL/cwa-display-and-update-user-master-information/";
+	$inp_mode					= '';
+	$inp_verbose				= '';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -78,13 +80,16 @@ function display_and_update_student_signup_func() {
 					$testMode = TRUE;
 				}
 			}
-			if ($str_key		== "deDebug") {
+			if ($str_key		== "doDebug") {
 				$deDebug	= strtoupper($str_value);
 				$deDebug	= filter_var($deDebug,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key		== "testMode") {
 				$testMode	= strtoupper($str_value);
 				$testMode	= filter_var($testMode,FILTER_UNSAFE_RAW);
+				if ($testMode) {
+					$inp_mode	= 'TESTMODE';
+				}
 			}
 			if ($str_key		== "request_info") {
 				$request_info	= strtoupper($str_value);
@@ -381,6 +386,7 @@ function display_and_update_student_signup_func() {
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
 		$countryCodesTableName		= 'wpw1_cwa_country_codes';
 	} else {
+		$content					.= "<p><b>Operating in Production Mode</b></p>";
 		$extMode					= 'pd';
 		$studentTableName			= "wpw1_cwa_student";
 		$userMasterTableName		= 'wpw1_cwa_user_master';
@@ -773,7 +779,7 @@ echo "studentTableName: $studentTableName<br />";
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -831,13 +837,14 @@ echo "studentTableName: $studentTableName<br />";
 							$content	.= "<h4>$user_call_sign User Master Data</h4>
 											<p><a href='$theURL'>Display another student</a></p>
 											<form method='post' action='$updateMaster' 
-											name='updateMaster_form' ENCTYPE='multipart/form-data''>
+											name='updateMaster_form' ENCTYPE='multipart/form-data'>
 											<input type='hidden' name='strpass' value='2'>
 											<input type='hidden' name='inp_callsign' value='$user_call_sign'>
 											<input type='hidden' name='request_type' value='callsign'>
 											<input type='hidden' name='request_info' value='$user_call_sign'>
 											<input type='hidden' name='doDebug' value='$doDebug'>
 											<input type='hidden' name='testMode' value='$testMode'>
+											<input type='hidden' name='inp_mode' value='$inp_mode'>
 											<table style='width:900px;'>
 											<tr><td><b>Callsign<br />$user_call_sign</b></td>
 												<td><b>Name</b><br />$user_last_name, $user_first_name</td>
@@ -866,9 +873,19 @@ echo "studentTableName: $studentTableName<br />";
 						}
 						
 						
-						$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID'>$student_ID<a/>";
+						$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 	
 						$content			.= "<h4>Student Signup Created $student_date_created</h4>
+												<form method='post' action='$theURL' 
+												name='updateStudent_form' ENCTYPE='multipart/form-data'>
+												<input type='hidden' name='strpass' value='3'>
+												<input type='hidden' name='inp_callsign' value='$student_call_sign'>
+												<input type='hidden' name='request_type' value='callsign'>
+												<input type='hidden' name='request_info' value='$student_call_sign'>
+												<input type='hidden' name='inp_student_id' value='$student_ID'>
+												<input type='hidden' name='doDebug' value='$doDebug'>
+												<input type='hidden' name='testMode' value='$testMode'>
+												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
 												<tr><td>Student Student Id<td>
 													<td>$updateLink</td></tr>
@@ -964,8 +981,10 @@ echo "studentTableName: $studentTableName<br />";
 													<td>$student_date_created</td></tr>
 												<tr><td>Student Date Updated<td>
 													<td>$student_date_updated</td></tr>
+												<tr><td></td>
+													<td><input type='submit' class='formInputButton' name='submit' value='Update Student Record' /></td></tr>
 												</table>
-												<p>Click <a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID'>HERE</a>
+												<p>Click <a href='$theURL/?strpass=3&inp_callsign=$student_call_sign&inp_student_id=$student_ID&inp_mode=$inp_mode&inp_verbose=$inp_verbose'>HERE</a>
 												to modify this signup record</p>
 												<p>Click <a href='$theURL'>Look Up a Different Student</a>";
 					}
@@ -1002,8 +1021,8 @@ echo "studentTableName: $studentTableName<br />";
 					$student_time_zone  					= $studentRow->student_time_zone;
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
-					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent							= $studentRow->student_parent;
+					$student_age  							= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1052,6 +1071,8 @@ echo "studentTableName: $studentTableName<br />";
 												<input type='hidden' name='inp_student_id' value='$inp_student_id'>
 												<input type='hidden' name='inp_callsign' value='$student_call_sign'>
 												<input type='hidden' name='inp_semester' value='$student_semester'>
+												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<input class='formInputButton' type='submit' onclick=\"return confirm('Are you sure?');\"  value='Delete This Record' />
 												</form><br />
 												<form method='post' action='$theURL' 
@@ -1059,6 +1080,8 @@ echo "studentTableName: $studentTableName<br />";
 												<input type='hidden' name='strpass' value='4'>
 												<input type='hidden' name='inp_student_id' value='$inp_student_id'>
 												<input type='hidden' name='inp_callsign' value='$inp_callsign'>
+												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
 												<tr><td>student_id</td>
 													<td>$student_ID</td></tr>
@@ -1232,7 +1255,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1701,7 +1724,7 @@ echo "studentTableName: $studentTableName<br />";
 													<td><b>Date Updated</b><br />$user_date_updated</td></tr>
 												<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
 												</table>
-												<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode' 
+												<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode&inp_mode=$inp_mode' 
 												target='_blank'>HERE</a> to update the advisor Master Data</p>";
 					
 								// get the student signup info
@@ -1723,7 +1746,7 @@ echo "studentTableName: $studentTableName<br />";
 											$student_timezone_offset				= $studentRow->student_timezone_offset;
 											$student_youth  						= $studentRow->student_youth;
 											$student_age  							= $studentRow->student_age;
-											$student_parent 				= $studentRow->student_parent;
+											$student_parent 						= $studentRow->student_parent;
 											$student_parent_email  					= strtolower($studentRow->student_parent_email);
 											$student_level  						= $studentRow->student_level;
 											$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1768,7 +1791,7 @@ echo "studentTableName: $studentTableName<br />";
 											$student_action_log						= formatActionLog($student_action_log);
 											$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 											
-											$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID'>$student_ID<a/>";
+											$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 						
 											$content			.= "<h4>Student Signup Created $student_date_created</h4>
 																	<table style='width:900px;'>
@@ -1913,7 +1936,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1940,7 +1963,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
