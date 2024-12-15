@@ -339,7 +339,7 @@ function student_management_func() {
 		} elseif ($getStudentById) {
 			$sql				= "select * from $studentTableName 
 									left join $userMasterTableName on user_call_sign = student_call_sign 
-									where student_id = $studentid";
+									where student_id = $inp_studentid";
 		} else {
 			if ($doDebug) {
 				echo "getStudent is TRUE but neither getStudentByCallsign nor getStudentById is set<br />";
@@ -875,13 +875,17 @@ function getTheReason($strReasonCode) {
 
 		$jobname			= "Student Management Pre-assign Student to an Advisor";
 		$content			.= "<h3>$jobname</h3>";
-		if ($student_response == '') {
-			$responseSTR	= 'blank';
+		if ($haveStudent) {
+			if ($student_response == '') {
+				$responseSTR	= 'blank';
+			} else {
+				 $responseSTR	= $student_response;
+			}
+			if ($student_response != 'Y') {
+				$content 		.= "<p><b>NOTE:</b> Student is not validated (response = $responseSTR)</p>";
+			}
 		} else {
-			 $responseSTR	= $student_response;
-		}
-		if ($student_response != 'Y') {
-			$content 		.= "<p><b>NOTE:</b> Student is not validated (response = $responseSTR)</p>";
+			$content		.= "<p>No student record found for $inp_student_callsign</p>";
 		}
 		// log that the job was run
 		$thisDate			= date('Y-m-d');
@@ -955,8 +959,11 @@ function getTheReason($strReasonCode) {
 							$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
 							$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
 
-
-							$optionList		.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorClass_sequence'> Class nbr $advisorClass_sequence $advisorClass_level at $advisorClass_class_schedule_times local on $advisorClass_class_schedule_days<br />";
+							$thisChecked	= '';
+							if ($numACRows == 1) {
+								$thisChecked	= ' checked ';
+							}
+							$optionList		.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorClass_sequence' $thisChecked required> Class nbr $advisorClass_sequence $advisorClass_level at $advisorClass_class_schedule_times local on $advisorClass_class_schedule_days<br />";
 							$optionCount++;
 							$lastOptionClass	= $advisorClass_sequence;
 						}
@@ -1633,7 +1640,7 @@ function getTheReason($strReasonCode) {
 ////////	pass 27		Do the hold removal
 	} elseif ("27" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 27 with studentid of $studentid<br />";
+			echo "<br />at pass 27 with studentid of $inp_studentid<br />";
 			if ($haveStudent) {
 				echo "haveStudent is TRUE<br />";
 			} else {
@@ -2223,7 +2230,7 @@ function getTheReason($strReasonCode) {
 		if ($doDebug) {
 			echo "<br />at pass 42 with inp_student_callsign of $inp_student_callsign<br />
 					inp_advisor_callsign of $inp_advisor_callsign<br />
-					studentid or $studentid<br />";
+					studentid of $inp_studentid<br />";
 			if ($haveStudent) {
 				echo "haveStudent is TRUE<br />";
 			} else {
@@ -2644,9 +2651,9 @@ function getTheReason($strReasonCode) {
 													<form method='post' action='$pushURL' 
 													name='selection_form_41' ENCTYPE='multipart/form-data'>
 													<input type='hidden' name='strpass' value='2'>
-													<input type='hidden' name='inp_semester' value='$theSemester'>
+													<input type='hidden' name='inp_semester' value='$proximateSemester'>
 													<input type='hidden' name='request_info' value='$inp_advisor_callsign'>
-													<input type='hidden' name='inp_mode' value='$inp_mode'>
+													<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 													<input type='hidden' name='request_type' value= 'Full'>
 													<input type='hidden' name='inp_mode' value='$inp_mode'>
 													<input type='submit' class='formInputButton' value='Push'></form>";
@@ -2663,9 +2670,9 @@ function getTheReason($strReasonCode) {
 													<tr><td><form method='post' action='$pushURL' target='_blank' 
 															name='selection_form_41' ENCTYPE='multipart/form-data'> 
 															<input type='hidden' name='strpass' value='2'>
-															<input type='hidden' name='inp_semester' value='$theSemester'>
+															<input type='hidden' name='inp_semester' value='$proximateSemester'>
 															<input type='hidden' name='request_info' value='$inp_prev_advisor'>
-															<input type='hidden' name='inp_mode' value='$inp_mode'>
+															<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 															<input type='hidden' name='request_type' value= 'Full'>
 															<input type='hidden' name='inp_mode' value='$inp_mode'>
 															<input type='submit' class='formInputButton' value='Push $inp_prev_advisor'></form></td>
@@ -2673,9 +2680,9 @@ function getTheReason($strReasonCode) {
 														<td><form method='post' action='$pushURL' target='_blank' 
 															name='selection_form_41' ENCTYPE='multipart/form-data'> 
 															<input type='hidden' name='strpass' value='2'>
-															<input type='hidden' name='inp_semester' value='$theSemester'>
+															<input type='hidden' name='inp_semester' value='$proximateSemester'>
 															<input type='hidden' name='request_info' value='$inp_advisor_callsign'>
-															<input type='hidden' name='inp_mode' value='$inp_mode'>
+															<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 															<input type='hidden' name='request_type' value= 'Full'>
 															<input type='hidden' name='inp_mode' value='$inp_mode'>
 															<input type='submit' class='formInputButton' value='Push $inp_advisor_callsign'></form></td></tr>
@@ -2897,13 +2904,18 @@ function getTheReason($strReasonCode) {
 			$doProceed								= TRUE;
 			/// check to see if the student meetinp the criteria
 			if ($student_response != 'Y') {
-				$content							.= "<b>Student is not verified (Response is $student_response)</b><br />";
+				if ($student_response == '') {
+					$myStr		= 'blank';
+				} else {
+					$myStr		= $student_response;
+				}
+				$content							.= "<b>Student is not verified (Response is $myStr)</b><br />";
 				$doActions							= FALSE;
 			}						
 				/// inform if on hold
 			if ($student_intervention_required == 'H') {
 				$content							.= "Student is on hold<br />";
-//							$doActions							= FALSE;
+//				$doActions							= FALSE;
 			}
 			if ($student_status == 'Y') {
 				$content							.= "Student already assigned to $student_assigned_advisor - $student_assigned_advisor_class. Student status: $student_status<br />";
@@ -2912,460 +2924,472 @@ function getTheReason($strReasonCode) {
 				$content							.= "Student has a status of $student_status and is currently not available to be assigned<br />";
 				$doActions							= FALSE;
 			}
-			
-			if ($inp_choice == 'option1') {
-				$testFirst					= TRUE;
-				$searchFirstBegin			= "";
-				$searchFirstEnd				= "";
-				$testSecond					= TRUE;
-				$searchSecondBegin			= "";
-				$searchSecondEnd				= "";
-				$testThird					= TRUE;
-				$searchThirdBegin			= "";
-				$searchThirdEnd				= "";
-				////// get the student's search values
-				if ($student_first_class_choice_utc == '' || $student_first_class_choice_utc == 'None') {
-					$testFirst				= FALSE;
-					$searchFirstTime		= '';
-					$searchFirstDays		= '';
-					if ($doDebug) {
-						echo "No first choice. Not searching first choice<br />";
+			if ($doActions) {			
+				if ($inp_choice == 'option1') {
+					$testFirst					= TRUE;
+					$searchFirstBegin			= "";
+					$searchFirstEnd				= "";
+					$testSecond					= TRUE;
+					$searchSecondBegin			= "";
+					$searchSecondEnd				= "";
+					$testThird					= TRUE;
+					$searchThirdBegin			= "";
+					$searchThirdEnd				= "";
+					////// get the student's search values
+					if ($student_first_class_choice_utc == '' || $student_first_class_choice_utc == 'None') {
+						$testFirst				= FALSE;
+						$searchFirstTime		= '';
+						$searchFirstDays		= '';
+						if ($doDebug) {
+							echo "No first choice. Not searching first choice<br />";
+						}
+					} else {
+						$myArray				= explode(" ",$student_first_class_choice_utc);
+						$myTime					= substr($myArray[0],0,2);
+						$myInt					= intval($myTime) * 100;
+						$searchValues			= $searchRange[$myInt];
+						$thisArray				= explode("|",$searchValues);
+						$searchFirstBegin		= intval($thisArray[0]);
+						$searchFirstEnd			= intval($thisArray[1]);
+						$searchFirstDays		= $myArray[1];
+						if ($doDebug) {
+							echo "searchFirst: $searchFirstBegin - $searchFirstEnd $searchFirstDays<br />";
+						}
 					}
-				} else {
-					$myArray				= explode(" ",$student_first_class_choice_utc);
-					$myTime					= substr($myArray[0],0,2);
+					if ($student_second_class_choice_utc == '' || $student_second_class_choice_utc == 'None') {
+						$searchSecondTime		= "";
+						$searchSecondDays		= "";
+						$testSecond				= FALSE;
+						if ($doDebug) {
+							echo "No second choice. Not searching second choice<br />";
+						}
+					} else {
+						$myArray				= explode(" ",$student_second_class_choice_utc);
+						$myTime					= substr($myArray[0],0,2);
+						$myInt					= intval($myTime) * 100;
+						$searchValues			= $searchRange[$myInt];
+						$thisArray				= explode("|",$searchValues);
+						$searchSecondBegin		= intval($thisArray[0]);
+						$searchSecondEnd		= intval($thisArray[1]);
+						$searchSecondDays		= $myArray[1];
+						if ($doDebug) {
+							echo "searchSecond: $searchSecondBegin - $searchSecondEnd $searchSecondDays<br />";
+						}
+					}
+					if ($student_third_class_choice_utc == '' || $student_third_class_choice_utc == 'None') {
+						$searchThirdTime		= "";
+						$searchThirdDays		= "";
+						$testThird				= FALSE;
+						if ($doDebug) {
+							echo "No third choice. Not searching third choice<br />";
+						}
+					} else {
+						$myArray				= explode(" ",$student_third_class_choice_utc);
+						$myTime					= substr($myArray[0],0,2);
+						$myInt					= intval($myTime) * 100;
+						$searchValues			= $searchRange[$myInt];
+						$thisArray				= explode("|",$searchValues);
+						$searchThirdBegin		= intval($thisArray[0]);
+						$searchThirdEnd			= intval($thisArray[1]);
+						$searchThirdDays		= $myArray[1];
+						if ($doDebug) {
+							echo "searchThird: $searchThirdBegin - $searchThirdEnd $searchThirdDays<br />";
+						}
+					}
+				} else {					//// doing a option2 search rather than the student choices
+					/// convert input times and days to UTC
+					$result						= utcConvert('toutc',$student_timezone_offset,$search_time,$search_days);
+					if ($result[0] == 'FAIL') {
+						if ($doDebug) {
+							echo "utcConvert failed 'toutc',$student_timezone_offset,$search_time,$search_days<br />
+								  Error: $result[3]<br />";
+						}
+						$displayDays			= "<b>ERROR</b>";
+						$displayTimes			= '';
+					} else {
+						$displayTimes			= $result[1];
+						$displayDays			= $result[2];
+					}
+					$myTime					= substr($displayTimes[0],0,2);
 					$myInt					= intval($myTime) * 100;
 					$searchValues			= $searchRange[$myInt];
 					$thisArray				= explode("|",$searchValues);
 					$searchFirstBegin		= intval($thisArray[0]);
 					$searchFirstEnd			= intval($thisArray[1]);
-					$searchFirstDays		= $myArray[1];
+					$searchFirstDays		= $displayDays;
 					if ($doDebug) {
 						echo "searchFirst: $searchFirstBegin - $searchFirstEnd $searchFirstDays<br />";
 					}
+					$testFirst					= TRUE;
+					$testSecond					= FALSE;
+					$testThird					= FALSE;
 				}
-				if ($student_second_class_choice_utc == '' || $student_second_class_choice_utc == 'None') {
-					$searchSecondTime		= "";
-					$searchSecondDays		= "";
-					$testSecond				= FALSE;
-					if ($doDebug) {
-						echo "No second choice. Not searching second choice<br />";
-					}
+				// check to see if should test student choices
+				$doTesting			= FALSE;
+				if ($testFirst || $testSecond || $testThird) {
+					$doTesting		= TRUE;
 				} else {
-					$myArray				= explode(" ",$student_second_class_choice_utc);
-					$myTime					= substr($myArray[0],0,2);
-					$myInt					= intval($myTime) * 100;
-					$searchValues			= $searchRange[$myInt];
-					$thisArray				= explode("|",$searchValues);
-					$searchSecondBegin		= intval($thisArray[0]);
-					$searchSecondEnd		= intval($thisArray[1]);
-					$searchSecondDays		= $myArray[1];
-					if ($doDebug) {
-						echo "searchSecond: $searchSecondBegin - $searchSecondEnd $searchSecondDays<br />";
-					}
+					$content		.= "<p><b>Student has not selected any class choices</b></p>";
 				}
-				if ($student_third_class_choice_utc == '' || $student_third_class_choice_utc == 'None') {
-					$searchThirdTime		= "";
-					$searchThirdDays		= "";
-					$testThird				= FALSE;
-					if ($doDebug) {
-						echo "No third choice. Not searching third choice<br />";
-					}
-				} else {
-					$myArray				= explode(" ",$student_third_class_choice_utc);
-					$myTime					= substr($myArray[0],0,2);
-					$myInt					= intval($myTime) * 100;
-					$searchValues			= $searchRange[$myInt];
-					$thisArray				= explode("|",$searchValues);
-					$searchThirdBegin		= intval($thisArray[0]);
-					$searchThirdEnd			= intval($thisArray[1]);
-					$searchThirdDays		= $myArray[1];
-					if ($doDebug) {
-						echo "searchThird: $searchThirdBegin - $searchThirdEnd $searchThirdDays<br />";
-					}
-				}
-			} else {					//// doing a option2 search rather than the student choices
-				/// convert input times and days to UTC
-				$result						= utcConvert('toutc',$student_timezone_offset,$search_time,$search_days);
-				if ($result[0] == 'FAIL') {
-					if ($doDebug) {
-						echo "utcConvert failed 'toutc',$student_timezone_offset,$search_time,$search_days<br />
-							  Error: $result[3]<br />";
-					}
-					$displayDays			= "<b>ERROR</b>";
-					$displayTimes			= '';
-				} else {
-					$displayTimes			= $result[1];
-					$displayDays			= $result[2];
-				}
-				$myTime					= substr($displayTimes[0],0,2);
-				$myInt					= intval($myTime) * 100;
-				$searchValues			= $searchRange[$myInt];
-				$thisArray				= explode("|",$searchValues);
-				$searchFirstBegin		= intval($thisArray[0]);
-				$searchFirstEnd			= intval($thisArray[1]);
-				$searchFirstDays		= $displayDays;
-				if ($doDebug) {
-					echo "searchFirst: $searchFirstBegin - $searchFirstEnd $searchFirstDays<br />";
-				}
-				$testFirst					= TRUE;
-				$testSecond					= FALSE;
-				$testThird					= FALSE;
-			}						
-			//// get all the advisorClass records for the student's level
-			$sql					= "select * from $advisorClassTableName 
-									   where advisorclass_semester='$proximateSemester' 
-										and advisorclass_level='$student_level'";
-			$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisorclass === FALSE) {
-				handleWPDBError("$jobname MGMT 71",$doDebug);
-			} else {
-				$numACRows					= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numACRows rows<br />";
-				}
-				if ($numACRows > 0) {
-					foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-						$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-						$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-						$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-						$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-						$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-						$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-						$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-						$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-						$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-						$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-						$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-						$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-						$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-						$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-						$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-						$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-						$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-						$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-						$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-						$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-						$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-						$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-						$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-						$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-						$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-						$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-						$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-						$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-						$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-						$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-						$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-						$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-						$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-						$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-						$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-						$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-						$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-						$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-						$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-						$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-						$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-						$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-						$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-					
+				if ($doTesting) {
+					//// get all the advisorClass records for the student's level
+					$sql					= "select * from $advisorClassTableName 
+											   where advisorclass_semester='$proximateSemester' 
+												and advisorclass_level='$student_level'";
+					$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+					if ($wpw1_cwa_advisorclass === FALSE) {
+						handleWPDBError("$jobname MGMT 71",$doDebug);
+					} else {
+						$numACRows					= $wpdb->num_rows;
 						if ($doDebug) {
-							echo "<br />Have $advisorClass_level advisorClass for $advisorClass_advisor_call_sign held on $advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />
-								advisorClass_class_size: $advisorClass_class_size<br />
-								class_number_students: $class_number_students<br />";
+							echo "ran $sql<br />and retrieved $numACRows rows<br />";
 						}
-						$doProceed					= TRUE;
-						//// see if this advisor is excluded
-						if (strPos($student_excluded_advisor,$advisorClass_advisor_call_sign) !== FALSE) {
-							if ($doDebug) {
-								echo "This advisor is excluded .... bypassed<br />";
-							}
-							$doProceed				= FALSE;
-						}
-						if ($doProceed) {
-							////// get the advisor record and see if we can use this advisor
-							$sql					= "select * from $advisorTableName 
-														left join $userMasterTableName on user_call_sign = advisor_call_sign 
-														where advisor_call_sign='$advisor_call_sign' 
-														and advisor_semester='$proximateSemester'";
-							$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-							if ($wpw1_cwa_advisor === FALSE) {
-								handleWPDBError("$jobname MGMT 71",$doDebug);
-								$doProceed		= FALSE;
-							} else {
-								$numARows			= $wpdb->num_rows;
+						if ($numACRows > 0) {
+							foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+								$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+								$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+								$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+								$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+								$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+								$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+								$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+								$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+								$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+								$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+								$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+								$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+								$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+								$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+								$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+								$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+								$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+								$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+								$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+								$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+								$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+								$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+								$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+								$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+								$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+								$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+								$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+								$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+								$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+								$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+								$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+								$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+								$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+								$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+								$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+								$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+								$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+								$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+								$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+								$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+								$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+								$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+								$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+								$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+								$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+								$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+							
 								if ($doDebug) {
-									echo "ran $sql<br />and retrieved $myStr rows<br />";
+									echo "<br />Have $advisorClass_level advisorClass for $advisorClass_call_sign held on $advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />
+										advisorClass_class_size: $advisorClass_class_size<br />
+										class_number_students: $advisorClass_number_students<br />";
 								}
-								if ($numARows > 0) {
-									foreach ($wpw1_cwa_advisor as $advisorRow) {
-										$advisor_master_ID 					= $advisorRow->user_ID;
-										$advisor_master_call_sign			= $advisorRow->user_call_sign;
-										$advisor_first_name 				= $advisorRow->user_first_name;
-										$advisor_last_name 					= $advisorRow->user_last_name;
-										$advisor_email 						= $advisorRow->user_email;
-										$advisor_phone 						= $advisorRow->user_phone;
-										$advisor_city 						= $advisorRow->user_city;
-										$advisor_state 						= $advisorRow->user_state;
-										$advisor_zip_code 					= $advisorRow->user_zip_code;
-										$advisor_country_code 				= $advisorRow->user_country_code;
-										$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-										$advisor_telegram 					= $advisorRow->user_telegram;
-										$advisor_signal 					= $advisorRow->user_signal;
-										$advisor_messenger 					= $advisorRow->user_messenger;
-										$advisor_master_action_log 			= $advisorRow->user_action_log;
-										$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-										$advisor_languages 					= $advisorRow->user_languages;
-										$advisor_survey_score 				= $advisorRow->user_survey_score;
-										$advisor_is_admin					= $advisorRow->user_is_admin;
-										$advisor_role 						= $advisorRow->user_role;
-										$advisor_master_date_created 		= $advisorRow->user_date_created;
-										$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-					
-										$advisor_ID							= $advisorRow->advisor_id;
-										$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-										$advisor_semester 					= $advisorRow->advisor_semester;
-										$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-										$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-										$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-										$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-										$advisor_action_log 				= $advisorRow->advisor_action_log;
-										$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-										$advisor_control_code 				= $advisorRow->advisor_control_code;
-										$advisor_date_created 				= $advisorRow->advisor_date_created;
-										$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-										$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-					
-										// if you need the country name and phone code, include the following
-										$countrySQL		= "select * from wpw1_cwa_country_codes  
-															where country_code = '$advisor_country_code'";
-										$countrySQLResult	= $wpdb->get_results($countrySQL);
-										if ($countrySQLResult === FALSE) {
-											handleWPDBError($jobname,$doDebug);
-											$advisor_country		= "UNKNOWN";
-											$advisor_ph_code		= "";
-										} else {
-											$numCRows		= $wpdb->num_rows;
-											if ($doDebug) {
-												echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-											}
-											if($numCRows > 0) {
-												foreach($countrySQLResult as $countryRow) {
-													$advisor_country		= $countryRow->country_name;
-													$advisor_ph_code		= $countryRow->ph_code;
-												}
-											} else {
-												$advisor_country			= "Unknown";
-												$advisor_ph_code			= "";
-											}
-										}
-
-										
-										if ($advisor_verify_response == 'R') {
-											if ($doDebug) {
-												echo "Advisor has a response of R. Bypassing<br />";
-											}
-											$doProceed		= FALSE;
-										}
-										if ($advisor_survey_score == '6' || $advisor_survey_score == 9 || $advisor_survey_score == 13) {
-											if ($doDebug) {
-												echo "Advisor has a survey score of $advisor_survey_score. Bypassing<br />";
-											}
-											$doProceed		= FALSE;
-										}
-										if ($advisor_verify_email_number == '4') {
-											if ($doDebug) {
-												echo "Advisor was dropped. Bypassing<br />";
-											}
-											$doProceed		= FALSE;
-										}
-									}				///// end of advisor while
-								} else {
+								$doProceed					= TRUE;
+								//// see if this advisor is excluded
+								if (strPos($student_excluded_advisor,$advisorClass_call_sign) !== FALSE) {
 									if ($doDebug) {
-										echo "No advisor record found for $advisorClass_advisor_callsign<br />";
+										echo "This advisor is excluded .... bypassed<br />";
 									}
 									$doProceed				= FALSE;
 								}
-							}
-							if ($doProceed) {
-								$gotAMatch				= FALSE;
-								$advisorClass_class_schedule_times_utc		= intval($advisorClass_class_schedule_times_utc);
-								//// does the advisor's class meet the student's requirements?
-								if ($testFirst) {
-									if ($searchFirstDays == $advisorClass_class_schedule_days_utc) {		/// half way there
-										if ($advisorClass_class_schedule_times_utc >= $searchFirstBegin && $advisorClass_class_schedule_times_utc < $searchFirstEnd) {		/// have a match
-											$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
-											if ($result[0] == 'FAIL') {
-												if ($doDebug) {
-													echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
-														  Error: $result[3]<br />";
+								if ($doProceed) {
+									////// get the advisor record and see if we can use this advisor
+									$sql					= "select * from $advisorTableName 
+																left join $userMasterTableName on user_call_sign = advisor_call_sign 
+																where advisor_call_sign='$advisorClass_call_sign' 
+																and advisor_semester='$proximateSemester'";
+									$wpw1_cwa_advisor	= $wpdb->get_results($sql);
+									if ($wpw1_cwa_advisor === FALSE) {
+										handleWPDBError("$jobname MGMT 71",$doDebug);
+										$doProceed		= FALSE;
+									} else {
+										$numARows			= $wpdb->num_rows;
+										if ($doDebug) {
+											echo "ran $sql<br />and retrieved $numARows rows<br />";
+										}
+										if ($numARows > 0) {
+											foreach ($wpw1_cwa_advisor as $advisorRow) {
+												$advisor_master_ID 					= $advisorRow->user_ID;
+												$advisor_master_call_sign			= $advisorRow->user_call_sign;
+												$advisor_first_name 				= $advisorRow->user_first_name;
+												$advisor_last_name 					= $advisorRow->user_last_name;
+												$advisor_email 						= $advisorRow->user_email;
+												$advisor_ph_code 					= $advisorRow->user_ph_code;
+												$advisor_phone 						= $advisorRow->user_phone;
+												$advisor_city 						= $advisorRow->user_city;
+												$advisor_state 						= $advisorRow->user_state;
+												$advisor_zip_code 					= $advisorRow->user_zip_code;
+												$advisor_country_code 				= $advisorRow->user_country_code;
+												$advisor_country					= $advisorRow->user_country;
+												$advisor_whatsapp 					= $advisorRow->user_whatsapp;
+												$advisor_telegram 					= $advisorRow->user_telegram;
+												$advisor_signal 					= $advisorRow->user_signal;
+												$advisor_messenger 					= $advisorRow->user_messenger;
+												$advisor_master_action_log 			= $advisorRow->user_action_log;
+												$advisor_timezone_id 				= $advisorRow->user_timezone_id;
+												$advisor_languages 					= $advisorRow->user_languages;
+												$advisor_survey_score 				= $advisorRow->user_survey_score;
+												$advisor_is_admin					= $advisorRow->user_is_admin;
+												$advisor_role 						= $advisorRow->user_role;
+												$advisor_master_date_created 		= $advisorRow->user_date_created;
+												$advisor_master_date_updated 		= $advisorRow->user_date_updated;
+							
+												$advisor_ID							= $advisorRow->advisor_id;
+												$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
+												$advisor_semester 					= $advisorRow->advisor_semester;
+												$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+												$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
+												$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+												$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+												$advisor_action_log 				= $advisorRow->advisor_action_log;
+												$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+												$advisor_control_code 				= $advisorRow->advisor_control_code;
+												$advisor_date_created 				= $advisorRow->advisor_date_created;
+												$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+												$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
+							
+		
+												
+												if ($advisor_verify_response == 'R') {
+													if ($doDebug) {
+														echo "Advisor has a response of R. Bypassing<br />";
+													}
+													$doProceed		= FALSE;
 												}
-												$displayDays			= "<b>ERROR</b>";
-												$displayTimes			= "";
-											} else {
-												$displayTimes			= $result[1];
-												$displayDays			= $result[2];
-												$classAvailableArray[]	= "1|$advisorClass_advisor_call_sign|$advisorClass_advisor_last_name, $advisorClass_advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|First|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
-												if ($doDebug) {
-													echo "Got a match. Added $advisorClass_advisor_call_sign|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|First|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
+												if ($advisor_survey_score == '6' || $advisor_survey_score == 9 || $advisor_survey_score == 13) {
+													if ($doDebug) {
+														echo "Advisor has a survey score of $advisor_survey_score. Bypassing<br />";
+													}
+													$doProceed		= FALSE;
 												}
-												$gotAMatch	= TRUE;
+												if ($advisor_verify_email_number == '4') {
+													if ($doDebug) {
+														echo "Advisor was dropped. Bypassing<br />";
+													}
+													$doProceed		= FALSE;
+												}
+											}				///// end of advisor while
+										} else {
+											if ($doDebug) {
+												echo "No advisor record found for $advisorClass_advisor_callsign<br />";
+											}
+											$doProceed				= FALSE;
+										}
+									}
+									if ($doProceed) {
+										if ($doDebug) {
+											echo "testing advisor $advisor_call_sign<br />";
+										}
+										$gotAMatch				= FALSE;
+										$advisorClass_class_schedule_times_utc		= intval($advisorClass_class_schedule_times_utc);
+										//// does the advisor's class meet the student's requirements?
+										if ($testFirst) {
+											if ($doDebug) {
+												echo "checking $advisor_call_sign schedule against student first class choice<br />";
+											}
+											if ($searchFirstDays == $advisorClass_class_schedule_days_utc) {		/// half way there
+												if ($advisorClass_class_schedule_times_utc >= $searchFirstBegin && $advisorClass_class_schedule_times_utc < $searchFirstEnd) {		/// have a match
+													$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
+													if ($result[0] == 'FAIL') {
+														if ($doDebug) {
+															echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
+																  Error: $result[3]<br />";
+														}
+														$displayDays			= "<b>ERROR</b>";
+														$displayTimes			= "";
+													} else {
+														$displayTimes			= $result[1];
+														$displayDays			= $result[2];
+														$classAvailableArray[]	= "1|$advisorClass_call_sign|$advisor_last_name, $advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|First|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
+														if ($doDebug) {
+															echo "Got a match. Added $advisorClass_call_sign|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|First|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
+														}
+														$gotAMatch	= TRUE;
+													}
+												} else {
+													if ($doDebug) {
+														echo "no match<br /";
+													}
+												}
+											}
+										}
+										if ($testSecond) {
+											if ($doDebug) {
+												echo "checking $advisor_call_sign schedule against student second class choice<br />";
+											}
+											if ($searchSecondDays == $advisorClass_class_schedule_days_utc) {		/// half way there
+												if ($advisorClass_class_schedule_times_utc >= $searchSecondBegin && $advisorClass_class_schedule_times_utc < $searchSecondEnd) {		/// have a match
+													$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
+													if ($result[0] == 'FAIL') {
+														if ($doDebug) {
+															echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
+																  Error: $result[3]<br />";
+														}
+														$displayDays			= "<b>ERROR</b>";
+														$displayTimes			= "";
+													} else {
+														$displayTimes			= $result[1];
+														$displayDays			= $result[2];
+//														$studentCount			= getStudentCount($advisorClass_call_sign,$advisorClass_sequence);
+														$classAvailableArray[]			= "2|$advisorClass_call_sign|$advisor_last_name, $advisor_first_name|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Second|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
+														if ($doDebug) {
+															echo "Got a match. Added 2|$advisorClass_call_sign|$advisor_last_name, $advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Second|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
+														}
+														$gotAMatch		= TRUE;
+													}
+												} else {
+													if ($doDebug) {
+														echo "no match<br /";
+													}
+												}
+											}
+										}
+										if ($testThird) {
+											if ($doDebug) {
+												echo "checking $advisor_call_sign schedule against student third class choice<br />";
+											}
+											if ($searchThirdDays == $advisorClass_class_schedule_days_utc) {		/// half way there
+												if ($advisorClass_class_schedule_times_utc >= $searchThirdBegin && $advisorClass_class_schedule_times_utc < $searchThirdEnd) {		/// have a match
+													$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
+													if ($result[0] == 'FAIL') {
+														if ($doDebug) {
+															echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
+																  Error: $result[3]<br />";
+														}
+														$displayDays			= "<b>ERROR</b>";
+														$displayTimes			= "";
+													} else {
+														$displayTimes			= $result[1];
+														$displayDays			= $result[2];
+														$classAvailableArray[]			= "3|$advisorClass_call_sign|$advisor_last_name, $advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Third|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
+														if ($doDebug) {
+															echo "Got a match. Added $advisorClass_call_sign|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Third|$advisorClass_class_size|$advisorClass_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
+														}
+														$gotAMatch				= TRUE;
+													}
+												} else {
+													if ($doDebug) {
+														echo "no match<br /";
+													}
+												}
 											}
 										}
 									}
+								}
+							}			//// end of advisorClass while
+							if (count($classAvailableArray) > 0) {
+								/// output the data
+								sort($classAvailableArray);
+								if ($doDebug) {
+									echo "<br />class available array:<br /><pre>";
+									print_r($classAvailableArray);
+									echo "</pre><br />";
+									if ($gotAMatch) {
+										echo "gotAMatch is TRUE<br />";
+									} else {
+										echo "gotAMatch is FALSE<br />";
+									}
+								}
+								if ($testFirst) {
+									$searchFirstBegin		= str_pad($searchFirstBegin,4,'0',STR_PAD_LEFT);
+									$searchFirstEnd			= str_pad($searchFirstEnd,4,'0',STR_PAD_LEFT);
+								} else {
+									$searchFirstBegin		= '';
+									$searchFirstEnd			= '';
 								}
 								if ($testSecond) {
-									if ($searchSecondDays == $advisorClass_class_schedule_days_utc) {		/// half way there
-										if ($advisorClass_class_schedule_times_utc >= $searchSecondBegin && $advisorClass_class_schedule_times_utc < $searchSecondEnd) {		/// have a match
-											$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
-											if ($result[0] == 'FAIL') {
-												if ($doDebug) {
-													echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
-														  Error: $result[3]<br />";
-												}
-												$displayDays			= "<b>ERROR</b>";
-												$displayTimes			= "";
-											} else {
-												$displayTimes			= $result[1];
-												$displayDays			= $result[2];
-//															$studentCount					= getStudentCount($advisorClass_advisor_call_sign,$advisorClass_sequence);
-												$classAvailableArray[]			= "2|$advisorClass_advisor_call_sign|$advisorClass_advisor_last_name, $advisorClass_advisor_first_name|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Second|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
-												if ($doDebug) {
-													echo "Got a match. Added 2|$advisorClass_advisor_call_sign|$advisorClass_advisor_last_name, $advisorClass_advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Second|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
-												}
-												$gotAMatch		= TRUE;
-											}
-										}
-									}
+									$searchSecondBegin		= str_pad($searchSecondBegin,4,'0',STR_PAD_LEFT);
+									$searchSecondEnd		= str_pad($searchSecondEnd,4,'0',STR_PAD_LEFT);
+								} else {
+									$searchSecondBegin		= '';
+									$searchSecondEnd		= '';
 								}
 								if ($testThird) {
-									if ($searchThirdDays == $advisorClass_class_schedule_days_utc) {		/// half way there
-										if ($advisorClass_class_schedule_times_utc >= $searchThirdBegin && $advisorClass_class_schedule_times_utc < $searchThirdEnd) {		/// have a match
-											$result						= utcConvert('tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc,$doDebug);
-											if ($result[0] == 'FAIL') {
-												if ($doDebug) {
-													echo "utcConvert failed 'tolocal',$student_timezone_offset,$advisorClass_class_schedule_times_utc,$advisorClass_class_schedule_days_utc<br />
-														  Error: $result[3]<br />";
-												}
-												$displayDays			= "<b>ERROR</b>";
-												$displayTimes			= "";
-											} else {
-												$displayTimes			= $result[1];
-												$displayDays			= $result[2];
-												$classAvailableArray[]			= "3|$advisorClass_advisor_call_sign|$advisorClass_advisor_last_name, $advisorClass_advisor_first_name<br />$advisor_state, $advisor_country|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Third|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level";
-												if ($doDebug) {
-													echo "Got a match. Added $advisorClass_advisor_call_sign|$advisorClass_sequence|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|Third|$advisorClass_class_size|$class_number_students|$advisorClass_class_schedule_times $advisorClass_class_schedule_days|$advisorClass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
-												}
-												$gotAMatch				= TRUE;
-											}
-										}
+									$searchThirdBegin		= str_pad($searchThirdBegin,4,'0',STR_PAD_LEFT);
+									$searchThirdEnd			= str_pad($searchThirdEnd,4,'0',STR_PAD_LEFT);
+								} else {
+									$searchThirdBegin		= '';
+									$searchThirdEnd			= '';
+								}
+								if ($inp_choice == 'option1') {
+									$thisType			 	= "Search Using Student's Choices";
+									$thisSearch				= "<table style='width:1000px;'>
+																<tr><th>Student<br />
+																		$student_last_name, $student_first_name</th>
+																	<th>Call Sign<br />
+																		$student_call_sign</th>
+																	<th>Level<br />
+																		$student_level</th>
+																	<th>Location<br />
+																		$student_state, $student_country</th></tr>
+																<tr><td>&nbsp;</td>
+																	<td><b>Local Time</b></td>
+																	<td><b>UTC Time</b></td></tr>
+																<tr><td>First Choice</td>
+																	<td>$student_first_class_choice</td>
+																	<td>$student_first_class_choice_utc<br />
+																		Search GE $searchFirstBegin LT $searchFirstEnd</td>
+																	<td></td></tr>
+																<tr><td>Second Choice</td>
+																	<td>$student_second_class_choice</td>
+																	<td>$student_second_class_choice_utc<br />
+																		Search GE $searchSecondBegin LT $searchSecondEnd</td>
+																	<td></td></tr>
+																<tr><td>Third Choice</td>
+																	<td>$student_third_class_choice</td>
+																	<td>$student_third_class_choice_utc<br />
+																		Search GE $searchThirdBegin LT $searchThirdEnd</td>
+																	<td></td></tr>
+																<tr><td colspan='4'>Search Using Student Choices</td></tr>
+																</table>";
+								} else {
+									$thisType			 	= "Search Using a New Time and Class Days";
+									$thisSearch				= "New Search Criteria: $search_time $search_days Local ($displayTimes $displayDays UTC)<br />";
+								}
+								$showPreAssign				= TRUE;
+								if ($daysToSemester > 0 && $daysToSemester <= 19) {		/// show pre-assign or not??
+									$showPreAssign			= FALSE;
+									if ($doDebug) {
+										echo "showPreAssign set to FALSE as $daysToSemester is gt 0 and le 19<br />";
 									}
 								}
-							}
-						}
-					}			//// end of advisorClass while
-					if (count($classAvailableArray) > 0) {
-						/// output the data
-						sort($classAvailableArray);
-						if ($doDebug) {
-							echo "<br />class available array:<br /><pre>";
-							print_r($classAvailableArray);
-							echo "</pre><br />";
-							if ($gotAMatch) {
-								echo "gotAMatch is TRUE<br />";
-							} else {
-								echo "gotAMatch is FALSE<br />";
-							}
-						}
-						if ($testFirst) {
-							$searchFirstBegin		= str_pad($searchFirstBegin,4,'0',STR_PAD_LEFT);
-							$searchFirstEnd			= str_pad($searchFirstEnd,4,'0',STR_PAD_LEFT);
-						} else {
-							$searchFirstBegin		= '';
-							$searchFirstEnd			= '';
-						}
-						if ($testSecond) {
-							$searchSecondBegin		= str_pad($searchSecondBegin,4,'0',STR_PAD_LEFT);
-							$searchSecondEnd		= str_pad($searchSecondEnd,4,'0',STR_PAD_LEFT);
-						} else {
-							$searchSecondBegin		= '';
-							$searchSecondEnd		= '';
-						}
-						if ($testThird) {
-							$searchThirdBegin		= str_pad($searchThirdBegin,4,'0',STR_PAD_LEFT);
-							$searchThirdEnd			= str_pad($searchThirdEnd,4,'0',STR_PAD_LEFT);
-						} else {
-							$searchThirdBegin		= '';
-							$searchThirdEnd			= '';
-						}
-						if ($inp_choice == 'option1') {
-							$thisType			 	= "Search Using Student's Choices";
-							$thisSearch				= "<table style='width:1000px;'>
-														<tr><th>Student<br />
-																$student_last_name, $student_first_name</th>
-															<th>Call Sign<br />
-																$student_call_sign</th>
-															<th>Level<br />
-																$student_level</th>
-															<th>Location<br />
-																$student_state, $student_country</th></tr>
-														<tr><td>&nbsp;</td>
-															<td><b>Local Time</b></td>
-															<td><b>UTC Time</b></td></tr>
-														<tr><td>First Choice</td>
-															<td>$student_first_class_choice</td>
-															<td>$student_first_class_choice_utc<br />
-																Search GE $searchFirstBegin LT $searchFirstEnd</td>
-															<td></td></tr>
-														<tr><td>Second Choice</td>
-															<td>$student_second_class_choice</td>
-															<td>$student_second_class_choice_utc<br />
-																Search GE $searchSecondBegin LT $searchSecondEnd</td>
-															<td></td></tr>
-														<tr><td>Third Choice</td>
-															<td>$student_third_class_choice</td>
-															<td>$student_third_class_choice_utc<br />
-																Search GE $searchThirdBegin LT $searchThirdEnd</td>
-															<td></td></tr>
-														<tr><td colspan='4'>Search Using Student Choices</td></tr>
-														</table>";
-						} else {
-							$thisType			 	= "Search Using a New Time and Class Days";
-							$thisSearch				= "New Search Criteria: $search_time $search_days Local ($displayTimes $displayDays UTC)<br />";
-						}
-						$showPreAssign				= TRUE;
-						if ($daysToSemester > 0 && $daysToSemester <= 19) {		/// show pre-assign or not??
-							$showPreAssign			= FALSE;
-							if ($doDebug) {
-								echo "showPreAssign set to FALSE as $daysToSemester is gt 0 and le 19<br />";
-							}
-						}
-					
-						$content		.= "$thisSearch
-											$statusComment</p>
-											<table style='width:1000px;'>
-											<tr><th>Advisor</th>
-												<th>Name</th>
-												<th>Class</th>
-												<th>Advisor Class Schedule</th>
-												<th>Choice Match</th>
-												<th>Class Size</th>
-												<th>Seats<br />Taken</th>
-												<th>Student Class Time Local</th>
-												<th>Pre-Assign</th>
-												<th>Assign</th></tr>";
-
+							
+								$content		.= "$thisSearch
+													$statusComment</p>
+													<table style='width:1000px;'>
+													<tr><th>Advisor</th>
+														<th>Name</th>
+														<th>Class</th>
+														<th>Advisor Class Schedule</th>
+														<th>Choice Match</th>
+														<th>Class Size</th>
+														<th>Seats<br />Taken</th>
+														<th>Seats<br />Available</th>
+														<th>Student Class Time Local</th>
+														<th>Pre-Assign</th>
+														<th>Assign</th></tr>";
+		
 /*
 		classAvailableArray = 
 		0	1, 2, or 3 depending on which class choice matched
-		1	advisorClass_advisor_call_sign 
+		1	advisorClass_call_sign 
 		2	advisorClass_advisor_last_name, advisorClass_advisor_first_name
 		3	advisorClass_sequence
 		4	advisorClass_class_schedule_times_utc
@@ -3389,67 +3413,80 @@ function getTheReason($strReasonCode) {
 		Neither				xxx		xxx		xxx		
 			
 */
-						if (count($classAvailableArray) > 0) {
-							$gotAMatch			= TRUE;
+								if (count($classAvailableArray) > 0) {
+									$gotAMatch			= TRUE;
+								}
+								foreach ($classAvailableArray as $myValue) {
+									$myArray			= explode("|",$myValue);
+									$thisCallSign		= $myArray[1];
+									$thisName			= $myArray[2];
+									$thisClass			= $myArray[3];
+									$thisClassSkedTime	= $myArray[4];
+									$thisClassSkedDays	= $myArray[5];
+									$thisMatch			= $myArray[6];
+									$thisSize			= $myArray[7];
+									$thisCount			= $myArray[8];
+									$thisLocal			= $myArray[9];
+									$thisTimeZone		= $myArray[10];
+									$thisClassTime		= $myArray[11];
+									$thisLevel			= $myArray[12];
+								
+									$thisClassSkedTime	= str_pad($thisClassSkedTime,4,0,STR_PAD_LEFT);
+									$classFull			= TRUE;
+									if ($thisCount < $thisSize) {
+										$classFull		= FALSE;
+									}
+									if ($doDebug) {
+										echo "Logicals: doActions: $doActions; classFull: $classFull; showPreAssign: $showPreAssign<br />";
+									}
+									$myInt				= $thisSize - $thisCount;
+									$thisAvail			= 0;
+									if ($myInt < 0) {
+										$thisAvail	= 0;
+									}
+									if ($myInt > 0) {
+										$thisAvail		= "<b>$myInt</b>";
+									}
+									$content			.= "<tr><td style='vertical-align:top;'>$thisCallSign</td>
+																<td style='vertical-align:top;'>$thisName</td>
+																<td style='vertical-align:top;text-align:center;'>$thisClass</td>
+																<td style='vertical-align:top;'>$thisClassSkedTime $thisClassSkedDays UTC<br />$thisLocal Local</td>
+																<td style='vertical-align:top;'>$thisMatch</td>
+																<td style='vertical-align:top;text-align:center;'>$thisSize</td>
+																<td style='vertical-align:top;text-align:center;'>$thisCount</td>
+																<td style='vertical-align:top;text-align:center;'>$thisAvail</td>
+																<td style='vertical-align:top;'>$thisClassTime</td>";
+									if ($doActions && !$classFull && $showPreAssign) {
+										$content		.= "	<td style='vertical-align:top;'><a href='$theURL?strpass=2&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign' target='_blank'>Pre-Assign</a></td>
+																<td style='vertical-align:top;'><a href='$theURL?strpass=40&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign&level=$thisLevel' target='_blank'>Assign</a></td>
+															</tr>";
+									} elseif ($doActions) {
+										$content		.= "	<td style='vertical-align:top;'></td>
+																<td style='vertical-align:top;'><a href='$theURL?strpass=40&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign&level=$thisLevel' target='_blank'>Assign</a></td>
+															</tr>";
+									} else {
+										$content		.="<td style='vertical-align:top;'></td>
+															<td style='vertical-align:top;'></td></tr>";						
+									}
+								}
+								$content				.= "</table>
+															<p><u>The Pre-Assign Link</u>: Clicking on this link will open the 'Pre-assign Student to an Advisor' function. Use this capability before 
+															students have been actually assigned to an advisor.</p>
+															<p><u>The Assign Link</u>: Clicking on this link will open the 'Add Unassigned Student to an Advisors Class' function. Use this capability 
+															after students have been assigned to an advisor, otherwise the assignment will be ignored when assigning students to an advisor.</p>";
+							} else {	/// no matching records found
+								$content	.= "<h3>Find Possible Classes for Unassigned $inp_student_callsign<h3>
+												<p>No advisor classes found that match the criteria";
+							}
+						} else {		//// no advisorClass records 
+							$content		.= "<h3>Find Possible Classes for Unassigned $inp_student_callsign<h3>
+												<p>No advisorClass records found for the student level of $student_level";
 						}
-						foreach ($classAvailableArray as $myValue) {
-							$myArray			= explode("|",$myValue);
-							$thisCallSign		= $myArray[1];
-							$thisName			= $myArray[2];
-							$thisClass			= $myArray[3];
-							$thisClassSkedTime	= $myArray[4];
-							$thisClassSkedDays	= $myArray[5];
-							$thisMatch			= $myArray[6];
-							$thisSize			= $myArray[7];
-							$thisCount			= $myArray[8];
-							$thisLocal			= $myArray[9];
-							$thisTimeZone		= $myArray[10];
-							$thisClassTime		= $myArray[11];
-							$thisLevel			= $myArray[12];
-						
-							$thisClassSkedTime	= str_pad($thisClassSkedTime,4,0,STR_PAD_LEFT);
-							$classFull			= TRUE;
-							if ($thisCount < $thisSize) {
-								$classFull		= FALSE;
-							}
-							if ($doDebug) {
-								echo "Logicals: doActions: $doActions; classFull: $classFull; showPreAssign: $showPreAssign<br />";
-							}
-							$content			.= "<tr><td style='vertical-align:top;'>$thisCallSign</td>
-														<td style='vertical-align:top;'>$thisName</td>
-														<td style='vertical-align:top;text-align:center;'>$thisClass</td>
-														<td style='vertical-align:top;'>$thisClassSkedTime $thisClassSkedDays UTC<br />$thisLocal Local</td>
-														<td style='vertical-align:top;'>$thisMatch</td>
-														<td style='vertical-align:top;text-align:center;'>$thisSize</td>
-														<td style='vertical-align:top;text-align:center;'>$thisCount</td>
-														<td style='vertical-align:top;'>$thisClassTime</td>";
-							if ($doActions && !$classFull && $showPreAssign) {
-								$content		.= "	<td style='vertical-align:top;'><a href='$theURL?strpass=2&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign' target='_blank'>Pre-Assign</a></td>
-														<td style='vertical-align:top;'><a href='$theURL?strpass=40&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign&level=$thisLevel' target='_blank'>Assign</a></td>
-													</tr>";
-							} elseif ($doActions) {
-								$content		.= "	<td style='vertical-align:top;'></td>
-														<td style='vertical-align:top;'><a href='$theURL?strpass=40&inp_advisor_callsign=$thisCallSign&inp_student_callsign=$inp_student_callsign&level=$thisLevel' target='_blank'>Assign</a></td>
-													</tr>";
-							} else {
-								$content		.="<td style='vertical-align:top;'></td>
-													<td style='vertical-align:top;'></td></tr>";						
-							}
-						}
-						$content				.= "</table>
-													<p><u>The Pre-Assign Link</u>: Clicking on this link will open the 'Pre-assign Student to an Advisor' function. Use this capability before 
-													students have been actually assigned to an advisor.</p>
-													<p><u>The Assign Link</u>: Clicking on this link will open the 'Add Unassigned Student to an Advisors Class' function. Use this capability 
-													after students have been assigned to an advisor, otherwise the assignment will be ignored when assigning students to an advisor.</p>";
-					} else {	/// no matching records found
-						$content	.= "<h3>Find Possible Classes for Unassigned $inp_student_callsign<h3>
-										<p>No advisor classes found that match the criteria";
-					}
-				} else {		//// no advisorClass records 
-					$content		.= "<h3>Find Possible Classes for Unassigned $inp_student_callsign<h3>
-										<p>No advisorClass records found for the student level of $student_level";
+					} 
 				}
-			} 
+			} else {
+				$content	.= "<p>No further action taken</p>";
+			}
 		} else {			/// no student record found
 			$content			.= "<p>No student record found in $proximateSemester semester</p>";
 		}
@@ -3561,7 +3598,7 @@ function getTheReason($strReasonCode) {
 						///// 		now get all unassigned students and see if any can fill the class criteria
 						if ($inp_search == 'standard') {
 							$sql				= "select * from $studentTableName 
-													left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+													left join $userMasterTableName on user_call_sign = student_call_sign 
 													where student_semester='$proximateSemester' 
 														and student_level='$advisorClass_level' 
 														and student_response='Y' 
@@ -3571,7 +3608,7 @@ function getTheReason($strReasonCode) {
 														student_call_sign";
 						} else {
 							$sql				= "select * from $studentTableName 
-													left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+													left join $userMasterTableName on user_call_sign = student_call_sign 
 													where (student_semester='$proximateSemester' or semester='$expandedSemester') 
 														and student_level='$advisorClass_level' 
 														and (student_response ='Y' or response = '') 
@@ -3595,11 +3632,13 @@ function getTheReason($strReasonCode) {
 									$student_first_name 				= $studentRow->user_first_name;
 									$student_last_name 					= $studentRow->user_last_name;
 									$student_email 						= $studentRow->user_email;
+									$student_ph_code					= $studentRow->user_ph_code;
 									$student_phone 						= $studentRow->user_phone;
 									$student_city 						= $studentRow->user_city;
 									$student_state 						= $studentRow->user_state;
 									$student_zip_code 					= $studentRow->user_zip_code;
 									$student_country_code 				= $studentRow->user_country_code;
+									$student_country 					= $studentRow->user_country;
 									$student_whatsapp 					= $studentRow->user_whatsapp;
 									$student_telegram 					= $studentRow->user_telegram;
 									$student_signal 					= $studentRow->user_signal;
@@ -3610,6 +3649,7 @@ function getTheReason($strReasonCode) {
 									$student_survey_score 				= $studentRow->user_survey_score;
 									$student_is_admin					= $studentRow->user_is_admin;
 									$student_role 						= $studentRow->user_role;
+									$student_prev_callsign				= $studentRow->user_prev_callsign;
 									$student_master_date_created 		= $studentRow->user_date_created;
 									$student_master_date_updated 		= $studentRow->user_date_updated;
 				
@@ -3619,7 +3659,7 @@ function getTheReason($strReasonCode) {
 									$student_timezone_offset				= $studentRow->student_timezone_offset;
 									$student_youth  						= $studentRow->student_youth;
 									$student_age  							= $studentRow->student_age;
-									$student_parent 				= $studentRow->student_parent;
+									$student_parent 						= $studentRow->student_parent;
 									$student_parent_email  					= strtolower($studentRow->student_parent_email);
 									$student_level  						= $studentRow->student_level;
 									$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -3660,43 +3700,20 @@ function getTheReason($strReasonCode) {
 									$student_flexible						= $studentRow->student_flexible;
 									$student_date_created 					= $studentRow->student_date_created;
 									$student_date_updated			  		= $studentRow->student_date_updated;
-				
-									// if you need the country name and phone code, include the following
-									$countrySQL		= "select * from wpw1_cwa_country_codes  
-														where country_code = '$student_country_code'";
-									$countrySQLResult	= $wpdb->get_results($countrySQL);
-									if ($countrySQLResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
-										$student_country		= "UNKNOWN";
-										$student_ph_code		= "";
-									} else {
-										$numCRows		= $wpdb->num_rows;
-										if ($doDebug) {
-											echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-										}
-										if($numCRows > 0) {
-											foreach($countrySQLResult as $countryRow) {
-												$student_country		= $countryRow->country_name;
-												$student_ph_code		= $countryRow->ph_code;
-											}
-										} else {
-											$student_country			= "Unknown";
-											$student_ph_code			= "";
-										}
-									}
+
 									if ($doDebug) {
 										echo "<br />Found $student_call_sign<br />
 											  &nbsp;&nbsp;&nbsp;&nbsp;semester: $student_semester<br />
 											  &nbsp;&nbsp;&nbsp;&nbsp;response: $student_response<br />
-											  &nbsp;&nbsp;&nbsp;&nbsp;first choice: $student_first_class_choice_utc<br />
-											  &nbsp;&nbsp;&nbsp;&nbsp;second choice: $student_second_class_choice_utc<br />
-											  &nbsp;&nbsp;&nbsp;&nbsp;third choice: $student_third_class_choice_utc<br />
+											  &nbsp;&nbsp;&nbsp;&nbsp;first choice UTC: $student_first_class_choice_utc<br />
+											  &nbsp;&nbsp;&nbsp;&nbsp;second choice UTC: $student_second_class_choice_utc<br />
+											  &nbsp;&nbsp;&nbsp;&nbsp;third choice UTC: $student_third_class_choice_utc<br />
 											  &nbsp;&nbsp;&nbsp;&nbsp;Catalog Options: $student_catalog_options<br />
 											  &nbsp;&nbsp;&nbsp;&nbsp;Flexible: $student_flexible<br />";
 									}
 									$doProceed								= TRUE;
 									//////	make sure this isn't an excluded advisor
-									if (strPos($student_excluded_advisor,$advisorClass_advisor_call_sign) !== FALSE) {
+									if (strPos($student_excluded_advisor,$advisorClass_call_sign) !== FALSE) {
 										$doProceed							= FALSE;
 										if ($doDebug) {
 											echo "&nbsp;&nbsp;&nbsp;&nbsp;Advisor is excluded. Bypassing<br />";
@@ -4125,11 +4142,13 @@ function getTheReason($strReasonCode) {
 							$student_first_name 				= $studentRow->user_first_name;
 							$student_last_name 					= $studentRow->user_last_name;
 							$student_email 						= $studentRow->user_email;
+							$student_ph_code					= $studentRow->user_ph_code;
 							$student_phone 						= $studentRow->user_phone;
 							$student_city 						= $studentRow->user_city;
 							$student_state 						= $studentRow->user_state;
 							$student_zip_code 					= $studentRow->user_zip_code;
 							$student_country_code 				= $studentRow->user_country_code;
+							$student_country 					= $studentRow->user_country;
 							$student_whatsapp 					= $studentRow->user_whatsapp;
 							$student_telegram 					= $studentRow->user_telegram;
 							$student_signal 					= $studentRow->user_signal;
@@ -4140,6 +4159,7 @@ function getTheReason($strReasonCode) {
 							$student_survey_score 				= $studentRow->user_survey_score;
 							$student_is_admin					= $studentRow->user_is_admin;
 							$student_role 						= $studentRow->user_role;
+							$student_prev_callsign				= $studentRow->user_prev_callsign;
 							$student_master_date_created 		= $studentRow->user_date_created;
 							$student_master_date_updated 		= $studentRow->user_date_updated;
 		
@@ -4149,7 +4169,7 @@ function getTheReason($strReasonCode) {
 							$student_timezone_offset				= $studentRow->student_timezone_offset;
 							$student_youth  						= $studentRow->student_youth;
 							$student_age  							= $studentRow->student_age;
-							$student_parent 				= $studentRow->student_parent;
+							$student_parent 						= $studentRow->student_parent;
 							$student_parent_email  					= strtolower($studentRow->student_parent_email);
 							$student_level  						= $studentRow->student_level;
 							$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -4190,30 +4210,6 @@ function getTheReason($strReasonCode) {
 							$student_flexible						= $studentRow->student_flexible;
 							$student_date_created 					= $studentRow->student_date_created;
 							$student_date_updated			  		= $studentRow->student_date_updated;
-		
-							// if you need the country name and phone code, include the following
-							$countrySQL		= "select * from wpw1_cwa_country_codes  
-												where country_code = '$student_country_code'";
-							$countrySQLResult	= $wpdb->get_results($countrySQL);
-							if ($countrySQLResult === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-								$student_country		= "UNKNOWN";
-								$student_ph_code		= "";
-							} else {
-								$numCRows		= $wpdb->num_rows;
-								if ($doDebug) {
-									echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-								}
-								if($numCRows > 0) {
-									foreach($countrySQLResult as $countryRow) {
-										$student_country		= $countryRow->country_name;
-										$student_ph_code		= $countryRow->ph_code;
-									}
-								} else {
-									$student_country			= "Unknown";
-									$student_ph_code			= "";
-								}
-							}
 				
 				
 							if ($doDebug) {

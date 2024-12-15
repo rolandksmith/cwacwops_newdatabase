@@ -1391,7 +1391,7 @@ function advisorclass_report_generator_func() {
 							<input type='radio' id='comma' name='output_type' value='comma' $comma_checked> Tab Delimited Report<br /></p>
 							
 							<p>Which Table to Read<br />
-							<input type='radio' id='student' name='mode_type' value='Prpdiction' checked='checked'> Production<br />
+							<input type='radio' id='student' name='mode_type' value='Production' checked='checked'> Production<br />
 							<input type='radio' id='student2' name='mode_type' value='testMode'> TestMode<br /></p>
 							
 							<p>Enter the 'Where' clause:<br />
@@ -1431,10 +1431,12 @@ function advisorclass_report_generator_func() {
 		
 		if ($mode_type == 'testMode') {
 			$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
-			$advisorTableName			= 'wpw1_cwa_advisor2';	
+			$advisorTableName			= 'wpw1_cwa_advisor2';
+			$userMasterTableName		= 'wpw1_cwa_user_master2';	
 		} else {
 			$advisorClassTableName		= 'wpw1_cwa_advisorclass';
 			$advisorTableName			= 'wpw1_cwa_advisor';	
+			$userMasterTableName		= 'wpw1_cwa_user_master';	
 		}	
 		if ($doDebug) {
 			echo "file names defined. Setting up nameConversionArray<br />";
@@ -1594,9 +1596,9 @@ where rg_report_name = '$inp_report_name'";
 									$myReportName
 									<p>Save report: $inp_report<br />";
 	
-		$sql	= "SELECT * FROM `wpw1_cwa_advisorclass` 
-					left join wpw1_cwa_user_master on user_call_sign = advisorclass_call_sign 
-					left join wpw1_cwa_advisor on advisor_call_sign = advisorclass_call_sign 
+		$sql	= "SELECT * FROM $advisorClassTableName  
+					left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
+					left join $advisorTableName on advisor_call_sign = advisorclass_call_sign 
 					and advisor_semester = advisorclass_semester";
 		if ($where != '') {
 			$sql	= "$sql where $where ";

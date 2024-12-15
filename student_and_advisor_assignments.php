@@ -40,7 +40,7 @@ function student_and_advisor_assignments_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$doDebug 					= TRUE;
+	$doDebug 					= FALSE;
 	$testMode					= FALSE;
 	$thisVersion				= '4';
 	$inp_semester				= $initializationArray['nextSemester'];
@@ -311,7 +311,7 @@ function getTheReason($strReasonCode) {
 			$advisorTableName		= 'wpw1_cwa_advisor2';
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
 			$studentTableName		= 'wpw1_cwa_student2';
-			$userMasterTableName	= 'wpw1_cwa_user_masterTable2';
+			$userMasterTableName	= 'wpw1_cwa_user_master2';
 			$thisMode				= 'TM';
 		} else {
 			$advisorTableName		= 'wpw1_cwa_advisor';
@@ -757,18 +757,9 @@ function getTheReason($strReasonCode) {
 				echo "<br >Start of the C&R Report<br />";
 			}
 			// Prepare report of C and R Students
+			$content		.= "<a name='reportW'><h3>Students Who Have Withdrawn (promotable = W)</h3></a>";
 			$cCount			= 0;
 			$rCouht			= 0;
-			$content		.= "<a name='reportW'><h3>Students Who Have Withdrawn (promotable = W)</h3></a>
-								<table style='width:900px;'><tr>
-								<th>Name</th>
-								<th>Email</th>
-								<th>Phone</th>
-								<th>State</th>
-								<th>TZ</th>
-								<th>Level</th>
-								<th>Promotable</th>
-								<th>Former<br />Advisor</th></tr>";
 								
 			$sql			= "select * from $studentTableName 
 								left join $userMasterTableName on user_call_sign = student_call_sign 
@@ -788,6 +779,15 @@ function getTheReason($strReasonCode) {
 					echo "ran $myStr<br />and found $numSRows rows<br />";
 				}
 				if ($numSRows > 0) {
+					$content		.= "<table style='width:900px;'><tr>
+										<th>Name</th>
+										<th>Email</th>
+										<th>Phone</th>
+										<th>State</th>
+										<th>TZ</th>
+										<th>Level</th>
+										<th>Promotable</th>
+										<th>Former<br />Advisor</th></tr>";
 					foreach ($wpw1_cwa_student as $studentRow) {
 						$student_master_ID 					= $studentRow->user_ID;
 						$student_master_call_sign 			= $studentRow->user_call_sign;
@@ -922,18 +922,9 @@ function getTheReason($strReasonCode) {
 				echo "<br >Start of the C&R Report<br />";
 			}
 			// Prepare report of C and R Students
+			$content		.= "<a name='reportX'><h3>Students with a Status of C, R, or V</h3></a>";
 			$cCount			= 0;
 			$rCouht			= 0;
-			$content		.= "<a name='reportX'><h3>Students with a Status of C, R, or V</h3></a>
-								<table style='width:900px;'><tr>
-								<th>Name</th>
-								<th>Email</th>
-								<th>Phone</th>
-								<th>State</th>
-								<th>TZ</th>
-								<th>Level</th>
-								<th>Status</th>
-								<th>Former<br />Advisor</th></tr>";
 								
 			$sql			= "select * from $studentTableName 
 								left join $userMasterTableName on user_call_sign = student_call_sign 
@@ -952,6 +943,15 @@ function getTheReason($strReasonCode) {
 					echo "ran $sql<br />and found $numSRows rows<br />";
 				}
 				if ($numSRows > 0) {
+					$content		.= "<table style='width:900px;'><tr>
+										<th>Name</th>
+										<th>Email</th>
+										<th>Phone</th>
+										<th>State</th>
+										<th>TZ</th>
+										<th>Level</th>
+										<th>Status</th>
+										<th>Former<br />Advisor</th></tr>";
 					foreach ($wpw1_cwa_student as $studentRow) {
 						$student_master_ID 					= $studentRow->user_ID;
 						$student_master_call_sign 			= $studentRow->user_call_sign;
@@ -1246,6 +1246,7 @@ function getTheReason($strReasonCode) {
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
+										<th style='text-align:center;'>Students</th>
 										<th style='text-align:center;'>Slots<br />Avail</th>
 									</tr>";
 
@@ -1265,7 +1266,7 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_times		= $myArray[8];
 				$advisorClass_class_schedule_days_utc	= $myArray[9];
 				$advisorClass_class_schedule_times_utc	= $myArray[10];
-				$advisorClass_number_students					= $myArray[11];
+				$advisorClass_number_students			= $myArray[11];
 				
 				if ($doDebug) {
 					echo "<br />Processing $advisor_call_sign<br />
@@ -1299,6 +1300,7 @@ function getTheReason($strReasonCode) {
 									<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 									<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 									<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
+									<td style='text-align:center;vertical-align:top;'>$advisorClass_number_students</td>
 									<td style='text-align:center;vertical-align:top;'>$slotsAvailable</td></tr>";
 				$totalAdvisors++;
 				
@@ -1328,6 +1330,7 @@ function getTheReason($strReasonCode) {
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
+										<th style='text-align:center;'>Students</th>
 										<th style='text-align:center;'>Slots<br />Avail</th>
 									</tr>";
 			$totalSlots				= 0;
@@ -1371,6 +1374,7 @@ function getTheReason($strReasonCode) {
 										<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 										<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 										<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
+										<td style='text-align:center;vertical-align:top;'>$advisorClass_number_students</td>
 										<td style='text-align:center;vertical-align:top;'>$slotsAvailable</td></tr>";
 								
 				}
@@ -1427,6 +1431,7 @@ function getTheReason($strReasonCode) {
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
+										<th style='text-align:center;'>Students</th>
 										<th style='text-align:center;'>Slots<br />Avail</th>
 									</tr>";
 // echo "<br />AdvisorSortArray values:<br />";
@@ -1443,7 +1448,7 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_times		= $myArray[10];
 				$advisorClass_class_schedule_days_utc	= $myArray[2];
 				$advisorClass_class_schedule_times_utc	= $myArray[1];
-				$advisorClass_number_students					= $myArray[11];
+				$advisorClass_number_students			= $myArray[11];
 				
 // echo "advisorClassclass_schedule_days_utc: $advisorClass_class_schedule_days_utc<br />";
 				$slotsAvailable			= 0;
@@ -1468,6 +1473,7 @@ function getTheReason($strReasonCode) {
 										<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 										<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 										<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
+										<td style='text-align:center;vertical-align:top;'>$advisorClass_number_students</td>
 										<td style='text-align:center;vertical-align:top;'>$slotsAvailable</td></tr>";
 								
 				}
@@ -1619,7 +1625,7 @@ function getTheReason($strReasonCode) {
 						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 						$totalUnassigned++;
 						
-						$theLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$student_call_sign&inp_mode=$inp_mode' target='_blank'>$student_call_sign</a> (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_Blank'>UPD</a>)";
+						$theLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$student_call_sign&inp_mode=$inp_mode' target='_blank'>$student_call_sign</a> (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&doDebug=$doDebug&testMode=0' target='_Blank'>UPD</a>)";
 						$reqDate		= substr($student_request_date,0,10);
 						
 						${$student_level . 'Array'}[]		 	= "<tr><td style='vertical-align:top;'>$theLink</td>

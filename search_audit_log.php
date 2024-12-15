@@ -164,7 +164,7 @@ function search_audit_log_func() {
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
 							<table>
-							tr><td style='vertical-align:top;'>Call Sign of Interest</td>
+							<tr><td style='vertical-align:top;'>Call Sign of Interest</td>
 								<td style='vertical-align:top;'><input type='text' class='formInputText' name='inp_callsign' size='20' maxlength='20' autofocus required></td></tr>
 							<tr><td style='vertical-align:top;'>Verbosity</td>
 								<td style='vertical-align:top;'><input type='radio' class='formInputButton' name='inp_verbose' value='no' checked='checked'> Normal Output<br />

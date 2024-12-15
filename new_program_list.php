@@ -310,6 +310,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-advisor-class-history/' target='_blank'>Advisor Class History</a>
 								<li><a href='$siteURL/cwa-advisor-class-report/' target='_blank'>Advisor Class Report</a>
 								<li><a href='$siteURL/cwa-advisor-registration/' target='_blank'>Advisor Registration</a>
+								<li><a href='$siteURL/cwa-advisor-report-generator/' target='_blank'>Advisor Report Generator</a>
 								<li><a href='$siteURL/cwa-advisor-request-student-assessment/' target='_blank'>Advisor Request Student Assessment</a>
 								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
 								<li><a href='$siteURL/cwa-advisor-statistics/' target='_blank'>Advisor Statistics</a>
@@ -514,6 +515,7 @@ function program_list_func() {
 				
 								<h4>Advisor Utilities</h4>
 								<ul>
+ 								<li><a href='$siteURL/cwa-advisor-report-generator/' target='_blank'>Advisor Report Generator</a>
 								<li><a href='$siteURL/cwa-advisorclass-report-generator/' target='_blank'>AdvisorClass Report Generator</a>
 								<li><a href='$siteURL/cwa-display-and-update-advisor-signup-info/' target='_blank'>Display and Update Advisor Signup Info</a><br /><br />
 								</ul>

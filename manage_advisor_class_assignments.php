@@ -18,10 +18,8 @@ function manage_advisor_class_assignments_func() {
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$validUser 					= $initializationArray['validUser'];
-	if ($validUser == 'N') {				// turn off debug and testmode
-		$doDebug					= FALSE;
-		$testMode					= FALSE;
-	}
+	$userName					= $initializationArray['userName'];
+
 	$versionNumber				= '1';
 	$jobname					= "Manage Advisor Class Assignments V$versionNumber";
 	if ($doDebug) {
@@ -29,8 +27,6 @@ function manage_advisor_class_assignments_func() {
 		print_r($initializationArray);
 		echo "</pre><br />";
 	}
-	$validUser 					= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
 	$userRole					= $initializationArray['userRole'];
 	$validTestmode				= $initializationArray['validTestmode'];
 	$currentSemester			= $initializationArray['currentSemester'];
@@ -49,10 +45,10 @@ function manage_advisor_class_assignments_func() {
 	if ($proximateSemester == 'Not in Session') {
 		$proximateSemester		= $nextSemester;
 	}
-//	if ($userRole != 'administrator') {
-//		$doDebug		= FALSE;
-//		$testMode		= FALSE;
-//	}
+	if ($userRole != 'administrator') {
+		$doDebug		= FALSE;
+		$testMode		= FALSE;
+	}
 	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
@@ -274,8 +270,8 @@ function manage_advisor_class_assignments_func() {
 		///// get the student information
 		$sql				= "select * from $studentTableName 
 								left join $userMasterTableName on user_call_sign = student_call_sign 
-								where semester='$proximateSemester' 
-								and call_sign='$student_call_sign'";
+								where student_semester='$proximateSemester' 
+								and student_call_sign='$student_call_sign'";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -536,8 +532,8 @@ function manage_advisor_class_assignments_func() {
 		//////////	get the advisor record
 		$sql				= "select * from $advisorTableName 
 								left join $userMasterTableName on user_call_sign = advisor_call_sign 
-								where semester='$proximateSemester'
-									and call_sign='$inp_callsign'";
+								where advisor_semester='$proximateSemester'
+									and advisor_call_sign='$inp_callsign'";
 		$wpw1_cwa_advisor			= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisor === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -1382,7 +1378,7 @@ No replacement requested. ";
 													if ($student_status == 'S') {
 														$unconfirmedCount++;
 														$myStr					= "<table style='border:4px solid red;'>
-																					<tr><td><p><a href='$theURL/?strpass=1&inp_callsign=$advisorClass_advisor_call_sign&student_call_sign=$student_call_sign&token=$token'>Confirm 
+																					<tr><td><p><a href='$theURL/?strpass=1&inp_callsign=$advisorClass_call_sign&student_call_sign=$student_call_sign&token=$token'>Confirm 
 																					$student_call_sign</a></p></td></tr></table>\n";
 													} elseif ($student_status == 'Y') {
 														$myStr					= "Confirmed<br /><a href='$theURL/?strpass=1&inp_callsign=$advisorClass_call_sign&student_call_sign=$student_call_sign&token=$token'>Change $student_call_sign Confirmation</a>\n";
@@ -1427,7 +1423,7 @@ No replacement requested. ";
 												}
 											}	/// end of the student foreach
 										} else {		/// no student record found ... send error message
-											sendErrorEmail("Prepare Advisor Class Display: no $studentTableName table record found for student$strSnum in advisor $advisorClass_advisor_call_sign class $advisorClass_sequence");
+											sendErrorEmail("Prepare Advisor Class Display: no $studentTableName table record found for student$strSnum in advisor $advisorClass_call_sign class $advisorClass_sequence");
 										}
 									}	
 								}
