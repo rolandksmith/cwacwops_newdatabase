@@ -2,6 +2,8 @@ function display_catalog_for_a_timezone_func() {
 
 /*
 	Modified 16Apr23 by Roland to fix action_log
+	Modified 17Dec24 by Roland to have the option of only showing 
+		catalog entries with open seats
 */
 
 	$doDebug						= FALSE;
@@ -62,9 +64,17 @@ function display_catalog_for_a_timezone_func() {
 				$inp_timezone_id	 = $str_value;
 				$inp_timezone_id	 = filter_var($inp_timezone_id,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "inp_show_advisors") {
+				$inp_show_advisors	 = $str_value;
+				$inp_show_advisors	 = filter_var($inp_show_advisors,FILTER_UNSAFE_RAW);
+			}
 			if ($str_key 		== "inp_semester") {
 				$inp_semester	 = $str_value;
 				$inp_semester	 = filter_var($inp_semester,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_display") {
+				$inp_display	 = $str_value;
+				$inp_display	 = filter_var($inp_display,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_verbose") {
 				$inp_verbose	 = $str_value;
@@ -193,20 +203,22 @@ function display_catalog_for_a_timezone_func() {
 
 
 		$content 		.= "<h3>Display Class Catalog for a Time Zone</h3>
-							<p>Select the desired semester and time zone and submit.</p>
+							<p>Select the desired semester, time zone, display option and submit.</p>
 							<p><form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
 							<table>
 							<tr><td style='width:200px;'><b>Semester</b></td>
 								<td>$radioList</td></tr>
-							<tr><td colspan='2'><b>Enter either a Timezone Offset or a Timezone Identifier (such as America/Denver).</b> 
+							<tr><td colspan='2'><b>Enter either a Timezone Offset or a Timezone Identifier (such as America/Denver)</b> 
 												The Timezone Identifier will override the Timezone Offset</td></tr>
 							<tr><td>Timezone Offset</td>
-								<td><input type='text' class='formInputText' name='inp_timezone_offset' size='8' maxlength='8'></td>
+								<td><input type='text' class='formInputText' name='inp_timezone_offset' size='8' maxlength='8'></td></tr>
 							<tr><td>Timezone ID</td>
-								<td><input type='text' class='formInputText' name='inp_timezone_id' size='50' maxlength='50'></td>
-							</tr>
+								<td><input type='text' class='formInputText' name='inp_timezone_id' size='50' maxlength='50'></td></tr>
+							<tr><td>Display Contents</td>
+								<td><input type='radio' class='formInputButton' name='inp_display' value='all' checked required>Show all catalog entries<br />
+									<input type='radio' class='formInputButton' name='inp_display' value='seats' required>Show catalog entries with open seats<br />
 							$testModeOption
 							</table>
 							<input class='formInputButton' type='submit' value='Submit' />
@@ -247,7 +259,7 @@ function display_catalog_for_a_timezone_func() {
 				if ($doDebug) {
 					echo "<br />Getting catalog for $myLevel<br />";
 				}
-				$returnArray	= generateClassTimes($inp_timezone_offset,$myLevel,$inp_semester,$doDebug,$catalogMode);
+				$returnArray	= generateClassTimes($inp_timezone_offset,$myLevel,$inp_semester,$inp_display,$doDebug,$catalogMode);
 				//	[level][sequence] = localtime|localdays|nmbr classes|utctime|utcdays|advisors
 
 				$content		.= "<h3>CW Academy Course Catalog for $myLevel in $tzString for Semster $inp_semester</h3>
