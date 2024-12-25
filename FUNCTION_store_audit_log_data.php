@@ -47,7 +47,7 @@ function storeAuditLogData($dataToStore='',$doDebug=FALSE) {
 	}
 
 	if ($doDebug) {
-		echo "<br />----Arrived at the storelogData_v3 function<br />";
+		echo "<br />----Arrived at the store_audit_log_data function<br />";
 	}
 
 //	$initializationArray 		= data_initialization_func();
@@ -201,14 +201,19 @@ function storeAuditLogData($dataToStore='',$doDebug=FALSE) {
 					  wpdb->last_query: " . $wpdb->last_query . "<br />
 					  <b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
 			}
-			return array(FALSE,'Insert failed');
+			$haveError	= TRUE;
+			$errorReason	.= "Insert failed<br />";
 		} else {
 			if ($doDebug) {
-//				echo "wpdb->last_query: " . $wpdb->last_query . "<br /><br />";
-				echo "audit Log data has been stored<br /><br />";
+				$myInt		= $wpdb->insert_id;
+				echo "audit Log data has been stored at record $myInt<br /><br />";
 			}
-			return array(TRUE,'data inserted');
 		}
+	}
+	if ($haveError) {
+		return array(FALSE,$errorReason);
+	} else {
+		return array(TRUE,"");
 	}
 }
 add_action('storeAuditLogData','storeAuditLogData');
