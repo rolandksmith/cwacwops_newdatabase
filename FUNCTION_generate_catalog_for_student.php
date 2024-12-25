@@ -274,7 +274,7 @@ function generate_catalog_for_student($inp_data = array('')) {
 				if ($testMode) {
 					$catalogMode		= 'TestMode';
 				}
-				$result					= generateClassTimes($student_timezone_offset,$student_level,$student_semester,$doDebug,$catalogMode);
+				$result					= generateClassTimes($student_timezone_offset,$student_level,$student_semester,'all',$doDebug,$catalogMode);
 				if ($result != 'FALSE') {
 					if ($doDebug) {
 						echo "gemerateClassTimes:<br /><pre>";
