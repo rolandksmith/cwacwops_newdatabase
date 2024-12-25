@@ -33,6 +33,29 @@ function display_debug_reports_func() {
 	$theURL						= "$siteURL/cwa-display-debug-reports/";
 	$jobname					= "Display Debug Reports V$versionNumber";
 
+
+// get the input information
+	if (isset($_REQUEST)) {
+		foreach($_REQUEST as $str_key => $str_value) {
+			if ($doDebug) {
+				if (!is_array($str_value)) {
+					echo "Key: $str_key | Value: $str_value <br />\n";
+				} else {
+					echo "Key: $str_key (array)<br />\n";
+				}
+			}
+			if ($str_key 		== "strpass") {
+				$strPass		 = $str_value;
+				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_file") {
+				$inp_file	 = $str_value;
+				$inp_file	 = filter_var($inp_file,FILTER_UNSAFE_RAW);
+			}
+		}
+	}
+
+
 	
 	$content = "<style type='text/css'>
 		fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
@@ -94,11 +117,11 @@ function display_debug_reports_func() {
 			padding-right: 5px;
 		}
 		</style>";	
-
+	if ("1" == $strPass) {
 		if ($doDebug) {
 			echo "<br/>at pass1<br/>";
 		}
-	
+		
 		// get list of filenames
 
 		$directory = '/home/cwacwops/public_html/wp-content/uploads/';
@@ -115,26 +138,48 @@ function display_debug_reports_func() {
 		}
 		
 		// Now $matchingFiles contains the filenames you need
-		sort($matchingFiles);
+		rsort($matchingFiles);
 		if ($doDebug) {
 			echo "<br />matchingFiles:<br /><pre>";
 			print_r($matchingFiles); 
 			echo "</pre><br />";
 		}
 		$content 		.= "<h3>$jobname</h3>
-							<p>Select the report to be displayed</p>
+							<p>Select the report to be displayed (or deleted)</p>
 							<table>";
 		
 		foreach($matchingFiles as $thisFileName) {
 			$content	.= "<tr><td>$thisFileName<br />
-							<form method='post' action='$siteURL/wp-content/uploads/$thisFileName' target='_blank' 
-							name='selection_form' ENCTYPE='multipart/form-data'>
-							<input class='formInputButton' type='submit' value='Display' />
-							</form><br />
-							<hr>
-							</td></tr>";
+							<table>
+							<tr><td style='width:100px;'><form method='post' action='$siteURL/wp-content/uploads/$thisFileName' target='_blank' 
+									name='selection_form' ENCTYPE='multipart/form-data'>
+									<input class='formInputButton' type='submit' value='Display' />
+									</form></td>
+								<td style='width:100px;'><form method='post' action=$theURL 
+									name='delete_form' ENCTYPE='multipart/form-data'>
+									<input type='hidden' name='strpass' value='3'>
+									<input type='hidden' name='inp_file' value='$thisFileName'>
+									<input style='padding:0 0 0 0;' class='formInputButton' type='submit' value='Delete' /></td>
+								<td></td></tr>
+							</table><br /><hr></td></tr>";
 		}
 		$content		.= "</table>";	
+	}	
+	if ("3" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 3 with file $inp_file<br />";
+		}
+		$content		.= "<h3>$jobname</h3>";
+		// The full path to the file you want to delete
+		$file_to_delete = '/home/cwacwops/public_html/wp-content/uploads/' . $inp_file; 
+		
+		// Use the WordPress function wp_delete_file() for safer file deletion
+		if (wp_delete_file($file_to_delete)) {
+			$content	.= "File deleted successfully.";
+		} else {
+			$content	.= "Error deleting file. Please check file permissions and path.";
+		}		
+	}
 
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
