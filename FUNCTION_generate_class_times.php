@@ -1,4 +1,4 @@
-function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$doDebug=FALSE,$catalogMode='Production') {
+function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_display='all',$doDebug=FALSE,$catalogMode='Production') {
 
 /* generateClassTimes runs in two modes
 		If inp_level is 'all', the program returns a complete list in table
@@ -9,6 +9,9 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$doDebug=
 			will be returned
 		If this criteria is not met for some reason, a string with the word 'FAIL' 
 			is returned
+		If inp_display is 'all', all catalog entries are displayed. Otherwise, 
+			if inp_display is 'seats', only catalog entries with open seats are 
+			displayed
 			
 	Returned array (if not FAIL):
 		[level][sequence] = localtime|localdays|nmbr classes|utctime|utcdays|advisors
@@ -20,6 +23,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$doDebug=
 		example: printArray['Advanced'][0] = '0000|Monday,Thursday|3';
 		
 	Modified 12Jul23 by Roland to use only current tables
+	Modified 17Dec24 by Roland for the inp_display option
 
 */
 
@@ -64,6 +68,12 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$doDebug=
 	$semesterThree				= $initializationArray['semesterThree'];
 	$semesterFour				= $initializationArray['semesterFour'];
 	$validSemesters				= array($currentSemester,$nextSemester,$semesterTwo,$semesterThree,$semesterFour);
+	
+	if ($catalogMode == 'Production') {
+		$advisorClassTableName	= 'wpw1_cwa_advisorclass';
+	} else {
+		$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
+	}
 	
 	// validate the input data
 	if (!in_array($inp_level,$validLevelArray)) {
@@ -140,9 +150,96 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$doDebug=
 				$thisCount			= $myArray[3];
 				$thisAdvisors		= $myArray[4];
 				$skipLine			= FALSE;
+				
+				if ($inp_display == 'seats') {						// K7OJL-2,WR7Q-1
+					if ($doDebug) {
+						echo "<br />checking seats for each $thisAdvisors<br />";
+					}
+					$newAdvisorList	= "";
+					$firstTimeHere	= TRUE;
+ 					$myAdvisors		= explode(",",$thisAdvisors);	// array('K7OJL-2','WR7Q-1')
+					foreach($myAdvisors as $advisorParts) {			// K7OJL-2
+						$keepAdvisor	= TRUE;
+						$myAdvisorParts	= explode('-',$advisorParts);	// array('K7OJL','2')
+						$part1			= $myAdvisorParts[0];
+						$part2			= $myAdvisorParts[1];
+						if ($doDebug){
+							echo "looking for seats available for advisor $part1 class $part2<br />";
+						}
+						$classSQL		= "select * from $advisorClassTableName 
+											where advisorclass_semester = '$inp_semester' 
+											and advisorclass_call_sign = '$part1' 
+											and advisorclass_sequence = $part2";
+						$classResult	= $wpdb->get_results($classSQL);
+						if ($classResult === FALSE) {
+							handleWPDBError("FUNCTION_generate_class_times",$doDebug,"attempting to get advisorclass record for $part1 class $part2");
+							if ($doDebug) {
+								$myStr	= $wpdb->last_error;
+								echo "ran $classSQL which failed<br />Error: $myStr<br />";
+							}
+						} else {
+							$numRows 	= $wpdb->num_rows;
+							if ($doDebug) {
+								echo "ran $classSQL<br />and retrieved $numRows rows<br />";
+							}
+							if ($numRows > 0) {
+								foreach($classResult as $classResultRow) {
+									$advisorClass_class_size 				= $classResultRow->advisorclass_class_size;
+									$advisorClass_number_students			= $classResultRow->advisorclass_number_students;
+									
+									if ($part1 == 'K1BG') {
+										$advisorClass_class_size			= 0;
+									}
+									if ($advisorClass_class_size > 0) {
+										$myInt		= $advisorClass_class_size - $advisorClass_number_students;
+										if ($doDebug) {
+											echo "$part1 has size $advisorClass_class_size, students: $advisorClass_number_students, Available: $myInt<br />";
+										}
+										if ($myInt <= 0) {
+											$keepAdvisor	= FALSE;
+											if ($doDebug) {
+												echo "seats avail: $myInt. Set keepAdvisor to FALSE<br />";
+											} else {
+												if ($doDebug) {
+													echo "advisor $part1 class $part2 has $myInt seats available<br />";
+												}
+											}
+										}							
+									} else {
+										if ($doDebug) {
+											echo "adivisor $part1 class $part2 has class size of $advisorClass_class_size<br />";
+										}
+										$keepAdvisor		= FALSE;
+									}
 	
-				$printArray[$thisLevel][$thisIncrement] = "$thisTime|$thisDays|$thisCount|$thisAdvisors";
-				$thisIncrement++;
+								}
+							}
+						}
+						if ($keepAdvisor) {
+							if ($firstTimeHere) {
+								$newAdvisorList	= $advisorParts;
+								$firstTimeHere	= FALSE;
+							} else {
+								$newAdvisorList	.= ",$advisorParts";
+							}
+						}
+					}
+					$thisAdvisors	= $newAdvisorList;
+					if ($doDebug) {
+						echo "thisAdvisors set to $newAdvisorList<br />";
+					}
+				}
+				if ($thisAdvisors != '') {
+					$printArray[$thisLevel][$thisIncrement] = "$thisTime|$thisDays|$thisCount|$thisAdvisors";
+					$thisIncrement++;
+					if ($doDebug) {
+						echo "buffer added to printArray<br /><br />";
+					}
+				} else {
+					if ($doDebug) {
+						echo "buffer NOT added to printArray<br /><br />";
+					}
+				}
 			}
 		}
 		$noErrors					= TRUE;	
