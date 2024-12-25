@@ -27,21 +27,13 @@
 				} else {
 					$strSnum		= strval($snum);
 				}
-				$theInfo			= ${'class_student' . $strSnum};
+				$theInfo			= ${'advisorClass_student' . $strSnum};
 				if ($theInfo != '') {
 					$studentCount++;
-					$studentArray	= explode(",",$theInfo);
-					$studentCallSign = $studentArray[0];
-					$studentid		= $studentArray[1];
 
 
 /// javascript alert box
-&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:window.alert('Text Here');\">
-<span style='color:orange;'>??</span>
-
-
-// link to display and update student
-<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>
+<a href=\"javascript:window.alert('Text Here');\">
 
 
 
@@ -65,7 +57,7 @@
 		} else {
 			$thisMode		= "Production";
 		}
-		$joblog				= "cwa_push_advisor_class_v2|$thisDate|$thisTime|$userName|thisMode|Initiated for $request_info ";
+		$joblog				= "$jobname|$thisDate|$thisTime|$userName|thisMode|Initiated for $request_info ";
 		$result				= write_joblog_func($joblog);
 		if ($result[0] == 'fail') {
 			echo "write joblog failed<br />";
@@ -567,10 +559,13 @@ $futureDate = date('Y-m-d', strtotime($currentDate . ' +10 days'));
 
 // Amazon SES Suppression List
 
-To enable your account-level suppression list, you have to specify at least one reason for the suppressed-reasons parameter. You can specify either BOUNCE or COMPLAINT, or you can specify both, as shown in the preceding example.
+To enable your account-level suppression list, you have to specify at least 
+one reason for the suppressed-reasons parameter. You can specify either 
+BOUNCE or COMPLAINT, or you can specify both, as shown in the preceding example.
 
 To configure your account-level suppression list using the SES console:
-Sign in to the AWS Management Console and open the Amazon SES console at https://console.aws.amazon.com/ses/.
+Sign in to the AWS Management Console and open the Amazon SES console at 
+https://console.aws.amazon.com/ses/.
 
 In the navigation pane, under Configuration, choose Suppression list.
 
@@ -578,7 +573,15 @@ In the Account-level settings pane, choose Edit.
 
 In Suppression list, check the Enabled box.
 
-In Suppression reasons, select one of the reasons for which recipient email addresses should be automatically added to your account-level suppression list.
+In Suppression reasons, select one of the reasons for which recipient email 
+addresses should be automatically added to your account-level suppression list.
 
 Choose Save changes.
 
+
+
+
+// link examples
+	$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$replacement_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_call_sign</a>";
+	$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$replacement_student&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_student</a>";
+	$findLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$replacement_student&inp_mode=$inp_mode' target='_blank'>Find Class</a>";
