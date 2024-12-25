@@ -151,7 +151,7 @@
 			if ($doDebug) {
 				echo "inp_data is invalid<br />";
 			}
-			return array(FALSE,'invalid input data array. No update done');
+			return array(FALSE,'input data array is empty. No update done');
 		}
 		if ($jobname == '') {
 			if ($doDebug) {
