@@ -287,11 +287,13 @@ function manage_advisor_class_assignments_func() {
 					$student_first_name 				= $studentRow->user_first_name;
 					$student_last_name 					= $studentRow->user_last_name;
 					$student_email 						= $studentRow->user_email;
+					$student_ph_code					= $studentRow->user_ph_code;
 					$student_phone 						= $studentRow->user_phone;
 					$student_city 						= $studentRow->user_city;
 					$student_state 						= $studentRow->user_state;
 					$student_zip_code 					= $studentRow->user_zip_code;
 					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
 					$student_whatsapp 					= $studentRow->user_whatsapp;
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
@@ -353,29 +355,6 @@ function manage_advisor_class_assignments_func() {
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$student_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$student_country		= "UNKNOWN";
-						$student_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$student_country		= $countryRow->country_name;
-								$student_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$student_country			= "Unknown";
-							$student_ph_code			= "";
-						}
-					}
 					/////// see if student is actually assigned to the advisor
 					if ($student_assigned_advisor != $inp_callsign) {
 						$content	.= "Incompatible Information Entered.<br />";
@@ -549,11 +528,13 @@ function manage_advisor_class_assignments_func() {
 					$advisor_first_name 				= $advisorRow->user_first_name;
 					$advisor_last_name 					= $advisorRow->user_last_name;
 					$advisor_email 						= $advisorRow->user_email;
+					$advisor_ph_code 					= $advisorRow->user_ph_code;
 					$advisor_phone 						= $advisorRow->user_phone;
 					$advisor_city 						= $advisorRow->user_city;
 					$advisor_state 						= $advisorRow->user_state;
 					$advisor_zip_code 					= $advisorRow->user_zip_code;
 					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_country 					= $advisorRow->user_country;
 					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 					$advisor_telegram 					= $advisorRow->user_telegram;
 					$advisor_signal 					= $advisorRow->user_signal;
@@ -581,29 +562,6 @@ function manage_advisor_class_assignments_func() {
 					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisor_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
-						}
-					}
 					if ($userName == '') {
 						$userName 		= $advisor_call_sign;
 					}
@@ -634,11 +592,13 @@ function manage_advisor_class_assignments_func() {
 								$student_first_name 				= $studentRow->user_first_name;
 								$student_last_name 					= $studentRow->user_last_name;
 								$student_email 						= $studentRow->user_email;
+								$student_ph_cpde 					= $studentRow->user_ph_code;
 								$student_phone 						= $studentRow->user_phone;
 								$student_city 						= $studentRow->user_city;
 								$student_state 						= $studentRow->user_state;
 								$student_zip_code 					= $studentRow->user_zip_code;
 								$student_country_code 				= $studentRow->user_country_code;
+								$student_country 					= $studentRow->user_country;
 								$student_whatsapp 					= $studentRow->user_whatsapp;
 								$student_telegram 					= $studentRow->user_telegram;
 								$student_signal 					= $studentRow->user_signal;
@@ -700,29 +660,6 @@ function manage_advisor_class_assignments_func() {
 								$student_date_created 					= $studentRow->student_date_created;
 								$student_date_updated			  		= $studentRow->student_date_updated;
 			
-								// if you need the country name and phone code, include the following
-								$countrySQL		= "select * from wpw1_cwa_country_codes  
-													where country_code = '$student_country_code'";
-								$countrySQLResult	= $wpdb->get_results($countrySQL);
-								if ($countrySQLResult === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-									$student_country		= "UNKNOWN";
-									$student_ph_code		= "";
-								} else {
-									$numCRows		= $wpdb->num_rows;
-									if ($doDebug) {
-										echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-									}
-									if($numCRows > 0) {
-										foreach($countrySQLResult as $countryRow) {
-											$student_country		= $countryRow->country_name;
-											$student_ph_code		= $countryRow->ph_code;
-										}
-									} else {
-										$student_country			= "Unknown";
-										$student_ph_code			= "";
-									}
-								}
 							}
 							if ($doProceed) {
 								$student_remove_status			= '';
@@ -824,7 +761,7 @@ function manage_advisor_class_assignments_func() {
 											$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 											$studentUpdateParams[]	= "student_status|R|s";
 											$confirmationMsg		= "Student $student_call_sign confirmed as not attending and a replacement has been requested.<br />";
-											$removeStudent				= FALSE;
+											$removeStudent			= FALSE;
 										} elseif ($inp_attend == 'advisor') {
 											if ($doDebug) {
 												echo "Doing advisor; Replacement Yes<br />";
@@ -860,7 +797,7 @@ function manage_advisor_class_assignments_func() {
 											$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 											$studentUpdateParams[]	= "student_status|R|s";
 											$confirmationMsg		= "Student $student_call_sign confirmed as not attending and a replacement has been requested.<br />";
-											$removeStudent				= FALSE;
+											$removeStudent			= FALSE;
 										}
 									} else {
 										if ($inp_attend == 'schedule') {
@@ -1016,6 +953,16 @@ No replacement requested. ";
 								}
 								if ($removeStudent) {
 								// remove the student
+								
+									if (!isset($student_assigned_advisor)) {
+										if ($doDebug) {
+											echo "student_assigned_advisor is MISSING!<br />";
+										}
+										$nowInfo		= date('Y-m-d H:i:s');
+										sendErrorEmail("$jobname $userName $nowInfo attempting to remove student $student_call_sign. student_assigned_advisor is missing");
+										$student_assigned_advisor	= $userName;
+									}
+								
 									$inp_data			= array('inp_student'=>$student_call_sign,
 																'inp_semester'=>$student_semester,
 																'inp_assigned_advisor'=>$student_assigned_advisor,

@@ -442,7 +442,7 @@ function check_student_status_func() {
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_student_parent 				= $studentRow->student_parent;
+					$student_parent 				= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -469,7 +469,7 @@ function check_student_status_func() {
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
@@ -587,7 +587,7 @@ than 48 days before the semester. Possible error");
 											   Check your email, including the spam and promotions folders for email from 
 											   CW Academy and respond appropriately</p>";
 							} elseif ($student_response == 'Y') {
-								if ($student_student_status == '') {
+								if ($student_status == '') {
 									$content	.= "<tr><td style='vertical-align:top;'>Class Preferences</td>
 													<td>$student_first_class_choice<br />
 														$student_second_class_choice<br />
@@ -597,7 +597,7 @@ than 48 days before the semester. Possible error");
 													vacancy arise. You will receive more information before the semester starts. If you do not get assigned 
 													to a class, your sign up will be automatically moved to the next semester and you will be given heightened 
 													priority for assignment to a class.</p>";
-								} elseif ($student_student_status == 'S') {
+								} elseif ($student_status == 'S') {
 									$content	.= "<tr><td style='vertical-align:top;'>Class Preferences</td>
 													<td>$student_first_class_choice<br />
 														$student_second_class_choice<br />
@@ -606,11 +606,11 @@ than 48 days before the semester. Possible error");
 												<p>You have been assigned to a class. 
 													Your advisor should contact you within the next few days to give you the actual class schedule and 
 													confirm that you will be able to participate in this class.</p>";								
-								} elseif ($student_student_status == 'R' || $student_student_status == 'C' || $student_student_status == 'N' || $student_student_status == 'V') {
+								} elseif ($student_status == 'R' || $student_status == 'C' || $student_status == 'N' || $student_status == 'V') {
 									$content	.= "</table><p>You were assigned to a class, however the 
 													advisor has removed you from the class. Either the class did not 
 													meet your needs or you did not respond to the advisor.</p>";
-								} elseif ($student_student_status == 'Y') {
+								} elseif ($student_status == 'Y') {
 									$content	.= "<tr><td style='vertical-align:top;'>Assigned Advisor</td>
 														<td>$student_assigned_advisor</td></tr>
 													</table>

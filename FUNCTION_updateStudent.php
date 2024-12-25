@@ -152,7 +152,7 @@ function updateStudent($inpArray) {
 			if ($doDebug) {
 				echo "inp_data is invalid<br />";
 			}
-			return array(FALSE,'invalid input data array. No update done');
+			return array(FALSE,'empty input data array. No update done');
 		}
 		if ($jobname == '') {
 			if ($doDebug) {
@@ -248,6 +248,10 @@ function updateStudent($inpArray) {
 				echo "no record with id of $inp_id found in $tableName to update<br />";
 			}
 			return array(FALSE,"no record with id of $inp_id found in $tableName to update");
+		} else {
+			if ($doDebug) {
+				echo "there is a record to be updated<br />";
+			}
 		}
 	
 		// convert inp_data to updateParams and updateFormat
@@ -430,7 +434,9 @@ function updateStudent($inpArray) {
 			return array(FALSE,'No delete table found. No deletion made.');
 		}
 	}
-		
+	if ($doDebug) {
+		echo "updateStudent finished. Returning<br /><br />";
+	}
 	return array(TRUE,$inp_id);
 }
 add_action('updateStudent','updateStudent');
