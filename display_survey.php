@@ -2,7 +2,7 @@ function display_survey_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -195,11 +195,13 @@ function display_survey_func() {
 		$surveysTableName			= "wpw1_cwa_survey_surveys2";
 		$surveyContentTableName		= "wpw1_cwa_survey_content2";
 		$surveyResponseTableName	= 'wpw1_cwa_survey_response2';
+		$userMasterTableName		= 'wpw1_cwa_user_master2';
 	} else {
 		$extMode					= 'pd';
 		$surveysTableName			= "wpw1_cwa_survey_surveys";
 		$surveyContentTableName		= "wpw1_cwa_survey_content";
 		$surveyResponseTableName	= 'wpw1_cwa_survey_response';
+		$userMasterTableName		= 'wpw1_cwa_user_master';
 	}
 
 
@@ -512,10 +514,86 @@ function display_survey_func() {
 								if ($doDebug) {
 									echo "token resolved<br />";
 								}
+								// send email to owner
+								$ownerSQL		= "select * from $userMasterTableName 
+													where user_call_sign = $survey_owner";
+								$sqlResult		= $wpdb->get_results($ownerSQL);
+								if ($sqlResult === FALSE) {
+									handleWPDBError($jobname,$doDebug."getting survey owner email");
+								} else {
+									$numRows	= $wpdb->num_rows;
+									if ($doDebug) {
+										echo "ran $sql<br />and retrieved $numRows rows<br />";
+									}
+									if ($numRows > 0) {
+										foreach($sqlResult as $sqlRow) {
+											$user_id				= $sqlRow->user_ID;
+											$user_call_sign			= $sqlRow->user_call_sign;
+											$user_first_name		= $sqlRow->user_first_name;
+											$user_last_name			= $sqlRow->user_last_name;
+											$user_email				= $sqlRow->user_email;
+											$user_ph_code			= $sqlRow->user_ph_code;
+											$user_phone				= $sqlRow->user_phone;
+											$user_city				= $sqlRow->user_city;
+											$user_state				= $sqlRow->user_state;
+											$user_zip_code			= $sqlRow->user_zip_code;
+											$user_country_code		= $sqlRow->user_country_code;
+											$user_country			= $sqlRow->user_country;
+											$user_whatsapp			= $sqlRow->user_whatsapp;
+											$user_telegram			= $sqlRow->user_telegram;
+											$user_signal			= $sqlRow->user_signal;
+											$user_messenger			= $sqlRow->user_messenger;
+											$user_action_log		= $sqlRow->user_action_log;
+											$user_timezone_id		= $sqlRow->user_timezone_id;
+											$user_languages			= $sqlRow->user_languages;
+											$user_survey_score		= $sqlRow->user_survey_score;
+											$user_is_admin			= $sqlRow->user_is_admin;
+											$user_role				= $sqlRow->user_role;
+											$user_prev_callsign		= $sqlRow->user_prev_callsign;
+											$user_date_created		= $sqlRow->user_date_created;
+											$user_date_updated		= $sqlRow->user_date_updated;
+											
+											// format and send email to survey owner
+											$theSubject			= "CW Academy -- Questionnaire Completed";
+											$theContent			= "To: $user_last_name, $user_first_name ($user_call_sign):<br />
+$inp_callsign has completed the $response_survey_name questionnaire.";											
+
+											if ($testMode) {
+												$theSubject	= "TESTMODE $theSubject";
+												$myTo		= "rolandksmith@gmail.com";
+												$mailCode	= '2';
+											} else {
+												$myTo		= $user_email;
+												$mailCode	= '10';
+											}
+											$mailResult		= emailFromCWA_v2(array('theRecipient'=>$myTo,
+																						'theSubject'=>$theSubject,
+																						'theContent'=>$theContent,
+																						'theCc'=>'',
+																						'theAttachment'=>'',
+																						'mailCode'=>$mailCode,
+																						'jobname'=>$jobname,
+																						'increment'=>0,
+																						'testMode'=>$testMode,
+																						'doDebug'=>$doDebug));
+											if ($mailResult === FALSE) {
+												if ($doDebug) {
+													echo "sending the email to $myTo failed<br />";
+													sendErrorEmail("$jobname sending email to $myTo failed");
+												}
+											} else {
+												if ($doDebug) {
+													echo "email sent<br />";
+												}
+											}
+										}
+									}
+								}
 							}
 						}
 					}
-				}
+				}		
+				
 			} else {
 				$content			.= "<h3>$jobname</h3>
 										<p>No responses returned</p>";

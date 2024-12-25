@@ -2,7 +2,7 @@ function display_survey_results_func() {
 
 	global $wpdb, $jobname, $doDebug, $testMode;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -237,11 +237,14 @@ function display_survey_results_func() {
 					$survey_record_id		= $surveyResultRow->survey_record_id;
 					$survey_owner			= $surveyResultRow->survey_owner;
 					$survey_name			= $surveyResultRow->survey_name;
+					$survey_recurring		= $surveyResultRow->survey_recurring;
 					$survey_action_log		= $surveyResultRow->survey_action_log;
 					$survey_date_created	= $surveyResultRow->survey_date_created;
 					$survey_date_updated	= $surveyResultRow->survey_date_updated;
 					
-					$surveyRadioList		.= "<input type='radio' class='formInputButton' name='inp_survey_id' value='$survey_record_id' required>$survey_name<br />";
+					if ($survey_recurring == 'N') {
+						$surveyRadioList		.= "<input type='radio' class='formInputButton' name='inp_survey_id' value='$survey_record_id' required>$survey_name<br />";
+					}
 				}
 				
 				$content		.= "<h3>$jobname</h3>
@@ -365,7 +368,7 @@ function display_survey_results_func() {
 								$response_survey_date	= $responseResultRow->response_survey_date;
 								
 								$nameInfo				= getResponseName($response_survey_who);
-								$responseDisplay		= "<td style='width:350px;'><b>$nameInfo ($response_survey_who)</b>";
+								$responseDisplay		= "<td style='width:350px;vertical-align:top;'><b>$nameInfo ($response_survey_who)</b><br /><br />";
 								$responseAnswers		= json_decode($response_survey_data,TRUE);
 								
 								foreach($surveyContent as $thisSeq => $thisAnswerSet) {

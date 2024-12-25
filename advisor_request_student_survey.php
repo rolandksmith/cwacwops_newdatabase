@@ -12,7 +12,7 @@ function advisor_request_student_survey_func() {
 
 
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -95,6 +95,7 @@ function advisor_request_student_survey_func() {
 	$incl_advisor				= 'N';
 	$studentList				= '';
 	$studentList				= '';
+	$newDate					= date('Y-m-d H:i:s');
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -126,6 +127,11 @@ function advisor_request_student_survey_func() {
 			if ($str_key 			== "token") {
 				$token				 = $str_value;
 				$token		 		= strtoupper(filter_var($token,FILTER_UNSAFE_RAW));
+			}
+			if ($str_key 			== "inp_survey_id") {
+				$inp_survey_id				 = $str_value;
+				$inp_survey_id		 		= strtoupper(filter_var($inp_survey_id,FILTER_UNSAFE_RAW));
+echo "inp_survey_id = $inp_survey_id<br/>";
 			}
 			if ($str_key 			== "inp_duration") {
 				$inp_duration		 = $str_value;
@@ -296,7 +302,8 @@ function advisor_request_student_survey_func() {
 								student responses.</p>";
 
 		$surveySQL		= "select * from $surveysTableName 
-							where survey_owner='$inp_callsign'";
+							where survey_owner='$inp_callsign' 
+							order by survey_recurring, survey_name";
 		$surveyResult	= $wpdb->get_results($surveySQL);
 		if ($surveyResult === FALSE) {
 			handleWPDBError($jobname,$doDebug,"pass 1 getting list of surveys");
@@ -306,24 +313,32 @@ function advisor_request_student_survey_func() {
 				echo "Ran $surveySQL<br />and retrieved $numSRows rows<br />";
 			}
 			if ($numSRows > 0) {
-				$surveyRadioList			= "";
+				$surveyRadioList1			= "";	// recurring surveys
+				$surveyRadioList2			= "";	// non-recurring surveys
 				foreach($surveyResult as $surveyResultRow) {
 					$survey_record_id		= $surveyResultRow->survey_record_id;
 					$survey_owner			= $surveyResultRow->survey_owner;
 					$survey_name			= $surveyResultRow->survey_name;
+					$survey_recurring		= $surveyResultRow->survey_recurring;
 					$survey_action_log		= $surveyResultRow->survey_action_log;
 					$survey_date_created	= $surveyResultRow->survey_date_created;
 					$survey_date_updated	= $surveyResultRow->survey_date_updated;
 					
-					$surveyRadioList		.= "<input type='radio' class='formInputButton' name='inp_selected_survey' value='$survey_record_id|$survey_name' required>$survey_name<br />";
+					if ($survey_recurring == 'Y') { 
+						$surveyRadioList1		.= "<input type='radio' class='formInputButton' name='inp_selected_survey' value='$survey_record_id|$survey_name' required>$survey_name<br />";
+					} else {
+						$surveyRadioList2		.= "<input type='radio' class='formInputButton' name='inp_selected_survey' value='$survey_record_id|$survey_name' required>$survey_name<br />";
+					}
 				}
 
 				$content	.= "<table><tr><td><form method='post' action='$theURL' 
 								name='survey_form' ENCTYPE='multipart/form-data'>
 								<input type='hidden' name='strpass' value='2'>
 								<input type='hidden' name='inp_callsign' value='$inp_callsign'>
-								<br /><u>Available Surveys</u><br />
-								$surveyRadioList<br />
+								<br /><u>Available Recurring Surveys</u><br />
+									$surveyRadioList1<br />
+								<br /><u>Available Non-recurring Surveys</u><br />
+									$surveyRadioList2<br />
 								<br />How many days shall the recipient have to answer the questionnaire? 
 								When the time expires, the survey will no longer be available to the student.<br />
 								<input type='text' class='formInutText' name='inp_duration' size='5' maxlength='5' required><br />
@@ -338,162 +353,267 @@ function advisor_request_student_survey_func() {
 			echo "<br />at pass2 with survey $inp_selected_survey for advisor $inp_callsign<br />";
 		}
 		$content			.= "<h3>$jobname</h3>";
-		// get the advisor information
 		
-		$sql				= "select * from $advisorTableName 
-								left join $userMasterTableName on user_call_sign = advisor_call_sign 
-								where advisor_call_sign = '$inp_callsign' 
-								and advisor_semester = '$theSemester'";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug,"pass2 attempting to get the advisor record");
+		// see if this is a recurring survey. If so, clone it
+		$surveySQL		= "select * from $surveysTableName 
+							where survey_record_id=$inp_survey_id";
+		$surveyResult	= $wpdb->get_results($surveySQL);
+		if ($surveyResult === FALSE) {
+			handleWPDBError($jobname,$doDebug,"pass 1 getting list of surveys");
 		} else {
-			$numARows			= $wpdb->num_rows;
+			$numSRows	= $wpdb->num_rows;
 			if ($doDebug) {
-				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
+				echo "Ran $surveySQL<br />and retrieved $numSRows rows<br />";
 			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_master_ID 					= $advisorRow->user_ID;
-					$advisor_master_call_sign			= $advisorRow->user_call_sign;
-					$advisor_first_name 				= $advisorRow->user_first_name;
-					$advisor_last_name 					= $advisorRow->user_last_name;
-					$advisor_email 						= $advisorRow->user_email;
-					$advisor_ph_code 					= $advisorRow->user_ph_code;
-					$advisor_phone 						= $advisorRow->user_phone;
-					$advisor_city 						= $advisorRow->user_city;
-					$advisor_state 						= $advisorRow->user_state;
-					$advisor_zip_code 					= $advisorRow->user_zip_code;
-					$advisor_country_code 				= $advisorRow->user_country_code;
-					$advisor_country 					= $advisorRow->user_country;
-					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-					$advisor_telegram 					= $advisorRow->user_telegram;
-					$advisor_signal 					= $advisorRow->user_signal;
-					$advisor_messenger 					= $advisorRow->user_messenger;
-					$advisor_master_action_log 			= $advisorRow->user_action_log;
-					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-					$advisor_languages 					= $advisorRow->user_languages;
-					$advisor_survey_score 				= $advisorRow->user_survey_score;
-					$advisor_is_admin					= $advisorRow->user_is_admin;
-					$advisor_role 						= $advisorRow->user_role;
-					$advisor_master_date_created 		= $advisorRow->user_date_created;
-					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// get the advisor classes
-					$sql				= "select * from $advisorClassTableName 
-											where advisorclass_call_sign = '$inp_callsign' 
-											and advisorclass_semester = '$theSemester'";
-					$advisorClassResult	= $wpdb->get_results($sql);
-					if ($advisorClassResult === FALSE) {
-						handleWPDBError($jobname,$doDebug,"pass2 attempting to get the advisor classes");
-						$content		.= "<b>ERROR</b> There are no class records for advisor $inp_callsign";
-					} else {
-						$numACRows		= $wpdb->num_rows;
+			if ($numSRows > 0) {
+				$surveyRadioList			= "";
+				foreach($surveyResult as $surveyResultRow) {
+					$survey_record_id		= $surveyResultRow->survey_record_id;
+					$survey_owner			= $surveyResultRow->survey_owner;
+					$survey_name			= $surveyResultRow->survey_name;
+					$survey_recurring		= $surveyResultRow->survey_recurring;
+					$survey_action_log		= $surveyResultRow->survey_action_log;
+					$survey_date_created	= $surveyResultRow->survey_date_created;
+					$survey_date_updated	= $surveyResultRow->survey_date_updated;
+		
+					if ($survey_recurring == 'Y') {	/// clone the survey
 						if ($doDebug) {
-							echo "ran $sql<br />and retrieved $numACRows rows<br />";
+							echo "recurring survey. Cloning<br />";
 						}
-						if ($numACRows > 0) {
-							$classesArray								= array();
-							$selectionList								= "";
-							foreach($advisorClassResult as $advisorClassRow) {
-								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-								$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-								$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-								$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-								$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-								$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-								$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-								$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-								$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-								$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-								$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-								$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-								$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-								$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-								$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-								$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-								$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-								$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-								$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-								$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-								$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-								$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-								$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-								$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-								$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-								$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-								$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-								$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-								$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-								$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-								$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-								$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-								$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-								$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-								$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-								$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-								$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-								$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-								$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-								$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-								$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-								$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-								$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-								$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-								$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-								$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-								$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-								
-								if ($numACRows == 1) {
-									$content		.= "<p>You have one $advisorClass_Level class. Next step is to 
-														indicate which students should answer the questionnaire</p>";
-								$strPass			= '3';
-								$classesArray[]		= $advisorClass_sequence;
-														
+						// Insert the surveys record
+						$nowDate			= date('dMY');
+						$inp_survey_name	= "$inp_survey_name $nowDate";
+						$insertResult		= $wpdb->insert($surveysTableName, 
+															array('survey_owner'=>$userName, 
+																  'survey_name'=>$inp_survey_name, 
+																  'survey_recurring'=>'N', 
+																  'survey_action_log'=>"$newDate $userName survey cloned "), 
+															array('%s','%s','%s','%s'));
+						if ($insertResult === FALSE) {
+							handleWPDBError($jobname,$doDebug,"pass 2 attempting to insert new survey failed");
+							$content		.= "<p>Attempting to insert cloned survey name into $surveysTableName failed</p>";
+							$strPass		= '0';
+						} else {
+							$inp_survey_id	= $wpdb->insert_id;
+							if ($doDebug) {
+								echo "inserting survey name $inp_survey_name into $surveysTableName was succesful. Insert_id: $inp_survey_id<br />";
+							}
+							
+							// Now copy the survey content
+							$cloneSQL		= "select * from $surveyContentTableName 
+												where content_id = $survey_record_id 
+												order by content_seq";
+							$cloneResult	= $wpdb->get_results($cloneSQL);
+							if ($cloneResult === FALSE) {
+								handleWPDBError($jobname,$doDebug,"pass2 attempting to read $surveyContentTableName to clone it");
+								$content	.= "<p>Cloning Failed</p>";
+							} else {
+								$numSCRows	= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $cloneSQL<br />and retrieved $numSCRows rows<br />";
+								}
+								if ($numSCRows > 0) {
+									foreach ($cloneResult as $cloneResultRow) {
+										$content_id					= $cloneResultRow->content_id;
+										$content_seq				= $cloneResultRow->content_seq;
+										$content_text				= $cloneResultRow->content_text;
+										$content_answer_format		= $cloneResultRow->content_answer_format;
+										$content_answer_params		= $cloneResultRow->content_answer_params;
+										$content_answer_required	= $cloneResultRow->content_answer_required;
+										
+										$cloneInsert		= $wpdb->insert($surveyContentTableName, 
+																array('content_id'=>$inp_survey_id, 
+																	  'content_seq'=>$content_seq, 
+																	  'content_text'=>$content_text, 
+																	  'content_answer_format'=>$content_answer_format, 
+																	  'content_answer_params'=>$content_answer_params, 
+																	  'content_answer_required'=>$content_answer_required, 
+																	  'content_action_log'=>" $newDate $userName record created "), 
+																array('%d','%d','%s','%s','%s','%s','%s'));
+										if ($cloneInsert === FALSE) {
+											handleWPDBError($jobname,$doDebug,"pass2 attempting to insert $content_seq into $surveyContentTableName");
+											$content	.= "<p>Cloning Failed</p>";
+											$strPass	= '0';
+										} else {
+											if ($doDebug) {
+												echo "$content_seq cloned<br />";
+											}
+										
+										}
+									}
+									$content		.= "<p>Survey $inp_survey_name is set up.</p>";
 								} else {
-									$selectionList	.= "<input type='checkbox' class='formInputButton' name='classesArray[]' value='$advisorClass_sequence'>Class $advisorClass_sequence $advisorClass_level <br />";
+									$content	.= "<p>No questions found to be cloned</p>";
+									$strPass	= '0';
 								}
 							}
-							if ($numACRows > 1) {
-								$content			.= "<h4>Indicate Which Classes Should Have the Questionnaire</h4>
-														<form method='post' action='$theURL' 
-														name='survey_form' ENCTYPE='multipart/form-data'>
-														<input type='hidden' name='strpass' value='3'>
-														<input type='hidden' name='inp_callsign' value='$inp_callsign'>
-														<input type='hidden' name='inp_duration' value='$inp_duration'>
-														<input type='hidden' name='inp_selected_survey' value='$inp_selected_survey'>
-														<input type='hidden' name='numACRows' value='$numACRows'>
-														<table>
-														<tr><td style='vertical-align:top;width:150px;'>Classes</td>
-															<td>$selectionList</td>
-														<tr><td></td>
-															<td><input class='formInputButton' name='submit' type='submit' value='Submit' /></td></tr>
-														</table></form>";
-							}
-								
-						} else {
-							$content		.= "<p>No class records found for $inp_callsign</p>";
 						}
 					}
 				}
 			} else {
-				$content				.= "<p>No advisor record found for $inp_callsign</p>";
+				$content		.= "<p>No survey found with ID $inp_survey_id to clone</p>";
+				$strPass		= '0';
+			}
+		}
+		
+		if ($strPass != '0') {
+			// get the advisor information
+			
+			$sql				= "select * from $advisorTableName 
+									left join $userMasterTableName on user_call_sign = advisor_call_sign 
+									where advisor_call_sign = '$inp_callsign' 
+									and advisor_semester = '$theSemester'";
+			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
+			if ($wpw1_cwa_advisor === FALSE) {
+				handleWPDBError($jobname,$doDebug,"pass2 attempting to get the advisor record");
+			} else {
+				$numARows			= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
+				}
+				if ($numARows > 0) {
+					foreach ($wpw1_cwa_advisor as $advisorRow) {
+						$advisor_master_ID 					= $advisorRow->user_ID;
+						$advisor_master_call_sign			= $advisorRow->user_call_sign;
+						$advisor_first_name 				= $advisorRow->user_first_name;
+						$advisor_last_name 					= $advisorRow->user_last_name;
+						$advisor_email 						= $advisorRow->user_email;
+						$advisor_ph_code 					= $advisorRow->user_ph_code;
+						$advisor_phone 						= $advisorRow->user_phone;
+						$advisor_city 						= $advisorRow->user_city;
+						$advisor_state 						= $advisorRow->user_state;
+						$advisor_zip_code 					= $advisorRow->user_zip_code;
+						$advisor_country_code 				= $advisorRow->user_country_code;
+						$advisor_country 					= $advisorRow->user_country;
+						$advisor_whatsapp 					= $advisorRow->user_whatsapp;
+						$advisor_telegram 					= $advisorRow->user_telegram;
+						$advisor_signal 					= $advisorRow->user_signal;
+						$advisor_messenger 					= $advisorRow->user_messenger;
+						$advisor_master_action_log 			= $advisorRow->user_action_log;
+						$advisor_timezone_id 				= $advisorRow->user_timezone_id;
+						$advisor_languages 					= $advisorRow->user_languages;
+						$advisor_survey_score 				= $advisorRow->user_survey_score;
+						$advisor_is_admin					= $advisorRow->user_is_admin;
+						$advisor_role 						= $advisorRow->user_role;
+						$advisor_master_date_created 		= $advisorRow->user_date_created;
+						$advisor_master_date_updated 		= $advisorRow->user_date_updated;
+	
+						$advisor_ID							= $advisorRow->advisor_id;
+						$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
+						$advisor_semester 					= $advisorRow->advisor_semester;
+						$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+						$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
+						$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+						$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+						$advisor_action_log 				= $advisorRow->advisor_action_log;
+						$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+						$advisor_control_code 				= $advisorRow->advisor_control_code;
+						$advisor_date_created 				= $advisorRow->advisor_date_created;
+						$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+						$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
+	
+						// get the advisor classes
+						$sql				= "select * from $advisorClassTableName 
+												where advisorclass_call_sign = '$inp_callsign' 
+												and advisorclass_semester = '$theSemester'";
+						$advisorClassResult	= $wpdb->get_results($sql);
+						if ($advisorClassResult === FALSE) {
+							handleWPDBError($jobname,$doDebug,"pass2 attempting to get the advisor classes");
+							$content		.= "<b>ERROR</b> There are no class records for advisor $inp_callsign";
+						} else {
+							$numACRows		= $wpdb->num_rows;
+							if ($doDebug) {
+								echo "ran $sql<br />and retrieved $numACRows rows<br />";
+							}
+							if ($numACRows > 0) {
+								$classesArray								= array();
+								$selectionList								= "";
+								foreach($advisorClassResult as $advisorClassRow) {
+									$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+									$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+									$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+									$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+									$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+									$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+									$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+									$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+									$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+									$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+									$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+									$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+									$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+									$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+									$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+									$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+									$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+									$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+									$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+									$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+									$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+									$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+									$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+									$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+									$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+									$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+									$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+									$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+									$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+									$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+									$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+									$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+									$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+									$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+									$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+									$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+									$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+									$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+									$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+									$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+									$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+									$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+									$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+									$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+									$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+									$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+									
+									if ($numACRows == 1) {
+										$content		.= "<p>You have one $advisorClass_Level class. Next step is to 
+															indicate which students should answer the questionnaire</p>";
+									$strPass			= '3';
+									$classesArray[]		= $advisorClass_sequence;
+															
+									} else {
+										$selectionList	.= "<input type='checkbox' class='formInputButton' name='classesArray[]' value='$advisorClass_sequence'>Class $advisorClass_sequence $advisorClass_level <br />";
+									}
+								}
+								if ($numACRows > 1) {
+									$content			.= "<h4>Indicate Which Classes Should Have the Questionnaire</h4>
+															<form method='post' action='$theURL' 
+															name='survey_form' ENCTYPE='multipart/form-data'>
+															<input type='hidden' name='strpass' value='3'>
+															<input type='hidden' name='inp_callsign' value='$inp_callsign'>
+															<input type='hidden' name='inp_duration' value='$inp_duration'>
+															<input type='hidden' name='inp_survey_id' value='$inp_survey_id'>
+															<input type='hidden' name='numACRows' value='$numACRows'>
+															<table>
+															<tr><td style='vertical-align:top;width:150px;'>Classes</td>
+																<td>$selectionList</td>
+															<tr><td></td>
+																<td><input class='formInputButton' name='submit' type='submit' value='Submit' /></td></tr>
+															</table></form>";
+								}
+									
+							} else {
+								$content		.= "<p>No class records found for $inp_callsign</p>";
+							}
+						}
+					}
+				} else {
+					$content				.= "<p>No advisor record found for $inp_callsign</p>";
+				}
 			}
 		}
 	}
@@ -654,7 +774,7 @@ function advisor_request_student_survey_func() {
 							name='advisor_selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='5'>
 							<input type='hidden' name='inp_duration' value='$inp_duration'>
-							<input type='hidden' name='inp_selected_survey' value='$inp_selected_survey'>
+							<input type='hidden' name='inp_survey_id' value='$inp_survey_id'>
 							<input type='hidden' name='inp_mode' value='$inp_mode'>
 							<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 							<table>
@@ -677,11 +797,12 @@ function advisor_request_student_survey_func() {
 			print_r($inp_students);
 			echo "</pre><br />";
 		}
-		
+		$content		.= "<h3>$jobname</h3>";
 		if (count($inp_students) > 0) {
 			if ($doDebug) {
 				echo "inp_student count is > 0<br />";
 			}
+			
 			foreach($inp_students as $thisCallSign) {
 				if ($doDebug) {
 					echo "<br />Processing inp_students ... thisCallSign: $thisCallSign<br />";
@@ -847,6 +968,7 @@ next $inp_duration days. To start the questionnaire, please click $url.";
 					}
 				}
 			}
+			$content		.= "<p>All selected students processed</p>";
 		} else {
 			if ($doDebug) {
 				echo "inp_student count is 0<br />";
