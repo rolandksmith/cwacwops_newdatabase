@@ -83,6 +83,19 @@ function search_joblog_func() {
 				$inp_who	 = $str_value;
 				$inp_who	 = filter_var($inp_who,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "searchWhere") {
+				$searchWhere	 = $str_value;
+				$searchWhere	 = filter_var($searchWhere,FILTER_UNSAFE_RAW);
+				$searchWhere	= base64_decode($searchWhere);
+			}
+			if ($str_key 		== "begin") {
+				$begin	 = $str_value;
+				$begin	 = filter_var($begin,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "$doDebug") {
+				$$doDebug	 = $str_value;
+				$$doDebug	 = filter_var($$doDebug,FILTER_UNSAFE_RAW);
+			}
 		}
 	}
 	
@@ -181,6 +194,9 @@ function search_joblog_func() {
 							<input type='hidden' name='strpass' value='2'>
 							Select the field and the search criteria:<br /><br '>
 							<table>
+							<tr><td style='border-style=none;'><input type='radio' class='formInputButton' name='inp_field' value='reverse'></td>
+								<td>Entries in reverse order, 25 at a time</td>
+								<td></td></tr>
 							<tr><td style='border-style=none;width=6px;vertical-align:top;'><input type='radio' class='formInputButton' name='inp_field' value='searchJobName'></td>
 								<td style='vertical-align:top;'>Job Name</td>
 								<td style='border-style=none;'>like: <input type='text' class='formInputText' name='inp_search' size='50' maxlength='150'></td></tr>
@@ -242,62 +258,87 @@ function search_joblog_func() {
 					$part2			= "job_time like '$myArray[1]%'";
 				}
 			 	$searchWhere		= "where $part1 and $part2";
+			} elseif ($inp_field == 'reverse') {
+			 	$searchWhere		= "";
 			} else {
 				$content			.= "No valid search criteria entered";
 			}
-			if ($searchWhere != '') {
+			$begin					= 0;
+			$strPass				= 3;
+		}
+	}
+	if ("3" == $strPass) {
+		$displayCount			= 0;
 			
-				$sql				= "select * from wpw1_cwa_joblog $searchWhere order by job_date DESC, job_time DESC";
-				$wpw1_cwa_joblog			= $wpdb->get_results($sql);
-				if ($wpw1_cwa_joblog === FALSE) {
-					if ($doDebug) {
-						echo "Reading the database failed<br />";
-						echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
-						echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
-					}
-					$content		.= "No data obtained";
-				} else {
-					$numRows		= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "successfully ran<br />";
-						echo "wpdb->last_query: " . $wpdb->last_query . "<br />and retreived $numRows rows<br />";
-					}
-					if ($numRows > 0) {
-						$content	.= "<h3> Results of Searching Job Log</h3>
-										<p>Search Criteria: $searchWhere</p>
-										<table>
-										<tr><th>Program Name</th>
-											<th>Date</th>
-											<th>Who</th>
-											<th>Mode</th>
-											<th>Data Type</th>
-											<th>Addl</th>
-											<th>IP</th>
-											<th>Date Created</td></tr>";
-						foreach($wpw1_cwa_joblog as $joblogRow) {
-							$job_name		= $joblogRow->job_name;
-							$job_date		= $joblogRow->job_date;
-							$job_time		= $joblogRow->job_time;
-							$job_who		= $joblogRow->job_who;
-							$job_mode		= $joblogRow->job_mode;
-							$job_data_type	= $joblogRow->job_data_type;
-							$job_addl_info	= $joblogRow->job_addl_info;
-							$job_ip_addr	= $joblogRow->job_ip_addr;
-							$job_date_created	= $joblogRow->job_date_created;
-							$content	.= "<tr><td>$job_name</td>
-												<td>$job_date $job_time</td>
-												<td>$job_who</td>
-												<td>$job_mode</td>
-												<td>$job_data_type</td>
-												<td>$job_addl_info</td>
-												<td>$job_ip_addr</td>
-												<td>$job_date_created</td></tr>";
-						}
-					} else {
-						$content			.= "<h3> Results of Searching Job Log $inp_field for $inp_search</h3>No data found matching the search criteria";
-					}
-				}
+		$sql				= "select * from wpw1_cwa_joblog 
+								$searchWhere 
+								order by job_date DESC, job_time DESC 
+								limit $begin,25";
+		$wpw1_cwa_joblog			= $wpdb->get_results($sql);
+		if ($wpw1_cwa_joblog === FALSE) {
+			if ($doDebug) {
+				echo "Reading the database failed<br />";
+				echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
+				echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
 			}
+			$content		.= "No data obtained";
+		} else {
+			$numRows		= $wpdb->num_rows;
+			if ($doDebug) {
+				echo "successfully ran<br />";
+				echo "wpdb->last_query: " . $wpdb->last_query . "<br />and retreived $numRows rows<br />";
+			}
+			if ($numRows > 0) {
+				$content	.= "<h3> Results of Searching Job Log</h3>
+								<p>Search Criteria: $searchWhere<br />
+								Showing next 25 records starting at record $begin</p>
+								<table>
+								<tr><th>Program Name</th>
+									<th>Date</th>
+									<th>Who</th>
+									<th>Mode</th>
+									<th>Data Type</th>
+									<th>Addl</th>
+									<th>IP</th>
+									<th>Date Created</td></tr>";
+				foreach($wpw1_cwa_joblog as $joblogRow) {
+					$job_name		= $joblogRow->job_name;
+					$job_date		= $joblogRow->job_date;
+					$job_time		= $joblogRow->job_time;
+					$job_who		= $joblogRow->job_who;
+					$job_mode		= $joblogRow->job_mode;
+					$job_data_type	= $joblogRow->job_data_type;
+					$job_addl_info	= $joblogRow->job_addl_info;
+					$job_ip_addr	= $joblogRow->job_ip_addr;
+					$job_date_created	= $joblogRow->job_date_created;
+					$content	.= "<tr><td>$job_name</td>
+										<td>$job_date $job_time</td>
+										<td>$job_who</td>
+										<td>$job_mode</td>
+										<td>$job_data_type</td>
+										<td>$job_addl_info</td>
+										<td>$job_ip_addr</td>
+										<td>$job_date_created</td></tr>";
+					$displayCount++;
+				}
+			} else {
+				$content			.= "<h3> Results of Searching Job Log $inp_field for $inp_search</h3>No data found matching the search criteria";
+			}
+		}
+		$content			.= "</table>";
+		if ($displayCount == 25) {		// probably more records
+			$begin			= $begin + 26;
+			$searchWhere	= base64_encode($searchWhere);
+			$content		.= "<tr><td colspan='8'>Click 'Next' to show next 25 records 
+									<form method='post' action='$theURL' 
+									name='selection_form' ENCTYPE='multipart/form-data'>
+									<input type='hidden' name='strpass' value='3'>
+									<input type='hidden' name='searchWhere' value='$searchWhere'>
+									<input type='hidden' name='begin' value='$begin'>
+									<input type='hidden' name='doDebug' value='$doDebug'>
+									<input type='submit' class='formInputButton' name='submit' value='Next' />
+									</form></td></tr>";
+		} else {
 			$content			.= "</table>";
 		}
 	}
