@@ -2,7 +2,7 @@ function setup_survey_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -53,6 +53,10 @@ function setup_survey_func() {
 	$createSurvey				= FALSE;
 	$cloneSurvey				= FALSE;
 	$newDate					= date('dMY H:i:s');
+	$submit						= '';
+	$inp_recurring				= 'N';
+	$surveyRadioList			= '';
+	$inp_required				= 'N';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -114,9 +118,13 @@ function setup_survey_func() {
 				$inpParams	 = $str_value;
 				$inpParams	 = filter_var($inpParams,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key 			== "inpRequired") {
-				$inpRequired	 = $str_value;
-				$inpRequired	 = filter_var($inpRequired,FILTER_UNSAFE_RAW);
+			if ($str_key 			== "inp_recurring") {
+				$inp_recurring	 = $str_value;
+				$inp_recurring	 = filter_var($inp_recurring,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 			== "inp_required") {
+				$inp_required	 = $str_value;
+				$inp_required	 = filter_var($inp_required,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 				== "inp_selected_survey") {
 				$inp_selected_survey	 = $str_value;
@@ -124,7 +132,7 @@ function setup_survey_func() {
 				$thisArray				= explode("|",$inp_selected_survey);
 				$inp_survey_id			= intval($thisArray[0]);
 				$inp_survey_name		= $thisArray[1];
-				$updateSurvey			= TRUE;
+//				$updateSurvey			= TRUE;
 				if ($doDebug) {
 					echo "set inp_survey_id = $inp_survey_id<br />
 						  set inp_survey_name = $inp_survey_name<br />";
@@ -133,12 +141,16 @@ function setup_survey_func() {
 			if ($str_key 				== "submit") {
 				$submit	 				= $str_value;
 				$submit	 				= filter_var($submit,FILTER_UNSAFE_RAW);
+echo "set submit to $submit<br />";
 				if ($submit == 'Update Survey') {
 					$updateSurvey		= TRUE;
+echo "set updateSurvey to TRUE<br />";
 				} elseif ($submit == 'Clone and Update') {
 					$cloneSurvey		= TRUE;
+echo "set cloneSurvey to TRUE<br />";
 				} elseif ($submit == 'Create Survey') {
 					$createSurvey		= TRUE; 
+echo "set createSurvey to TRUE<br />";
 				}
 			}
 		}
@@ -264,53 +276,60 @@ function setup_survey_func() {
 					
 					$surveyRadioList		.= "<input type='radio' class='formInputButton' name='inp_selected_survey' value='$survey_record_id|$survey_name' required>$survey_name<br />";
 				}
-				
-				$content		.= "<h3>$jobname</h3>
-									<table>
-									<tr><td style='width:300px;vertical-align:top;'><b>Review and Modify an Existing Survey</b><br />
-											<p>Select survey to modify from the list of surveys below
-											<form method='post' action='$theURL' 
-											name='modify_form' ENCTYPE='multipart/form-data'>
-											<input type='hidden' name='strpass' value='2'>
-											<br /><u>Available Surveys</u><br />
-											$surveyRadioList<br />
-											<input class='formInputButton' name='submit' type='submit' value='Update Survey' />
-											</form></td>
-										<td style='width:300px;vertical-align:top;'><b>Clone and Modify an Existing Survey</b><br />
-											<p>Select survey to copy and modify from the list below
-											and specify the new survey name
-											<form method='post' action='$theURL' 
-											name='modify_form' ENCTYPE='multipart/form-data'>
-											<input type='hidden' name='strpass' value='10'>
-											<br /><u>Available Surveys</u><br />
-											$surveyRadioList<br />
-											<b>New Survey Name</b><br />
-											<input type='text' class='formInputText' size='50' maxlength='100' name='inp_survey_name'><br />
-											<input class='formInputButton' name='submit' type='submit' value='Clone and Update' />
-											</form></td>
-										<td style='width:300px;vertical-align:top;'><b>Create a New Survey</b><br />
-											<p>Enter the new survey name
-											<form method='post' action='$theURL' 
-											name='modify_form' ENCTYPE='multipart/form-data'>
-											<input type='hidden' name='strpass' value='2'>
-											<b>New Survey Name</b><br />
-											<input type='text' class='formInputText' size='50' maxlength='100' name='inp_survey_name'><br />
-											<input class='formInputButton' type='submit' name='submit' value='Create Survey' />
-											</form></td>
-										<td style='width:300px;vertical-align:top;'><b>Delete a Survey</b><br />
-											<p>Select survey to delete from the list of surveys below
-											<form method='post' action='$theURL' 
-											name='delete_form' ENCTYPE='multipart/form-data'>
-											<input type='hidden' name='strpass' value='30'>
-											<br /><u>Available Surveys</u><br />
-											$surveyRadioList<br />
-											<input class='formInputButton' name='submit' type='submit' value='Delete Survey' />
-											</form></td></tr>
-											$testModeOption
-									<tr><td colspan='2'></td></tr></table>
-									</form></p>";
 			}
+			$content		.= "<h3>$jobname</h3>
+								<table>
+								<tr><td style='width:300px;vertical-align:top;'><b>Review and Modify an Existing Survey</b><br />
+										<p>Select survey to modify from the list of surveys below
+										<form method='post' action='$theURL' 
+										name='modify_form' ENCTYPE='multipart/form-data'>
+										<input type='hidden' name='strpass' value='2'>
+										<br /><u>Available Surveys</u><br />
+										$surveyRadioList<br />
+										<input class='formInputButton' name='submit' type='submit' value='Update Survey' />
+										</form></td>
+									<td style='width:300px;vertical-align:top;'><b>Clone and Modify an Existing Survey</b><br />
+										<p>Select survey to copy and modify from the list below
+										and specify the new survey name
+										<form method='post' action='$theURL' 
+										name='modify_form' ENCTYPE='multipart/form-data'>
+										<input type='hidden' name='strpass' value='2'>
+										<br /><u>Available Surveys</u><br />
+										$surveyRadioList<br />
+										<b>New Survey Name</b><br />
+										<input type='text' class='formInputText' size='50' maxlength='100' name='inp_survey_name'><br />
+										<b>Is this a recurring survey?</b><br />
+										<input type='radio' class='formInputText' name='inp_recurring' value='N' checked>No<br />
+										<input type='radio' class='formInputText' name='inp_recurring' value='Y'>Yes<br /><br />
+										<input class='formInputButton' name='submit' type='submit' value='Clone and Update' /><br />
+										</form></td>
+									<td style='width:300px;vertical-align:top;'><b>Create a New Survey</b><br />
+										<p>Enter the new survey name
+										<form method='post' action='$theURL' 
+										name='modify_form' ENCTYPE='multipart/form-data'>
+										<input type='hidden' name='strpass' value='2'>
+										<b>New Survey Name</b><br />
+										<input type='text' class='formInputText' size='50' maxlength='100' name='inp_survey_name'><br />
+										<b>Is this a recurring survey?</b><br />
+										<input type='radio' class='formInputText' name='inp_recurring' value='N' checked>No<br />
+										<input type='radio' class='formInputText' name='inp_recurring' value='Y'>Yes<br /><br />
+										<input class='formInputButton' type='submit' name='submit' value='Create Survey' />
+										</form></td>
+									<td style='width:300px;vertical-align:top;'><b>Delete a Survey</b><br />
+										<p>Select survey to delete from the list of surveys below
+										<form method='post' action='$theURL' 
+										name='delete_form' ENCTYPE='multipart/form-data'>
+										<input type='hidden' name='strpass' value='30'>
+										<br /><u>Available Surveys</u><br />
+										$surveyRadioList<br />
+										<input class='formInputButton' name='submit' type='submit' value='Delete Survey' />
+										</form></td></tr>
+										$testModeOption
+								<tr><td colspan='2'></td></tr></table>
+								</form></p>";
+			$strPass	= '1';
 		}
+
 	} elseif ("4" == $strPass) {
 		if ($doDebug) {
 			echo "<br />at pass4 ready to either insert or update a sequence<br />";
@@ -376,11 +395,11 @@ function setup_survey_func() {
 								$logInfo							.= "Answer params changed from $content_answer_params to $inpParams. ";
 							}
 						}
-						if ($inpRequired != $content_answer_required) {
-							$updateParams['content_answer_required']	= $inpRequired;
+						if ($inp_required != $content_answer_required) {
+							$updateParams['content_answer_required']	= $inp_required;
 							$updateFormat[]						= '%s';
 							$doUpdate							= TRUE;
-							$logInfo							.= "Answer required changed from $content_answer_required to $inpRequired. ";
+							$logInfo							.= "Answer required changed from $content_answer_required to $inp_required. ";
 						}
 						
 						if ($doUpdate) {
@@ -437,14 +456,15 @@ function setup_survey_func() {
 										$inp_sequence<br />
 										<b>Question Format:</b><br /><input type='radio' class='formInputButton' name='inpFormat' value='Block'>Block <i>Text displayed. No response given</i><br />
 																<input type='radio' class='formInputButton' name='inpFormat' value='YN'>Yes or No </i>Can select either Yes or No for the response</i><br />
-																<input type='radio' class='formInputButton' name='inpFormat' value='text'>Free form response </i>An unlimited character textual response</i><br />
+																<input type='radio' class='formInputButton' name='inpFormat' value='shortText'>Text response up to 100 characters</i><br />
+																<input type='radio' class='formInputButton' name='inpFormat' value='longText'>Free form response </i>An unlimited character textual response</i><br />
 																<input type='radio' class='formInputButton' name='inpFormat' value='scale'>Scale <i>Response selects one of the three to five options such as Poor,Fair,Good</i><br />
 										<br /><b>Question Text:</b> <textarea class='formInputText' rows='5' cols='50' name='inpText'></textarea><br />
 										<br /><b>Question Parameters</b> <i>indicate up to five parameters, one of which will be selected, separated by commas. For example: Good,Fair,Poor</i><br />
 										<input type='text' class='formInputText' name='inpParams' size='20' maxlength='20'><br />
 										<br /><b>Is a response required?</b><br />
-										<input type='radio' class='formInputButton' name='inpRequired' value='Y'>Yes<br />
-										<input type='radio' class='formInputButton' name='inpRequired' value='N'>No<br />
+										<input type='radio' class='formInputButton' name='inp_required' value='Y'>Yes<br />
+										<input type='radio' class='formInputButton' name='inp_required' value='N'>No<br />
 										<hr style='border: 2px solid black;'><br /><br />
 										<input class='formInputButton' name='submit' type='submit' value='Add Sequence' />
 										</form></td></tr></table>";
@@ -464,7 +484,7 @@ function setup_survey_func() {
 									'content_text'=>$inpText,
 									'content_answer_format'=>$inpFormat,
 									'content_answer_params'=>$inpParams, 
-									'content_answer_required'=>$inpRequired, 
+									'content_answer_required'=>$inp_required, 
 									'content_action_log'=>"$nowDate $userName sequence added to survey ");
 		$updateFormat		= array('%d','%d','%s','%s','%s','%s','%s','%s');
 		$insertResult		= $wpdb->insert($surveyContentTableName, 
@@ -488,15 +508,35 @@ function setup_survey_func() {
 
 	if ("2" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass2 with submit of $submit<br />";
+			echo "<br />at pass2<br />";
+			echo "with submit of $submit<br />";
 		}
-		
+		if ($doDebug) {
+			if ($updateSurvey) {
+				echo "updateSurvey is TRUE<br />";
+			} else {
+				echo "updateSurvey is FALSE<br />";
+			}
+			if ($cloneSurvey) {
+				echo "cloneSurvey is TRUE<br />";
+			} else {
+				echo "cloneSurvey is FALSE<br />";
+			}
+			if ($createSurvey) {
+				echo "createSurvey is TRUE<br />";
+			} else {
+				echo "createSurvey is FALSE<br />";
+			}
+		}
 		$content		.= "<h3>$jobname</h3>";
 		
 		$haveID			= FALSE;
 
 
 		if ($updateSurvey) {
+			if ($doDebug) {
+				echo "doing updateSurvey";
+			}
 			$sql			= "select * from $surveysTableName 
 								where survey_record_id = $inp_survey_id";
 			$surveyResult	= $wpdb->get_results($sql);
@@ -531,11 +571,14 @@ function setup_survey_func() {
 				$strPass			= '0';
 			} else {
 				// Insert the surveys record
-				$nowDate			= date('dMY');
-				$inp_survey_name	= "$inp_survey_name $nowDate";
+				if ($inp_recurring == 'N') {
+					$nowDate			= date('dMY');
+					$inp_survey_name	= "$inp_survey_name $nowDate";
+				}
 				$insertResult		= $wpdb->insert($surveysTableName, 
 													array('survey_owner'=>$userName, 
 														  'survey_name'=>$inp_survey_name, 
+														  'survey_recurring'=>$inp_recurring, 
 														  'survey_action_log'=>"$newDate $userName survey created "), 
 													array('%s','%s','%s'));
 				if ($insertResult === FALSE) {
@@ -549,6 +592,109 @@ function setup_survey_func() {
 					$content		.= "<p>Survey $inp_survey_name is set up.</p>";
 					$haveID			= TRUE;
 					$updateSurvey	= TRUE;
+				}
+			}
+		}
+		if ($cloneSurvey) {
+			if ($inp_survey_name == '') {
+				$content			.= "<p>A survey name is required. Go back and enter the name</p>";
+				$strPass			= '0';
+			} else {
+				if ($doDebug) {
+					echo "<br />Cloning surveyid $inp_survey_id into $inp_survey_name<br />";
+				}
+				// get the survey information and write new survey
+				$sql			= "select * from $surveysTableName 
+									where survey_record_id = $inp_survey_id";
+				$surveyResult	= $wpdb->get_results($sql);
+				if ($surveyResult === FALSE) {
+					handleWPDBError($jobname,$doDebug,"attempting to get survey id $inp_survey_id for cloning");
+					$content	.= "<p>Attempting get data for survey $inp_survey_name failed<br />";
+				} else {
+					$numSRows	= $wpdb->num_rows;
+					if ($doDebug) {
+						echo "ran $sql<br />and retrieved $numSRows rows<br />";
+					}
+					if ($numSRows > 0) {
+						foreach($surveyResult as $surveyResultRow) {
+							$survey_record_id		= $surveyResultRow->survey_record_id;
+							$survey_owner			= $surveyResultRow->survey_owner;
+							$survey_name			= $surveyResultRow->survey_name;
+							$survey_recurring		= $surveyResultRow->survey_recurring;
+							
+							// Insert the surveys record
+							if ($inp_recurring == 'N') {
+								$nowDate			= date('dMY');
+								$inp_survey_name	= "$inp_survey_name $nowDate";
+							}
+							$insertResult		= $wpdb->insert($surveysTableName, 
+																array('survey_owner'=>$userName, 
+																	  'survey_name'=>$inp_survey_name, 
+																	  'survey_recurring'=>$inp_recurring, 
+																	  'survey_action_log'=>"$newDate $userName survey cloned "), 
+																array('%s','%s','%s','%s'));
+							if ($insertResult === FALSE) {
+								handleWPDBError($jobname,$doDebug,"pass 15 attempting to insert new survey failed");
+								$content		.= "<p>Attempting to insert cloned survey name into $surveysTableName failed</p>";
+							} else {
+								$survey_record_id	= $wpdb->insert_id;
+								if ($doDebug) {
+									echo "inserting survey name $inp_survey_name into $surveysTableName was succesful. Insert_id: $survey_record_id<br />";
+								}
+								
+								// Now copy the survey content
+								$cloneSQL		= "select * from $surveyContentTableName 
+													where content_id = $inp_survey_id 
+													order by content_seq";
+								$cloneResult	= $wpdb->get_results($cloneSQL);
+								if ($cloneResult === FALSE) {
+									handleWPDBError($jobname,$doDebug,"pass2 attempting to read $surveyContentTableName to clone it");
+									$content	.= "<p>Cloning Failed</p>";
+								} else {
+									$numSCRows	= $wpdb->num_rows;
+									if ($doDebug) {
+										echo "ran $cloneSQL<br />and retrieved $numSCRows rows<br />";
+									}
+									if ($numSCRows > 0) {
+										foreach ($cloneResult as $cloneResultRow) {
+											$content_id					= $cloneResultRow->content_id;
+											$content_seq				= $cloneResultRow->content_seq;
+											$content_text				= $cloneResultRow->content_text;
+											$content_answer_format		= $cloneResultRow->content_answer_format;
+											$content_answer_params		= $cloneResultRow->content_answer_params;
+											$content_answer_required	= $cloneResultRow->content_answer_required;
+											
+											$cloneInsert		= $wpdb->insert($surveyContentTableName, 
+																	array('content_id'=>$survey_record_id, 
+																		  'content_seq'=>$content_seq, 
+																		  'content_text'=>$content_text, 
+																		  'content_answer_format'=>$content_answer_format, 
+																		  'content_answer_params'=>$content_answer_params, 
+																		  'content_answer_required'=>$content_answer_required, 
+																		  'content_action_log'=>" $newDate $userName record created "), 
+																	array('%d','%d','%s','%s','%s','%s','%s'));
+											if ($cloneInsert === FALSE) {
+												handleWPDBError($jobname,$doDebug,"pass2 attempting to insert $content_seq into $surveyContentTableName");
+												$content	.= "<p>Cloning Failed</p>";
+											} else {
+												if ($doDebug) {
+													echo "$content_seq cloned<br />";
+												}
+											
+											}
+										}
+										$content		.= "<p>Survey $inp_survey_name is set up.</p>";
+										$haveID			= TRUE;
+										$updateSurvey	= TRUE;
+									} else {
+										$content	.= "<p>No questions found to be cloned</p>";
+									}
+								}
+							}
+						}
+					} else {
+						$content		.= "<p>No survey found with ID $inp_survey_id to clone</p>";
+					}
 				}
 			}
 		}
@@ -580,64 +726,41 @@ function setup_survey_func() {
 							$content_answer_params		= $contentResultRow->content_answer_params;
 							$content_answer_required	= $contentResultRow->content_answer_required;
 							
-							$myInt				= $content_seq;
-							$blockChecked		= '';
-							$YNChecked			= '';
-							$textChecked		= '';
-							$scaleChecked		= '';
-							$multimultiChecked	= '';
-							$mintisingleChecked	= '';
 							switch ($content_answer_format) {
 								case "Block":
-									$blockChecked	= 'checked';
+									$formatStr		= "Block <i>Text displayed. No response given</i>";
 									break;
-								case "text":
-									$textChecked	= 'checked';
+								case "shortText":
+									$formatStr		= "shortText: Text response up to 100 characters</i>";
+									break;
+								case "longText":
+									$formatStr		= "longText: Free form response </i>An unlimited character textual response</i>";
 									break;
 								case "YN":
-									$YNChecked		= 'checked';
+									$formatStr		= "Yes or No </i>Can select either Yes or No for the response</i>";
 									break;
 								case "scale":
-									$scaleChecked	= 'checked';
+									$formatStr		= "Scale <i>Response selects one of the three to five options such as Poor,Fair,Good</i>";
 									break;
 								case "multimulti":
-									$multimultiChecked	= 'checked';
+									$formatStr		= "";
 									break;
 								case "multisingle":
-									$multiSingleChecked	= 'checked';
+									$formatStr		= "";
 							}
-							$requiredYesChecked		= '';
-							$requiredNoChecked		= '';
-							if ($content_answer_required == 'Y') {
-								$requiredYesChecked	= 'checked';
-								$requiredNoChecked	= '';
-							} elseif ($content_answer_required == 'N') {
-								$requiredYesChecked	= '';
-								$requiredNoChecked	= 'checked';
-							}
-							$inpFormat		= "inp_format_" . $myInt;
-							$inpSeq			= "inp_seq_" . $myInt;
-							$inpText		= "inp_text_" . $myInt;
-							$inpParams		= "inp_params_" . $myInt;
-							$inpRequired	= "inp_required_" . $myInt;
-							$inpScale		= "inp_scale_" . $myInt;
 							
 							$content		.= "<tr><td style='vertical-align:top;'><b>Question Sequence:</b> <i>Sequence in which the question will be shown</i><br />
-													<input type='text' 
-													class='formInputText' size='5' maxlength='5' value='$myInt' name='$inpSeq'><br /><br />
-													<b>Question Format:</b><br /><input type='radio' class='formInputButton' name='$inpFormat' value='Block' $blockChecked> Block <i>Text displayed. No response given</i><br />
-																			<input type='radio' class='formInputButton' name='$inpFormat' value='YN' $YNChecked>Yes or No </i>Can select either Yes or No for the response</i><br />
-																			<input type='radio' class='formInputButton' name='$inpFormat' value='text' $textChecked>Free form response </i>An unlimited character textual response</i><br />
-																			<input type='radio' class='formInputButton' name='$inpFormat' value='scale' $scaleChecked>Scale <i>Response selects one of the three to five options such as Poor,Fair,Good</i><br />
-													<br /><b>Question Text:</b> <textarea class='formInputText' rows='5' cols='50' name='$inpText'>$content_text</textarea><br />";
+													$content_seq<br /><br />
+													<b>Question Format:</b><br />
+													$formatStr<br />
+													<br /><b>Question Text:</b> $content_text<br />";
 							if ($content_answer_format == 'scale') {
 								$content	.= "<br /><b>Question Parameters</b> <i>indicate up to five parameters, one of which will be selected, separated by commas. For example: Good,Fair,Poor</i><br />
-												<input type='text' class='formInputText' name='$inpParams' size='20' maxlength='20' value='$content_answer_params'><br />";
+												$content_answer_params<br />";
 							}
 							if ($content_answer_format != 'Block') {
-								$content		.= "<br /><b>Is a response required or optional?</b><br />
-													<input type='radio' class='formInputButton' name='$inpRequired' value='Y' $requiredYesChecked >Yes<br />
-													<input type='radio' class='formInputButton' name='$inpRequired' value='N' $requiredNoChecked >No<br />";
+								$content		.= "<br /><b>Is a response required?</b><br />
+													$content_answer_required<br />";
 							}
 							$content		.= "<hr style='border: 2px solid black;'></td></tr>";
 						}
@@ -720,7 +843,8 @@ function setup_survey_func() {
 
 					$blockChecked		= '';
 					$YNChecked			= '';
-					$textChecked		= '';
+					$shortTextChecked		= '';
+					$longTextChecked		= '';
 					$scaleChecked		= '';
 					$multimultiChecked	= '';
 					$mintisingleChecked	= '';
@@ -728,8 +852,11 @@ function setup_survey_func() {
 						case "Block":
 							$blockChecked	= 'checked';
 							break;
-						case "text":
-							$textChecked	= 'checked';
+						case "shortText":
+							$shortTextChecked	= 'checked';
+							break;
+						case "longText":
+							$longTextChecked	= 'checked';
 							break;
 						case "YN":
 							$YNChecked		= 'checked';
@@ -764,7 +891,8 @@ function setup_survey_func() {
 											class='formInputText' size='5' maxlength='5' value='$content_seq' name='inpSeq'><br /><br />
 											<b>Question Format:</b><br /><input type='radio' class='formInputButton' name='inpFormat' value='Block' $blockChecked> Block <i>Text displayed. No response given</i><br />
 																	<input type='radio' class='formInputButton' name='inpFormat' value='YN' $YNChecked>Yes or No </i>Can select either Yes or No for the response</i><br />
-																	<input type='radio' class='formInputButton' name='inpFormat' value='text' $textChecked>Free form response </i>An unlimited character textual response</i><br />
+																	<input type='radio' class='formInputButton' name='inpFormat' value='shortText' $shortTextChecked>Text response up to 100 characters</i><br />
+																	<input type='radio' class='formInputButton' name='inpFormat' value='longText' $longTextChecked>Free form response </i>An unlimited character textual response</i><br />
 																	<input type='radio' class='formInputButton' name='inpFormat' value='scale' $scaleChecked>Scale <i>Response selects one of the three to five options such as Poor,Fair,Good</i><br />
 											<br /><b>Question Text:</b> <textarea class='formInputText' rows='5' cols='50' name='inpText'>$content_text</textarea><br />";
 					if ($content_answer_format == 'scale') {
@@ -773,8 +901,8 @@ function setup_survey_func() {
 					}
 					if ($content_answer_format != 'Block') {
 						$content		.= "<br /><b>Is a response required?</b><br />
-											<input type='radio' class='formInputButton' name='inpRequired' value='Y' $requiredYesChecked >Yes<br />
-											<input type='radio' class='formInputButton' name='inpRequired' value='N' $requiredNoChecked >No<br />";
+											<input type='radio' class='formInputButton' name='inp_required' value='Y' $requiredYesChecked >Yes<br />
+											<input type='radio' class='formInputButton' name='inp_required' value='N' $requiredNoChecked >No<br />";
 					}
 					$content		.= "<hr style='border: 2px solid black;'></td></tr>
 										<br /><input class='formInputButton' name='submit' type='submit' name='submit' value='Update' />
