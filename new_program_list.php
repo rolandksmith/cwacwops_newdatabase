@@ -321,6 +321,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-automatic-student-backfill-v1/' target='_blank'>Automatic Student Backfill V1</a>
 								<li><a href='$siteURL/bad-actors/' target='_blank'>Bad Actors</a>
 								<li><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a>
+								<li><a href='$siteURL/cwa-cross-check-student-assignments/' target='_blank'>Cross Check Student Assignments</a>
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-backups-cron/' target='_blank'>Daily Backups Cron</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
@@ -338,6 +339,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-chronological-action-log/' target='_blank'>Display Chronological Action Log</a>
 								<li><a href='$siteURL/cwa-display-current-and-future-students-and-errors/' target='_blank'>Display Current and Future Students and Errors</a>
 								<li><a href='$siteURL/cwa-display-cw-assessment-for-a-callsign/' target='_blank'>Display CW Assessment for a Callsign</a>
+								<li><a href='$siteURL/cwa-display-debug-reports/' target='_blank'>Display Debug Reports</a>
 								<li><a href='$siteURL/cwa-display-evaluations-for-an-advisor/' target='_blank'>Display Evaluations for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-initialization-array/' target='_blank'>Display Initialization Array</a>
 								<li><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
@@ -413,9 +415,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-verify-temp-data/' target='_blank'>Verify Temp Data</a>
 								<li><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View a Student Assessment</a>
 								<li><a href='$siteURL/program-list/' target='_blank'>Program List</a>
-								<li><a href='$siteURL/rksmith-create-student-table/' target='_blank'>RKSMITH - Create Student Table</a>
-								<li><a href='$siteURL/rkstest-create-advisor-and-class-tables/' target='_blank'>RKSTEST - Create Advisor and Class Tables</a>
-								<li><a href='$siteURL/rkstest-fill-profile-fields/' target='_blank'>RKSTESt - Fill Profile Fields</a>
 								<li><a href='$siteURL/rkstest-function-test/' target='_blank'>RKSTEST Function Test</a>
 								<li><a href='$siteURL/rkstest-run-arbitrary-php-code/' target='_blank'>RKSTEST Run Arbitrary PHP Code</a>
 								<li><a href='$siteURL/utility-calculate-utc/' target='_blank'>UTILITY: Calculate UTC</a>
@@ -559,19 +558,24 @@ function program_list_func() {
 								<h4>Roland Programs</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
+								<li><a href='$siteURL/cwa-cross-check-student-assignments/' target='_blank'>Cross Check Student Assignments</a>
+								<li><a href='$siteURL/cwa-display-debug-reports/' target='_blank'>Display Debug Reports</a>
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
 								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
 								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
 								<li><a href='$siteURL/cwa-update-advisor-service/' target='_blank'>Update Advisor Service</a>
-								<li><a href='$siteURL/rksmith-create-student-table/' target='_blank'>RKSMITH - Create Student Table</a>
-								<li><a href='$siteURL/rkstest-create-advisor-and-class-tables/' target='_blank'>RKSTEST - Create Advisor and Class Tables</a>
-								<li><a href='$siteURL/rkstest-fill-profile-fields/' target='_blank'>RKSTESt - Fill Profile Fields</a>
 								<li><a href='$siteURL/rkstest-function-test/' target='_blank'>RKSTEST Function Test</a>
 								<li><a href='$siteURL/rkstest-run-arbitrary-php-code/' target='_blank'>RKSTEST Run Arbitrary PHP Code</a><br /><br />
 								<li><a href='$siteURL/cwa-manage-directory/' target='_blank'>Manage Directory</a>
+								</ul>
+								
+								<h4>Survey Questionnaires (UNDER DEVELOPMENT)</h4>
 								<ul>
-				
-				
+								<li><a href='$siteURL/cwa-advisor-request-student-survey/' target='_blank'>Advisor Request Student Survey</a>
+								<li><a href='$siteURL/cwa-setup-survey/' target='_blank'>Setup Survey</a>
+								<li><a href='$siteURL/cwa-display-survey/' target='_blank'>Display Survey</a>
+								<li><a href='$siteURL/cwa-display-survey-results/' target='_blank'>Display Survey Results</a>
+								</ul>
 				
 					
 								<td style='vertical-align:top;'>
