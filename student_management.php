@@ -2204,12 +2204,12 @@ function getTheReason($strReasonCode) {
 												</form></p>";
 							} else {
 								$content	.= "<h3>$jobname</h3>
-												<p>The requested advisor $input_advisor_callsign does not have a class at student $inp_student_callsign 
+												<p>The requested advisor $inp_advisor_callsign does not have a class at student $inp_student_callsign 
 												$student_level level. No action taken.</p>";
 							}
 						} else {
 							$content	.= "<h3>$jobname</h3>
-											<p>The requested advisor $input_advisor_callsign does not have a class at student $inp_student_callsign 
+											<p>The requested advisor $inp_advisor_callsign does not have a class at student $inp_student_callsign 
 											$student_level level. No action taken.</p>";
 						}
 					}
@@ -3341,20 +3341,21 @@ function getTheReason($strReasonCode) {
 																		$student_state, $student_country</th></tr>
 																<tr><td>&nbsp;</td>
 																	<td><b>Local Time</b></td>
-																	<td><b>UTC Time</b></td></tr>
-																<tr><td>First Choice</td>
-																	<td>$student_first_class_choice</td>
-																	<td>$student_first_class_choice_utc<br />
+																	<td><b>UTC Time</b></td>
+																	<td></td></tr>
+																<tr><td style='vertical-align:top;'>First Choice</td>
+																	<td style='vertical-align:top;'>$student_first_class_choice</td>
+																	<td style='vertical-align:top;'>$student_first_class_choice_utc<br />
 																		Search GE $searchFirstBegin LT $searchFirstEnd</td>
 																	<td></td></tr>
-																<tr><td>Second Choice</td>
-																	<td>$student_second_class_choice</td>
-																	<td>$student_second_class_choice_utc<br />
+																<tr><td style='vertical-align:top;'>Second Choice</td>
+																	<td style='vertical-align:top;'>$student_second_class_choice</td>
+																	<td style='vertical-align:top;'>$student_second_class_choice_utc<br />
 																		Search GE $searchSecondBegin LT $searchSecondEnd</td>
 																	<td></td></tr>
-																<tr><td>Third Choice</td>
-																	<td>$student_third_class_choice</td>
-																	<td>$student_third_class_choice_utc<br />
+																<tr><td style='vertical-align:top;'>Third Choice</td>
+																	<td style='vertical-align:top;'>$student_third_class_choice</td>
+																	<td style='vertical-align:top;'>$student_third_class_choice_utc<br />
 																		Search GE $searchThirdBegin LT $searchThirdEnd</td>
 																	<td></td></tr>
 																<tr><td colspan='4'>Search Using Student Choices</td></tr>
@@ -4516,10 +4517,12 @@ function getTheReason($strReasonCode) {
 								<input type='hidden' name='strpass' value='2'>
 								<input type='hidden' name='inp_mode' value='$inp_mode'>
 								<input type='hidden' name='inp_semester' value='$student_semester'>
-								<input type='hidden' name='request_info' value='$student_assigned_advisor'>
+								<input type='hidden' name='request_info' value='$inp_advisor_callsign'>
 								<input type='hidden' name='request_type' value= 'Full'>
 								<input type='submit' class='formInputButton' value='Push'></form></p><br /><br />";
 							}								
+						} else {
+							$content	.= "<p>No advisorClass record found for $inp_advisor_callsign class $inp_advisorClass</p>";
 						}
 					} else {
 						if ($doDebug) {

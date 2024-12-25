@@ -41,6 +41,8 @@ function display_replacement_requests_func() {
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-display-replacement-requests/";
 	$jobname					= "Display Replacement Requests V$versionNumber";
+	$inp_mode					= "Production";
+	$inp_verbose				= "N";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -69,6 +71,10 @@ function display_replacement_requests_func() {
 				if ($inp_mode == 'TESTMODE') {
 					$testMode = TRUE;
 				}
+			}
+			if ($str_key 		== "inp_id") {
+				$inp_id	 = $str_value;
+				$inp_id	 = filter_var($inp_id,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -192,7 +198,9 @@ function display_replacement_requests_func() {
 									<th>Level</th>
 									<th>Replaced Student</th>
 									<th>Date Requested</th>
-									<th>Date Fulfilled</th></tr>";
+									<th>Date Fulfilled</th>
+									<th>Find Class</th>
+									<th>Close</th></tr>";
 									
 		// get the replacement requests
 		$sql		= "select * from $replacementRequestsTableName 
@@ -229,13 +237,31 @@ function display_replacement_requests_func() {
 					$replacement_date_updated	= $replacement_requestsRow->date_updated;
 					
 					$dateCreated				= substr($replacement_date_created,0,10);
-					$dateFufilled				= substr($replacement_date_resolved,0,10);
-					$content 					.= "<tr><td>$replacement_call_sign</td>
+					$dateFulfilled				= substr($replacement_date_resolved,0,10);
+					$advisorLink				= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$replacement_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_call_sign</a>";
+					$studentLink				= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$replacement_student&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_student</a>";
+					$findLink					= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$replacement_student&inp_mode=$inp_mode' target='_blank'>Find Class</a>";
+					$closeLink					= "<a href='$theURL?strpass=4&inp_id=$replacement_id' target='_blank'>Close</a>";
+					$classLink					= "<a href='$siteURL/cwa-student-management/?strpass=81&inp_advisor_callsign=$replacement_call_sign&inp_advisorClass=$replacement_class&inp_search=standard&inp_mode=$inp_mode' target='_blank'>(Find)</a>";
+					if ($dateFulfilled == '') {
+						$myStr					= $findLink;
+						$myStr1					= $closeLink;
+						$myStr3					= $classLink;
+					} else {
+						$myStr					= "";
+						$myStr1					= "";
+						$myStr3					= "";
+					}
+						
+					
+					$content 					.= "<tr><td>$advisorLink $myStr3</td>
 														<td>$replacement_class</td>
 														<td>$replacement_level</td>
-														<td>$replacement_student</td>
+														<td>$studentLink</td>
 														<td>$dateCreated</td>
-														<td>$dateFufilled</td></tr>";
+														<td>$dateFulfilled</td>
+														<td>$myStr</td>
+														<td>$myStr1</td></tr>";
 				}
 				$content						.= "</table>";
 			} else {
@@ -243,6 +269,30 @@ function display_replacement_requests_func() {
 			}
 		}
 	
+	
+	} elseif ("4" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass4 with inp_id or $inp_id<br />";
+		}
+		
+		$content	.= "<h3>$jobname</h3>
+						<h4>Closing $inp_id</h4>";
+		$nowDate	= date('Y-m-d H:i:s');
+		$updateResult	= $wpdb->update($replacementRequestsTableName,
+										array('date_resolved'=>$nowDate), 
+										array('record_id'=>$inp_id),
+										array('%s'), 
+										array('%d'));
+		if ($updateResult === FALSE) {
+			handleWPDBError($jobname,$doDebug,"pass 3 attempting to close $inp_id");
+			$content	.= "<p>Closing $inp_id failed</p>";
+		} else {
+			if ($doDebug) {
+				$lastQuery	= $wpdb->last_query;
+				echo "successfully ran $lastQuery<br />resulting in $updateResult rows updated<br />";
+			}
+			$content	.= "<p>Replacement request successfully closed</p>";
+		}
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";

@@ -1104,11 +1104,13 @@ function getTheReason($strReasonCode) {
 						$advisorClass_first_name 				= $advisorClassRow->user_first_name;
 						$advisorClass_last_name 				= $advisorClassRow->user_last_name;
 						$advisorClass_email 					= $advisorClassRow->user_email;
+						$advisorClass_ph_code 					= $advisorClassRow->user_ph_code;
 						$advisorClass_phone 					= $advisorClassRow->user_phone;
 						$advisorClass_city 						= $advisorClassRow->user_city;
 						$advisorClass_state 					= $advisorClassRow->user_state;
 						$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
 						$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+						$advisorClass_country	 				= $advisorClassRow->user_country;
 						$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
 						$advisorClass_telegram 					= $advisorClassRow->user_telegram;
 						$advisorClass_signal 					= $advisorClassRow->user_signal;
@@ -1172,31 +1174,6 @@ function getTheReason($strReasonCode) {
 						$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
 						$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 	
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$advisorClass_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$advisorClass_country		= "UNKNOWN";
-							$advisorClass_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$advisorClass_country		= $countryRow->country_name;
-									$advisorClass_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$advisorClass_country			= "Unknown";
-								$advisorClass_ph_code			= "";
-							}
-						}
-
 						// see if we can use this advisor
 						$doProceed				= TRUE;
 						if (in_array($advisorClass_call_sign,$badAdvisors)) {
@@ -1209,9 +1186,8 @@ function getTheReason($strReasonCode) {
 							if ($doDebug) {
 								echo "processing advisorClass $advisorClass_call_sign; class $advisorClass_sequence<br />";
 							}
-							$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-information/?request_type=callsign&request_info=$advisorClass_call_sign&inp_table=advisor&strpass=2' target='_blank'>($advisorClass_call_sign)</a>";
-					
-							$advisorArray[]		= "$advisorClass_level|$advisorClass_call_sign|$advisor_last_name, $advisor_first_name|$theLink|$advisorClass_sequence|$advisorClass_timezone_offset|$advisorClass_class_size|$advisorClass_class_schedule_days|$advisorClass_class_schedule_times|$advisorClass_class_schedule_days_utc|$advisorClass_class_schedule_times_utc|$advisorClass_number_students";
+							$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>($advisorClass_call_sign)</a>";
+							$advisorArray[]		= "$advisorClass_level|$advisorClass_call_sign|$advisorClass_last_name, $advisorClass_first_name|$theLink|$advisorClass_sequence|$advisorClass_timezone_offset|$advisorClass_class_size|$advisorClass_class_schedule_days|$advisorClass_class_schedule_times|$advisorClass_class_schedule_days_utc|$advisorClass_class_schedule_times_utc|$advisorClass_number_students";
 						}
 					}
 					if ($doDebug) {
@@ -1294,7 +1270,7 @@ function getTheReason($strReasonCode) {
 					$slotsAvailable			= 0;
 				}
 				
-				$content	.= "<tr><td style='vertical-align:top;'>$theLink</td>
+				$content	.= "<tr><td style='vertical-align:top;'>$advisor_name $theLink</td>
 									<td style='vertical-align:top;'>$advisorClass_sequence</td>
 									<td style='vertical-align:top;'>$advisorClass_level</td> 
 									<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
@@ -1367,8 +1343,8 @@ function getTheReason($strReasonCode) {
 					$advisorCount++;
 					$slotsAvailable		= $advisorClass_class_size - $advisorClass_number_students;
 					$totalAvailable		= $totalAvailable + $slotsAvailable;
-//					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$thisMode' target='_blank'>($advisor_call_sign)</a>";
-					$content	.= "<tr><td style='vertical-align:top;'>$advisor_call_sign</td>
+					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$thisMode' target='_blank'>($advisor_call_sign)</a>";
+					$content	.= "<tr><td style='vertical-align:top;'>$advisor_name $theLink</td>
 										<td style='vertical-align:top;'>$advisorClass_sequence</td>
 										<td style='vertical-align:top;'>$advisorClass_level</td> 
 										<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>

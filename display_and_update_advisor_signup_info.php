@@ -1110,118 +1110,122 @@ function display_and_update_advisor_info_func() {
 														<input type='hidden' name='inp_semester' value='$advisorClass_semester'>
 														<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 														<input type='hidden' name='inp_mode' value='$inp_mode'>
-														<h4><b>$advisorClass_call_sign $advisorClass_semester Class $advisorClass_sequence</b> Table $advisorClassTableName</h4>
+														<h4><b>$advisorClass_call_sign $advisorClass_semester $advisorClass_level Class $advisorClass_sequence</b> Table $advisorClassTableName</h4>
 														<table style='border-collapse:collapse;'>
 														<tr><td colspan='4'><b><u>Advisor Class Fields</u></b></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />id</b><br />$advisorClass_ID</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />call_sign</b><br />$advisorClass_call_sign</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />sequence</b><br />$advisorClass_sequence</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />semester</b><br />$advisorClass_semester</td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />timezone_offset</b><br />$advisorClass_timezone_offset</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />level</b><br />$advisorClass_level</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_size</b><br />$advisorClass_class_size</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_schedule_days</b><br />$advisorClass_class_schedule_days</td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />class_schedule_times</b><br />$advisorClass_class_schedule_times</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_schedule_days_utc</b><br />$advisorClass_class_schedule_days_utc</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_schedule_times_utc</b><br />$advisorClass_class_schedule_times_utc</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_incomplete</b><br />$advisorClass_class_incomplete</td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />date_created</b><br />$advisorClass_date_created</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />date_updated</b><br />$advisorClass_date_updated</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student01</b><br />
+														<tr><td style='vertical-align:top;'><b>id</b><br />$advisorClass_ID</td>
+															<td style='vertical-align:top;'><b>call_sign</b><br />$advisorClass_call_sign</td>
+															<td style='vertical-align:top;'><b>sequence</b><br />$advisorClass_sequence</td>
+															<td style='vertical-align:top;'><b>semester</b><br />$advisorClass_semester</td></tr>
+														<tr><td style='vertical-align:top;'><b>timezone_offset</b><br />$advisorClass_timezone_offset</td>
+															<td style='vertical-align:top;'><b>level</b><br />$advisorClass_level</td>
+															<td style='vertical-align:top;'><b>class_size</b><br />$advisorClass_class_size</td>
+															<td></td></tr>
+														<tr><td style='vertical-align:top;'><b>class_schedule_Local</b><br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days</td>
+															<td style='vertical-align:top;'><b>class_schedule_utc</b><br />$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc</td>
+															<td style='vertical-align:top;'><b>class_incomplete</b><br />$advisorClass_class_incomplete</td>
+															<td></td></tr>
+														<tr><td style='vertical-align:top;'><b>date_created</b><br />$advisorClass_date_created</td>
+															<td style='vertical-align:top;'><b>date_updated</b><br />$advisorClass_date_updated</td>
+															<td></td>
+															<td></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student01</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student01&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student01</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student02</b><br />
+															<td style='vertical-align:top;'><b>Student02</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student02&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student02</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student03</b><br />
+																	target='_blank'>$advisorClass_student02</a></td>
+															<td style='vertical-align:top;'><b>Student03</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student03&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student03</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student04</b><br />
+															<td style='vertical-align:top;'><b>Student04</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student04&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student04</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student05</b><br />
+																	target='_blank'>$advisorClass_student04</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student05</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student05&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student05</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student06</b><br />
+															<td style='vertical-align:top;'><b>Student06</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student06&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student06</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student07</b><br />
+																	target='_blank'>$advisorClass_student06</a></td>
+															<td style='vertical-align:top;'><b>Student07</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student07&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student07</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student08</b><br />
+															<td style='vertical-align:top;'><b>Student08</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student08&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student08</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student09</b><br />
+																	target='_blank'>$advisorClass_student08</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student09</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student09&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student09</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student10</b><br />
+															<td style='vertical-align:top;'><b>Student10</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student10&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student10</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student11</b><br />
+																	target='_blank'>$advisorClass_student10</a></td>
+															<td style='vertical-align:top;'><b>Student11</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student11&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student11</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student12</b><br />
+															<td style='vertical-align:top;'><b>Student12</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student12&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student12</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student13</b><br />
+																	target='_blank'>$advisorClass_student12</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student13</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student13&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student13</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student14</b><br />
+															<td style='vertical-align:top;'><b>Student14</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student14&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student14</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student15</b><br />
+																	target='_blank'>$advisorClass_student14</a></td>
+															<td style='vertical-align:top;'><b>Student15</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student15&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student15</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student16</b><br />
+															<td style='vertical-align:top;'><b>Student16</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student16&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student16</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student17</b><br />
+																	target='_blank'>$advisorClass_student16</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student17</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student17&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student17</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student18</b><br />
+															<td style='vertical-align:top;'><b>Student18</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student18&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student18</a></td></tr>
-															<tr><td style='vertical-align:top;'><b>Advisor Class<br />student19</b><br />
+																	target='_blank'>$advisorClass_student18</a></td>
+															<td style='vertical-align:top;'><b>Student19</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student19&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student19</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student20</b><br />
+															<td style='vertical-align:top;'><b>Student20</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student20&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student20</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student21</b><br />
+																	target='_blank'>$advisorClass_student20</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student21</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student21&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student21</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student22</b><br />
+															<td style='vertical-align:top;'><b>Student22</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student22&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student22</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student23</b><br />
+																	target='_blank'>$advisorClass_student22</a></td>
+															<td style='vertical-align:top;'><b>Student23</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student23&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student23</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student24</b><br />
+															<td style='vertical-align:top;'><b>Student24</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student24&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student24</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student25</b><br />
+																	target='_blank'>$advisorClass_student24</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student25</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student25&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student25</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student26</b><br />
+															<td style='vertical-align:top;'><b>Student26</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student26&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student26</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />student27</b><br />
+																	target='_blank'>$advisorClass_student26</a></td>
+															<td style='vertical-align:top;'><b>Student27</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student27&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student27</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student28</b><br />
+															<td style='vertical-align:top;'><b>Student28</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student28&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student28</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student29</b><br />
+																	target='_blank'>$advisorClass_student28</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student29</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student29&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student29</a></td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />student30</b><br />
+															<td style='vertical-align:top;'><b>Student30</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student30&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student30</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Advisor Class<br />number_students</b><br />$advisorClass_number_students</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_evaluation_complete</b><br />$advisorClass_class_evaluation_complete</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />class_comments</b><br />$advisorClass_class_comments</td>
-															<td style='vertical-align:top;'><b>Advisor Class<br />copycontrol</b><br />$advisorClass_copy_control</td></tr>
-														<tr><td style='vertical-align:top;' colspan='4'><b>Advisor Class<br />action_log</b><br />$advisorClass_action_log</td></tr>";
+																	target='_blank'>$advisorClass_student30</a></td>
+															<td></td>
+															<td></td></tr>
+														<tr><td style='vertical-align:top;'><b>number_students</b><br />$advisorClass_number_students</td>
+															<td style='vertical-align:top;'><b>class_evaluation_complete</b><br />$advisorClass_class_evaluation_complete</td>
+															<td style='vertical-align:top;'><b>class_comments</b><br />$advisorClass_class_comments</td>
+															<td style='vertical-align:top;'><b>copycontrol</b><br />$advisorClass_copy_control</td></tr>
+														<tr><td style='vertical-align:top;' colspan='4'><b>action_log</b><br />$advisorClass_action_log</td></tr>";
 	
 											if ($classCount == $numACRows) {			// show add a class
 												$content	.= "<tr><td><input type='submit' class='formInputButton' name='submitswitch' value='Update this Class' /></td>
@@ -1565,105 +1569,105 @@ function display_and_update_advisor_info_func() {
 									<table style='border-collapse:collapse;'>
 									<tr><th style='width:280px;'>Field</th>
 										<th>Value</th></tr>
-								   <tr><td>Advisorclass ID</td>
+								   <tr><td>ID</td>
 										<td>$advisorClass_ID</td></tr>
-									<tr><td>Advisorclass Call Sign</td>
+									<tr><td>Call Sign</td>
 										<td>$advisorClass_call_sign</td></tr>
-									<tr><td>Advisorclass Sequence</td>
+									<tr><td>Sequence</td>
 										<td>$advisorClass_sequence</td></tr>
-									<tr><td>Advisorclass Semester</td>
+									<tr><td>Semester</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_semester' size='15' maxlenth='15' value='$advisorClass_semester'></td></tr>
-									<tr><td>Advisorclass Timezone Offset</td>
+									<tr><td>Timezone Offset</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_timezone_offset' size='8' maxlenth='8' value='$advisorClass_timezone_offset'></td></tr>
-									<tr><td>Advisorclass Level</td>
+									<tr><td>Level</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_level' size='15' maxlenth='15' value='$advisorClass_level'></td></tr>
-									<tr><td>Advisorclass Class Size</td>
+									<tr><td>Class Size</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_size' size='5' maxlenth='5' value='$advisorClass_class_size'></td></tr>
-									<tr><td>Advisorclass Class Schedule Days</td>
+									<tr><td>Class Schedule Days</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days' size='20' maxlenth='20' value='$advisorClass_class_schedule_days'></td></tr>
-									<tr><td>Advisorclass Class Schedule Times</td>
+									<tr><td>Class Schedule Times</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times' size='5' maxlenth='5' value='$advisorClass_class_schedule_times'></td></tr>
-									<tr><td>Advisorclass Class Schedule Days Utc</td>
+									<tr><td>Class Schedule Days Utc</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days_utc' size='20' maxlenth='20' value='$advisorClass_class_schedule_days_utc'></td></tr>
-									<tr><td>Advisorclass Class Schedule Times Utc</td>
+									<tr><td>Class Schedule Times Utc</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times_utc' size='5' maxlenth='5' value='$advisorClass_class_schedule_times_utc'></td></tr>
-									<tr><td>Advisorclass Class Incomplete</td>
+									<tr><td>Class Incomplete</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_incomplete' size='5' maxlenth='5' value='$advisorClass_class_incomplete'></td></tr>
-									<tr><td>Advisorclass Date Created</td>
+									<tr><td>Date Created</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_date_created' size='20' maxlenth='20' value='$advisorClass_date_created'></td></tr>
-									<tr><td>Advisorclass Date Updated</td>
+									<tr><td>Date Updated</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_date_updated' size='20' maxlenth='20' value='$advisorClass_date_updated'></td></tr>
 
 									<tr><td colspan='2'><table>
-									<tr><td>Advisorclass Student01<br />
+									<tr><td>Student01<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student01' size='20' maxlenth='20' value='$advisorClass_student01'></td>
-										<td>Advisorclass Student02<br />
+										<td>Student02<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student02' size='20' maxlenth='20' value='$advisorClass_student02'></td>
-										<td>Advisorclass Student03<br />
+										<td>Student03<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student03' size='20' maxlenth='20' value='$advisorClass_student03'></td>
-										<td>Advisorclass Student04<br />
+										<td>Student04<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student04' size='20' maxlenth='20' value='$advisorClass_student04'></td>
-										<td>Advisorclass Student05<br />
+										<td>Student05<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student05' size='20' maxlenth='20' value='$advisorClass_student05'></td></tr>
-									<tr><td>Advisorclass Student06<br />
+									<tr><td>Student06<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student06' size='20' maxlenth='20' value='$advisorClass_student06'></td>
-										<td>Advisorclass Student07<br />
+										<td>Student07<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student07' size='20' maxlenth='20' value='$advisorClass_student07'></td>
-										<td>Advisorclass Student08<br />
+										<td>Student08<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student08' size='20' maxlenth='20' value='$advisorClass_student08'></td>
-										<td>Advisorclass Student09<br />
+										<td>Student09<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student09' size='20' maxlenth='20' value='$advisorClass_student09'></td>
-										<td>Advisorclass Student10<br />
+										<td>Student10<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student10' size='20' maxlenth='20' value='$advisorClass_student10'></td></tr>
-									<tr><td>Advisorclass Student11<br />
+									<tr><td>Student11<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student11' size='20' maxlenth='20' value='$advisorClass_student11'></td>
-										<td>Advisorclass Student12<br />
+										<td>Student12<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student12' size='20' maxlenth='20' value='$advisorClass_student12'></td>
-										<td>Advisorclass Student13<br />
+										<td>Student13<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student13' size='20' maxlenth='20' value='$advisorClass_student13'></td>
-										<td>Advisorclass Student14<br />
+										<td>Student14<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student14' size='20' maxlenth='20' value='$advisorClass_student14'></td>
-										<td>Advisorclass Student15<br /
+										<td>Student15<br /
 											<input type='text' class='formInputText' name='inp_advisorclass_student15' size='20' maxlenth='20' value='$advisorClass_student15'></td></tr>
-									<tr><td>Advisorclass Student16<br />
+									<tr><td>Student16<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student16' size='20' maxlenth='20' value='$advisorClass_student16'></td>
-										<td>Advisorclass Student17<br />
+										<td>Student17<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student17' size='20' maxlenth='20' value='$advisorClass_student17'></td>
-										<td>Advisorclass Student18<br />
+										<td>Student18<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student18' size='20' maxlenth='20' value='$advisorClass_student18'></td>
-										<td>Advisorclass Student19<br />
+										<td>Student19<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student19' size='20' maxlenth='20' value='$advisorClass_student19'></td>
-										<td>Advisorclass Student20<br />
+										<td>Student20<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student20' size='20' maxlenth='20' value='$advisorClass_student20'></td></tr>
-									<tr><td>Advisorclass Student21<br />
+									<tr><td>Student21<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student21' size='20' maxlenth='20' value='$advisorClass_student21'></td>
-										<td>Advisorclass Student22<br />
+										<td>Student22<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student22' size='20' maxlenth='20' value='$advisorClass_student22'></td>
-										<td>Advisorclass Student23<br />
+										<td>Student23<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student23' size='20' maxlenth='20' value='$advisorClass_student23'></td>
-										<td>Advisorclass Student24<br />
+										<td>Student24<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student24' size='20' maxlenth='20' value='$advisorClass_student24'></td>
-										<td>Advisorclass Student25<br />
+										<td>Student25<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student25' size='20' maxlenth='20' value='$advisorClass_student25'></td></tr>
-									<tr><td>Advisorclass Student26<br />
+									<tr><td>Student26<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student26' size='20' maxlenth='20' value='$advisorClass_student26'></td>
-										<td>Advisorclass Student27<br />
+										<td>Student27<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student27' size='20' maxlenth='20' value='$advisorClass_student27'></td>
-										<td>Advisorclass Student28<br />
+										<td>Student28<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student28' size='20' maxlenth='20' value='$advisorClass_student28'></td>
-										<td>Advisorclass Student29<br />
+										<td>Student29<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student29' size='20' maxlenth='20' value='$advisorClass_student29'></td>
-										<td>Advisorclass Student30<br />
+										<td>Student30<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student30' size='20' maxlenth='20' value='$advisorClass_student30'></td></tr></table>
-									<tr><td>Advisorclass Number Students</td>
+									<tr><td>Number Students</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_number_students' size='5' maxlenth='5' value='$advisorClass_number_students'></td></tr>
-									<tr><td>Advisorclass Class Evaluation Complete</td>
+									<tr><td>Class Evaluation Complete</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_evaluation_complete' size='5' maxlenth='5' value='$advisorClass_class_evaluation_complete'></td></tr>
-									<tr><td>Advisorclass Class Comments</td>
+									<tr><td>Class Comments</td>
 										<td><textarea class='formInputText' name='inp_advisorclass_class_comments' rows='5' cols= '50'>$advisorClass_class_comments</textarea></td></tr>
-									<tr><td>Advisorclass Copycontrol</td>
+									<tr><td>Copycontrol</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_copy_control' size='15' maxlenth='15' value='$advisorClass_copy_control'></td></tr>
-									<tr><td>Advisorclass Action Log</td>
+									<tr><td>Action Log</td>
 										<td><textarea class='formInputText' name='inp_advisorclass_action_log' rows='5' cols= '50'>$advisorClass_action_log</textarea></td></tr>
 									<tr><td>&nbsp;</td>
 										<td><input class='formInputButton' type='submit' value='Submit' /></td></tr>
@@ -2073,7 +2077,7 @@ function display_and_update_advisor_info_func() {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_number_students'] = $myInt;
 						$updateFormat[] = '%d';
-						$actionContent .= "updating current number_students of $advisorClass_number_students to $inp_advisorclass_number_students.<br />";
+						$actionContent .= "updating current number_students to $inp_number_students. <br />";
 					}
 					
 					if ($doTheUpdate) {
