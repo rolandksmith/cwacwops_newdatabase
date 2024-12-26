@@ -1022,7 +1022,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_parent							= $studentRow->student_parent;
-					$student_age  							= $studentRow->student_parent;
+					$student_age  							= $studentRow->student_age;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
