@@ -413,7 +413,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-user-master-report-generator/' target='_blank'>User Master Report Generator</a>
 								<li><a href='$siteURL/cwa-verify-advisor-class/' target='_blank'>Verify Advisor Class</a>
 								<li><a href='$siteURL/cwa-verify-temp-data/' target='_blank'>Verify Temp Data</a>
-								<li><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View a Student Assessment</a>
+								<li><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View Your Student Assessment</a>
 								<li><a href='$siteURL/program-list/' target='_blank'>Program List</a>
 								<li><a href='$siteURL/rkstest-function-test/' target='_blank'>RKSTEST Function Test</a>
 								<li><a href='$siteURL/rkstest-run-arbitrary-php-code/' target='_blank'>RKSTEST Run Arbitrary PHP Code</a>
@@ -475,7 +475,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a>
 								<li><a href='$siteURL/cwa-show-advisor-class-assignments/' target='_blank'>Show Advisor Class Assignments</a>
 								<li><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a>
-								<li><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View a Student Assessment</a><br /><br />
+								<li><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View Your Student Assessment</a><br /><br />
 								</ul>
 								
 								<h4>Advisor Reports</h4>
@@ -775,7 +775,7 @@ function program_list_func() {
 							<p><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a><br />
 								This program displays the current class makeup and allows the advisor to specify student's status,
 								request replacement students, check Morse Code Proficency Assessments.</p>
-							<p><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View a Student's Morse Code Assessments</a><br />
+							<p><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View Your Student's Morse Code Assessments</a><br />
 								This program allows the advisor to view one of his student's Morse Code Proficiency Assessments.</p>
 							<p><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
 								Displays recent reminders starting with the most recent reminder. Displays 25 at a time</p>
