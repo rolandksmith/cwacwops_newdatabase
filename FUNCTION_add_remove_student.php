@@ -539,52 +539,59 @@ function add_remove_student($inp_data = array()) {
 												$updateParams = array();
 												$updateFormat = array();
 												$numberStudents = 0;
+												$foundLocation = '';
+												$foundTheCulprit = FALSE;
+												$lastEntry = '';
 												for ($snum=1;$snum<31;$snum++) {
 													if ($snum < 10) {
 														$strSnum = str_pad($snum,2,'0',STR_PAD_LEFT);
 													} else {
 														$strSnum = strval($snum);
 													}
-													$advisorClass_studentCallSign = ${'advisorClass_student' . $strSnum};
-													if ($inp_student == $advisorClass_studentCallSign) {
-														if ($doDebug) {
-															echo "found $inp_student at student$strSnum<br />";
-														}
-														$doneMoving = FALSE;
-														$numberStudents = $snum - 1;
-														$ii = $snum;
-														$jj = $snum + 1;
-														while(!$doneMoving) {
-															if ($jj < 10) {
-																$strJJ = str_pad($jj,2,'0',STR_PAD_LEFT);
-															} else {
-																$strJJ = strval($jj);
-															}
-															if ($ii < 10) {
-																$strII = str_pad($ii,2,'0',STR_PAD_LEFT);
-															} else {
-																$strII = strval($ii);
-															}
-															if (${'advisorClass_student' . $strJJ} != '') {
-																${'advisorClass_student' . $strII} = ${'advisorClass_student' . $strJJ};
-																${'advisorClass_student' . $strJJ} = '';
-																$updateParams["advisorclass_student$strII"] = ${'advisorClass_student' . $strII};
-																$updateFormat[]					= '%s';
-																$numberStudents++;
-																$ii++;
-																$jj++;
-															} else {
-																$doneMoving = TRUE;
-																${'advisorClass_student' . $strII} = '';
-																$updateParams["advisorclass_student$strII"] = ${'advisorClass_student' . $strII};
-																$updateFormat[]					= '%s';
-															}
+													$foundCallSign = ${'advisorClass_student' . $strSnum};
+													if ($foundCallSign != '') {
+														$lastEntry = $strSnum;
+														$numberStudents = $snum;
+														if ($inp_student == $foundCallSign) {
+															$foundLocation = $strSnum;
+															$foundTheCulprit = TRUE;
 														}
 													}
 												}
+												if($foundTheCulprit) {
+													if ($doDebug) {
+														echo "lastEntry: $lastEntry<br />foundLocation: $foundLocation<br />";
+													}
+													if ($foundLocation == $lastEntry) {
+														$updateParams["advisorClass_student$lastEntry"]		= '';
+														$updateFormat[]												= '%s';
+														if ($doDebug) {
+															echo "found $inp_student at lastEntry $lastEntry and deleted<br />";
+														}
+													} else {
+														$updateParams["advisorClass_student$foundLocation"]	= ${'advisorClass_student' . $lastEntry};
+														$updateFormat[]												= '%s';
+														$updateParams["advisorClass_student$lastEntry"]		= '';
+														$updateFormat[]												= '%s';
+														if ($doDebug) {
+															echo "moved last entry $lastEntry to found location $foundLocation, wiped out last entry $lastEntry<br />";
+														}
+													}
+													$numberStudents--;
+													if ($doDebug) {
+														echo "numberStudents: $numberStudents<br />";
+													}
+													$updateParams['advisorclass_number_students']					= $numberStudents;
+													$updateFormat[]													= '%d';
+												} else {
+													if ($doDebug) {
+														echo "$inp_student not found\n";
+													}
+													$gotError							= TRUE;
+													$errors								.= "$inp_student not found in advisorClass to remove<br />";
+												}
+
 												if (!$gotError) {
-													$updateParams['advisorclass_number_students'] 	= $numberStudents;
-													$updateFormat[]						= '%d';
 													$advisorClass_action_log 			= "$advisorClass_action_log / $actionDate $userName $inp_student removed ";
 													$updateParams['advisorclass_action_log'] 		= $advisorClass_action_log;
 													$updateFormat[] 					= '%s';
