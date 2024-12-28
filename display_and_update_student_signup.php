@@ -439,7 +439,7 @@ function display_and_update_student_signup_func() {
 			echo "<br />at pass2 with request_type: $request_type and request_info: $request_info<br />";
 		}
 
-echo "studentTableName: $studentTableName<br />";
+// echo "studentTableName: $studentTableName<br />";
 	
 		if ($request_type == "callsign") {
 			$request_info = strtoupper($request_info);
@@ -450,7 +450,8 @@ echo "studentTableName: $studentTableName<br />";
 					Request Info: $request_info <br />";
 		}
 
-		$content				.= "<h3>$jobname</h3>";
+		$content				.= "<h3>$jobname</h3>
+									<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>";
 
 		if ($inp_depth == 'one') {
 			$content			.= "<p><b>Showing Most Current Data Only</b></p>";
@@ -874,7 +875,14 @@ echo "studentTableName: $studentTableName<br />";
 						
 						
 						$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
-	
+						$preAssignedLink	= '';
+						if ($student_pre_assigned_advisor != '') {
+							$preAssignedLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_pre_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_pre_assigned_advisor</a>";
+						}
+						$assignedLink		= '';
+						if ($student_assigned_advisor != '') {
+							$assignedLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
+						}
 						$content			.= "<h4>Student Signup Created $student_date_created</h4>
 												<form method='post' action='$theURL' 
 												name='updateStudent_form' ENCTYPE='multipart/form-data'>
@@ -930,7 +938,7 @@ echo "studentTableName: $studentTableName<br />";
 												<tr><td style='vertical-align:top;'>Student Action Log<td>
 													<td>$student_action_log</td></tr>
 												<tr><td>Student Pre Assigned Advisor<td>
-													<td>$student_pre_assigned_advisor</td></tr>
+													<td>$preAssignedLink</td></tr>
 												<tr><td>Student Selected Date<td>
 													<td>$student_selected_date</td></tr>
 												<tr><td>Student No Catalog<td>
@@ -938,7 +946,7 @@ echo "studentTableName: $studentTableName<br />";
 												<tr><td>Student Hold Override<td>
 													<td>$student_hold_override</td></tr>
 												<tr><td>Student Assigned Advisor<td>
-													<td>$student_assigned_advisor</td></tr>
+													<td>$assignedLink</td></tr>
 												<tr><td>Student Advisor Select Date<td>
 													<td>$student_advisor_select_date</td></tr>
 												<tr><td>Student Advisor Class Timezone<td>
@@ -1065,6 +1073,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_date_updated			  		= $studentRow->student_date_updated;
 					
 					$content				.= "<h3>Update $inp_callsign Signup Record</h3>
+												<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 												<form method='post' action='$theURL' 
 												name='deletion_form' ENCTYPE='multipart/form-data'>
 												<input type='hidden' name='strpass' value='5'>
@@ -1298,6 +1307,7 @@ echo "studentTableName: $studentTableName<br />";
 					$student_date_updated			  		= $studentRow->student_date_updated;
 
 					$content		.= "<h3>Display and Update $student_call_sign Signup Information</h3>
+										<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 										<h4>Results of the Update</h4>";
 
 					$updateParams	= array();
@@ -1792,6 +1802,14 @@ echo "studentTableName: $studentTableName<br />";
 											$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 											
 											$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
+											$preAssignedLink	= '';
+											if ($student_pre_assigned_advisor != '') {
+												$preAssignedLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_pre_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_pre_assigned_advisor</a>";
+											}
+											$assignedLink		= '';
+											if ($student_assigned_advisor != '') {
+												$assignedLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
+											}
 						
 											$content			.= "<h4>Student Signup Created $student_date_created</h4>
 																	<table style='width:900px;'>
@@ -1838,7 +1856,7 @@ echo "studentTableName: $studentTableName<br />";
 																	<tr><td style='vertical-align:top;'>Student Action Log<td>
 																		<td>$student_action_log</td></tr>
 																	<tr><td>Student Pre Assigned Advisor<td>
-																		<td>$student_pre_assigned_advisor</td></tr>
+																		<td>$preAssignedLink</td></tr>
 																	<tr><td>Student Selected Date<td>
 																		<td>$student_selected_date</td></tr>
 																	<tr><td>Student No Catalog<td>
@@ -1846,7 +1864,7 @@ echo "studentTableName: $studentTableName<br />";
 																	<tr><td>Student Hold Override<td>
 																		<td>$student_hold_override</td></tr>
 																	<tr><td>Student Assigned Advisor<td>
-																		<td>$student_assigned_advisor</td></tr>
+																		<td>$assignedLink</td></tr>
 																	<tr><td>Student Advisor Select Date<td>
 																		<td>$student_advisor_select_date</td></tr>
 																	<tr><td>Student Advisor Class Timezone<td>
@@ -1892,7 +1910,7 @@ echo "studentTableName: $studentTableName<br />";
 																	</table>
 																	<p>Click <a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID'>HERE</a>
 																	to modify this signup record</p>
-																	<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student";
+																	<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>";
 										}
 									} else {
 										$content		.= "<p>No signup record found for $inp_callsign</p>";
@@ -1980,6 +1998,7 @@ echo "studentTableName: $studentTableName<br />";
 
 		
 					$content		.= "<h3>$jobname</h3>
+										<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 										<h4>Deleting record ID $inp_student_id</h4>";
 					$updateParams	= array();
 					$updateFormat	= array();
