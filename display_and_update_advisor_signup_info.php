@@ -1129,6 +1129,7 @@ function display_and_update_advisor_info_func() {
 															<td style='vertical-align:top;'><b>date_updated</b><br />$advisorClass_date_updated</td>
 															<td></td>
 															<td></td></tr>
+														<tr><td colspan='4'><table>
 														<tr><td style='vertical-align:top;'><b>Student01</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student01&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student01</a></td>
@@ -1140,11 +1141,11 @@ function display_and_update_advisor_info_func() {
 																	target='_blank'>$advisorClass_student03</a></td>
 															<td style='vertical-align:top;'><b>Student04</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student04&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student04</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student05</b><br />
+																	target='_blank'>$advisorClass_student04</a></td>
+														    <td style='vertical-align:top;'><b>Student05</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student05&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student05</a></td>
-															<td style='vertical-align:top;'><b>Student06</b><br />
+																	target='_blank'>$advisorClass_student05</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student06</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student06&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student06</a></td>
 															<td style='vertical-align:top;'><b>Student07</b><br />
@@ -1152,20 +1153,20 @@ function display_and_update_advisor_info_func() {
 																	target='_blank'>$advisorClass_student07</a></td>
 															<td style='vertical-align:top;'><b>Student08</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student08&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student08</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student09</b><br />
+																	target='_blank'>$advisorClass_student08</a></td>
+														    <td style='vertical-align:top;'><b>Student09</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student09&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student09</a></td>
 															<td style='vertical-align:top;'><b>Student10</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student10&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student10</a></td>
-															<td style='vertical-align:top;'><b>Student11</b><br />
+																	target='_blank'>$advisorClass_student10</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student11</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student11&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student11</a></td>
 															<td style='vertical-align:top;'><b>Student12</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student12&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student12</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student13</b><br />
+																	target='_blank'>$advisorClass_student12</a></td>
+														    <td style='vertical-align:top;'><b>Student13</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student13&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student13</a></td>
 															<td style='vertical-align:top;'><b>Student14</b><br />
@@ -1173,11 +1174,11 @@ function display_and_update_advisor_info_func() {
 																	target='_blank'>$advisorClass_student14</a></td>
 															<td style='vertical-align:top;'><b>Student15</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student15&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student15</a></td>
-															<td style='vertical-align:top;'><b>Student16</b><br />
+																	target='_blank'>$advisorClass_student15</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student16</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student16&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student16</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student17</b><br />
+																	target='_blank'>$advisorClass_student16</a></td>
+														    <td style='vertical-align:top;'><b>Student17</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student17&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student17</a></td>
 															<td style='vertical-align:top;'><b>Student18</b><br />
@@ -1200,11 +1201,11 @@ function display_and_update_advisor_info_func() {
 																	target='_blank'>$advisorClass_student23</a></td>
 															<td style='vertical-align:top;'><b>Student24</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student24&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student24</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student25</b><br />
+																	target='_blank'>$advisorClass_student24</a></td>
+														    <td style='vertical-align:top;'><b>Student25</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student25&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student25</a></td>
-															<td style='vertical-align:top;'><b>Student26</b><br />
+																	target='_blank'>$advisorClass_student25</a></td></tr>
+														<tr><td style='vertical-align:top;'><b>Student26</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student26&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student26</a></td>
 															<td style='vertical-align:top;'><b>Student27</b><br />
@@ -1212,15 +1213,13 @@ function display_and_update_advisor_info_func() {
 																	target='_blank'>$advisorClass_student27</a></td>
 															<td style='vertical-align:top;'><b>Student28</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student28&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student28</a></td></tr>
-														<tr><td style='vertical-align:top;'><b>Student29</b><br />
+																	target='_blank'>$advisorClass_student28</a></td>
+														    <td style='vertical-align:top;'><b>Student29</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student29&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 																	target='_blank'>$advisorClass_student29</a></td>
 															<td style='vertical-align:top;'><b>Student30</b><br />
 																	<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student30&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																	target='_blank'>$advisorClass_student30</a></td>
-															<td></td>
-															<td></td></tr>
+																	target='_blank'>$advisorClass_student30</a></td></tr></table></td></tr>
 														<tr><td style='vertical-align:top;'><b>number_students</b><br />$advisorClass_number_students</td>
 															<td style='vertical-align:top;'><b>class_evaluation_complete</b><br />$advisorClass_class_evaluation_complete</td>
 															<td style='vertical-align:top;'><b>class_comments</b><br />$advisorClass_class_comments</td>
