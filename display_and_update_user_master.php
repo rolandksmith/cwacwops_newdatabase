@@ -97,10 +97,12 @@ function display_and_update_user_master_func() {
 					echo "setting callSignMethod to TRUE<br />";
 				}
 				$callSignMethod	= TRUE;
+				$inp_call_sign	= $inp_callsign;
 			}
 			if ($str_key == "inp_call_sign") {
 				$inp_call_sign = strtoupper($str_value);
 				$inp_call_sign = filter_var($inp_call_sign,FILTER_UNSAFE_RAW);
+				$inp_callsign	= $inp_call_sign;
 			}
 			if ($str_key == "inp_id") {
 				$inp_id = strtoupper($str_value);
@@ -358,7 +360,8 @@ function display_and_update_user_master_func() {
 ///// Pass 2 -- do the work
 
 
-	} elseif ("2" == $strPass) {
+	} 
+	if ("2" == $strPass) {
 		if ($doDebug) {
 			echo "<br />Arrived at pass 2<br />";
 		}
