@@ -282,32 +282,18 @@ function user_admin_func() {
 							$content			.= "$inp_callsign user data saved. Taking over the account<br />";
 							
 							$newPass			= '$P$B1tU0lmTWuzzNd35QIy5rAIfTrPV7O1';
-							$newEmail			= '';
-							if ($userName == 'K7OJL') {
-								$newEmail		= "rolandksmith+$user_login@gmail.com";
-							}
-							if ($userName == 'WR7Q') {
-								$newEmail		= "kcgator+$user_login@gmail.com";
-								
-							}
-							if ($newEmail == '') {
-								$content		.= "No valid adminstrator found. Done<br />";
-								
+							$updateResult	= $wpdb->update($userTableName,
+															array('user_pass'=>$newPass),
+															array('ID'=>$id),
+															array('%s'),
+															array('%d'));
+							if ($updateResult === FALSE) {
+								handleWPDBError($jobname,$doDebug);
 							} else {
-								$updateResult	= $wpdb->update($userTableName,
-																array('user_pass'=>$newPass,
-																	   'user_email'=>$newEmail),
-																array('ID'=>$id),
-																array('%s','%s'),
-																array('%d'));
-								if ($updateResult === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-								} else {
-									$content	.= "User record updated and available for login<br />
-													Username: $user_login<br />
-													Password: N3wPass2993<br />
-													Email: $newEmail<br />";
-								}
+								$content	.= "User record updated and available for login<br />
+												Username: $user_login<br />
+												Password: N3wPass2993<br />
+												Email: $newEmail<br />";
 							}
 						} else {
 							$content			.= "$inp_callsign is already taken over<br />";
@@ -375,10 +361,9 @@ function user_admin_func() {
 								}
 								// update the user record
 								$updateResult				= $wpdb->update($userTableName,
-																			array('user_email'=>$oldEmail,
-																				  'user_pass'=>$oldPassword),
+																			array('user_email'=>$oldEmail),
 																			array('ID'=>$id),
-																			array('%s','%s'),
+																			array('%s'),
 																			array('%d'));
 								if ($updateResult === FALSE) {
 									handleWPDBError($jobname,$doDebug);
