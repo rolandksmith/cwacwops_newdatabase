@@ -1080,7 +1080,7 @@ function student_registration_func() {
 				echo "somehow no student data and no master data<br />";
 			}
 			$content	.= "<b>FATAL PROGRAM ERROR</b> The sysadmin has been notified";
-			sendErrorEmail("$jobname Pass1 username $username. No student data and no master data. How is that possible?");		
+			sendErrorEmail("$jobname Pass1 username $userName. No student data and no master data. How is that possible?");		
 		} else {
 			$showSignup		= FALSE;
 			$showAll		= FALSE;
