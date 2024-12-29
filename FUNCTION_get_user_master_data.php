@@ -1009,27 +1009,29 @@ function get_user_master_data($dataArray=array()) {
 											}
 										}
 										
-										// get the country and ph_code
-										$countrySQL		= "select * from $countryCodesTableName 
-															where country_code = '$user_country_code'";
-										$countrySQLResult		= $wpdb->get_results($countrySQL);
-										if ($countrySQLResult === FALSE) {
-											handleWPDBError($jobname,$doDebug);
-											$user_country		= "UNKNOWN";
-											$user_ph_code		= "";
-										} else {
-											$numCRows		= $wpdb->num_rows;
-											if ($doDebug) {
-												echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-											}
-											if($numCRows > 0) {
-												foreach($countrySQLResult as $countryRow) {
-													$user_country		= $countryRow->country_name;
-													$user_ph_code		= $countryRow->ph_code;
-												}
+										if ($user_country_code != '') {
+											// get the country and ph_code
+											$countrySQL		= "select * from $countryCodesTableName 
+																where country_code = '$user_country_code'";
+											$countrySQLResult		= $wpdb->get_results($countrySQL);
+											if ($countrySQLResult === FALSE) {
+												handleWPDBError($jobname,$doDebug);
+												$user_country		= "UNKNOWN";
+												$user_ph_code		= "";
 											} else {
-												$user_country			= "Unknown";
-												$user_ph_code			= "";
+												$numCRows		= $wpdb->num_rows;
+												if ($doDebug) {
+													echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+												}
+												if($numCRows > 0) {
+													foreach($countrySQLResult as $countryRow) {
+														$user_country		= $countryRow->country_name;
+														$user_ph_code		= $countryRow->ph_code;
+													}
+												} else {
+													$user_country			= "Unknown";
+													$user_ph_code			= "";
+												}
 											}
 										}
 										// figure out the timezone_id
@@ -1038,69 +1040,70 @@ function get_user_master_data($dataArray=array()) {
 										}
 										if ($user_country_code == '') {
 											$user_timezone_id 	= 'XX';
-										} elseif ($user_country_code == 'US') {
-											if ($doDebug) {
-												echo "have a country code of US, verifying the zip code<br />";
-											}
-											$zipResult		= getOffsetFromZipCode($user_zip_code,'',TRUE,$testMode,$doDebug);
-											if ($zipResult[0] == 'NOK') {
-												$user_timezone_id		="XX";
-											} else {
-												$user_timezone_id		= $zipResult[1];
-											}
-										} else {		// country code not US. Figure out the timezone and offset
-											if ($doDebug) {
-												echo "dealing with a non-us country of $user_country_code<br />";
-											}
-											$timezone_identifiers 		= DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $user_country_code );
-											$myInt						= count($timezone_identifiers);
-											if ($doDebug) {
-												echo "found $myInt identifiers for country $user_country_code";
-											}
-											
-											if ($myInt == 1) {									//  only 1 found. Use that and continue
-												$timezone_id		= $timezone_identifiers[0];
-											} else {
-												$timezoneSelector			= array();		// localDateTime => $myCity
-												$ii							= 1;
+										} else {
+											if ($user_country_code == 'US') {
 												if ($doDebug) {
-													echo "have the list of identifiers for $user_country_code<br />";
+													echo "have a country code of US, verifying the zip code<br />";
 												}
-												$oneChecked				= FALSE;
-												foreach ($timezone_identifiers as $thisID) {
+												$zipResult		= getOffsetFromZipCode($user_zip_code,'',TRUE,$testMode,$doDebug);
+												if ($zipResult[0] == 'NOK') {
+													$user_timezone_id		="XX";
+												} else {
+													$user_timezone_id		= $zipResult[1];
+												}
+											} else {		// country code not US. Figure out the timezone and offset
+												if ($doDebug) {
+													echo "dealing with a non-us country of $user_country_code<br />";
+												}
+												$timezone_identifiers 		= DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $user_country_code );
+												$myInt						= count($timezone_identifiers);
+												if ($doDebug) {
+													echo "found $myInt identifiers for country $user_country_code";
+												}
+												
+												if ($myInt == 1) {									//  only 1 found. Use that and continue
+													$timezone_id		= $timezone_identifiers[0];
+												} else {
+													$timezoneSelector			= array();		// localDateTime => $myCity
+													$ii							= 1;
 													if ($doDebug) {
-														echo "Processing $thisID<br />";
+														echo "have the list of identifiers for $user_country_code<br />";
 													}
-													$selector			= "";
-													if (isset($browser_timezone_id)) {
-														if ($browser_timezone_id == $thisID) {
-															$selector		= "checked";
-															$oneChecked		= TRUE;
+													$oneChecked				= FALSE;
+													foreach ($timezone_identifiers as $thisID) {
+														if ($doDebug) {
+															echo "Processing $thisID<br />";
 														}
+														$selector			= "";
+														if (isset($browser_timezone_id)) {
+															if ($browser_timezone_id == $thisID) {
+																$selector		= "checked";
+																$oneChecked		= TRUE;
+															}
+														}
+														$dateTimeZoneLocal 	= new DateTimeZone($thisID);
+														$dateTimeLocal 		= new DateTime("now",$dateTimeZoneLocal);
+														$localDateTime 		= $dateTimeLocal->format('h:i A');
+														$myInt				= strpos($thisID,"/");
+														$myCity				= substr($thisID,$myInt+1);
+														
+														if (!array_key_exists($localDateTime,$timezoneSelector)) {
+															$timezoneSelector[$localDateTime] 	= $thisID;
+														}
+													} 
+													if (count($timezoneSelector) == 0) {
+														$user_timezone_id			= 'XX';
 													}
-													$dateTimeZoneLocal 	= new DateTimeZone($thisID);
-													$dateTimeLocal 		= new DateTime("now",$dateTimeZoneLocal);
-													$localDateTime 		= $dateTimeLocal->format('h:i A');
-													$myInt				= strpos($thisID,"/");
-													$myCity				= substr($thisID,$myInt+1);
-													
-													if (!array_key_exists($localDateTime,$timezoneSelector)) {
-														$timezoneSelector[$localDateTime] 	= $thisID;
+													if (count($timezoneSelector) == 1) {
+														foreach($timezoneSelector as $thisDateTime => $thisID);
+															$user_timezone_id			= $thisID;
 													}
-												} 
-												if (count($timezoneSelector) == 0) {
-													$user_timezone_id			= 'XX';
-												}
-												if (count($timezoneSelector) == 1) {
-													foreach($timezoneSelector as $thisDateTime => $thisID);
-														$user_timezone_id			= $thisID;
-												}
-												if (count($timezoneSelector) > 1) {
-													$user_timezone_id			= "XX";
+													if (count($timezoneSelector) > 1) {
+														$user_timezone_id			= "XX";
+													}
 												}
 											}
 										}
-										
 										
 										// have all the data. Insert the record into user_master
 										$user_action_log	= "/ $thisDate $userName Record created ";
