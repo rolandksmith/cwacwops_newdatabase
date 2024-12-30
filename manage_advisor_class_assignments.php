@@ -14,7 +14,7 @@ function manage_advisor_class_assignments_func() {
 
 	global $wpdb,$userName,$validTestmode;
 
-	$doDebug					= FALSE;
+	$doDebug					= TRUE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$validUser 					= $initializationArray['validUser'];
@@ -75,6 +75,8 @@ function manage_advisor_class_assignments_func() {
 	$inp_comment				= '';
 	$inp_replacement			= '';
 	$token						= '';
+	$inp_mode					= '';
+	$inp_verbose				= '';
 	$actionDate					= date('Y-m-d H:i:s');
 	$updateStudentInfoURL		= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$statusArray				= array('Y'=>'Verified',
@@ -124,6 +126,23 @@ function manage_advisor_class_assignments_func() {
 			if ($str_key 		== "token") {
 				$token			 = $str_value;
 				$token			 = filter_var($token,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "unconfirm") {
+				$unconfirm			 = $str_value;
+				$unconfirm			 = filter_var($unconfirm,FILTER_UNSAFE_RAW);
+				$unconfirm			= str_replace('Change ','',$unconfirm);
+				$studentToProcess	= str_replace(' Confirmation','',$unconfirm);
+				if ($doDebug) {
+					echo "set studentToProcess to $studentToProcess<br />";
+				}
+			}
+			if ($str_key 		== "confirm") {
+				$confirm			 = $str_value;
+				$confirm			 = filter_var($confirm,FILTER_UNSAFE_RAW);
+				$studentToProcess	= str_replace('Confirm ','',$confirm);
+				if ($doDebug) {
+					echo "set studentToProcess to $studentToProcess<br />";
+				}
 			}
 			if ($str_key 		== "inp_attend") {
 				$inp_attend			 = $str_value;
@@ -263,15 +282,16 @@ function manage_advisor_class_assignments_func() {
 		if ($doDebug) {
 			echo "<br />arrived at $strPass with <br />
 				inp_callsign: $inp_callsign<br />
-				student_call_sign: $student_call_sign<br />
+				studentToProcess: $studentToProcess<br />
 				token: $token<br />";
 		}
+
 
 		///// get the student information
 		$sql				= "select * from $studentTableName 
 								left join $userMasterTableName on user_call_sign = student_call_sign 
 								where student_semester='$proximateSemester' 
-								and student_call_sign='$student_call_sign'";
+								and student_call_sign='$studentToProcess'";
 		$wpw1_cwa_student		= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -313,7 +333,7 @@ function manage_advisor_class_assignments_func() {
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1011,12 +1031,13 @@ No replacement requested. ";
 			$token			= '';
 		}
 		$unconfirmedCount	= 0;
+		$jjCount			= 0;
 		$content			.= "$confirmationMsg 
 								<h4>$inp_callsign Classes and Students for $proximateSemester Semester</h4>
 								<div><p><table style='width:900px;'>
 								<tr><td>If you would like a .csv dump of the students assigned 
 										to your $proximateSemester semester classes, please click</td>
-									<td><form method='post' action='$theURL' target='_blank' 
+									<td><form method='post' action='$theURL' 
 										name='dump_form' ENCTYPE='multipart/form-data'>
 										<input type='hidden' name='strpass' value='10'>
 										<input type='hidden' name='inp_callsign' value='$inp_callsign'>
@@ -1160,7 +1181,8 @@ No replacement requested. ";
 									} else {
 										$numSRows									= $wpdb->num_rows;
 										if ($doDebug) {
-											echo "ran $sql<br />and found $numSRows rows<br />";
+											$myStr					= $wpdb->last_query;
+											echo "ran $myStr<br />and found $numSRows rows<br />";
 										}
 										if ($numSRows > 0) {
 											foreach ($wpw1_cwa_student as $studentRow) {
@@ -1169,11 +1191,13 @@ No replacement requested. ";
 												$student_first_name 				= $studentRow->user_first_name;
 												$student_last_name 					= $studentRow->user_last_name;
 												$student_email 						= $studentRow->user_email;
+												$student_ph_code 					= $studentRow->user_ph_code;
 												$student_phone 						= $studentRow->user_phone;
 												$student_city 						= $studentRow->user_city;
 												$student_state 						= $studentRow->user_state;
 												$student_zip_code 					= $studentRow->user_zip_code;
 												$student_country_code 				= $studentRow->user_country_code;
+												$student_country					= $studentRow->user_country;
 												$student_whatsapp 					= $studentRow->user_whatsapp;
 												$student_telegram 					= $studentRow->user_telegram;
 												$student_signal 					= $studentRow->user_signal;
@@ -1234,38 +1258,12 @@ No replacement requested. ";
 												$student_flexible						= $studentRow->student_flexible;
 												$student_date_created 					= $studentRow->student_date_created;
 												$student_date_updated			  		= $studentRow->student_date_updated;
-							
-												// if you need the country name and phone code, include the following
-												$countrySQL		= "select * from wpw1_cwa_country_codes  
-																	where country_code = '$student_country_code'";
-												$countrySQLResult	= $wpdb->get_results($countrySQL);
-												if ($countrySQLResult === FALSE) {
-													handleWPDBError($jobname,$doDebug);
-													$student_country		= "UNKNOWN";
-													$student_ph_code		= "";
-												} else {
-													$numCRows		= $wpdb->num_rows;
-													if ($doDebug) {
-														echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-													}
-													if($numCRows > 0) {
-														foreach($countrySQLResult as $countryRow) {
-															$student_country		= $countryRow->country_name;
-															$student_ph_code		= $countryRow->ph_code;
-														}
-													} else {
-														$student_country			= "Unknown";
-														$student_ph_code			= "";
-													}
-												}
-
 
 												if ($doDebug) {
-													echo "<br />Processing student $student_call_sign<br />
-															&nbsp;&nbsp;&nbsp;&nbsp;Level: $student_level<br />
-															&nbsp;&nbsp;&nbsp;&nbsp;Class: $student_assigned_advisor_class<br />
-															&nbsp;&nbsp;&nbsp;&nbsp;Status: $student_status<br />
-															&nbsp;&nbsp;&nbsp;&nbsp;Promotable: $student_promotable<br />";
+													echo "&nbsp;&nbsp;&nbsp;&nbsp;Level: $student_level<br />
+														  &nbsp;&nbsp;&nbsp;&nbsp;Class: $student_assigned_advisor_class<br />
+														  &nbsp;&nbsp;&nbsp;&nbsp;Status: $student_status<br />
+														  &nbsp;&nbsp;&nbsp;&nbsp;Promotable: $student_promotable<br />";
 												}
 												
 												if ($student_status == 'S' || $student_status == 'Y') {
@@ -1325,10 +1323,24 @@ No replacement requested. ";
 													if ($student_status == 'S') {
 														$unconfirmedCount++;
 														$myStr					= "<table style='border:4px solid red;'>
-																					<tr><td><p><a href='$theURL/?strpass=1&inp_callsign=$advisorClass_call_sign&student_call_sign=$student_call_sign&token=$token'>Confirm 
-																					$student_call_sign</a></p></td></tr></table>\n";
+																					<tr><td><form method='post' action='$theURL' 
+																							name='confirm_form' ENCTYPE='multipart/form-data'>
+																							<input type='hidden' name='strpass' value='1'>
+																							<input type='hidden' name='inp_callsign' value='$advisorClass_call_sign'>
+																							<input type='hidden' name='token' value='$token'>
+																							<input type='hidden' name='inp_mode' value='$inp_mode'>
+																							<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+																							<input class='formInputButton' type='submit' name='confirm' value='Confirm $student_call_sign' />
+																							</td></tr></table>\n";
 													} elseif ($student_status == 'Y') {
-														$myStr					= "Confirmed<br /><a href='$theURL/?strpass=1&inp_callsign=$advisorClass_call_sign&student_call_sign=$student_call_sign&token=$token'>Change $student_call_sign Confirmation</a>\n";
+														$myStr					= "Confirmed<br />
+																					<form method='post' action='$theURL' 
+																					name='unconfirm_form' ENCTYPE='multipart/form-data'>
+																					<input type='hidden' name='strpass' value='1'>
+																					<input type='hidden' name='token' value='$token'>
+																					<input type='hidden' name='inp_mode' value='$inp_mode'>
+																					<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+																					<input class='formInputButton' type='submit' name='unconfirm' value='Change $student_call_sign Confirmation' />";
 													}
 													if ($doDebug) {
 														echo "displaying student $student_call_sign information<br />";
