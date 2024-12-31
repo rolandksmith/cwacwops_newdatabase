@@ -144,13 +144,12 @@ function program_list_func() {
 
 	// get the user_master information	
 	
-	$badTimezoneID			= FALSE;
-	$missingZipCode			= FALSE;
-	$xxTimezoneID			= FALSE;
-			
+	$badTimezoneID		= TRUE;
+	$missingZipCode		= TRUE;
+	$xxTimezoneID		= TRUE;
+	$gotData			= FALSE;
 	$result				= FALSE;
 	$reason				= "";
-	$user_id 			= 0;
 	$user_call_sign 	= "unknown";
 	$user_first_name 	= "unknown";
 	$user_last_name 	= "unknown";
@@ -173,67 +172,111 @@ function program_list_func() {
 	$user_prev_callsign	= "";
 	$user_date_created 	= "";
 	$user_date_updated 	= "";
-	$dataArray					= array('getMethod'=>'callsign',
-										'getInfo'=>$userName,
-										'doDebug'=> $doDebug,
-										'testMode'=> $testMode);
-	$dataResult			= get_user_master_data($dataArray);
-	// unpack the data
-	$result				= $dataResult['result'];
-	$reason				= $dataResult['reason'];
-	$count				= $dataResult['count'];
 	
-	if ($result === FALSE) {
-		// failure actions
-		$content		.= "getting data for $userName failed.<br />Reason: $reason<br />";
+	$sql				= "select * from $userMasterTableName 
+							where user_call_sign like '$userName'";
+	$userMasterResult	= $wpdb->get_results($sql);
+	if ($userMasterResult === FALSE) {
+		handleWPDBError($jobname,$doDebug,"initial read of userMasterTableName failed");
 	} else {
+		$numURows		= $wpdb->num_rows;
 		if ($doDebug) {
-			echo "call to get data for $userName returned $count rows of data<br />";
+			echo "ran $sql<br />and retrieved $numURows rows<br />";
 		}
-		for ($ii=0;$ii<$count;$ii++) {
-			$user_id 				= $dataResult[$ii]['user_id'];
-			$user_call_sign 		= $dataResult[$ii]['user_call_sign'];
-			$user_first_name 		= $dataResult[$ii]['user_first_name'];
-			$user_last_name 		= $dataResult[$ii]['user_last_name'];
-			$user_email 			= $dataResult[$ii]['user_email'];
-			$user_phone 			= $dataResult[$ii]['user_phone'];
-			$user_ph_code 			= $dataResult[$ii]['user_ph_code'];
-			$user_city 				= $dataResult[$ii]['user_city'];
-			$user_state 			= $dataResult[$ii]['user_state'];
-			$user_zip_code 			= $dataResult[$ii]['user_zip_code'];
-			$user_country_code 		= $dataResult[$ii]['user_country_code'];
-			$user_country 			= $dataResult[$ii]['user_country'];
-			$user_whatsapp 			= $dataResult[$ii]['user_whatsapp'];
-			$user_telegram 			= $dataResult[$ii]['user_telegram'];
-			$user_signal 			= $dataResult[$ii]['user_signal'];
-			$user_messenger 		= $dataResult[$ii]['user_messenger'];
-			$user_user_action_log	= $dataResult[$ii]['user_action_log'];
-			$user_timezone_id	 	= $dataResult[$ii]['user_timezone_id'];
-			$user_languages 		= $dataResult[$ii]['user_languages'];
-			$user_survey_score		= $dataResult[$ii]['user_survey_score'];
-			$user_is_admin			= $dataResult[$ii]['user_is_admin'];
-			$user_role				= $dataResult[$ii]['user_role'];
-			$user_prev_callsign		= $dataResult[$ii]['user_prev_callsign'];
-			$user_date_created 		= $dataResult[$ii]['user_date_created'];
-			$user_date_updated 		= $dataResult[$ii]['user_date_updated'];
+		if ($numURows > 0) {
+			$gotData					= TRUE;
+			foreach($userMasterResult as $sqlRow) {
+				$user_id				= $sqlRow->user_ID;
+				$user_call_sign			= $sqlRow->user_call_sign;
+				$user_first_name		= $sqlRow->user_first_name;
+				$user_last_name			= $sqlRow->user_last_name;
+				$user_email				= $sqlRow->user_email;
+				$user_ph_code			= $sqlRow->user_ph_code;
+				$user_phone				= $sqlRow->user_phone;
+				$user_city				= $sqlRow->user_city;
+				$user_state				= $sqlRow->user_state;
+				$user_zip_code			= $sqlRow->user_zip_code;
+				$user_country_code		= $sqlRow->user_country_code;
+				$user_country			= $sqlRow->user_country;
+				$user_whatsapp			= $sqlRow->user_whatsapp;
+				$user_telegram			= $sqlRow->user_telegram;
+				$user_signal			= $sqlRow->user_signal;
+				$user_messenger			= $sqlRow->user_messenger;
+				$user_action_log		= $sqlRow->user_action_log;
+				$user_timezone_id		= $sqlRow->user_timezone_id;
+				$user_languages			= $sqlRow->user_languages;
+				$user_survey_score		= $sqlRow->user_survey_score;
+				$user_is_admin			= $sqlRow->user_is_admin;
+				$user_role				= $sqlRow->user_role;
+				$user_prev_callsign		= $sqlRow->user_prev_callsign;
+				$user_date_created		= $sqlRow->user_date_created;
+				$user_date_updated		= $sqlRow->user_date_updated;
+			}
+		} else {
+			// no userMaster record found. See if one needs to be created
+			$dataArray					= array('getMethod'=>'callsign',
+												'getInfo'=>$userName,
+												'doDebug'=> $doDebug,
+												'testMode'=> $testMode);
+			$dataResult			= get_user_master_data($dataArray);
 
-			$user_last_name			= no_magic_quotes($user_last_name);
+			// unpack the data
+			$result				= $dataResult['result'];
+			$reason				= $dataResult['reason'];
+			
+			if ($result === FALSE) {
+				// failure actions
+				$content		.= "getting data for $userName failed.<br />Reason: $reason<br />";
+			} else {
+				$gotData				= TRUE;
+				$user_id 				= $dataResult['user_id'];
+				$user_call_sign 		= $dataResult['user_call_sign'];
+				$user_first_name 		= $dataResult['user_first_name'];
+				$user_last_name 		= $dataResult['user_last_name'];
+				$user_email 			= $dataResult['user_email'];
+				$user_phone 			= $dataResult['user_phone'];
+				$user_ph_code 			= $dataResult['user_ph_code'];
+				$user_city 				= $dataResult['user_city'];
+				$user_state 			= $dataResult['user_state'];
+				$user_zip_code 			= $dataResult['user_zip_code'];
+				$user_country_code 		= $dataResult['user_country_code'];
+				$user_country 			= $dataResult['user_country'];
+				$user_whatsapp 			= $dataResult['user_whatsapp'];
+				$user_telegram 			= $dataResult['user_telegram'];
+				$user_signal 			= $dataResult['user_signal'];
+				$user_messenger 		= $dataResult['user_messenger'];
+				$user_user_action_log	= $dataResult['user_action_log'];
+				$user_timezone_id	 	= $dataResult['user_timezone_id'];
+				$user_languages 		= $dataResult['user_languages'];
+				$user_survey_score		= $dataResult['user_survey_score'];
+				$user_is_admin			= $dataResult['user_is_admin'];
+				$user_role				= $dataResult['user_role'];
+				$user_prev_callsign		= $dataResult['user_prev_callsign'];
+				$user_date_created 		= $dataResult['user_date_created'];
+				$user_date_updated 		= $dataResult['user_date_updated'];
+			}
 		}
-		if ($user_country_code == 'US' && $user_zip_code == '') {
-			$missingZipCode			= TRUE;
-			$badTimezoneID			= TRUE;
-		}
-		if ($user_timezone_id == 'XX') {
-			$xxTimezoneID			= TRUE;
-			$badTimezoneID			= TRUE;
-		}
-		if ($user_timezone_id == '') {
-			$badTimezoneID			= TRUE;
+		if ($gotData) {
+			$missingZipCode				= FALSE;
+			$badTimezoneID				= FALSE;
+			$xxTimezoneID				= FALSE;
+			if ($user_country_code == 'US' && $user_zip_code == '') {
+				$missingZipCode			= TRUE;
+				$badTimezoneID			= TRUE;
+			}
+			if ($user_timezone_id == 'XX') {
+				$xxTimezoneID			= TRUE;
+				$badTimezoneID			= TRUE;
+			} 
+			if ($user_timezone_id == '') {
+				$badTimezoneID			= TRUE;
+			}
+		} else {
+			sendErrorEmail("$jobname no userMaster record and no userMeta data for $getInfo. Aborting");
+			$content	.= "<p><b>FATAL ERROR</b> SysAdmin has been notified</p>";
+			return $content;
 		}
 	}
-
-
-
 
 	if ($userRole == 'administrator') {
 		$doProceed			= TRUE;
