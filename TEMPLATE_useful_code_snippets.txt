@@ -585,3 +585,35 @@ Choose Save changes.
 	$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$replacement_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_call_sign</a>";
 	$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$replacement_student&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_student</a>";
 	$findLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$replacement_student&inp_mode=$inp_mode' target='_blank'>Find Class</a>";
+
+
+
+
+/// try - catch
+try {
+  $table_name = $wpdb->prefix . 'your_table_name'; 
+  $data = array(
+    'column1' => 'value1',
+    'column2' => 'value2', 
+    // ... more data
+  );
+
+  $format = array('%s', '%s'); // Specify data formats
+
+  $result = $wpdb->insert($table_name, $data, $format);
+
+  if ($result === false) {
+    // Insertion failed, but no exception was thrown
+    // Log the error or handle it appropriately
+    error_log("wpdb->insert failed: " . $wpdb->last_error); 
+  } else {
+    // Insertion successful
+    echo "Data inserted successfully!";
+  }
+
+} catch (Exception $e) {
+  // Catch any exceptions thrown during the insertion process
+  error_log("wpdb->insert exception: " . $e->getMessage()); 
+  // Handle the exception (e.g., display an error message)
+  echo "An error occurred: " . $e->getMessage();
+}
