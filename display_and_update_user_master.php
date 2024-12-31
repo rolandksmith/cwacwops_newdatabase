@@ -369,7 +369,7 @@ function display_and_update_user_master_func() {
 		$displayedAlready			= FALSE;
 
 		if ($callSignMethod) {
-			$request_type					= 'callsign';
+			$request_type				= 'callsign';
 			$request_info				= $inp_callsign;
 			if ($doDebug) {
 				echo "callSignMethod is TRUE. Setting request_type to $request_type and request_info to $request_info<br />";
@@ -398,7 +398,7 @@ function display_and_update_user_master_func() {
 		if ($request_type == 'callsign') {
 			$request_info	= strtoupper($request_info);
 			$sql			= "select * from $userMasterTableName 
-								where user_call_sign = '$request_info'";
+								where user_call_sign like '$request_info'";
 		} elseif ($request_type == 'id') {
 			$sql			= "select * from $userMasterTableName 
 								where user_ID = $request_info";
