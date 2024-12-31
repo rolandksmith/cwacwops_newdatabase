@@ -14,7 +14,7 @@ function manage_advisor_class_assignments_func() {
 
 	global $wpdb,$userName,$validTestmode;
 
-	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$validUser 					= $initializationArray['validUser'];
@@ -75,6 +75,7 @@ function manage_advisor_class_assignments_func() {
 	$inp_comment				= '';
 	$inp_replacement			= '';
 	$token						= '';
+	$submit						= '';
 	$inp_mode					= '';
 	$inp_verbose				= '';
 	$actionDate					= date('Y-m-d H:i:s');
@@ -178,6 +179,7 @@ function manage_advisor_class_assignments_func() {
 			}
 		}
 	}
+	
 
 	$firstTime						= TRUE;
 	$advisor_call_sign				= '';
@@ -276,6 +278,10 @@ function manage_advisor_class_assignments_func() {
 									<input type='radio' class='formInputButton' name='inp_verbose' value='Y'> Turn on Debugging </td></tr>";
 		} else {
 			$testModeOption	= '';
+		}
+
+		if ($submit == 'Prepare CSV') {
+			$strPass	= '10';
 		}
 
 	if ("1" == $strPass) {
@@ -1449,9 +1455,21 @@ No replacement requested. ";
 				if ($numSRows > 0) {
 					$content		.= "<h3>$jobname</h3>
 										<h4>CSV Dump of Students in $inp_callsign $proximateSemester Semester Class(es)</h4>
-										<p>The table below lists your students by class number in student call sign 
+										<p>The table below shows what the csv file contains for your students by class number in student call sign 
 										order. The fields are separated by tabs. The first row are the field names.</p>
+										<p>The link to download the csv file along with instructions are below the table.</p>
 										<pre>class\tcall_sign\tfirst_name\tlast_name\temail\tphone\tstate\tcountry\twhatsapp\tsignal\ttelegram\tmessenger\n";
+										
+					// prepare the csv file and write the headers
+					$thisStr		= "$inp_callsign" . "_class_download.csv";
+					if (preg_match('/localhost/',$siteURL)) {
+						$thisFileName	= "wp-content/uploads/$thisStr";
+					} else {
+						$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$thisStr";
+					}
+					$thisFP			= fopen($thisFileName,'w');
+					$thisList		= ['class','call_sign','first_name','last_name','email','phone','state','country','whatsapp','signal','telegram','messenger'];
+					fputcsv($thisFP,$thisList,"\t");										
 			
 					foreach ($wpw1_cwa_student as $studentRow) {
 						$student_master_ID 					= $studentRow->user_ID;
@@ -1459,11 +1477,13 @@ No replacement requested. ";
 						$student_first_name 				= $studentRow->user_first_name;
 						$student_last_name 					= $studentRow->user_last_name;
 						$student_email 						= $studentRow->user_email;
+						$student_ph_code 					= $studentRow->user_ph_code;
 						$student_phone 						= $studentRow->user_phone;
 						$student_city 						= $studentRow->user_city;
 						$student_state 						= $studentRow->user_state;
 						$student_zip_code 					= $studentRow->user_zip_code;
 						$student_country_code 				= $studentRow->user_country_code;
+						$student_country 					= $studentRow->user_country;
 						$student_whatsapp 					= $studentRow->user_whatsapp;
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
@@ -1483,7 +1503,7 @@ No replacement requested. ";
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1525,44 +1545,21 @@ No replacement requested. ";
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
 	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
-
-
-						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
-
 						$content			.= "$student_assigned_advisor_class\t$student_call_sign\t$student_first_name\t$student_last_name\t$student_email\t+$student_ph_code $student_phone\t$student_state\t$student_country\t$student_whatsapp\t$student_signal\t$student_telegram\t$student_messenger\n";	
+						$thisPhone			= "+$student_ph_code $student_phone";
+						$thisList			= [$student_assigned_advisor_class,$student_call_sign,$student_first_name,$student_last_name,$student_email,$thisPhone,$student_state,$student_country,$student_whatsapp,$student_signal,$student_telegram,$student_messenger];
+						fputcsv($thisFP,$thisList,"\t");
+					}
+					fclose($thisFP);
+					if ($doDebug) {
+						echo "table is written and the file is ready to download<br />";
 					}
 					$content				.= "</pre><br />
+												<p>Click <a href='$siteURL/wp-content/uploads/$thisStr'>$thisStr</a> to download the csv file</p>
 												<p>To use this data on a Windows computer do the following:<br />
-												1. Highlight the information in the table above<br />
-												2. Copy this data to the clipboard (highlight and press control-c)<br />
-												3. Right click on the desktop and select New --> Text Document<br />
-												4. Name the document<br />
-												5. Double click on the document<br />
-												6. Paste the clipboard into the document and save the document<br />
-												7. Open Excel and import the newly created document <i>(Click on Data --> From Text/CSV)</i></p>";
+												Open Excel (or your preferred spreadsheet program) and import the newly 
+												downloaded document. You may need to specify that Whatsapp, Signal, 
+												Telegram, and Messenger are 'text' fields.</p>";
 				} else {
 					$content				.= "no students found<br />";
 				}	
