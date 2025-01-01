@@ -32,6 +32,7 @@ function display_debug_reports_func() {
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-display-debug-reports/";
 	$jobname					= "Display Debug Reports V$versionNumber";
+	$submit						= '';
 
 
 // get the input information
@@ -51,6 +52,10 @@ function display_debug_reports_func() {
 			if ($str_key 		== "inp_file") {
 				$inp_file	 = $str_value;
 				$inp_file	 = filter_var($inp_file,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "submit") {
+				$submit	 = $str_value;
+				$submit	 = filter_var($submit,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -149,22 +154,33 @@ function display_debug_reports_func() {
 							<table>";
 		
 		foreach($matchingFiles as $thisFileName) {
-			$content	.= "<tr><td>$thisFileName<br />
+			$fileNameArray	= explode("_",$thisFileName);
+			$fileNameDate	= $fileNameArray[4];
+			$fileNameYear 	= substr($fileNameDate,0,4);
+			$fileNameDay 	= substr($fileNameDate,4,2);
+			$fileNameMonth 	= substr($fileNameDate,4,2);
+			$fileNameDay 	= substr($fileNameDate,6,2);
+			$fileNameHour 	= substr($fileNameDate,8,2);
+			$fileNameMinut 	= substr($fileNameDate,10,2);
+			$fileNameMinute	= substr($fileNameDate,10,2);
+			$fileInfo 		= $fileNameYear . "-" . $fileNameMonth . "-" . $fileNameDay . " " . $fileNameHour . ":" . $fileNameMinute;
+			$content	.= "<tr><td>$thisFileName ($fileInfo)<br />
 							<table>
 							<tr><td style='width:100px;'><form method='post' action='$siteURL/wp-content/uploads/$thisFileName' target='_blank' 
 									name='selection_form' ENCTYPE='multipart/form-data'>
-									<input class='formInputButton' type='submit' value='Display' />
+									<input class='formInputButton' type='submit' name='submit' value='Display' />
 									</form></td>
-								<td style='width:100px;'><form method='post' action=$theURL 
-									name='delete_form' ENCTYPE='multipart/form-data'>
-									<input type='hidden' name='strpass' value='3'>
-									<input type='hidden' name='inp_file' value='$thisFileName'>
-									<input style='padding:0 0 0 0;' class='formInputButton' type='submit' value='Delete' /></td>
+								<td></td>
 								<td></td></tr>
 							</table><br /><hr></td></tr>";
 		}
 		$content		.= "</table>";	
 	}	
+//								<td style='width:100px;'><form method='post' action=$theURL 
+//									name='delete_form' ENCTYPE='multipart/form-data'>
+//									<input type='hidden' name='strpass' value='3'>
+//									<input type='hidden' name='inp_file' value='$thisFileName'>
+//									<input style='padding:0 0 0 0;' class='formInputButton' name='submit' type='submit' value='Delete' /></td>
 	if ("3" == $strPass) {
 		if ($doDebug) {
 			echo "<br />at pass 3 with file $inp_file<br />";
