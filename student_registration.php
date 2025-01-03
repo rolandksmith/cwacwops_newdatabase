@@ -1855,7 +1855,7 @@ function student_registration_func() {
 					$inp_waiting_list	= 'N';
 				}
 		
-				$inp_action_log		= "REGISTRATION $currentDateTime $inp_callsign sign-up record stored ";
+				$inp_action_log		= "STDREG $currentDateTime $inp_callsign sign-up record stored ";
 				if ($inp_semester == '') {
 					sendErrorEmail("$jobname pass 3 inp_semeter is empty. Assuming nextSemster, inp_bypass: $inp_bypass; inp_doAgain: $inp_doAgain");
 					$inp_semester	= $nextSemester;
@@ -2557,7 +2557,7 @@ function student_registration_func() {
 				if ($doDebug) {
 					echo "would delete the record for $inp_callsign here";
 				}
-				$student_action_log				= "$student_action_log / REGISTER $actionDate student $inp_callsign requested registration to be deleted ";
+				$student_action_log				= "$student_action_log / STDREG $actionDate student $inp_callsign requested registration to be deleted ";
 /*	the student record is not actually deleted
 	the response is set to R
 	if the student status is S or Y, remove the student from the advisor's class
@@ -2759,7 +2759,7 @@ function student_registration_func() {
 			}
 						
 			if ($doUpdate) {
-				$student_action_log					= "$student_action_log / $actionDate REGISTER $updateLog";
+				$student_action_log					= "$student_action_log / $actionDate STDREG $updateLog";
 				$updateParams[]						= "student_action_log|$student_action_log|s";
 
 				if ($doDebug) {
@@ -3584,7 +3584,7 @@ function student_registration_func() {
 						echo "have a student_response of 'R'. Resetting to blank<br />";
 					}
 					$actionDate			= date('dMy H:i');
-					$student_action_log	.= " / $actionDate $jobname $student_call_sign removed status of R ";
+					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed status of R ";
 					$updateParams		= array('student_action_log'=>$student_action_log,
 												'student_response'=>'');
 					$updateFormat		= array('%s','%s');
