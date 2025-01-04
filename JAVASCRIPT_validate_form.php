@@ -1,6 +1,8 @@
 add_action( 'wp_head', function () { ?>
 <script Language='JavaScript' type='text/javascript'>
 	function validate_form() {
+
+//	invoke: <input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" name='' />
 	
 		function onlyNumbers(str) {
 		  return /^[0-9]+$/.test(str);
@@ -88,81 +90,62 @@ add_action( 'wp_head', function () { ?>
 	        }
 		}		
 
-	    if(document.getElementById('chk_city')) {
-	        var myCity = document.getElementById('chk_city').value;
-	        if (myCity == '') {
-		        errortext += 'City is a required field\n';
+	    if(document.getElementById('chk_state')) {
+	    	console.log('checking state');
+	        var myState = document.getElementById('chk_state').value;
+	        if (myState == '') {
+		        errortext += 'State / Province is a required field\n';
 	        	errorcount++;
 	        }
 		}		
 
-		var myCountryCode = '';
-		var myCountry = '';
-		var gotCountry = false;
-		var needCountry = false;
-		var gotList1Country = false;
-		var gotList2Country = false;
-	    if(document.getElementById('chk_countrya')) {
-			needCountry = true;
-			var getCountryValue = document.querySelector("input[name='inp_countrya']:checked");
-	  		if (getCountryValue !== null) {
-				var myCountry = getCountryValue.value;
-				if (myCountry != '') {
-					myCountryCode = myCountry.slice(0,2);
-					if (myCountryCode != 'XX') {
-						gotCountry = true;	
-						gotList1Country = true;
+	    if(document.getElementById('chk_country')) {
+	    	console.log('checking country');
+	        var myCountry = document.getElementById('chk_country').value;
+	        if (myCountry == '') {
+		        errortext += 'Country is a required field\n';
+	        	errorcount++;
+	        }
+		}		
+
+	    if(document.getElementById('chk_country_code')) {
+	    	console.log('checking country_codes US and CA');
+	        var myCountryCode = document.getElementById('chk_country_code').value;
+			if(myCountryCode == 'US' || myCountryCode == 'CA') {
+				if (document.getElementById('chk_zip')) {
+					var myZipCode = document.getElementById('chk_zip').value;
+					if (myZipCode == '') {
+						errortext += 'Zip/Postal Code is required for US and Canadian Residents\n';
+						errorcount++;
 					}
 				}
-//			} else {
-//				alert('getCountryValue was null\n');
 			}
+		}
 
-			if (!gotCountry) {
-				try {
-					if(document.getElementById('chk_countryb')) {
-						var getCountryb = document.getElementById('chk_countryb');
-						var getCountrybValue = getCountryb.options[getCountryb.selectedIndex].value;
-						if(getCountrybValue !== null) {
-							myCountryCode = getCountrybValue.slice(0,2);
-							if (myCountryCode != 'XX') {
-								myCountry = getCountrybValue.slice(3,50);
-								gotCountry = true;
-								gotList2Country = true;
-							} else {
-								errortext	+= 'A country must be selected\n';
-								$errorcount++;
-							}
-//						} else {
-//							alert('getCountryb was null\n');
+	    if(document.getElementById('chk_country_data')) {
+	    	console.log('checking country_data');
+	        var myCountryData = document.getElementById('chk_country_data').value;
+	        console.log(myCountryData);
+	        if (myCountryData == '') {
+	        	errortext += 'Country is a required field\n';
+	        	errorcount++;
+	        } else {
+		        var mySplit = myCountryData.split("|");
+		        var myCountryCode = mySplit[0];
+		        console.log('have a country code ' + myCountryCode);
+				if(myCountryCode == 'US' || myCountryCode == 'CA') {
+					if (document.getElementById('chk_zip')) {
+						var myZipCode = document.getElementById('chk_zip').value;
+						console.log('checking zip code ' + myZipCode);
+						if (myZipCode == '') {
+							errortext += 'Zip/Postal Code is required for US and Canadian Residents\n';
+							errorcount++;
 						}
 					}
-				} catch (e) {
-					errortext += 'Country from the selection list is undefined. No country selected.\n';
-					errorcount++;
 				}
-			}
-			if (gotList2Country) {
-				return confirm('You selected ' + myCountry + ' from the list of Other Countries. Is this your country? If not, then cancel and correct your country selection. To cancel any selection in the list, click on No Selection at the top of the list.');
-		    }
-		}
-				
-		if (needCountry) {
-			if (!gotCountry ) {
-				errortext += 'Country is required. Please select a country.\n';
-				errorcount++;
-			}
-		}
-		
-		if(myCountryCode == 'US' || myCountryCode == 'CA') {
-			if (document.getElementById('chk_zip')) {
-				var myZipCode = document.getElementById('chk_zip').value;
-				if (myZipCode == '') {
-					errortext += 'Zip/Postal Code is required for US and Canadian Residents\n';
-					errorcount++;
-				}
-			}
-		}
+			}        
+	    }
+	    	
 
 	    if(document.getElementById('chk_days')) {
 			var getDaysValue = document.querySelector("input[name='inp_days']:checked").value;   
