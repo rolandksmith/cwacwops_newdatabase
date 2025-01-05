@@ -7,7 +7,7 @@ function display_and_update_user_master_func() {
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -461,6 +461,16 @@ function display_and_update_user_master_func() {
 						$user_date_created		= $sqlRow->user_date_created;
 						$user_date_updated		= $sqlRow->user_date_updated;
 
+						$errorMsg				= "";
+						if ($user_zip_code == '') {
+							$errorMsg			= "<p><b>CRITICAL</b> The zip / postal code was invalid. Please 
+													click 'Update' and correct your zip / postal code information.</p>";
+						} elseif ($user_timezone_id == '??') {
+							$errorMsg			= "<p><b>CRITICAL</b> Your information is incomplete. Please 
+													click the 'Update' button and verify your city, state or province, and Zip / Postal Code 
+													information</p>";
+						}
+
 						$myStr			= formatActionLog($user_action_log);
 						$content		.= "<h4>User Master Data</h4>
 											<form method='post' action='$theURL' 
@@ -738,7 +748,10 @@ function display_and_update_user_master_func() {
 							}
 						}
 					}
-
+					$zipRequired	= '';
+					if ($user_country_code == 'US') {
+						$zipRequired	= ' required ';
+					}
 					$content	.= "<form method='post' action='$theURL' 
 									name='deletion_form' ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='5'>
@@ -775,16 +788,16 @@ function display_and_update_user_master_func() {
 										<td><input type='text' class='formInputText' name='inp_phone' length='20' 
 										maxlength='20' value='$user_phone'></td></tr>
 									<tr><td>City</td>
-										<td><input type='text' class='formInputText' name='inp_city' length='30' 
+										<td><input type='text' class='formInputText' name='inp_city' id='chk_city' length='30' 
 										maxlength='30' value='$user_city'></td></tr>
-									<tr><td>State</td>
-										<td><input type='text' class='formInputText' name='inp_state' length='30' 
+									<tr><td>State / Province</td>
+										<td><input type='text' class='formInputText' name='inp_state' id='chk_state' length='30' 
 										maxlength='30' value='$user_state'></td></tr>
 									<tr><td>Zip Code</td>
-										<td><input type='text' class='formInputText' name='inp_zip_code' length='20' 
-										maxlength='20' value='$user_zip_code'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_zip_code' id='chk_zip' length='20' 
+										maxlength='20' value='$user_zip_code' $zipRequired></td></tr>
 									<tr><td>Country</td>
-										<td><select name='inp_country_data' class='formSelect' size='5'>
+										<td><select name='inp_country_data' id='chk_country_data' class='formSelect' size='5'>
 											$option1
 											$countryOptionList
 											</select></td></tr>
@@ -842,7 +855,7 @@ function display_and_update_user_master_func() {
 										<tr><td>Date Updated</td>
 											<td>$user_date_updated</td></tr>";
 					}
-					$content	.= "<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit Updates' /></td></tr>
+					$content	.= "<tr><td colspan='2'><input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" value='Submit Updates' /></td></tr>
 									</table></form>";
 				}
 			} else {
@@ -943,12 +956,9 @@ function display_and_update_user_master_func() {
 						$updateContent			.= "phone updated to $inp_phone<br />";
 						$updateLog				.= " / phone updated to $inp_phone";
 					}
-//					if ($inp_ph_code != $user_ph_code) {
-//						$updateParams['user_ph_code']	= $inp_ph_code;
-//						$updateFormat[]			= '%s';
-//						$updateContent			.= "ph_code updated to $inp_ph_code<br />";
-//						$updateLog				.= " / ph_code updated to $inp_ph_code";
-//					}
+					
+					$inp_ph_code				= $user_ph_code;
+					
 					if ($inp_city != $user_city) {
 						$updateParams['user_city']	= $inp_city;
 						$updateFormat[]			= '%s';
@@ -956,6 +966,7 @@ function display_and_update_user_master_func() {
 						$updateLog				.= " / city updated to $inp_city";
 						$signifcantChange		= TRUE;
 						$changeCity				= TRUE;
+						$user_city				= $inp_city;
 					}
 					if ($inp_state != $user_state) {
 						$updateParams['user_state']	= $inp_state;
@@ -970,6 +981,7 @@ function display_and_update_user_master_func() {
 						$updateLog					.= " / zip_code updated to $inp_zip_code";
 						$significantChange			= TRUE;
 						$changeZip					= TRUE;
+						$user_zip_code				= $inp_zip_code;
 					}
 					if ($inp_country_code != $user_country_code) {
 						$updateParams['user_country_code']	= $inp_country_code;
@@ -978,12 +990,45 @@ function display_and_update_user_master_func() {
 						$updateLog						.= " / country_code updated to $inp_country_code";
 						$significantChange				= TRUE;
 						$changeCountry					= TRUE;
+						$user_country_code				= $inp_country_code;
+
+						// get the country name
+						$countrySQL				= "select * from $countryCodesTableName 
+													where country_code = '$user_country_code'";
+						$countrySQLResult		= $wpdb->get_results($countrySQL);
+						if ($countrySQLResult === FALSE) {
+							handleWPDBError($jobname,$doDebug);
+							$inp_country		= "UNKNOWN";
+							$inp_ph_code		= "";
+						} else {
+							$numCRows		= $wpdb->num_rows;
+							if ($doDebug) {
+								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
+							}
+							if($numCRows > 0) {
+								foreach($countrySQLResult as $countryRow) {
+									$inp_country		= $countryRow->country_name;
+									$inp_ph_code		= $countryRow->ph_code;
+								}
+							} else {
+								$inp_country			= "Unknown";
+								$inp_ph_code			= "";
+							}
+						}
+						
+					}
+					if ($inp_ph_code != $user_ph_code) {
+						$updateParams['user_ph_code']	= $inp_ph_code;
+						$updateFormat[]			= '%s';
+						$updateContent			.= "ph_code updated to $inp_ph_code<br />";
+						$updateLog				.= " / ph_code updated to $inp_ph_code";
 					}
 					if ($inp_country != $user_country) {
 						$updateParams['user_country']	= $inp_country;
 						$updateFormat[]					= '%s';
 						$updateContent					.= "country updated to $inp_country<br />";
 						$updateLog						.= " / country updated to $inp_country";
+						$user_country					= $inp_country;
 					}
 					if ($inp_whatsapp != $user_whatsapp) {
 						$updateParams['user_whatsapp']	= $inp_whatsapp;
@@ -992,7 +1037,7 @@ function display_and_update_user_master_func() {
 						$updateLog					.= " / whatsapp updated to $inp_whatsapp";
 					}
 					if ($inp_telegram != $user_telegram) {
-						$updateParams['user__telegram']	= $inp_telegram;
+						$updateParams['user_telegram']	= $inp_telegram;
 						$updateFormat[]				= '%s';
 						$updateContent				.= "telegram updated to $inp_telegram<br />";
 						$updateLog					.= " / telegram updated to $inp_telegram";
@@ -1029,6 +1074,7 @@ function display_and_update_user_master_func() {
 							$updateFormat[]				= '%s';
 							$updateContent				.= "timezone_id updated to $inp_timezone_id<br />";
 							$updateLog					.= " / timezone_id updated to $inp_timezone_id";
+							$user_timezone_id			= $inp_timezone_id;
 						}
 						if ($inp_is_admin != $user_is_admin) {
 							$updateParams['user_is_admin']	= $inp_is_admin;
@@ -1060,10 +1106,10 @@ function display_and_update_user_master_func() {
 							echo "skipping survey_score, timezone_id, role, prev_callsign, and action_log as user is not an admin<br />"; 
 						}
 					}
-					if ($user_timezone_id == 'XX') {
+					if ($user_timezone_id == '??') {
 						$significantChange	= TRUE;
 						if ($doDebug) {
-							echo "user_timezone_id is XX. Setting significantChange to TRUE<br />";
+							echo "user_timezone_id is ??. Setting significantChange to TRUE<br />";
 						}
 					}
 					if ($user_timezone_id == '') {
@@ -1081,6 +1127,8 @@ function display_and_update_user_master_func() {
 						// If US: zip code change is significant. City change is not
 						if ($inp_country_code == 'US' && $changeZip) {
 							$doSignificantChange		= TRUE;
+						} elseif ($inp_country_code == 'CA' && $changeZip) {
+							$doSignificantChange		= TRUE;
 						} else {		/// treat any of the changes as significant
 							$doSignificantChange		= TRUE;
 						}
@@ -1096,7 +1144,7 @@ function display_and_update_user_master_func() {
 								}
 								$zipResult		= getOffsetFromZipCode($inp_zip_code,'',TRUE,$testMode,$doDebug);
 								if ($zipResult[0] == 'NOK') {
-									$inp_timezone_id		="XX";
+									$inp_timezone_id		="??";
 									if ($doDebug) {
 										echo "zip_code of $inp_zip_code is possibly invalid. Could not get a timezone_id<br />";
 									}
@@ -1110,7 +1158,28 @@ function display_and_update_user_master_func() {
 								if ($doDebug) {
 									echo "done with US country code. Have determined inp_timezone_id to be $inp_timezone_id<br />";
 								}
-							} else {		// country code not US. Figure out the timezone and offset
+							} elseif ($inp_country_code == 'CA') {
+								if ($doDebug) {
+									echo "have a country code of CA, will try zipcode if there, otherwise address";
+								}
+								if ($user_zip_code != '') {
+									$inp_timezone_id	= getTimeZone($user_zip_code,$doDebug);
+									if ($inp_timezone_id === FALSE) {
+										if ($doDebug) {
+											echo "invalid user_zip_code of $user_zip_code provided<br />";
+										}
+										$updateParams['user_zip_code']	= '??';
+										$updateFormat[]				='%s';
+										$updateContent				.= "zip_code updated to ??<br />";
+										$updateLog					.= " / invalid zip_code. Set to ?? ";
+									}
+								} else {
+									$updateParams['user_zip_code']	= '??';
+									$updateFormat[]				='%s';
+									$updateContent				.= "zip_code updated to ??<br />";
+									$updateLog					.= " / invalid zip_code. Set to ?? ";
+								}
+							} else {		// country code not US or CA. Figure out the timezone and offset
 								if ($doDebug) {
 									echo "dealing with a non-us country of $inp_country_code<br />";
 								}
