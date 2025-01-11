@@ -1328,7 +1328,7 @@ No replacement requested. ";
 													$myStr							= "";
 													if ($student_status == 'S') {
 														$unconfirmedCount++;
-														$myStr					= "<table style='border:4px solid red;'>
+														$myStr					= "<table style='border:4px solid green;'>
 																					<tr><td><form method='post' action='$theURL' 
 																							name='confirm_form' ENCTYPE='multipart/form-data'>
 																							<input type='hidden' name='strpass' value='1'>
