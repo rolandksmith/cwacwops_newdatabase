@@ -24,6 +24,19 @@ function program_list_func() {
 	$semesterFour		= $initializationArray['semesterFour'];
 	$jobname			= "Program List";
 	
+	$criticalZipCodeMsg	= "<p><b>CRITICAL!</b> Your ZipCode is missing. As a result, the system is unable to properly 
+								calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
+								target='_blank'><b>HERE</b></a> to update your ZipCode. When that is complete, please close that tab and refresh this tab.</p>";
+	$criticalTimezoneMsg	= "<p><b>CRITICAL!</b> There are multiple timezone identifiers for your 
+									location. Please click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
+									target='_blank'><b>HERE</b></a> to verify your User Master information and select the timezone identifier 
+									that best fits where you live. When that is complete, please close that tab and refresh this tab.</p>";
+	$criticalUpdateMsg	= "<p><b>CRITICAL!</b> The timezone ID in your record needs to be updated. Until that is done, the system 
+								is unable to properly calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
+								target='_blank'><b>HERE</b></a> to update display your information. Update anything that has changed (if anything) 
+								and click on 'Submit'. The system will update the timezone ID. When that is complete, please close that tab and refresh this tab.</p>";
+
+	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -166,7 +179,7 @@ function program_list_func() {
 	$user_signal 		= "";
 	$user_messenger 	= "";
 	$user_action_log	= "unknown";
-	$user_timezone_id	 = "XX";
+	$user_timezone_id	 = "??";
 	$user_languages 	= "";
 	$user_role			= "";
 	$user_prev_callsign	= "";
@@ -264,7 +277,7 @@ function program_list_func() {
 				$missingZipCode			= TRUE;
 				$badTimezoneID			= TRUE;
 			}
-			if ($user_timezone_id == 'XX') {
+			if ($user_timezone_id == '??') {
 				$xxTimezoneID			= TRUE;
 				$badTimezoneID			= TRUE;
 			} 
@@ -272,9 +285,9 @@ function program_list_func() {
 				$badTimezoneID			= TRUE;
 			}
 		} else {
-			sendErrorEmail("$jobname no userMaster record and no userMeta data for $getInfo. Aborting");
+			sendErrorEmail("$jobname no userMaster record and no userMeta data for $userName. Aborting");
 			$content	.= "<p><b>FATAL ERROR</b> SysAdmin has been notified</p>";
-			return $content;
+			goto bypass;
 		}
 	}
 
@@ -319,7 +332,7 @@ function program_list_func() {
 							</table>";
 			if ($xxTimezoneID) {
 				if ($doDebug) {
-					echo "timezone_id is XX. Giving update user master message<br />";
+					echo "timezone_id is ??. Giving update user master message<br />";
 				}
 				$content	.= "<p><b>CRITICAL!</b> There are multiple timezone identifiers for your 
 								location. Please click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
@@ -429,6 +442,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-search-joblog/' target='_blank'>Search Joblog</a>
 								<li><a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/' target='_blank'>Search Sent Email by Callsign or Email</a>
 								<li><a href='$siteURL/cwa-search-tracking-data/' target='_blank'>Search Tracking Data</a>
+								<li><a href='$siteURL/cwa-semester-raw-comparison-statistics/' target='_blank'>Semester Raw Comparison Statistics</a>
 								<li><a href='$siteURL/cwa-send-advisor-email-to-view-student-evaluations/' target='_blank'>Send Advisor Email to View Student Evaluations</a>
 								<li><a href='$siteURL/cwa-send-an-email/' target='_blank'>Send an Email</a>
 								<li><a href='$siteURL/cwa-send-congratulations-email-to-students/' target='_blank'>Send Congratulations Email to Students</a>
@@ -494,6 +508,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
 								<li><a href='$siteURL/cwa-how-students-progressed-report/' target='_blank'>How Students Progressed Report</a>
 								<li><a href='$siteURL/cwa-repeating-student-statistics/' target='_blank'>Repeating Student Statistics</a>
+								<li><a href='$siteURL/cwa-semester-raw-comparison-statistics/' target='_blank'>Semester Raw Comparison Statistics</a>
 								</ul>
 				
 								<h4>Reminder Management</h4>
@@ -771,31 +786,23 @@ function program_list_func() {
 							<td></td></tr>
 						</table>";
 		if ($badTimezoneID) {
-			if ($xxTimezoneID) {
-				if ($doDebug) {
-					echo "timezone_id is XX. Giving update user master message<br />";
-				}
-				$content	.= "<p><b>CRITICAL!</b> There are multiple timezone identifiers for your 
-								location. Please click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to verify your User Master information and select the timezone identifier 
-								that best fits where you live. When that is complete, please close that tab and refresh this tab.</p>";
-				$doProceed	= FALSE;
-			} elseif ($missingZipCode) {
+			if ($xxTimezoneID && $missingZipCode) {
 				if ($doDebug) {
 					echo "Zipcode is missing for a US location. Giving the update user master message<br />";
 				}
-				$content	.= "<p><b>CRITICAL!</b> Your record is missing a zipcode. As a result, the system is unable to properly 
-								calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to update the advisor Master Data with your zipcode. When that is complete, please close that tab and refresh this tab.</p>";
+				$content	.= "$criticalZipCodeMsg";
 				$doProceed	= FALSE;
+			} elseif ($xxTimezoneID && !$missingZipCode) {
+				if ($doDebug) {
+					echo "timezone_id is ??. Giving update user master message<br />";
+				}
+				$content	.= "$criticalTimezoneMsg";
+				$doProceed	= FALSE;				
 			} else {
 				if ($doDebug) {
 					echo "need to figure out the user's timezone ID. Giving the update user master message<br />";
 				}
-				$content	.= "<p><b>CRITICAL!</b> The timezone ID in your record needs to be updated. Until that is done, the system 
-								is unable to properly calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to update display your information. Update anything that has changed (if anything) 
-								and click on 'Submit'. The system will update the timezone ID. When that is complete, please close that tab and refresh this tab.</p>";
+				$content	.= "$criticalUpdateMsg";
 				$doProceed	= FALSE;
 			}
 		}
@@ -877,31 +884,23 @@ function program_list_func() {
 							<td></td></tr>
 						</table>";
 		if ($badTimezoneID) {
-			if ($xxTimezoneID) {
-				if ($doDebug) {
-					echo "timezone_id is XX. Giving update user master message<br />";
-				}
-				$content	.= "<p><b>CRITICAL!</b> There are multiple timezone identifiers for your 
-								location. Please click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to verify your User Master information and select the timezone identifier 
-								that best fits where you live. When that is complete, please close that tab and refresh this tab.</p>";
-				$doProceed	= FALSE;
-			} elseif ($missingZipCode) {
+			if ($xxTimezoneID && $missingZipCode) {
 				if ($doDebug) {
 					echo "Zipcode is missing for a US location. Giving the update user master message<br />";
 				}
-				$content	.= "<p><b>CRITICAL!</b> Your record is missing a zipcode. As a result, the system is unable to properly 
-								calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to update the advisor Master Data with your zipcode. When that is complete, please close that tab and refresh this tab.</p>";
+				$content	.= "$criticalZipCodeMsg";
 				$doProceed	= FALSE;
+			} elseif ($xxTimezoneID && !$missingZipCode) {
+				if ($doDebug) {
+					echo "timezone_id is ??. Giving update user master message<br />";
+				}
+				$content	.= "$criticalTimezoneMsg";
+				$doProceed	= FALSE;				
 			} else {
 				if ($doDebug) {
 					echo "need to figure out the user's timezone ID. Giving the update user master message<br />";
 				}
-				$content	.= "<p><b>CRITICAL!</b> The timezone ID in your record needs to be updated. Until that is done, the system 
-								is unable to properly calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-								target='_blank'>HERE</a> to update display your information. Update anything that has changed (if anything) 
-								and click on 'Submit'. The system will update the timezone ID. When that is complete, please close that tab and refresh this tab.</p>";
+				$content	.= "$criticalUpdateMsg";
 				$doProceed	= FALSE;
 			}
 		}
@@ -955,6 +954,7 @@ function program_list_func() {
 								Use this link to access the curriculum and various practice files. This information is hosted on cwops.org.</p>";
 		}	
 	}
+	bypass:
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><a href='$siteURL/wp-login.php/?action=logout'>Logout</a><br /></p>
 						<p>Prepared at $thisTime</p>";
