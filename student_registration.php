@@ -1212,13 +1212,13 @@ function student_registration_func() {
 				}
 				
 				$goOn						= TRUE;
-				if ($student_timezone_id == 'XX') {
+				if ($student_timezone_id == '??') {
 					$timezoneMsg	= "<p><b>IMPORTANT!</b> The timezone information in your master record needs to 
 										be updated. Please go to 
 										<a href='$siteURL/cwa-display-and-update-user-master-information/'>
 										Display and Update User Master Information</a> and click on 
 										'Update This Information'. Then verify that your 
-										address information is correct (it probably is ... if not, 
+										address information, particularly your ZipCode if you live in the US is correct. If not, 
 										please correct it). Then click on 'Submit Updates'. The 
 										list of possible timezones will be displayed. Please select 
 										the appropriate information. Then start the 'Student Signup' 
