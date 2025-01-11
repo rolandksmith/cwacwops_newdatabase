@@ -1884,7 +1884,7 @@ function getTheReason($strReasonCode) {
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("jobname|$nowDate|$nowTime|$userName|$thisStr|Time|$strPass: $elapsedTime");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|$thisStr|Time|$strPass: $elapsedTime");
 	if ($result == 'FAIL') {
 		$content	.= "<p>writing to joblog.txt failed</p>";
 	}
