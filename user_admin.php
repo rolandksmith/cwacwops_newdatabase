@@ -292,8 +292,7 @@ function user_admin_func() {
 							} else {
 								$content	.= "User record updated and available for login<br />
 												Username: $user_login<br />
-												Password: N3wPass2993<br />
-												Email: $newEmail<br />";
+ 	 											Password: N3wPass2993<br />";
 							}
 						} else {
 							$content			.= "$inp_callsign is already taken over<br />";
