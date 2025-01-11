@@ -17,7 +17,7 @@ function get_user_master_data($dataArray=array()) {
 	wpw1_users, the program attempts to figure out the timezone_id. If 
 	the country_code is US, then the zip code is used. Otherwise, only 
 	the country_code. If a country has more than one timezone_id, the 
-	program sets the timezone_id to 'XX' and it up to the calling program 
+	program sets the timezone_id to '??' and it up to the calling program 
 	to figure out the appropriate timezone_id.
 */
 
@@ -345,79 +345,60 @@ function get_user_master_data($dataArray=array()) {
 										if ($doDebug) {
 											echo "figuring out the timezone_id. Country_code: $user_country_code<br />";
 										}
+										$doCheck				= TRUE;
 										if ($user_country_code == '') {
-											$user_timezone_id 	= 'XX';
+											$user_timezone_id 	= '??';
+											$doCheck			= FALSE;
 										} else {
-											if ($user_country_code == 'US') {
-												if ($doDebug) {
-													echo "have a country code of US, verifying the zip code<br />";
-												}
-												$zipResult		= getOffsetFromZipCode($user_zip_code,'',TRUE,$testMode,$doDebug);
-												if ($zipResult[0] == 'NOK') {
-													$user_timezone_id		="XX";
-												} else {
-													$user_timezone_id		= $zipResult[1];
-												}
-											} else {		// country code not US. Figure out the timezone and offset
-												if ($doDebug) {
-													echo "dealing with a non-us country of $user_country_code<br />";
-												}
-												$timezone_identifiers 		= DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $user_country_code );
-												$myInt						= count($timezone_identifiers);
-												if ($doDebug) {
-													echo "found $myInt identifiers for country $user_country_code";
-												}
-												
-												if ($myInt == 1) {									//  only 1 found. Use that and continue
-													$timezone_id		= $timezone_identifiers[0];
-												} else {
-													$timezoneSelector			= array();		// localDateTime => $myCity
-													$ii							= 1;
-													if ($doDebug) {
-														echo "have the list of identifiers for $user_country_code<br />";
-													}
-													$oneChecked				= FALSE;
-													foreach ($timezone_identifiers as $thisID) {
+											if ($user_zip_code != '') {
+												// check using zip code
+												if ($user_country_code == 'US') {
+													if (strlen($user_zip_code) < 5) {
 														if ($doDebug) {
-															echo "Processing $thisID<br />";
+															echo "Have invalid US zip code<br />";
 														}
-														$selector			= "";
-														if (isset($browser_timezone_id)) {
-															if ($browser_timezone_id == $thisID) {
-																$selector		= "checked";
-																$oneChecked		= TRUE;
-															}
+														$user_zip_code		= '??';
+														$user_timezone_id	= '??';
+														$doCheck		 	= FALSE;
+													} else {
+														$myInt			= strpos($user_zip_code,"-");
+														if ($myInt === FALSE) {
+															$checkStr			= array('zip'=>$user_zip_code,
+																						'country'=>$user_country);
+														} else {
+															$newZip				= substr($user_zip_code,0,$myInt);
+															$checkStr			= array('zip'=>$newZip,
+																						'country'=>$user_country);
 														}
-														$dateTimeZoneLocal 	= new DateTimeZone($thisID);
-														$dateTimeLocal 		= new DateTime("now",$dateTimeZoneLocal);
-														$localDateTime 		= $dateTimeLocal->format('h:i A');
-														$myInt				= strpos($thisID,"/");
-														$myCity				= substr($thisID,$myInt+1);
-														
-														if (!array_key_exists($localDateTime,$timezoneSelector)) {
-															$timezoneSelector[$localDateTime] 	= $thisID;
-														}
-													} 
-													if (count($timezoneSelector) == 0) {
-														$user_timezone_id			= 'XX';
 													}
-													if (count($timezoneSelector) == 1) {
-														foreach($timezoneSelector as $thisDateTime => $thisID);
-															$user_timezone_id			= $thisID;
-													}
-													if (count($timezoneSelector) > 1) {
-														$user_timezone_id			= "XX";
+												} else {
+													$checkStr			= array('zip'=>$user_zip_code,
+																				'country'=>$user_country);
+												}
+											} else {
+												if ($user_country_code == 'US') {
+													$user_zip_code 		= '??';
+													$user_timezone_id	= '??';
+													$doCheck			= FALSE;
+													if ($doDebug) {
+														echo "US country code and empty zipcode. Set zipcode to ??<br />";
 													}
 												}
+												// no zipcode. check using address info
+												$checkStr			= array('city'=>$user_city,
+																			'state'=>$user_state,
+																			'country'=>$user_country);
+											}
+											if ($doCheck) {
+												$checkStr['doDebug']	= $doDebug;
+												$user_timezone_id		= getTimeZone($checkStr);
 											}
 										}
 										
 										// have all the data. Insert the record into user_master
 										$user_action_log	= "/ $thisDate $user_call_sign Record created ";
 										$user_prev_callsign	= '';
-										
-										
-										
+
 										try {
 											$userInsert			= $wpdb->insert($userMasterTableName,
 																				array('user_call_sign'=>$user_call_sign,
