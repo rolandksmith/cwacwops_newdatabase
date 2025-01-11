@@ -179,9 +179,10 @@ function display_student_evaluation_of_advisors_func() {
 		$currentSemester	= $initializationArray['currentSemester'];
 		$prevSemester		= $initializationArray['prevSemester'];
 		if ($currentSemester == 'Not in Session') {
-			$useSemester	= $prevSemester;
+			$useSemester	= "<input type='radio' name='theSemester' value='$prevSemester' class='formInputButton' checked required> Previous Semester: $prevSemester<br />";
 		} else {
-			$useSemester	= $currentSemester;
+			$useSemester	= "<input type='radio' name='theSemester' value='$currentSemester' class='formInputButton' checked required> Current Semester: $currentSemester<br />
+							  <input type='radio' name='theSemester' value='$prevSemester' class='formInputButton' required> Previous Semester: $prevSemester<br />";
 		}
 		$content 		.= "<h3>Display Student Evaluation of Advisors</h3>
 							<p>Specify the semester and click Submit to Start the Process</p>
@@ -190,8 +191,8 @@ function display_student_evaluation_of_advisors_func() {
 							<input type='hidden' name='strpass' value='2'>
 							<table>
 							<tr><td style='width:150px;vertical-align:top;'>Semester</td>
-								<td><input type='radio' name='theSemester' value='$useSemester' class='formInputButton' checked> $useSemester<br />
-									<input type='radio' name='theSemester' value='specified' class='formInputButton'> Specify semester:<br />
+								<td>$useSemester
+									<input type='radio' name='theSemester' value='specified' class='formInputButton' required> Specify semester (e.g., 2024 Jan/Feb) by entering it below:<br />
 									<input type='text' name='newSemester' class='formInputText' size='15' maxlength='15'></td></tr>
 							$testModeOption
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
