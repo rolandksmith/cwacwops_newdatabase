@@ -1321,7 +1321,6 @@ function getTheReason($strReasonCode) {
 					}
 
 					$student_last_name 						= no_magic_quotes($student_last_name);
-					$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 						
 					if ($doDebug) {
 						echo "Processing call sign $student_call_sign. Intervention Required: $student_intervention_required; hold_reason_code: $student_hold_reason_code<br />";
@@ -1347,10 +1346,10 @@ function getTheReason($strReasonCode) {
 								$IRType			= "H: Student on Hold";
 								$IRReason		= "(E) Student not evaluated but asking for next class level";
 							}
-							if ($student_hold_reason_code == 'X') {
-								$IRType			= "H: Student on Hold";
-								$IRReason		= "(X) Student is being recycled to unassigned";
-							}
+//??							if ($student_hold_reason_code == 'X') {
+//??								$IRType			= "H: Student on Hold";
+//??								$IRReason		= "(X) Student is being recycled to unassigned";
+//??							}
 							if ($student_hold_reason_code == 'W') {
 								$IRType			= "H: Student on Hold";
 								$IRReason		= "(W) Student withdrew but asking for next class level";
@@ -1482,7 +1481,7 @@ function getTheReason($strReasonCode) {
 						if ($student_excluded_advisor == '') {
 							$student_excluded_advisor	= $inp_advisor_callsign;
 						} else {
-							$student_excluded_advisor	.= "|$inp_advisor_callsign";
+							$student_excluded_advisor	.= "&$inp_advisor_callsign";
 						}
 						$updateParams	= array('student_excluded_advisor'=>"$student_excluded_advisor",
 												'student_action_log'=>"$student_action_log");
@@ -1724,25 +1723,24 @@ function getTheReason($strReasonCode) {
 
 // $testMode	= TRUE;
 		$jobname			= "Student Management Override Excluded Advisor";
+		$madeChange			= FALSE;
 		if ($haveStudent) {
-			$myInt 									= strpos($student_excluded_advisor,$inp_advisor_callsign);
-			if ($myInt !== FALSE) {
-				/// advisor needs to be removed
-				$newExcludedAdvisor 				= '';
-				$myInt 								= 0;
-				$myArray							= explode("|",$student_excluded_advisor);
-				foreach($myArray as $myValue) {
-					if ($myValue != $inp_advisor_callsign) {
-						$myInt++;
-						if ($myInt == 1) {
-							$newExcludedAdvisor 	= $myValue;
-						} else {
-							$newExcludedAdvisor 	.= "|$myValue";
-						}
-					}
+			$test1			= "/$inp_advisor_call_sign/";
+			$test2			= "/\|$inp_advisor_call_sign/";
+			$test3			= "/&$inp_advisor_call_sign/";
+			if (preg_match($test1,$student_excluded_advisor)) {
+				if (preg_match($test2,$student_excluded_advisor)) {
+					$student_excluded_advisor = str_replace("\|$inp_advisor_callsign","",$student_excluded_advisor);
+					$madeChange			  = TRUE;
+				} elseif (preg_match($test3,$student_excluded_advisor)) {
+					$student_excluded_advisor = str_replace("&$inp_advisor_callsign","",$student_excluded_advisor);
+					$madeChainge			  = TRUE;
 				}
-				$student_excluded_advisor			= $newExcludedAdvisor;
-
+			} else {
+				$student_excluded_advisor = str_replace($inp_advisor_callsign,"",$student_excluded_advisor);
+				$madeChainge			  = TRUE;
+			}
+			if ($madeChange) {
 				$student_action_log		= "$student_action_log / $actionDate MGMT30 removed excluded advisor $inp_advisor_callsign";
 				$updateParams			= array('student_excluded_advisor'=>$student_excluded_advisor,
 												'student_action_log'=>$student_action_log);
@@ -1777,7 +1775,6 @@ function getTheReason($strReasonCode) {
 		} else {
 			$content	.= "Found incongruous number of records for $inp_student_callsign: $numberSRows. Process aborted.";
 		}
-					
 					
 
 		
