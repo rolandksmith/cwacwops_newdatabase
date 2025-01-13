@@ -597,7 +597,7 @@ function daily_student_cron_v4_func() {
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
 						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
+						$student_master_action_log 			= stripslashes($studentRow->user_action_log);
 						$student_timezone_id 				= $studentRow->user_timezone_id;
 						$student_languages 					= $studentRow->user_languages;
 						$student_survey_score 				= $studentRow->user_survey_score;
@@ -626,7 +626,7 @@ function daily_student_cron_v4_func() {
 						$student_response_date  				= $studentRow->student_response_date;
 						$student_abandoned  					= $studentRow->student_abandoned;
 						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
+						$student_action_log  					= stripslashes($studentRow->student_action_log);
 						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
 						$student_selected_date  				= $studentRow->student_selected_date;
 						$student_no_catalog  					= $studentRow->student_no_catalog;
@@ -656,7 +656,6 @@ function daily_student_cron_v4_func() {
 	
 								
 						$student_last_name 						= no_magic_quotes($student_last_name);
-						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 	
 						if ($student_first_class_choice == '') {
 							$student_first_class_choice			= 'None';
@@ -928,7 +927,7 @@ function daily_student_cron_v4_func() {
 									$advisorEmail							= $advisorClassRow->user_email;
 									$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
 									$advisorClass_level						= $advisorClassRow->advisorclass_level;
-									$advisorClass_action_log				= $advisorClassRow->advisorclass_action_log;
+									$advisorClass_action_log				= stripslashes($advisorClassRow->advisorclass_action_log);
 									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
 									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
@@ -1146,7 +1145,7 @@ function daily_student_cron_v4_func() {
 													$replace_telegram 					= $studentRow->user_telegram;
 													$replace_signal 					= $studentRow->user_signal;
 													$replace_messenger 					= $studentRow->user_messenger;
-													$replace_master_action_log 			= $studentRow->user_action_log;
+													$replace_master_action_log 			= stripslashes($studentRow->user_action_log);
 													$replace_timezone_id 				= $studentRow->user_timezone_id;
 													$replace_languages 					= $studentRow->user_languages;
 													$replace_survey_score 				= $studentRow->user_survey_score;
@@ -1175,7 +1174,7 @@ function daily_student_cron_v4_func() {
 													$replace_response_date  				= $studentRow->student_response_date;
 													$replace_abandoned  					= $studentRow->student_abandoned;
 													$replace_replace_status  				= strtoupper($studentRow->student_status);
-													$replace_action_log  					= $studentRow->student_action_log;
+													$replace_action_log  					= stripslashes($studentRow->student_action_log);
 													$replace_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
 													$replace_selected_date  				= $studentRow->student_selected_date;
 													$replace_no_catalog  					= $studentRow->student_no_catalog;
@@ -1440,7 +1439,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
 					$student_messenger 					= $studentRow->user_messenger;
-					$student_master_action_log 			= $studentRow->user_action_log;
+					$student_master_action_log 			= stripslashes($studentRow->user_action_log);
 					$student_timezone_id 				= $studentRow->user_timezone_id;
 					$student_languages 					= $studentRow->user_languages;
 					$student_survey_score 				= $studentRow->user_survey_score;
@@ -1455,7 +1454,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -1469,7 +1468,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_response_date  				= $studentRow->student_response_date;
 					$student_abandoned  					= $studentRow->student_abandoned;
 					$student_status  						= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->student_action_log;
+					$student_action_log  					= stripslashes($studentRow->student_action_log);
 					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
 					$student_selected_date  				= $studentRow->student_selected_date;
 					$student_no_catalog  					= $studentRow->student_no_catalog;
@@ -1482,7 +1481,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
@@ -2531,7 +2530,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 														$advisorEmail							= $advisorClassRow->user_email;
 														$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
 														$advisorClass_level						= $advisorClassRow->advisorclass_level;
-														$advisorClass_action_log				= $advisorClassRow->advisorclass_action_log;
+														$advisorClass_action_log				= stripslashes($advisorClassRow->advisorclass_action_log);
 														$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 														$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
 														$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
@@ -2737,7 +2736,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																		$replace_telegram 					= $replaceRow->user_telegram;
 																		$replace_signal 					= $replaceRow->user_signal;
 																		$replace_messenger 					= $replaceRow->user_messenger;
-																		$replace_master_action_log 			= $replaceRow->user_action_log;
+																		$replace_master_action_log 			= stripslashes($replaceRow->user_action_log);
 																		$replace_timezone_id 				= $replaceRow->user_timezone_id;
 																		$replace_languages 					= $replaceRow->user_languages;
 																		$replace_survey_score 				= $replaceRow->user_survey_score;
@@ -2766,7 +2765,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																		$replace_response_date  				= $replaceRow->student_response_date;
 																		$replace_abandoned  					= $replaceRow->student_abandoned;
 																		$replace_replace_status  				= strtoupper($replaceRow->student_status);
-																		$replace_action_log  					= $replaceRow->student_action_log;
+																		$replace_action_log  					= stripslashes($replaceRow->student_action_log);
 																		$replace_pre_assigned_advisor  			= $replaceRow->student_pre_assigned_advisor;
 																		$replace_selected_date  				= $replaceRow->student_selected_date;
 																		$replace_no_catalog  					= $replaceRow->student_no_catalog;
@@ -3086,7 +3085,7 @@ assignment that meet the criteria for your class.<p>";
 													$student_response_date  				= $studentRow->student_response_date;
 													$student_abandoned  					= $studentRow->student_abandoned;
 													$student_status  						= strtoupper($studentRow->student_status);
-													$student_action_log  					= $studentRow->student_action_log;
+													$student_action_log  					= stripslashes($studentRow->student_action_log);
 													$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
 													$student_selected_date  				= $studentRow->student_selected_date;
 													$student_no_catalog  					= $studentRow->student_no_catalog;
@@ -3099,7 +3098,7 @@ assignment that meet the criteria for your class.<p>";
 													$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 													$student_promotable  					= $studentRow->student_promotable;
 													$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-													$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+													$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 													$student_available_class_days  			= $studentRow->student_available_class_days;
 													$student_intervention_required  		= $studentRow->student_intervention_required;
 													$student_copy_control  					= $studentRow->student_copy_control;
