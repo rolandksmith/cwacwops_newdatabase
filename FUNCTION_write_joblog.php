@@ -52,6 +52,14 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 	} else {
 		$updateParams['job_comments']	= 'None supplied';
 	}
+	
+	if ($myArray[0] == 'jobname' || $myArray[0] == '') {
+		$variableDump	= get_defined_vars();
+		$newStr			= print_r($variableDump,TRUE);
+		sendErrorEmail("function_write_joblog: jobname. $myStr\n<br /><pre>$newStr</pre>");
+	}
+	
+	
 	$updateParams['job_month']			= date('F Y');
 	$updateFormat						= array('%s','%s','%s','%s','%s','%s','%s','%s','%s');
 
