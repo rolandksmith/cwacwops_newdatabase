@@ -617,3 +617,9 @@ try {
   // Handle the exception (e.g., display an error message)
   echo "An error occurred: " . $e->getMessage();
 }
+
+
+/// SQL to change something within a field in a table
+UPDATE your_table_name
+SET your_column_name = REPLACE(your_column_name, '\|', '&');
+
