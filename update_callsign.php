@@ -655,7 +655,7 @@ changed from $inp_old_callsign to $inp_new_callsign ";
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname from $inp_old_callsign to $inp_new_callsign|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr|from $inp_old_callsign to $inp_new_callsign");
 	if ($result == 'FAIL') {
 		$content	.= "<p>writing to joblog.txt failed</p>";
 	}
