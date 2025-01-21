@@ -392,7 +392,7 @@ if ($doDebug) {
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("4jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
+	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
 	if ($result == 'FAIL') {
 		$content	.= "<p>writing to joblog.txt failed</p>";
 	}
