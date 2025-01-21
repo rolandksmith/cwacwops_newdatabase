@@ -2,7 +2,7 @@ function semester_raw_comparison_statistics_func() {
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -55,8 +55,19 @@ function semester_raw_comparison_statistics_func() {
 
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-semester-raw-comparison-statistics/";
-	$inp_semester				= '';
-	$inp_rsave					= '';
+	$inp_semester				= FALSE;
+	$inp_rsave					= FALSE;
+	$inp_students				= FALSE;
+	$inp_verified				= FALSE;
+	$inp_declined				= FALSE;
+	$inp_assigned				= FALSE;
+	$inp_replaced				= FALSE;
+	$inp_promoted				= FALSE;
+	$inp_withdrawn				= FALSE;
+	$inp_notpromoted			= FALSE;
+	$inp_advisors				= FALSE;
+	$inp_classes				= FALSE;
+	
 	$jobname					= "Semester Raw Comparison Statistics V$versionNumber";
 	$levelArray					= array('Beginner'=>'beg',
 										'Fundamental'=>'fun',
@@ -95,6 +106,86 @@ function semester_raw_comparison_statistics_func() {
 			if ($str_key 		== "inp_semesterlist") {
 				$inp_semesterlist	 = $str_value;
 //				$inp_semesterlist	 = filter_var($inp_semesterlist,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_students") {
+				if ($str_value == 'students') {
+					$inp_students	= TRUE;
+					if ($doDebug) {
+						echo "set inp_students to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_verified") {
+				if ($str_value == 'verified') {
+					$inp_verified	= TRUE;
+					if ($doDebug) {
+						echo "set inp_verified to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_declined") {
+				if ($str_value == 'declined') {
+					$inp_declined	= TRUE;
+					if ($doDebug) {
+						echo "set inp_declined to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_assigned") {
+				if ($str_value == 'assigned') {
+					$inp_assigned	= TRUE;
+					if ($doDebug) {
+						echo "set inp_assigned to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_replaced") {
+				if ($str_value == 'replaced') {
+					$inp_replaced	= TRUE;
+					if ($doDebug) {
+						echo "set inp_replaced to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_promoted") {
+				if ($str_value == 'promoted') {
+					$inp_promoted	= TRUE;
+					if ($doDebug) {
+						echo "set inp_promoted to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_withdrawn") {
+				if ($str_value == 'withdrawn') {
+					$inp_withdrawn	= TRUE;
+					if ($doDebug) {
+						echo "set inp_withdrawn to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_notpromoted") {
+				if ($str_value == 'notpromoted') {
+					$inp_notpromoted	= TRUE;
+					if ($doDebug) {
+						echo "set inp_notpromoted to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_advisors") {
+				if ($str_value == 'advisors') {
+					$inp_advisors	= TRUE;
+					if ($doDebug) {
+						echo "set inp_advisors to TRUE<br />";
+					}
+				}
+			}
+			if ($str_key 		== "inp_classes") {
+				if ($str_value == 'classes') {
+					$inp_classes	= TRUE;
+					if ($doDebug) {
+						echo "set inp_classes to TRUE<br />";
+					}
+				}
 			}
 		}
 	}
@@ -181,10 +272,12 @@ function semester_raw_comparison_statistics_func() {
 		$extMode					= 'tm';
 		$studentTableName			= "wpw1_cwa_student2";
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
+		$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
 	} else {
 		$extMode					= 'pd';
 		$studentTableName			= "wpw1_cwa_student";
 		$userMasterTableName		= 'wpw1_cwa_user_master';
+		$advisorClassTableName		= 'wpw1_cwa_advisorclass';
 	}
 
 
@@ -227,6 +320,18 @@ function semester_raw_comparison_statistics_func() {
 							<tr><td style='width:150px; vertical-align:top;'>Semester</td><td>
 								$optionList
 								</td></tr>
+							<tr><td style='vertical-align:top;'><b>Counts to be Included</b></td>
+								<td><input type='checkbox' class='formInputButton' name='inp_students' value='students'>Enrolled Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_verified' value='verified'>Verified Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_declined' value='declined'>Students who Declined<br />
+									<input type='checkbox' class='formInputButton' name='inp_assigned' value='assigned'>Assigned Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_replaced' value='replaced'>Replaced Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_promoted' value='promoted'>Promoted Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_withdrawn' value='withdrawn'>Withdrawn Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_notpromoted' value='notpromoted'>Not Promoted Students<br />
+									<input type='checkbox' class='formInputButton' name='inp_advisors' value='advisors'>Advisor Counts<br />
+									<input type='checkbox' class='formInputButton' name='inp_classes' value='classes'>Advisor Classes<br />
+								</td></tr>
 							$testModeOption
 							<tr><td>Save this report to the reports achive?</td>
 							<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
@@ -255,11 +360,11 @@ function semester_raw_comparison_statistics_func() {
 			$countsArray[$theSemester]['students']['int']		= 0;
 			$countsArray[$theSemester]['students']['adv']		= 0;
 
-			$countsArray[$theSemester]['validated']['total']	= 0;
-			$countsArray[$theSemester]['validated']['beg']		= 0;
-			$countsArray[$theSemester]['validated']['fun']		= 0;
-			$countsArray[$theSemester]['validated']['int']		= 0;
-			$countsArray[$theSemester]['validated']['adv']		= 0;
+			$countsArray[$theSemester]['verified']['total']	= 0;
+			$countsArray[$theSemester]['verified']['beg']		= 0;
+			$countsArray[$theSemester]['verified']['fun']		= 0;
+			$countsArray[$theSemester]['verified']['int']		= 0;
+			$countsArray[$theSemester]['verified']['adv']		= 0;
 
 			$countsArray[$theSemester]['assigned']['total']		= 0;
 			$countsArray[$theSemester]['assigned']['beg']		= 0;
@@ -272,6 +377,43 @@ function semester_raw_comparison_statistics_func() {
 			$countsArray[$theSemester]['promoted']['fun']		= 0;
 			$countsArray[$theSemester]['promoted']['int']		= 0;
 			$countsArray[$theSemester]['promoted']['adv']		= 0;
+
+			$countsArray[$theSemester]['advisors']['total']		= 0;
+			$countsArray[$theSemester]['advisors']['beg']		= 0;
+			$countsArray[$theSemester]['advisors']['fun']		= 0;
+			$countsArray[$theSemester]['advisors']['int']		= 0;
+			$countsArray[$theSemester]['advisors']['adv']		= 0;
+
+			$countsArray[$theSemester]['classes']['total']		= 0;
+			$countsArray[$theSemester]['classes']['beg']		= 0;
+			$countsArray[$theSemester]['classes']['fun']		= 0;
+			$countsArray[$theSemester]['classes']['int']		= 0;
+			$countsArray[$theSemester]['classes']['adv']		= 0;
+
+			$countsArray[$theSemester]['declined']['total']		= 0;
+			$countsArray[$theSemester]['declined']['beg']		= 0;
+			$countsArray[$theSemester]['declined']['fun']		= 0;
+			$countsArray[$theSemester]['declined']['int']		= 0;
+			$countsArray[$theSemester]['declined']['adv']		= 0;
+
+			$countsArray[$theSemester]['replaced']['total']		= 0;
+			$countsArray[$theSemester]['replaced']['beg']		= 0;
+			$countsArray[$theSemester]['replaced']['fun']		= 0;
+			$countsArray[$theSemester]['replaced']['int']		= 0;
+			$countsArray[$theSemester]['replaced']['adv']		= 0;
+
+			$countsArray[$theSemester]['withdrawn']['total']		= 0;
+			$countsArray[$theSemester]['withdrawn']['beg']		= 0;
+			$countsArray[$theSemester]['withdrawn']['fun']		= 0;
+			$countsArray[$theSemester]['withdrawn']['int']		= 0;
+			$countsArray[$theSemester]['withdrawn']['adv']		= 0;
+
+			$countsArray[$theSemester]['notpromoted']['total']		= 0;
+			$countsArray[$theSemester]['notpromoted']['beg']		= 0;
+			$countsArray[$theSemester]['notpromoted']['fun']		= 0;
+			$countsArray[$theSemester]['notpromoted']['int']		= 0;
+			$countsArray[$theSemester]['notpromoted']['adv']		= 0;
+
 			// get the students
 			$studentSQL		= "select * from $studentTableName 
 								left join $userMasterTableName on user_call_sign = student_call_sign 
@@ -366,8 +508,8 @@ function semester_raw_comparison_statistics_func() {
 						$countsArray[$theSemester]['students'][$prefix]++;
 						
 						if ($student_response == 'Y') {
-							$countsArray[$theSemester]['validated']['total']++;
-							$countsArray[$theSemester]['validated'][$prefix]++;
+							$countsArray[$theSemester]['verified']['total']++;
+							$countsArray[$theSemester]['verified'][$prefix]++;
 						}
 						if ($student_status == 'S' || $student_status == 'Y') {
 							$countsArray[$theSemester]['assigned']['total']++;
@@ -377,23 +519,125 @@ function semester_raw_comparison_statistics_func() {
 							$countsArray[$theSemester]['promoted']['total']++;
 							$countsArray[$theSemester]['promoted'][$prefix]++;
 						}
+						
+						if ($student_response == 'R') {
+							$countsArray[$theSemester]['declined']['total']++;
+							$countsArray[$theSemester]['declined'][$prefix]++;
+						}
+						
+						if ($student_status == 'C' || $student_status == 'R' || $student_status == 'V') {
+							$countsArray[$theSemester]['replaced']['total']++;
+							$countsArray[$theSemester]['replaced'][$prefix]++;
+						}
+						
+						if ($student_promotable == 'W') {
+							$countsArray[$theSemester]['withdrawn']['total']++;
+							$countsArray[$theSemester]['withdrawn'][$prefix]++;
+						}
+
+						if ($student_promotable == 'N') {
+							$countsArray[$theSemester]['notpromoted']['total']++;
+							$countsArray[$theSemester]['notpromoted'][$prefix]++;
+						}
+						
+						
 					}
 				} else {
 					$content	.= "<p>No students found in $studentTableName table for $theSemester semester</p>";
+				}
+			}
+			// get the advisors
+			$advisorClassSQL	= "select * from $advisorClassTableName 
+									where advisorclass_semester = '$theSemester'";
+			$wpw1_cwa_advisorclass	= $wpdb->get_results($advisorClassSQL);
+			if ($wpw1_cwa_advisorclass === FALSE) {
+				handleWPDBError($jobname,$doDebug);
+			} else {
+				$numACRows			= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $advisorClassSQL<br />and found $numACRows rows<br />";
+				}
+				if ($numACRows > 0) {
+					$prevAdvisor	= "";
+					foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+						$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+						$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+						$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+						$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+						$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+						$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+						$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+						$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+						$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+						$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+						$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+						$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+						$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+						$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+						$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+						$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+						$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+						$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+						$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+						$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+						$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+						$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+						$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+						$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+						$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+						$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+						$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+						$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+						$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+						$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+						$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+						$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+						$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+						$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+						$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+						$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+						$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+						$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+						$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+						$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+						$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+						$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+						$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+
+						$prefix				= $levelArray[$advisorClass_level];
+
+						if ($advisorClass_call_sign != $prevAdvisor) {
+							$countsArray[$theSemester]['advisors']['total']++;
+							$countsArray[$theSemester]['advisors'][$prefix]++;
+						}
+						$prevAdvisor		= $advisorClass_call_sign;
+
+						$countsArray[$theSemester]['classes']['total']++;
+						$countsArray[$theSemester]['classes'][$prefix]++;
+					}
+				} else {
+					$content		.= "<p>No advisorClass records found in $advisorClassTableName table</p>";
 				}
 			}
 		}
 		// counts obtained display and export
 		
 		// setup csv file
-		$thisStr		= "semester_comparison.csv";
+		$outFileName		= "semester_comparison_" . $userName . ".csv";
 		if (preg_match('/localhost/',$siteURL)) {
-			$thisFileName	= "wp-content/uploads/$thisStr";
+			$thisFileName	= "wp-content/uploads/$outFileName";
 		} else {
-			$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$thisStr";
+			$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$outFileName";
 		}
 		$thisFP			= fopen($thisFileName,'w');
 
+	//// output the semesters
 		$csvRecord				= array();
 		$displayReport			= "<h4>Raw Data</h4>
 									<table>
@@ -404,198 +648,505 @@ function semester_raw_comparison_statistics_func() {
 			$csvRecord[]		= $thisSemester;
 		}
 		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Total Enrolled</td>";
-		$csvRecord[]			= 'Total Enrolled';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['students']['total'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Beg Enrolled</td>";
-		$csvRecord[]			= 'Beg Enrolled';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['students']['beg'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Fun Enrolled</td>";
-		$csvRecord[]			= 'Fun Enrolled';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['students']['fun'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Int Enrolled</td>";
-		$csvRecord[]			= 'Int Enrolled';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['students']['int'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Enrolled</td>";
-		$csvRecord[]			= 'Adv Enrolled';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['students']['adv'];
-			$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
 
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Total Verified</td>";
-		$csvRecord[]			= 'Total Verified';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['validated']['total'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
+	// output the students
+		if ($inp_students) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Enrolled</td>";
+			$csvRecord[]			= 'Total Enrolled';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['students']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Enrolled</td>";
+			$csvRecord[]			= 'Beg Enrolled';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['students']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Enrolled</td>";
+			$csvRecord[]			= 'Fun Enrolled';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['students']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Enrolled</td>";
+			$csvRecord[]			= 'Int Enrolled';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['students']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Enrolled</td>";
+			$csvRecord[]			= 'Adv Enrolled';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['students']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
 		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Beg Verified</td>";
-		$csvRecord[]			= 'Beg Verified';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['validated']['beg'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Fun Verified</td>";
-		$csvRecord[]			= 'Fun Verified';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['validated']['fun'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Int Verified</td>";
-		$csvRecord[]			= 'Int Verified';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['validated']['int'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Verified</td>";
-		$csvRecord[]			= 'Adv Verified';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['validated']['adv'];
-			$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
 
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Total Assigned</td>";
-		$csvRecord[]			= 'Total Assigned';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['assigned']['total'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
+	// output declined, if requested	
+		if ($inp_declined) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Declined</td>";
+			$csvRecord[]			= 'Total Declined';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['declined']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Declined</td>";
+			$csvRecord[]			= 'Beg Declined';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['declined']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Declined</td>";
+			$csvRecord[]			= 'Fun Declined';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['declined']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Declined</td>";
+			$csvRecord[]			= 'Int Declined';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['declined']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Declined</td>";
+			$csvRecord[]			= 'Adv Declined';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['declined']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
 		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Beg Assigned</td>";
-		$csvRecord[]			= 'Beg Assigned';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['assigned']['beg'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Fun Assigned</td>";
-		$csvRecord[]			= 'Fun Assigned';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['assigned']['fun'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Int Assigned</td>";
-		$csvRecord[]			= 'Int Assigned';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['assigned']['int'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Assigned</td>";
-		$csvRecord[]			= 'Adv Assigned';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['assigned']['adv'];
-			$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
+		
 
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Total Promoted</td>";
-		$csvRecord[]			= 'Total Promoted';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['promoted']['total'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
+	// output verified
+		if ($inp_verified) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Verified</td>";
+			$csvRecord[]			= 'Total Verified';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['verified']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Verified</td>";
+			$csvRecord[]			= 'Beg Verified';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['verified']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Verified</td>";
+			$csvRecord[]			= 'Fun Verified';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['verified']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Verified</td>";
+			$csvRecord[]			= 'Int Verified';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['verified']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Verified</td>";
+			$csvRecord[]			= 'Adv Verified';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['verified']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
 		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Beg Promoted</td>";
-		$csvRecord[]			= 'Beg Promoted';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['promoted']['beg'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Fun Promoted</td>";
-		$csvRecord[]			= 'Fun Promoted';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['promoted']['fun'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td>Int Promoted</td>";
-		$csvRecord[]			= 'Int Promoted';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['promoted']['int'];
-			$displayReport		.= "<td>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
-		$csvRecord				= array();
-		$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Promoted</td>";
-		$csvRecord[]			= 'Adv Promoted';
-		foreach($inp_semesterlist as $thisSeq => $thisSemester) {
-			$thisData			= $countsArray[$thisSemester]['promoted']['adv'];
-			$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
-			$csvRecord[]		= $thisData;
-		}
-		fputcsv($thisFP,$csvRecord,"\t");
 
+	// output assigned
+		if ($inp_assigned) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Assigned</td>";
+			$csvRecord[]			= 'Total Assigned';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['assigned']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Assigned</td>";
+			$csvRecord[]			= 'Beg Assigned';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['assigned']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Assigned</td>";
+			$csvRecord[]			= 'Fun Assigned';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['assigned']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Assigned</td>";
+			$csvRecord[]			= 'Int Assigned';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['assigned']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Assigned</td>";
+			$csvRecord[]			= 'Adv Assigned';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['assigned']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
 
+	// output Replaced if requested
+		if ($inp_replaced) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Replaced</td>";
+			$csvRecord[]			= 'Total Replaced';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['replaced']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Replaced</td>";
+			$csvRecord[]			= 'Beg Replaced';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['replaced']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Replaced</td>";
+			$csvRecord[]			= 'Fun Replaced';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['replaced']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Replaced</td>";
+			$csvRecord[]			= 'Int Replaced';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['replaced']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Replaced</td>";
+			$csvRecord[]			= 'Adv Replaced';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['replaced']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+
+	// output promoted
+		if ($inp_promoted) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Promoted</td>";
+			$csvRecord[]			= 'Total Promoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['promoted']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Promoted</td>";
+			$csvRecord[]			= 'Beg Promoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['promoted']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Promoted</td>";
+			$csvRecord[]			= 'Fun Promoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['promoted']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Promoted</td>";
+			$csvRecord[]			= 'Int Promoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['promoted']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Promoted</td>";
+			$csvRecord[]			= 'Adv Promoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['promoted']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+
+	// output Withdrawn, if requested
+		if ($inp_withdrawn) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Withdrawn</td>";
+			$csvRecord[]			= 'Total Withdrawn';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['withdrawn']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Withdrawn</td>";
+			$csvRecord[]			= 'Beg Withdrawn';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['withdrawn']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Withdrawn</td>";
+			$csvRecord[]			= 'Fun Withdrawn';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['withdrawn']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Withdrawn</td>";
+			$csvRecord[]			= 'Int Withdrawn';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['withdrawn']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Withdrawn</td>";
+			$csvRecord[]			= 'Adv Withdrawn';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['withdrawn']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+
+	// output NotPromoted, if requested
+		if ($inp_notpromoted) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total NotPromoted</td>";
+			$csvRecord[]			= 'Total NotPromoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['notpromoted']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg NotPromoted</td>";
+			$csvRecord[]			= 'Beg NotPromoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['notpromoted']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun NotPromoted</td>";
+			$csvRecord[]			= 'Fun NotPromoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['notpromoted']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int NotPromoted</td>";
+			$csvRecord[]			= 'Int NotPromoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['notpromoted']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv NotPromoted</td>";
+			$csvRecord[]			= 'Adv NotPromoted';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['notpromoted']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+
+	// output advisors
+		if ($inp_advisors) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Advisors</td>";
+			$csvRecord[]			= 'Total Advisors';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['advisors']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Advisors</td>";
+			$csvRecord[]			= 'Beg Advisors';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['advisors']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Advisors</td>";
+			$csvRecord[]			= 'Fun Advisors';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['advisors']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Advisors</td>";
+			$csvRecord[]			= 'Int Advisors';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['advisors']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Advisors</td>";
+			$csvRecord[]			= 'Adv Advisors';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['advisors']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+
+	// output classes
+		if ($inp_classes) {
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Total Classes</td>";
+			$csvRecord[]			= 'Total Classes';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['classes']['total'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Beg Classes</td>";
+			$csvRecord[]			= 'Beg Classes';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['classes']['beg'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Fun Classes</td>";
+			$csvRecord[]			= 'Fun Classes';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['classes']['fun'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td>Int Classes</td>";
+			$csvRecord[]			= 'Int Classes';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['classes']['int'];
+				$displayReport		.= "<td>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+			$csvRecord				= array();
+			$displayReport			.= "</tr>\n<tr><td style='border-bottom:1px solid black;'>Adv Classes</td>";
+			$csvRecord[]			= 'Adv Classes';
+			foreach($inp_semesterlist as $thisSeq => $thisSemester) {
+				$thisData			= $countsArray[$thisSemester]['classes']['adv'];
+				$displayReport		.= "<td style='border-bottom:1px solid black;'>$thisData</td>";
+				$csvRecord[]		= $thisData;
+			}
+			fputcsv($thisFP,$csvRecord,"\t");
+		}
+		
 		$displayReport			.= "</tr></table>";
 		fclose($thisFP);		
 		
 		$content				.= "$displayReport
-									<p>Click <a href='$siteURL/wp-content/uploads/$thisStr'>semester_comparison.csv</a> to 
-									download semester_comparison_csv file</p>
-									<p>To use this data import the downloaded semester_comparison.csv file into a spreadsheet.</p>";
+									<p>Click <a href='$siteURL/wp-content/uploads/$outFileName'>$outFileName</a> to 
+									download $outFileName file</p>
+									<p>To use this data, import the downloaded $outFileName file into a spreadsheet.</p>";
 		
 		
 	}
