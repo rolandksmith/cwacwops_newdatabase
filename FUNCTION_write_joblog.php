@@ -53,7 +53,18 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 		$updateParams['job_comments']	= 'None supplied';
 	}
 	
-	if ($myArray[0] == 'jobname' || $myArray[0] == '') {
+	$checkJobname			= $myArray[0];
+	$badJobname				= FALSE;
+	if (preg_match('/jobname/',$checkJobname)) {
+		$badJobname			= TRUE;
+	}
+	if (preg_match('/FIX/',$checkobname)) {
+		$badJobname			= TRUE;
+	}
+	if ($checkJobname == '') {
+		$badJobname			= TRUE;
+	}
+	if ($badJobname) {
 		$variableDump	= get_defined_vars();
 		$newStr			= print_r($variableDump,TRUE);
 		sendErrorEmail("function_write_joblog: jobname. $myStr\n<br /><pre>$newStr</pre>");
