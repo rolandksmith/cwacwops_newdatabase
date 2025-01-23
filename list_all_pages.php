@@ -38,6 +38,7 @@ function list_all_pages_func() {
 	$inp_semester				= '';
 	$inp_rsave					= '';
 	$existsArray				= array();
+	$pageTitles					= array();
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -263,6 +264,9 @@ function list_all_pages_func() {
 			$thisURL2a		= $page->post_name;
 			$thisSnippet	= $page->post_content;
 			
+			$pageTitleString	= str_replace("CWA - ","",$thisTitle);
+			$pageTitles[]		= $pageTitleString;
+			
 			$thisURL		= "$siteURL/$thisURL2a/";
 			$myPos			= strpos($thisSnippet,'[');
 			if ($myPos === FALSE) {
@@ -325,6 +329,13 @@ function list_all_pages_func() {
 			$content		.= "$thisTitle<br />";
 		}
 		$content			.= "</code></pre>";
+		
+		// put out an alphabetic list of all pages
+		sort($pageTitles);
+		$content			.= "<h4>Page Titles</h4>";
+		foreach($pageTitles as $myStr) {
+			$content		.= "$myStr<br />";
+		}
 	
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
