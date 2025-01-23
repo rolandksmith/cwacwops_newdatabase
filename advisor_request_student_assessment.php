@@ -1184,7 +1184,7 @@ has completed the requested Morse code assessment. Please log into
 											$mailCode	= '2';
 										} else {
 											$myTo		= $advisor_email;
-											$mailCode	= '13';
+											$mailCode	= '14';
 										}
 										$mailResult		= emailFromCWA_v2(array('theRecipient'=>$myTo,
 																					'theSubject'=>$theSubject,
