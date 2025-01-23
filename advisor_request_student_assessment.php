@@ -827,11 +827,13 @@ function advisor_request_student_assessment_func() {
 								$student_first_name 				= $studentRow->user_first_name;
 								$student_last_name 					= $studentRow->user_last_name;
 								$student_email 						= $studentRow->user_email;
+								$student_ph_code 					= $studentRow->user_ph_code;
 								$student_phone 						= $studentRow->user_phone;
 								$student_city 						= $studentRow->user_city;
 								$student_state 						= $studentRow->user_state;
 								$student_zip_code 					= $studentRow->user_zip_code;
 								$student_country_code 				= $studentRow->user_country_code;
+								$student_country	 				= $studentRow->user_country;
 								$student_whatsapp 					= $studentRow->user_whatsapp;
 								$student_telegram 					= $studentRow->user_telegram;
 								$student_signal 					= $studentRow->user_signal;
@@ -893,31 +895,6 @@ function advisor_request_student_assessment_func() {
 								$student_date_created 					= $studentRow->student_date_created;
 								$student_date_updated			  		= $studentRow->student_date_updated;
 			
-								// if you need the country name and phone code, include the following
-								$countrySQL		= "select * from wpw1_cwa_country_codes  
-													where country_code = '$student_country_code'";
-								$countrySQLResult	= $wpdb->get_results($countrySQL);
-								if ($countrySQLResult === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-									$student_country		= "UNKNOWN";
-									$student_ph_code		= "";
-								} else {
-									$numCRows		= $wpdb->num_rows;
-									if ($doDebug) {
-										echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-									}
-									if($numCRows > 0) {
-										foreach($countrySQLResult as $countryRow) {
-											$student_country		= $countryRow->country_name;
-											$student_ph_code		= $countryRow->ph_code;
-										}
-									} else {
-										$student_country			= "Unknown";
-										$student_ph_code			= "";
-									}								
-									$haveUsername	= TRUE;
-									$haveData		= TRUE;
-								}
 							}
 						}
 					}
@@ -959,7 +936,7 @@ will be displayed there.</p>";
 						$mailCode	= '2';
 					} else {
 						$myTo		= $student_email;
-						$mailCode	= '13';
+						$mailCode	= '14';
 					}
 					$mailResult		= emailFromCWA_v2(array('theRecipient'=>$myTo,
 																'theSubject'=>$theSubject,
