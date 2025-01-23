@@ -9,7 +9,7 @@ function view_a_student_cw_assessment_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
