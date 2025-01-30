@@ -45,7 +45,7 @@ function getTimeZone($inp_data) {
 			$this_timezone_id	= '??';
 			goto bypass;
 		}
-		if ($state = '') {
+		if ($state == '') {
 			if ($doDebug) {
 				echo "if no zip, then state is required<br />";
 			}
@@ -54,36 +54,30 @@ function getTimeZone($inp_data) {
 		}
 	}
 	
-	if ($country == 'US' || $country == 'United States') {
-		if ($zip != '') {
-			if ($doDebug) {
-				echo "looking up US zip code of $zip<br />";
-			}
-			$zipResult		= getOffsetFromZipCode($zip,'',TRUE,FALSE,$doDebug);
-			if ($zipResult[0] == 'NOK') {
-				$this_timezone_id		="??";
-			} else {
-				$this_timezone_id		= $zipResult[1];
-			}
+	if ($zip != '' && ($country == '' || $country == 'US' || $country == 'United States')) {
+		if ($doDebug) {
+			echo "looking up US zip code of $zip<br />";
+		}
+		$zipResult		= getOffsetFromZipCode($zip,'',TRUE,FALSE,$doDebug);
+		if ($zipResult[0] == 'NOK') {
+			$this_timezone_id		="??";
 		} else {
-			$this_timezone_id			= '??';
+			$this_timezone_id		= $zipResult[1];
 		}
  	} else {
-		// user google maps to find the timezone id
+ 		if ($doDebug) {
+ 			echo "using google maps to find the timezone ID<br />";
+ 		}
+		// use google maps to find the timezone id
 		// setup the address
 		if ($zip != '') {
 			$address	= "$zip,$country";
 		} else {
-			if ($city = '' && $state != '') {
-				$address	= "$state,$country";
-			} elseif ($city != '' & $state = '') {
-				$address	= "$city,$country";
-			} else {
-				$this_timezone_id	= '??';
-				goto bypass;
+			$address	= "$city,$state,$country";
+			if ($doDebug) {
+				echo "getting geocoordinates for $address <br />";
 			}
 		}
-
 		$apiKey = "AIzaSyBWoxQBzlt9ITgrhOkDe8yrxGlEYQ01wgI";
 		
 		// Geocoding request
