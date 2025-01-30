@@ -67,7 +67,8 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 	if ($badJobname) {
 		$variableDump	= get_defined_vars();
 		$newStr			= print_r($variableDump,TRUE);
-		sendErrorEmail("function_write_joblog: jobname.\n<br /><pre>$newStr</pre>");
+		$myStr			= the_title();
+		sendErrorEmail("function_write_joblog: jobname. $myStr\n<br /><pre>$newStr</pre>");
 	}
 	
 	
