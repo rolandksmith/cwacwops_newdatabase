@@ -292,7 +292,7 @@ function search_joblog_func() {
 				$content	.= "<h3> Results of Searching Job Log</h3>
 								<p>Search Criteria: $searchWhere<br />
 								Showing next 25 records starting at record $begin</p>
-								<table>
+								<table style='width:1000px;'>
 								<tr><th>Program Name</th>
 									<th>Date</th>
 									<th>Who</th>
@@ -300,6 +300,9 @@ function search_joblog_func() {
 									<th>Data Type</th>
 									<th>Addl</th>
 									<th>IP</th>
+									<th>Month</th>
+									<th>Comments</th>
+									<th>Title</th>
 									<th>Date Created</td></tr>";
 				foreach($wpw1_cwa_joblog as $joblogRow) {
 					$job_name		= $joblogRow->job_name;
@@ -310,15 +313,21 @@ function search_joblog_func() {
 					$job_data_type	= $joblogRow->job_data_type;
 					$job_addl_info	= $joblogRow->job_addl_info;
 					$job_ip_addr	= $joblogRow->job_ip_addr;
+					$job_month		= $joblogRow->job_month;
+					$job_comments	= $joblogRow->job_comments;
+					$job_title		= $joblogRow->job_title;
 					$job_date_created	= $joblogRow->job_date_created;
-					$content	.= "<tr><td>$job_name</td>
-										<td>$job_date $job_time</td>
-										<td>$job_who</td>
-										<td>$job_mode</td>
-										<td>$job_data_type</td>
-										<td>$job_addl_info</td>
-										<td>$job_ip_addr</td>
-										<td>$job_date_created</td></tr>";
+					$content	.= "<tr><td style='vertical-align:top;'>$job_name</td>
+										<td style='vertical-align:top;'>$job_date $job_time</td>
+										<td style='vertical-align:top;'>$job_who</td>
+										<td style='vertical-align:top;'>$job_mode</td>
+										<td style='vertical-align:top;'>$job_data_type</td>
+										<td style='vertical-align:top;'>$job_addl_info</td>
+										<td style='vertical-align:top;'>$job_ip_addr</td>
+										<td style='vertical-align:top;'>$job_month</td>
+										<td style='vertical-align:top;'>$job_comments</td>
+										<td style='vertical-align:top;'>$job_title</td>
+										<td style='vertical-align:top;'>$job_date_created</td></tr>";
 					$displayCount++;
 				}
 			} else {
