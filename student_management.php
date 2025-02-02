@@ -86,7 +86,7 @@ function student_management_func() {
 	$inp_choice					= '';
 	$search_days				= '';
 	$search_time				= '';
-	$jobname					= '';
+	$jobname					= 'Student Mgmt: Not Specified';
 	$inp_prev_advisor			= '';
 	$inp_prev_advisor_class		= '';
 	$theURL						= "$siteURL/cwa-student-management/";
@@ -349,7 +349,7 @@ function student_management_func() {
 		if ($getStudent) {
 			$studentResult		= $wpdb->get_results($sql);
 			if ($studentResult === FALSE) {
-				handleWPDBError($jobname,$doDebug);
+				handleWPDBError($jobname,$doDebug,"getting student infor from _REQUEST");
 			} else {
 				$preNumSRows	= $wpdb->num_rows;
 				if ($doDebug) {
@@ -470,7 +470,7 @@ function student_management_func() {
 		if ($getAdvisor) {
 			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 			if ($wpw1_cwa_advisor === FALSE) {
-				handleWPDBError($jobname,$doDebug);
+				handleWPDBError($jobname,$doDebug,"getting advisor from _REQUEST");
 			} else {
 				$numARows			= $wpdb->num_rows;
 				if ($doDebug) {
@@ -647,7 +647,8 @@ function getTheReason($strReasonCode) {
 		if ($doDebug) {
 			echo "<br />Function starting. daysToSemester: $daysToSemester<br />";
 		}
-		$content 		.= "<h3>$jobname Functions</h3>
+		$jobname		= "Student Mgmt: ";
+		$content 		.= "<h3>$jobname Pass 1</h3>
 							<p>Click on the links below to perform the indicated action:</p>
 							<ol>
 							<li><strong>Useful Functions Before Students are Assigned to Advisors</strong>
