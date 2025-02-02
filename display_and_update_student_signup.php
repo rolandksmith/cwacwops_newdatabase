@@ -2047,8 +2047,22 @@ function display_and_update_student_signup_func() {
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('job_name' 		=> $jobname,
+							'job_date' 		=> $nowDate,
+							'job_time'		=> $nowTime,
+							'job_who' 		=> $userName,
+							'job_mode'		=> 'Time',
+							'job_data_type' => $thisStr,
+							'job_addl_info'	=> "$strPass: $elapsedTime",
+							'job_ip_addr' 	=> $ipAddr,
+							'job_month' 	=> $jobmonth,
+							'job_comments' 	=> '',
+							'job_title' 	=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
 		$content	.= "<p>writing to joblog.txt failed</p>";
 	}
 	return $content;
