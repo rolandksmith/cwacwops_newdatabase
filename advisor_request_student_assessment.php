@@ -15,7 +15,7 @@ function advisor_request_student_assessment_func() {
 
 
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -357,11 +357,13 @@ function advisor_request_student_assessment_func() {
 					$advisor_first_name 				= $advisorRow->user_first_name;
 					$advisor_last_name 					= $advisorRow->user_last_name;
 					$advisor_email 						= $advisorRow->user_email;
+					$advisor_ph_code 					= $advisorRow->user_ph_code;
 					$advisor_phone 						= $advisorRow->user_phone;
 					$advisor_city 						= $advisorRow->user_city;
 					$advisor_state 						= $advisorRow->user_state;
 					$advisor_zip_code 					= $advisorRow->user_zip_code;
 					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_country	 				= $advisorRow->user_country;
 					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 					$advisor_telegram 					= $advisorRow->user_telegram;
 					$advisor_signal 					= $advisorRow->user_signal;
@@ -388,30 +390,6 @@ function advisor_request_student_assessment_func() {
 					$advisor_date_created 				= $advisorRow->advisor_date_created;
 					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisor_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
-						}
-					}
 
 					// how many classes does this advisor have
 					$sql			= "select count(advisorclass_call_sign) from $advisorClassTableName 
@@ -467,11 +445,13 @@ function advisor_request_student_assessment_func() {
 					$advisorClass_first_name 				= $advisorClassRow->user_first_name;
 					$advisorClass_last_name 				= $advisorClassRow->user_last_name;
 					$advisorClass_email 					= $advisorClassRow->user_email;
+					$advisorClass_ph_code 					= $advisorClassRow->user_ph_code;
 					$advisorClass_phone 					= $advisorClassRow->user_phone;
 					$advisorClass_city 						= $advisorClassRow->user_city;
 					$advisorClass_state 					= $advisorClassRow->user_state;
 					$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
 					$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+					$advisorClass_country	 				= $advisorClassRow->user_country;
 					$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
 					$advisorClass_telegram 					= $advisorClassRow->user_telegram;
 					$advisorClass_signal 					= $advisorClassRow->user_signal;
@@ -535,30 +515,6 @@ function advisor_request_student_assessment_func() {
 					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
 					$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisorClass_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisorClass_country		= "UNKNOWN";
-						$advisorClass_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisorClass_country		= $countryRow->country_name;
-								$advisorClass_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisorClass_country			= "Unknown";
-							$advisorClass_ph_code			= "";
-						}
-					}
 
 					$studentList	= '';
 
@@ -645,7 +601,8 @@ function advisor_request_student_assessment_func() {
 						$freq_params		= "<input type='hidden' name='inp_freq' value='450,550,600,700'>";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions";
+											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$words_params		= "<input type='hidden' name='inp_words' value='1'>";
 						$characters_params	= "<input type='hidden' name='inp_chars' value='3'>";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0' checked>No Callsigns";
@@ -663,12 +620,14 @@ function advisor_request_student_assessment_func() {
 						$freq_params		= "<input type='hidden' name='inp_freq' value='450,550,600,700'>";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions";
+											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$words_params		= "<input type='hidden' name='inp_words' value='2'>";
 						$characters_params	= "<input type='hidden' name='inp_chars' value='4'>";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2'>2 Callsigns";
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked>2 Callsign2<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns";
 						$makeup_params		= "<input type='hidden' name='inp_makeup' value='3-4'>";
 						$answers_params		= "<input type='hidden' name='inp_answers' value='5'>";
 						$vocab_params		= "<input type='hidden' name='inp_vocab' value='threek'>";
@@ -683,12 +642,14 @@ function advisor_request_student_assessment_func() {
 						$freq_params		= "<input type='hidden' name='inp_freq' value='450,550,600,700'>";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions";
+											   <input type='radio' class='formInputButton' name='inp_questions' value='7' > 7 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$words_params		= "<input type='hidden' name='inp_words' value='2'>";
 						$characters_params	= "<input type='hidden' name='inp_chars' value='4'>";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2'>2 Callsigns";
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' >2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns";
 						$makeup_params		= "<input type='hidden' name='inp_makeup' value='3-5'>";
 						$answers_params		= "<input type='hidden' name='inp_answers' value='5'>";
 						$vocab_params		= "<input type='hidden' name='inp_vocab' value='threek'>";
@@ -704,12 +665,14 @@ function advisor_request_student_assessment_func() {
 						$freq_params		= "<input type='hidden' class='formInputButton' name='inp_freq' value='450,550,600,700'>";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions";
+											   <input type='radio' class='formInputButton' name='inp_questions' value='7' > 7 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$words_params		= "<input type='hidden' name='inp_words' value='3'>";
 						$characters_params	= "<input type='hidden' name='inp_chars' value='5'>";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2'>2 Callsigns";
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' >1 Callsign<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked>2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns";
 						$makeup_params		= "<input type='hidden' name='inp_makeup' value='3-5'>";
 						$answers_params		= "<input type='hidden' name='inp_answers' value='7'>";
 						$vocab_params		= "<input type='hidden' name='inp_vocab' value='threek'>";
@@ -754,19 +717,21 @@ function advisor_request_student_assessment_func() {
 					} elseif ($advisorClass_level == 'Fundamental') {
 						$content	.= "<p>You can change the speed and questions parameters. If any callsigns are selected, 
 										they will be included in the number of questions selected. Questions will consist of 
-										2-3 character words or abbreviations. Each question will be either a callsign (if 
-										callsigns were selected) or two words or abbreviations.<p>";
+										2-4 character words or abbreviations. Each question will be either a callsign (if 
+										callsigns were selected) or one word or abbreviation.<p>";
 					} elseif ($advisorClass_level == 'Intermediate') {
 						$content	.= "<p>You can change the speed and questions parameters. If any callsigns are selected, 
 										they will be included in the number of questions selected. Questions will consist of 
 										2-4 character words or abbreviations. Each question will be either a callsign (if 
-										callsigns were selected) or two words or abbreviations.<p>";
+										callsigns were selected) or one word or abbreviation.<p>";
 					} elseif ($advisorClass_level == 'Advanced') {
 						$content	.= "<p>You can change the speed and questions parameters. If any callsigns are selected, 
 										they will be included in the number of questions selected. Questions will consist of 
 										2-5 character words or abbreviations. Each question will be either a callsign (if 
-										callsigns were selected) or two words or abbreviations.<p>";
+										callsigns were selected) or one word or abbreviation.<p>";
 					}
+					$content		.= "<p>if 'Include Advisor' is selected, the advisor will receive the same invitation 
+										sent to the students</p>";
 				}
 			} else {
 				$content	.= "No advisor record found for $inp_callsign";
@@ -1246,10 +1211,25 @@ has completed the requested Morse code assessment. Please log into
 	if ($testMode) {
 		$thisStr	= 'Testmode';
 	}
+
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
