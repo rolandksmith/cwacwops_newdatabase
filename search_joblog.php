@@ -292,7 +292,7 @@ function search_joblog_func() {
 				$content	.= "<h3> Results of Searching Job Log</h3>
 								<p>Search Criteria: $searchWhere<br />
 								Showing next 25 records starting at record $begin</p>
-								<table style='width:1000px;'>
+								<table style='width:1200px;'>
 								<tr><th>Program Name</th>
 									<th>Date</th>
 									<th>Who</th>
