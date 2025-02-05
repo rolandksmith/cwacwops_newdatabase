@@ -998,6 +998,23 @@ function display_and_update_student_signup_func() {
 					}
 				} else {
 					$content		.= "<p>No signup record found for $inp_callsign</p>";
+					// see if there is a user master record
+					$sql			= "select * from $userMasterTableName 
+										where user_call_sign like '$getInfo'";
+					$sqlResult		= $wpdb->get_results($sql);
+					if ($sqlResult === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+					} else {
+						$numRows	= $wpdb->num_rows;
+						if ($doDebug) {
+							echo "ran $sql<br />and retrieved $numRows rows<br />";
+						}
+						if ($numRows > 0) {
+							$content	.= "<p>There is a User Master record. Click 
+							<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$getInfo&doDebug&testMode' target='_blank'>Display and Update User Master</a> 
+							to display the user master information</p>";
+						}
+					}			
 				}
 			}
 		}
@@ -2049,17 +2066,17 @@ function display_and_update_student_signup_func() {
 	$ipAddr			= get_the_user_ip();
 	$theTitle		= esc_html(get_the_title());
 	$jobmonth		= date('F Y');
-	$updateData		= array('job_name' 		=> $jobname,
-							'job_date' 		=> $nowDate,
-							'job_time'		=> $nowTime,
-							'job_who' 		=> $userName,
-							'job_mode'		=> 'Time',
-							'job_data_type' => $thisStr,
-							'job_addl_info'	=> "$strPass: $elapsedTime",
-							'job_ip_addr' 	=> $ipAddr,
-							'job_month' 	=> $jobmonth,
-							'job_comments' 	=> '',
-							'job_title' 	=> $theTitle,
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
 							'doDebug'		=> $doDebug);
 	$result			= write_joblog2_func($updateData);
 	if ($result === FALSE){
