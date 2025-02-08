@@ -774,6 +774,7 @@ function advisor_request_student_assessment_func() {
 					$haveUsername			= TRUE;						
 				} else {
 					$haveData				= FALSE;
+					$haveUsername			= FALSE;
 					$sql					= "select * from $studentTableName
 												left join $userMasterTableName on user_call_sign = student_call_sign  
 												where student_id = $thisID";
@@ -860,6 +861,8 @@ function advisor_request_student_assessment_func() {
 								$student_date_created 					= $studentRow->student_date_created;
 								$student_date_updated			  		= $studentRow->student_date_updated;
 			
+								$haveData								= TRUE;
+								$haveUsername							= TRUE;
 							}
 						}
 					}
@@ -947,7 +950,7 @@ will be displayed there.</p>";
 					$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&words=$thisWords&characters=$thisCharacters&callsigns=$thisCallsigns&answers=$thisAnswers&level=$thisLevel&token=$token&vocab=$thisVocab&infor=$thisInfor";
 					$myStr		= "$siteURL/cwa-advisor-request-student-assessment/?strpass=10&inp_callsign=$student_call_sign&token=$token";
 					$returnurl	= urlencode($myStr);
-					$url		= "$url" . "&returnurl=$returnurl'>Perform Assessment</a>";
+					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
 					
 					$reminder_text		= "<b>Morse Code Assessment</b> Your advisor $inp_callsign 
 requests that you do a Morse code proficiency assessment. The assessment program will give you $thisQuestions 
@@ -1115,7 +1118,7 @@ available to your advisor. To start the assessment, please click $url.";
 										$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$inp_callsign&token=$token");
 										$reminder_text		= "<b>Morse Code Assessment Result</b> Your student 
 $student_last_name, $student_first_name ($inp_callsign) has completed the Morse code assessment you requested. 
-Click <a href='$siteURL/cwa-view-a-student-cw-assessment-v2/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to view the results.";  
+Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to view the results.";  
 										$effective_date		 	= date('Y-m-d H:i:s');
 										$closeStr				= strtotime("+5 days");
 										$close_date				= date('Y-m-d H:i:s', $closeStr);
