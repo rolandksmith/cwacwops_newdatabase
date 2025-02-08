@@ -422,12 +422,58 @@ if ($doDebug) {
 			echo "<br />Arrived at pass 2 with inp_callsign: $inp_callsign<br />";
 		}
 
+		// get the person's name from user_master
+		$sql				= "select * from $userMasterTableName 
+								where user_call_sign = '$inp_callsign'";
+		$sqlResult		= $wpdb->get_results($sql);
+		if ($sqlResult === FALSE) {
+			handleWPDBError($jobname,$doDebug);
+			$user_last_name				= "Unknown";
+			$user_first_name			= "";
+		} else {
+			$numRows	= $wpdb->num_rows;
+			if ($doDebug) {
+				echo "ran $sql<br />and retrieved $numRows rows<br />";
+			}
+			if ($numRows > 0) {
+				foreach($sqlResult as $sqlRow) {
+					$user_id				= $sqlRow->user_ID;
+					$user_call_sign			= $sqlRow->user_call_sign;
+					$user_first_name		= $sqlRow->user_first_name;
+					$user_last_name			= $sqlRow->user_last_name;
+					$user_email				= $sqlRow->user_email;
+					$user_ph_code			= $sqlRow->user_ph_code;
+					$user_phone				= $sqlRow->user_phone;
+					$user_city				= $sqlRow->user_city;
+					$user_state				= $sqlRow->user_state;
+					$user_zip_code			= $sqlRow->user_zip_code;
+					$user_country_code		= $sqlRow->user_country_code;
+					$user_country			= $sqlRow->user_country;
+					$user_whatsapp			= $sqlRow->user_whatsapp;
+					$user_telegram			= $sqlRow->user_telegram;
+					$user_signal			= $sqlRow->user_signal;
+					$user_messenger			= $sqlRow->user_messenger;
+					$user_action_log		= $sqlRow->user_action_log;
+					$user_timezone_id		= $sqlRow->user_timezone_id;
+					$user_languages			= $sqlRow->user_languages;
+					$user_survey_score		= $sqlRow->user_survey_score;
+					$user_is_admin			= $sqlRow->user_is_admin;
+					$user_role				= $sqlRow->user_role;
+					$user_prev_callsign		= $sqlRow->user_prev_callsign;
+					$user_date_created		= $sqlRow->user_date_created;
+					$user_date_updated		= $sqlRow->user_date_updated;
+				}
+			} else {
+				$user_last_name				= "Unknown";
+				$user_first_name			= "";
+			}
+		}
 		$advisorOK				= TRUE;
 		if ($advisorOK) {
 			if ($doDebug) {
 				echo "Advisor check OK<br />";
 			}
-			$content					.= "<h3>Self Assessment Information for $inp_callsign</h3>
+			$content					.= "<h3>Self Assessment Information for $user_last_name, $user_first_name ($inp_callsign)</h3>
 											<h4>Method 1 Assessments</h4>
 											<table style='width:auto;'>
 											<tr><th>Score</th>
