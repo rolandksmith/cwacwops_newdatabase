@@ -1,6 +1,14 @@
 function advisor_service_report_func() {
 
-//	Modified 15Oct24 by Roland for new database
+/* Prepares a report of the number of classes each advisor has advised.
+	Two options: all classes or only advisors who have achieved 6, 12, 24, 48, 
+	or 60 classes since a specific semester
+	
+	Related programs:
+		remove_service_duplicates
+		update_advisor_service
+
+*/
 
 	global $wpdb;
 
@@ -10,12 +18,16 @@ function advisor_service_report_func() {
 	$validUser 						= $initializationArray['validUser'];
  	$userName						= $initializationArray['userName'];
 	$currentTimestamp				= $initializationArray['currentTimestamp'];
+	$currentSemester				= $initializationArray['currentSemester'];
 	$validTestmode					= $initializationArray['validTestmode'];
 	$siteURL						= $initializationArray['siteurl'];
 	$userName						= $initializationArray['userName'];
 	$userEmail						= $initializationArray['userEmail'];
 	$userDisplayName				= $initializationArray['userDisplayName'];
 	$userRole						= $initializationArray['userRole'];
+	$pastSemestersArray				= $initializationArray['pastSemestersArray'];
+	$inp_semester					= '';
+	$semesterList					= '';
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
@@ -56,11 +68,22 @@ function advisor_service_report_func() {
 	$jobname					= "Advisor Service Report V$versionNumber";
 	$categoryClass				= array(6,12,24,48,60);
 	$limit_categories			= 'Y';
+	$got6List					= "";
+	$got12List					= "";
+	$got24List					= "";
+	$got48List					= "";
+	$got60List					= "";
 	
 	$monthsArray				= array('Jan/Feb'=>'1',
 										'May/Jun'=>'2',
-										'Apr/May'=>'2',
-										'Sep/Oct'=>'3');
+										'Apr/May'=>'3',
+										'Sep/Oct'=>'4');
+	$monthsBack					= array('1'=>'Jan/Feb',
+										'2'=>'May/Jun',
+										'3'=>'Apr/May',
+										'4'=>'Sep/Oct');
+										
+	$classesArray				= array();
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -86,6 +109,10 @@ function advisor_service_report_func() {
 			if ($str_key 		== "limit_categories") {
 				$limit_categories	 = $str_value;
 				$limit_categories	 = filter_var($limit_categories,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_semester") {
+				$inp_semester	 = $str_value;
+				$inp_semester	 = filter_var($inp_semester,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_rsave") {
 				$inp_rsave	 = $str_value;
@@ -194,15 +221,28 @@ function advisor_service_report_func() {
 
 
 	if ("1" == $strPass) {
+
+		$semesterList				= '';
+			if ($currentSemester != 'Not in Session') {
+				$semesterList		.= "<input type='radio' class='formInputbutton' name='inp_semester' value='$currentSemester' required>$currentSemester<br />";
+			}
+		foreach($pastSemestersArray as $thisSemester) {
+			$semesterList			.= "<input type='radio' class='formInputbutton' name='inp_semester' value='$thisSemester' required>$thisSemester<br />";
+		}
+
 		$content 		.= "<h3>$jobname</h3>
 							<p>Click submit to run the report</p>
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
 							<table style='border-collapse:collapse;'>
-							<tr><td style='vertical-align:top'>Limit Categories</td>
-								<td><input type='radio' class='formInputButton' name='limit_categories' value='N' required>All categories<br />
-									<input type='radio' class='formInputButton' name='limit_categories' value='Y' required>Only 6, 12, 24, 48, and 60</td></tr>
+							<tr><td colspan='2' style='vertical-align:top'>
+									<input type='radio' class='formInputButton' name='limit_categories' value='N' required>Show all classes for all advisors<br />
+									 <input type='radio' class='formInputButton' name='limit_categories' value='Y' required>Only 6, 12, 24, 48, and 60 classes</td></tr>
+							<tr><td colspan='2' style='vertical-align:top'>
+										Since the semester indicated below:<br />
+									$semesterList	
+										</td></tr>
 							$testModeOption
 							<tr><td>Save this report to the reports achive?</td>
 							<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
@@ -217,14 +257,26 @@ function advisor_service_report_func() {
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
 			echo "<br />at pass $strPass with limit_categories: $limit_categories<br />";
+			if ($limit_categories == 'Y') {
+				echo "inp_semester: $inp_semester<br />";
+			}
 		}
+
 		
 		$content			.= "<h3>$jobname</h3>";
+		// convert inp_semester
+		$myArray			= explode(" ",$inp_semester); 
+		$thisYear			= $myArray[0];
+		$thisMonths			= $myArray[1];
+		$newMonths			= $monthsArray[$thisMonths];
+		$sinceSemester		= "$thisYear,$newMonths";		
+
 		if ($limit_categories == 'Y') {
-			$content		.= "Showing only 6, 12, 24, 48, and 60 classes";
+			$content		.= "Showing only 6, 12, 24, 48, and 60 award achievements";
 		} else {
 			$content		.= "Showing all class categories";
 		}
+		$content			.= "<br />Awards achieved since $inp_semester";
 		
 		$advisorInfoArray	= array();
 		// get the list of advisors 
@@ -241,25 +293,15 @@ function advisor_service_report_func() {
 			}
 			if ($numARows > 0) {
 				foreach($advisorServiceResult as $advisorServiceRow) {
-					$advisor		= $advisorServiceRow->advisorcallsign;
+					$thisAdvisor	= $advisorServiceRow->advisorcallsign;
 					
+					if ($doDebug) {
+						echo "<br />Processing advisor $thisAdvisor<br />";
+					}
 
-/*
-					// get the number of classes for the advisor
-					$sumSQL			= "select sum(classes) as advisorclasses 
-										from $advisorServiceTableName 
-										where advisor = '$advisor'";
-					$sumResult		= $wpdb->get_var($sumSQL);
-					if ($sumResult === NULL) {
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						if ($doDebug) {
-							$lastQuery	= $wpdb->last_query;
-							echo "ran $lastQuery<br />and retrieved $sumResult<br />";
-						}
-*/						
 					$sql		= "select * from $advisorServiceTableName 
-									where advisor='$advisor'"; 
+									where advisor='$thisAdvisor' 
+									order by semester"; 
 					$sqlResult	= $wpdb->get_results($sql);
 					if ($sqlResult === FALSE) {
 						handleWPDBError($jobname,$doDebug,"getting advisor records to count classes");
@@ -269,138 +311,231 @@ function advisor_service_report_func() {
 							echo "ran $sql<br />and retrieved $numARows records<br />";
 						}
 						if ($numARows > 0) {
-							$sumResult			= 0;
-							$thisMaxSemester	= "20001";
-							$useSemester	 	= "";
 							foreach($sqlResult as $resultRow) {
 								$advisor		= $resultRow->advisor;
 								$classes		= $resultRow->classes;
 								$semester		= $resultRow->semester;
 								
-								$sumResult	 		= $sumResult + $classes;
-								$myArray			= explode(" ",$semester);
-								$thisYear			= $myArray[0];
-								$thisMonths			= $myArray[1];
-								if (isset($monthsArray[$thisMonths])) {
-									$monthsNumber	= $monthsArray[$thisMonths];
-									$myStr			= $thisYear . $monthsNumber;
+								if ($doDebug) {
+									echo "processing semester $semester of $classes classes<br />";
+								}
+								$myArray 		= explode(" ",$semester);
+								$thisYear		= $myArray[0];
+								$thisMonths		= $myArray[1];
+								
+								$newMonth		= $monthsArray[$thisMonths];
+								$newSemester	= "$thisYear,$newMonth";
+								
+/* the classes array has these fields
+	advisor: the advisor callsign
+	classes: the total number of classes advisor has taught 
+		  up to and including sinceSemester
+	lastSemester: the last semester that the advisor taught
+	
+	newClasses: the number of classes taught
+*/
+								if ($doDebug) {
+									echo "semester: $semester $newSemester $sinceSemester<br />";
+								}
+								if ($newSemester > $sinceSemester) { // count as new classes
+									$thisNew	= $classes;
+									$thisOld	= 0;
+								} else {
+									$thisNew	= 0;
+									$thisOld	= $classes;
+								}
+								
+								if (array_key_exists($advisor,$classesArray)) {
+									$classesArray[$advisor]['classes']	= $classesArray[$advisor]['classes'] + $thisOld;
+									$classesArray[$advisor]['newClasses']	= $classesArray[$advisor]['newClasses'] + $thisNew;
+									if ($newSemester > $classesArray[$advisor]['lastSemester']) {
+										$classesArray[$advisor]['lastSemester']	= $newSemester;
+									}
 									if ($doDebug) {
-										echo "calculated $myStr out of $semester<br />";
+										echo "updated classesArray $advisor $thisNew $thisOld<br />";
 									}
-									if ($myStr > $thisMaxSemester) {
-										$thisMaxSemester	= $myStr;
-										$useSemester		= $semester;
-										if ($doDebug) {
-											echo "useSemester now $useSemester<br />";
-										}
+								} else {
+									$classesArray[$advisor]['classes']			= $thisOld;
+									$classesArray[$advisor]['newClasses']		= $thisNew;
+									$classesArray[$advisor]['lastSemester']		= $newSemester;
+									if ($doDebug) {
+										echo "added classesArray $advisor $thisNew $thisOld<br />";
 									}
 								}
 							}
-						
-							if ($limit_categories == 'Y') {
-								if (in_array($sumResult,$categoryClass)) {
-									$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
-									$advisorInfoArray[]	= "$sumStr&$advisor&$useSemester";
-								}
-							} else {
-								$sumStr		= str_pad($sumResult,3,'0',STR_PAD_LEFT);
-								$advisorInfoArray[]	= "$sumStr&$advisor&$useSemester";
-							}
+						} else {
+							$content	.= "no classes found for $thisAdvisor<br />";
 						}
 					}
 				}
 			} else {
-				if ($doDebug) {
-					echo "No records found in $advisorServiceTableName<br />";
-				}
-				$content	.= "No data found in $advisorServiceTableName";
+				$content		.= "No records found in $advisorServiceTableName<br />";
 			}
 		}
-		
-		$myInt				= count($advisorInfoArray);
-		if ($myInt > 0) {
-			$prevCount		= 0;
-			$firstTime		= TRUE;
-			asort($advisorInfoArray);
-			if ($doDebug) {
-				echo "<br />advisorInfoArray:<br /><pre>";
-				print_r($advisorInfoArray);
-				echo "</pre><br />";
-			}
-			$content		.= "<pre>\nclasses\tcallsign\tname\tsemester\n";
-			foreach($advisorInfoArray as $thisData) {
-				$myArray			= explode("&",$thisData);
-				$classCount			= intval($myArray[0]);
-				$advisor			= $myArray[1];
-				$useSemester		= $myArray[2];
+		ksort($classesArray);
+		if ($doDebug) {
+			echo "<br />classesArray:<br /><pre>";
+			print_r($classesArray);
+			echo "</pre><br />";
+		}
 
-				$advisorSQL			= "select * from $advisorTableName 
-										left join $userMasterTableName on user_call_sign = advisor_call_sign 
-										where advisor_call_sign = '$advisor' 
-										order by advisor_date_created DESC 
-										limit 1";
-				$advisorResult		= $wpdb->get_results($advisorSQL);
-				if ($advisorResult === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-				} else {
-					$numARows		= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $advisorSQL<br />and retrieved $numARows rows<br />";
-					}
-					if ($numARows > 0) {
-						foreach($advisorResult as $advisorResultRow) {
-							$advisor_master_ID 					= $advisorResultRow->user_ID;
-							$advisor_master_call_sign			= $advisorResultRow->user_call_sign;
-							$advisor_first_name 				= $advisorResultRow->user_first_name;
-							$advisor_last_name 					= $advisorResultRow->user_last_name;
-							$advisor_email 						= $advisorResultRow->user_email;
-							$advisor_phone 						= $advisorResultRow->user_phone;
-							$advisor_city 						= $advisorResultRow->user_city;
-							$advisor_state 						= $advisorResultRow->user_state;
-							$advisor_zip_code 					= $advisorResultRow->user_zip_code;
-							$advisor_country_code 				= $advisorResultRow->user_country_code;
-							$advisor_whatsapp 					= $advisorResultRow->user_whatsapp;
-							$advisor_telegram 					= $advisorResultRow->user_telegram;
-							$advisor_signal 					= $advisorResultRow->user_signal;
-							$advisor_messenger 					= $advisorResultRow->user_messenger;
-							$advisor_master_action_log 			= $advisorResultRow->user_action_log;
-							$advisor_timezone_id 				= $advisorResultRow->user_timezone_id;
-							$advisor_languages 					= $advisorResultRow->user_languages;
-							$advisor_survey_score 				= $advisorResultRow->user_survey_score;
-							$advisor_is_admin					= $advisorResultRow->user_is_admin;
-							$advisor_role 						= $advisorResultRow->user_role;
-							$advisor_master_date_created 		= $advisorResultRow->user_date_created;
-							$advisor_master_date_updated 		= $advisorResultRow->user_date_updated;
-		
-							$advisor_ID							= $advisorResultRow->advisor_id;
-							$advisor_call_sign 					= strtoupper($advisorResultRow->advisor_call_sign);
-							$advisor_semester 					= $advisorResultRow->advisor_semester;
-							$advisor_welcome_email_date 		= $advisorResultRow->advisor_welcome_email_date;
-							$advisor_verify_email_date 			= $advisorResultRow->advisor_verify_email_date;
-							$advisor_verify_email_number 		= $advisorResultRow->advisor_verify_email_number;
-							$advisor_verify_response 			= strtoupper($advisorResultRow->advisor_verify_response);
-							$advisor_action_log 				= $advisorResultRow->advisor_action_log;
-							$advisor_class_verified 			= $advisorResultRow->advisor_class_verified;
-							$advisor_control_code 				= $advisorResultRow->advisor_control_code;
-							$advisor_date_created 				= $advisorResultRow->advisor_date_created;
-							$advisor_date_updated 				= $advisorResultRow->advisor_date_updated;
-							$advisor_replacement_status 		= $advisorResultRow->advisor_replacement_status;
-							$nameStr							= "$advisor_last_name, $advisor_first_name";
-						}
-					} else {
-						$advisor_first_name	= "";
-						$advisor_last_name	= "";
-						$advisor_semester	= "";
-						$nameStr			= "";
-					}
+		// prepare the report
 
+		$content		.= "<table>
+							<tr><th>Name</th>
+								<th style='vertical-align:top; text-align:right;'>Prev Nmbr<br />Classes</th>
+								<th style='vertical-align:top; text-align:right;'>New<br />Classes</th>
+								<th style='vertical-align:top; text-align:right;'>Total<br />Classes</th>
+								<th style='vertical-align:top;'>Last Semester</th>
+								<th style='vertical-align:top;'>Award Level</th></tr>";
+
+		
+		foreach($classesArray as $thisAdvisor => $thisData) {
+			$thisClasses		= intval($classesArray[$thisAdvisor]['classes']);
+			$thisNewClasses		= intval($classesArray[$thisAdvisor]['newClasses']);
+			$thisLastSemester	= $classesArray[$thisAdvisor]['lastSemester'];
+
+			$myArray			= explode(",",$thisLastSemester);
+			$thisYear			= $myArray[0];
+			$thisMonths			= $myArray[1];
+			$myStr				= $monthsBack[$thisMonths];
+			$lastSemester		= "$thisYear $myStr";
+		
+			// get the advisor info
+			$advisorSQL			= "select * from $advisorTableName 
+									left join $userMasterTableName on user_call_sign = advisor_call_sign 
+									where advisor_call_sign = '$thisAdvisor' 
+									order by advisor_date_created DESC 
+									limit 1";
+			$advisorResult		= $wpdb->get_results($advisorSQL);
+			if ($advisorResult === FALSE) {
+				handleWPDBError($jobname,$doDebug);
+				$advisor_first_name	= "Unknown";
+				$advisor_last_name	= "Unknown";
+				$advisor_semester	= "Unknown";
+				$nameStr			= "";
+			} else {
+				$numARows		= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $advisorSQL<br />and retrieved $numARows rows<br />";
 				}
-				
-				$content			.= "$classCount\t$advisor\t$nameStr\t$useSemester\n";
+				if ($numARows > 0) {
+					foreach($advisorResult as $advisorResultRow) {
+						$advisor_master_ID 					= $advisorResultRow->user_ID;
+						$advisor_master_call_sign			= $advisorResultRow->user_call_sign;
+						$advisor_first_name 				= $advisorResultRow->user_first_name;
+						$advisor_last_name 					= $advisorResultRow->user_last_name;
+						$advisor_email 						= $advisorResultRow->user_email;
+						$advisor_phone 						= $advisorResultRow->user_phone;
+						$advisor_city 						= $advisorResultRow->user_city;
+						$advisor_state 						= $advisorResultRow->user_state;
+						$advisor_zip_code 					= $advisorResultRow->user_zip_code;
+						$advisor_country_code 				= $advisorResultRow->user_country_code;
+						$advisor_whatsapp 					= $advisorResultRow->user_whatsapp;
+						$advisor_telegram 					= $advisorResultRow->user_telegram;
+						$advisor_signal 					= $advisorResultRow->user_signal;
+						$advisor_messenger 					= $advisorResultRow->user_messenger;
+						$advisor_master_action_log 			= $advisorResultRow->user_action_log;
+						$advisor_timezone_id 				= $advisorResultRow->user_timezone_id;
+						$advisor_languages 					= $advisorResultRow->user_languages;
+						$advisor_survey_score 				= $advisorResultRow->user_survey_score;
+						$advisor_is_admin					= $advisorResultRow->user_is_admin;
+						$advisor_role 						= $advisorResultRow->user_role;
+						$advisor_master_date_created 		= $advisorResultRow->user_date_created;
+						$advisor_master_date_updated 		= $advisorResultRow->user_date_updated;
+	
+						$advisor_ID							= $advisorResultRow->advisor_id;
+						$advisor_call_sign 					= strtoupper($advisorResultRow->advisor_call_sign);
+						$advisor_semester 					= $advisorResultRow->advisor_semester;
+						$advisor_welcome_email_date 		= $advisorResultRow->advisor_welcome_email_date;
+						$advisor_verify_email_date 			= $advisorResultRow->advisor_verify_email_date;
+						$advisor_verify_email_number 		= $advisorResultRow->advisor_verify_email_number;
+						$advisor_verify_response 			= strtoupper($advisorResultRow->advisor_verify_response);
+						$advisor_action_log 				= $advisorResultRow->advisor_action_log;
+						$advisor_class_verified 			= $advisorResultRow->advisor_class_verified;
+						$advisor_control_code 				= $advisorResultRow->advisor_control_code;
+						$advisor_date_created 				= $advisorResultRow->advisor_date_created;
+						$advisor_date_updated 				= $advisorResultRow->advisor_date_updated;
+						$advisor_replacement_status 		= $advisorResultRow->advisor_replacement_status;
+						$nameStr							= "$advisor_last_name, $advisor_first_name";
+					}
+				} else {
+					$advisor_first_name	= "";
+					$advisor_last_name	= "Unknown";
+					$advisor_semester	= "Unknown";
+					$nameStr			= "Unknown";
+				}
 			}
-			$content				.= "</pre>
-										<p>$myInt Advisors Reported</p>";	
-		}	
+			$got6						= FALSE;
+			$got12						= FALSE;
+			$got24						= FALSE;
+			$got48						= FALSE;
+			$got60						= FALSE;
+			$myInt						= $thisClasses + $thisNewClasses;
+			$thisAward					= "";
+			$printIt					= FALSE;
+
+			if ($thisNewClasses > 0) {
+				if ($thisClasses < 60 && $myInt >= 60) {
+					$got60			= TRUE;
+					$thisAward		= "<b>60 Classes</b>";
+					$got60List		.= "$nameStr ($thisAdvisor)<br />";
+					$printIt		= TRUE;
+				} elseif ($thisClasses < 48 && $myInt >= 48) {
+					$got48			= TRUE;
+					$thisAward		= "<b>48 Classes</b>";
+					$got48List		.= "$nameStr ($thisAdvisor)<br />";
+					$printIt		= TRUE;
+				} elseif ($thisClasses < 24 && $myInt >= 24) {
+					$got24			= TRUE;
+					$thisAward		= "<b>24 Classes</b>";
+					$got24List		.= "$nameStr ($thisAdvisor)<br />";
+					$printIt		= TRUE;			
+				} elseif ($thisClasses < 12 && $myInt >= 12) {
+					$got12			= TRUE;
+					$thisAward		= "<b>12 Classes</b>";
+					$got12List		.= "$nameStr ($thisAdvisor)<br />";
+					$printIt		= TRUE;
+				} elseif ($thisClasses < 6 && $myInt >= 6) {
+					$got6			= TRUE;
+					$thisAward		= "<b>6 Classes</b>";
+					$got6List		.= "$nameStr ($thisAdvisor)<br />";
+					$printIt		= TRUE;
+				}
+			}
+			// output detail record
+			$doPrint			= FALSE;
+			if ($limit_categories == 'Y' && $printIt) {
+				$doPrint		= TRUE;
+			} 
+			if ($limit_categories == 'N') {
+				$doPrint		= TRUE;
+			}
+			if ($doPrint) {
+				$content		.= "<tr><td>$nameStr ($thisAdvisor)</td>
+										<td style='text-align:right;'>$thisClasses</td>
+										<td style='text-align:right;'>$thisNewClasses</td>
+										<td style='text-align:right;'>$myInt</td>
+										<td>$lastSemester</td>
+										<td>$thisAward</td></tr>";
+			}
+			
+		}		// end of classesArray
+		$content			.= "</table><br /><br />
+								<h4>6 Classes Award Level</h4>
+								$got6List
+								<br /><br />
+								<h4>12 Classes Award Level</h4>
+								$got12List
+								<br /><br />
+								<h4>24 Classes Award Level</h4>
+								$got24List
+								<br /><br />
+								<h4>48 Classes Award Level</h4>
+								$got48List
+								<br /><br />
+								<h4>60 Classes Award Level</h4>
+								$got60List";
 	
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
@@ -408,7 +543,7 @@ function advisor_service_report_func() {
 	if ($doDebug) {
 		echo "<br '>Checking to see if the report is to be saved. inp_rsave: $inp_rsave<br />";
 	}
-	if ($inp_rsave == 'Y') {
+	if ($inp_rsave == 'Y' && $strPass == '2') {
 		if ($doDebug) {
 			echo "Calling function to save the report as $jobname<br />";
 		}
@@ -418,6 +553,7 @@ function advisor_service_report_func() {
 		} else {
 			$content	.= "<br />Storing the report in the reports table failed";
 		}
+
 	}
 	$endingMicroTime = microtime(TRUE);
 	$elapsedTime	= $endingMicroTime - $startingMicroTime;
