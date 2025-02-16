@@ -7,13 +7,82 @@ function advisor_request_student_assessment_func() {
 	
 	Upon completion of the assessment, the results are provided to the advisor
 	
+	url Called 	<a href='https://cw-assessment.vercel.app?....'>
+	
+	Parameters:
+	mode						always 'specific'
+	callsign*					callsign of person doing the assessment
+									example: K7OJL
+	cpm*						words per minute
+									Beginner: 15, 18, 20, 25
+									Fundamental: 18, 20, 25
+									Intermediate: 18, 20, 25
+									Advanced: 20, 25, 30, 35
+	eff*						effective speed
+									Beginner: 4, 6, 8
+									Fundamental: 6, 8, 10, 12
+									Intermediate: 13, 15, 18, 20
+									Advanced: 20, 25, 30, 35
+	freq						list of frequencies 400 - 700
+									Always: 450,550,600,700
+	questions*					number of questions
+									Beginner: 3, 5, 7, 10
+									Fundamental: 3, 5, 7, 10
+									Intermediate: 3, 5. 7, 10
+									Advanced: 3, 5, 7, 10
+	words						number of words per question
+									always 1 
+	minchars					minimum number of characters in the question
+									Beginner: 2
+									Fundamental: 3
+									Intermediate: 3
+									Advanced: 3
+	maxchars					maximum number of characters in the question
+									Beginner: 3
+									Fundamental: 4
+									Intermediate: 5
+									Advanced: 6
+	timeout						how long student has to select an answer
+									Beginner: 15
+									Fundamental: 10
+									Intermediate: 10
+									Advanced: 10
+	callsigns					how many callsigns to include in the questions
+									Beginner: 0
+									Fundamental: 1 1x3
+									Intermediate: 
+										Depends on number of questions
+											3 questions: 0
+											5 questions: 1 1x3,2x2
+											7 questions: 2 1x3,2x2
+											10 questions: 3 1x3,2x2,complex
+									Advanced: 
+											3 questions: 0
+											5 questions: 1 complex
+											7 questions: 2 complex
+											10 questions: 3 complex
+	answers*					how many answers to display
+									Beginner: 5, 7, 10
+									Fundamental: 5, 7, 10
+									Intermediate: 5, 7, 10
+									Advanced: 5, 7, 10
+	level						level of the exam (note: all lowercase)
+									beginner, fundamental, intermediate, advanced
+	token						token to identify this activity
+	vocab						vocabulary to use 
+									threek or original (always threek)
+	infor						reason for the assessment
+	
+	
+	* - parameter selected by advisor	
+	
+	
 	created 30Dec23 by Roland
 	Modified 25Oct24 by Roland for new database
+	Modified 10Feb24 by Roland to use new parameters
 */
 
 	global $wpdb, $doDebug, $testMode, $audioAssessmentTableName, $alreadyPlayed;
-
-
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
@@ -691,7 +760,7 @@ function advisor_request_student_assessment_func() {
 										<td style='vertical-align:top;'><b>Select Questions Parameters</b><br /><br />
 											<b>Number of Questions</b><br />
 											$questions_params<br /><br /><br />
-											<b>Number of answers to show for eachquestion</b><br />
+											<b>Number of answers to show for each question</b><br />
 											$answers_params</td></tr>
 									<tr><td colspan='3'><input class='formInputButton' type='submit' value='Submit' /></td></tr>
 									</table></form>";
