@@ -57,10 +57,24 @@
 		} else {
 			$thisMode		= "Production";
 		}
-		$joblog				= "$jobname|$thisDate|$thisTime|$userName|thisMode|Initiated for $request_info ";
-		$result				= write_joblog_func($joblog);
-		if ($result[0] == 'fail') {
-			echo "write joblog failed<br />";
+		$ipAddr			= get_the_user_ip();
+		$theTitle		= esc_html(get_the_title());
+		$jobmonth		= date('F Y');
+		$updateData		= array('jobname' 		=> $jobname,
+								'jobdate' 		=> $nowDate,
+								'jobtime'		=> $nowTime,
+								'jobwho' 		=> $userName,
+								'jobmode'		=> 'Time',
+								'jobdatatype' 	=> $thisStr,
+								'jobaddlinfo'	=> "$strPass: $elapsedTime",
+								'jobip' 		=> $ipAddr,
+								'jobmonth' 		=> $jobmonth,
+								'jobcomments' 	=> '',
+								'jobtitle' 		=> $theTitle,
+								'doDebug'		=> $doDebug);
+		$result			= write_joblog2_func($updateData);
+		if ($result === FALSE){
+			$content	.= "<p>writing to joblog failed</p>";
 		}
 
 
@@ -585,6 +599,7 @@ Choose Save changes.
 	$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$replacement_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_call_sign</a>";
 	$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$replacement_student&inp_depth=one&doDebug&testMode' target='_blank'>$replacement_student</a>";
 	$findLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$replacement_student&inp_mode=$inp_mode' target='_blank'>Find Class</a>";
+	$userMasterLink	= "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$replacement_call_sign&doDebug&testMode' target='_blank'>$replacement_call_sign</a>";
 
 
 
