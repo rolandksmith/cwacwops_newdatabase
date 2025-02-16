@@ -1,5 +1,15 @@
 function update_advisor_service_func() {
 
+/*	Updates wpw1_cwa_advisor_service table with the classes each advisor 
+	has taught
+	
+	Related programs:
+		advisor_service_report
+		removeServiceDuplicates
+		update_advisor_service
+
+*/
+
 	global $wpdb;
 
 	$doDebug						= FALSE;
@@ -15,6 +25,7 @@ function update_advisor_service_func() {
 	$userDisplayName				= $initializationArray['userDisplayName'];
 	$userRole						= $initializationArray['userRole'];
 	$pastSemestersArray				= $initializationArray['pastSemestersArray'];
+	$currentSemester				= $initializationArray['currentSemester'];
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
@@ -171,11 +182,11 @@ function update_advisor_service_func() {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
 		$extMode					= 'tm';
-		$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass2";
+		$advisorClassTableName		= "wpw1_cwa_advisorclass2";
 		$advisorServiceTableName	= "wpw1_cwa_advisor_service2";
 	} else {
 		$extMode					= 'pd';
-		$advisorClassTableName		= "wpw1_cwa_consolidated_advisorclass";
+		$advisorClassTableName		= "wpw1_cwa_advisorclass";
 		$advisorServiceTableName	= "wpw1_cwa_advisor_service";
 	}
 
@@ -183,6 +194,9 @@ function update_advisor_service_func() {
 
 	if ("1" == $strPass) {
 		$semesterList				= '';
+			if ($currentSemester != 'Not in Session') {
+				$semesterList		.= "<input type='radio' class='formInputbutton' name='inp_semester' value='$currentSemester' required>$currentSemester<br />";
+			}
 		foreach($pastSemestersArray as $thisSemester) {
 			$semesterList			.= "<input type='radio' class='formInputbutton' name='inp_semester' value='$thisSemester' required>$thisSemester<br />";
 		}
@@ -212,10 +226,10 @@ function update_advisor_service_func() {
 		
 		$advisorArray			= array();
 		// get the classes from the requested semester
-		$sql			= "select advisor_call_sign, 
-								  sequence 
+		$sql			= "select advisorclass_call_sign, 
+								  advisorclass_sequence 
 							from $advisorClassTableName 
-							where semester = '$inp_semester'";
+							where advisorclass_semester = '$inp_semester'";
 							
 		$advisorClassResult	= $wpdb->get_results($sql);
 		if ($advisorClassResult === FALSE) {
@@ -227,8 +241,8 @@ function update_advisor_service_func() {
 			}
 			if ($numACRows > 0) {
 				foreach($advisorClassResult as $advisorClassResultRow) {
-					$advisorCallSign		= $advisorClassResultRow->advisor_call_sign;
-					$advisorSequence		= $advisorClassResultRow->sequence;
+					$advisorCallSign		= $advisorClassResultRow->advisorclass_call_sign;
+					$advisorSequence		= $advisorClassResultRow->advisorclass_sequence;
 					
 					if (array_key_exists($advisorCallSign, $advisorArray)) {
 						$advisorArray[$advisorCallSign]['classes']++;
@@ -337,9 +351,23 @@ function update_advisor_service_func() {
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
