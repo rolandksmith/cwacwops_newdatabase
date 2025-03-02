@@ -946,8 +946,6 @@ function program_list_func() {
 								information</p>
 							<p><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a><br />
 								The program displays the current status of your CW Academy class request.</p>
-							<p><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
-								Displays recent reminders starting with the most recent reminder. Displays 25 at a time</p>
 							<p><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a><br />
 								This program will change your callsign to your new callsign in the CW Academy database.</p>
 							<p><a href='https://cwops.org/cw-academy/cw-academy-student-resources/' target='_blank'>Student Resources</a><br />
