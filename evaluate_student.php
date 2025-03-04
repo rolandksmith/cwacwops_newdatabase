@@ -701,7 +701,7 @@ function evaluate_student_func() {
 							   and student_semester='$theSemester'";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'in function processEachStudent abt line 704');
 		} else {
 			$numSRows									= $wpdb->num_rows;
 			if ($doDebug) {
@@ -715,10 +715,12 @@ function evaluate_student_func() {
 					$student_last_name 					= $studentRow->user_last_name;
 					$student_email 						= $studentRow->user_email;
 					$student_phone 						= $studentRow->user_phone;
+					$student_ph_code 					= $studentRow->user_ph_code;
 					$student_city 						= $studentRow->user_city;
 					$student_state 						= $studentRow->user_state;
 					$student_zip_code 					= $studentRow->user_zip_code;
 					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
 					$student_whatsapp 					= $studentRow->user_whatsapp;
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
@@ -780,30 +782,6 @@ function evaluate_student_func() {
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$student_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$student_country		= "UNKNOWN";
-						$student_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$student_country		= $countryRow->country_name;
-								$student_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$student_country			= "Unknown";
-							$student_ph_code			= "";
-						}
-					}
-					
 					$PChecked									= "";
 					$NChecked									= "";
 					$WChecked									= "";
@@ -860,7 +838,7 @@ function evaluate_student_func() {
 							   where student_id=$studentid";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'in function x_updateStudent abt line 841');
 			sendErrorEmail($errorMsg);
 		} else {
 			$numPSRows									= $wpdb->num_rows;
@@ -1024,7 +1002,7 @@ function evaluate_student_func() {
 							   and student_semester='$theSemester'";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'in function isStudentEvaluated abt line 1005');
 			return array('0',$past_student_ID);
 		} else {
 			$numPSRows									= $wpdb->num_rows;
@@ -1073,7 +1051,7 @@ function evaluate_student_func() {
 								   where advisorclass_id=$advisorClassID";
 		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisorclass === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'in function processQ abt line 1054');
 			$allOK					= FALSE;
 		} else {
 			$numACRows				= $wpdb->num_rows;
@@ -1214,7 +1192,7 @@ function evaluate_student_func() {
 														'doDebug'=>$doDebug);
 						$updateResult	= update_user_master($userMasterData);
 						if ($updateResult[0] === FALSE) {
-							handleWPDBError($jobname,$doDebug);
+							handleWPDBError($jobname,$doDebug,'in processQ updating user_master abt line 1195');
 							$allOK			= FALSE;
 							$resultMessage	= "Unable to set user_master survey score";
 						} else {
@@ -1285,7 +1263,7 @@ function evaluate_student_func() {
 															and student_semester=$advisorClass_semester";
 								$wpw1_cwa_student	= $wpdb->get_results($sql);
 								if ($wpw1_cwa_student === FALSE) {
-									handleWPDBError($jobname,$doDebug);
+									handleWPDBError($jobname,$doDebug,'in removeQ abt line 1266');
 									$allOK			= FALSE;
 								} else {
 									$numPSRows									= $wpdb->num_rows;
@@ -1417,7 +1395,7 @@ function evaluate_student_func() {
 							where user_call_sign = '$inp_callsign'";
 		$sqlResult		= $wpdb->get_results($sql);
 		if ($sqlResult === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'getting user_master at beginning of pass2a abt line 1398');
 			$validUser	= FALSE;
 		} else {
 			$numRows	= $wpdb->num_rows;
@@ -1432,11 +1410,13 @@ function evaluate_student_func() {
 					$user_first_name		= $sqlRow->user_first_name;
 					$user_last_name			= $sqlRow->user_last_name;
 					$user_email				= $sqlRow->user_email;
+					$user_ph_code			= $sqlRow->user_ph_code;
 					$user_phone				= $sqlRow->user_phone;
 					$user_city				= $sqlRow->user_city;
 					$user_state				= $sqlRow->user_state;
 					$user_zip_code			= $sqlRow->user_zip_code;
 					$user_country_code		= $sqlRow->user_country_code;
+					$user_country			= $sqlRow->user_country;
 					$user_whatsapp			= $sqlRow->user_whatsapp;
 					$user_telegram			= $sqlRow->user_telegram;
 					$user_signal			= $sqlRow->user_signal;
@@ -1450,28 +1430,6 @@ function evaluate_student_func() {
 					$user_date_created		= $sqlRow->user_date_created;
 					$user_date_updated		= $sqlRow->user_date_updated;
 	
-					$countrySQL				= "select * from $countryCodesTableName 
-												where country_code = '$user_country_code'";
-					$countrySQLResult		= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$user_country		= "UNKNOWN";
-						$user_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$user_country		= $countryRow->country_name;
-								$user_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$user_country			= "Unknown";
-							$user_ph_code			= "";
-						}
-					}
 					$advisor_email 			= $user_email;
 					$advisor_phone			= "+$user_ph_code $user_phone";
 				}
@@ -1494,7 +1452,7 @@ function evaluate_student_func() {
 											   order by advisorclass_sequence";
 			$wpw1_cwa_advisorclass			= $wpdb->get_results($sql);
 			if ($wpw1_cwa_advisorclass === FALSE) {
-				handleWPDBError($jobname,$doDebug);
+				handleWPDBError($jobname,$doDebug,'getting class record abt line 1454');
 				$content	.= "<p>No $advisorClassTableName table records for this advisor.</p>";
 			} else {
 				$numACRows					= $wpdb->num_rows;
@@ -1708,7 +1666,7 @@ function evaluate_student_func() {
 								   order by advisorclass_sequence";
 		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisorclass === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+			handleWPDBError($jobname,$doDebug,'about line 1667');
 			$content			.= "Could not obtain any advisorClass records<br />";
 		} else {
 			$numACRows				= $wpdb->num_rows;
