@@ -49,18 +49,16 @@ function advisor_request_student_assessment_func() {
 									Advanced: 10
 	callsigns					how many callsigns to include in the questions
 									Beginner: 0
-									Fundamental: 1 1x3
-									Intermediate: 
-										Depends on number of questions
-											3 questions: 0
-											5 questions: 1 1x3,2x2
-											7 questions: 2 1x3,2x2
-											10 questions: 3 1x3,2x2,complex
-									Advanced: 
-											3 questions: 0
-											5 questions: 1 complex
-											7 questions: 2 complex
-											10 questions: 3 complex
+									All others 0,1,2,4,All
+									
+									if callsigns == '1'
+										1 1x3,2x2
+									if callsigns == 2
+										2 1x3,2x2
+									if callsigns == 4
+										4 1x3,2x2,complex
+									if callsigns 'A'
+										Nmbr Questions 1x3,2x2,complex
 	answers*					how many answers to display
 									Beginner: 5, 7, 10
 									Fundamental: 5, 7, 10
@@ -109,6 +107,7 @@ function advisor_request_student_assessment_func() {
 	$validTestmode		= $initializationArray['validTestmode'];
 	$currentSemester	= $initializationArray['currentSemester'];
 	$nextSemester		= $initializationArray['nextSemester'];
+	$prevSemester		= $initializationArray['prevSemester'];
 	$siteURL			= $initializationArray['siteurl'];
 	$currentDateTime	= $initializationArray['currentDateTime'];
 	$versionNumber		= '1';
@@ -379,7 +378,7 @@ function advisor_request_student_assessment_func() {
 	}
 	$theSemester				= $currentSemester;
 	if ($currentSemester == 'Not in Session') {
-		$theSemester			= $nextSemester;
+		$theSemester			= $prevSemester;
 	}
 
 
@@ -678,9 +677,9 @@ function advisor_request_student_assessment_func() {
 											   <input type='radio' class='formInputButton' name='inp_questions' value='7'> 7 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0' checked>No Callsigns";
-						$answers_params		= "<input type='radio' name='inp_answers' value='5' checked>5 Answers<br />
-												<input type='radio' name='inp_answers' value='7'>7 Answers<br />
-												<input type='radio' name='inp_answers' value='10'>10 Answers";
+						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='7'>7 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					} elseif ($advisorClass_level == 'Fundamental') {
 						$wpm_params			= "<input type='radio' class='formInputButton' name='inp_wpm' value='18'> 18cpm<br />
 												<input type='radio' class='formInputButton' name='inp_wpm' value='20'> 20cpm<br />
@@ -695,15 +694,16 @@ function advisor_request_student_assessment_func() {
 											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked>2 Callsign2<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns";
-						$answers_params		= "<input type='radio' name='inp_answers' value='5' checked>5 Answers<br />
-												<input type='radio' name='inp_answers' value='7'>7 Answers<br />
-												<input type='radio' name='inp_answers' value='10'>10 Answers";
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked>2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='A'>All Callsigns<br />";
+						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='7'>7 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					} elseif($advisorClass_level == 'Intermediate') {
 						$wpm_params			= "<input type='radio' class='formInputButton' name='inp_wpm' value='18'> 18cpm<br />
 												<input type='radio' class='formInputButton' name='inp_wpm' value='20'> 20cpm<br />
-												<input type='radio' class='formInputButton' name='inp_wpm' value='25' vhrvkrf> 25cpm";
+												<input type='radio' class='formInputButton' name='inp_wpm' value='25' checked> 25cpm";
 						$eff_params			= "<input type='radio' class='formInputButton' name='inp_eff' value='13'> 13wpm Effective<br />
 												<input type='radio' class='formInputButton' name='inp_eff' value='15'> 15wpm Effective<br />
 												<input type='radio' class='formInputButton' name='inp_eff' value='18'> 18wpm Effective<br />
@@ -715,10 +715,11 @@ function advisor_request_student_assessment_func() {
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' >2 Callsigns<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns";
-						$answers_params		= "<input type='radio' name='inp_answers' value='5' checked>5 Answers<br />
-												<input type='radio' name='inp_answers' value='7'>7 Answers<br />
-												<input type='radio' name='inp_answers' value='10'>10 Answers";
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='A'>All Callsigns<br />";
+						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='7'>7 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					} elseif ($advisorClass_level == 'Advanced') {
 						$wpm_params			= "<input type='radio' class='formInputButton' name='inp_wpm' value='20'> 20cpm<br />
 												<input type='radio' class='formInputButton' name='inp_wpm' value='25'> 25cpm<br />
@@ -732,9 +733,14 @@ function advisor_request_student_assessment_func() {
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='7' > 7 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
-						$answers_params		= "<input type='radio' name='inp_answers' value='5' checked>5 Answers<br />
-												<input type='radio' name='inp_answers' value='7'>7 Answers<br />
-												<input type='radio' name='inp_answers' value='10'>10 Answers";
+						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' >2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='4' >4 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='A' >All Callsigns<br />";
+						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='7'>7 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					}
 					$content	.= "<h4>Class $advisorClass_sequence $advisorClass_level</h4>
 									<form method='post' action='$theURL' 
@@ -760,6 +766,8 @@ function advisor_request_student_assessment_func() {
 										<td style='vertical-align:top;'><b>Select Questions Parameters</b><br /><br />
 											<b>Number of Questions</b><br />
 											$questions_params<br /><br /><br />
+											<b>Number of Questions to be Call Signs</b><br />
+											$callsigns_params<br /><br />
 											<b>Number of answers to show for each question</b><br />
 											$answers_params</td></tr>
 									<tr><td colspan='3'><input class='formInputButton' type='submit' value='Submit' /></td></tr>
@@ -998,13 +1006,14 @@ will be displayed there.</p>";
 						$thismaxchars	= '3'; 
 					} elseif ($student_level == 'Fundamental') {
 						$thisminchars	= '3';
-						$thismaxchars	= '4'; 
+						$thismaxchars	= '5'; 
 					} elseif ($student_level == 'Intermediate') {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
 					} elseif ($student_level == 'Advanced') {
 						$thisminchars	= '3';
-						$thismaxchars	= '6'; 
+//						$thismaxchars	= '6'; 
+						$thismaxchars	= '5'; 
 					} else {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
@@ -1012,53 +1021,42 @@ will be displayed there.</p>";
 					
 					// timeout parameters
 					if ($student_level == 'Beginner') {
-						$thistimeout	= '15'; 
+						$thistimeout	= '20'; 
 					} elseif ($student_level == 'Fundamental') {
-						$thistimeout	= '10';
-					} elseif ($student_level == 'Intermediate') {
-						$thistimeout	= '10';
-					} elseif ($student_level == 'Advanced') {
-						$thistimeout	= '10';
-					} else {
 						$thistimeout	= '15';
+					} elseif ($student_level == 'Intermediate') {
+						$thistimeout	= '15';
+					} elseif ($student_level == 'Advanced') {
+						$thistimeout	= '15';
+					} else {
+						$thistimeout	= '20';
+					}
+					if ($doDebug) {
+						echo "timeout parameters:<br />
+						      level: $student_level<br />
+						      thistimeout: $thistimeout<br />";
 					}
 					
 					// number of callsigns parameters
-					if ($student_level == 'Beginner') {
-						$thisCallsigns	= '0'; 
-					} elseif ($student_level == 'Fundamental') {
-						if ($thisQuestions == '3') {
-							$thisCallsigns	= '0';
-						} elseif ($thisQuestions == '5') {
-							$thisCallsigns	= '1%201x3,2x2';
-						} elseif ($thisQuestions == '7') {
-							$thisCallsigns	= '1%201x3,2x2';
-						} elseif ($thisQuestions == '10') {
-							$thisCallsigns	= '1%201x3,2x2,complex';
-						}
-					} elseif ($student_level == 'Intermediate') {
-						if ($thisQuestions == '3') {
-							$thisCallsigns	= '0';
-						} elseif ($thisQuestions == '5') {
-							$thisCallsigns	= '1%201x3,2x2';
-						} elseif ($thisQuestions == '7') {
-							$thisCallsigns	= '1%201x3,2x2';
-						} elseif ($thisQuestions == '10') {
-							$thisCallsigns	= '1%201x3,2x2,complex';
-						}
-					} elseif ($student_level == 'Advanced') {
-						if ($thisQuestions == '3') {
-							$thisCallsigns	= '0';
-						} elseif ($thisQuestions == '5') {
-							$thisCallsigns	= '1%20complex';
-						} elseif ($thisQuestions == '7') {
-							$thisCallsigns	= '1%20complex';
-						} elseif ($thisQuestions == '10') {
-							$thisCallsigns	= '1%20complex';
-						}
-					} else {
-						$thisCallsigns	= '1,complex';
+					if ($doDebug) {
+						echo "setting number of callsigns parameters<br />
+						      inp_cscount: $inp_cscount<br />";
 					}
+					if ($inp_cscount == '0') {
+						$thisCallsigns	= '0';
+					} elseif ($inp_cscount == '1') {
+						$thisCallsigns	= '1%201x3,2x2';
+					} elseif ($inp_cscount == '2') {
+						$thisCallsigns	= '2%201x3,2x2';
+					} elseif ($inp_cscount == '4') {
+						$thisCallsigns	= '4%201x3,2x2,complex';
+					} elseif ($inp_cscount == 'A') {
+						$thisCallsigns = "$inp_questions%201x3,2x2,complex";
+					}
+					if ($doDebug) {
+						echo "thisCallsigns: $thisCallsigns<br />";
+					}
+
 					$thisAnswers		= $inp_answers;				// how many answers to display
 					$thisLevel			= $student_level;			// level of the exam
 					$token				= mt_rand();				// token to identify this activity
