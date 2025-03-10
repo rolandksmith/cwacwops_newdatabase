@@ -1089,10 +1089,10 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 															<input type='radio' class='formInputButton' id='chk_semester' name='inp_semester' value='$semesterTwo' > $semesterTwo<br />
 															<input type='radio' class='formInputButton' id='chk_semester' name='inp_semester' value='$semesterThree'> $semesterThree</td>
 														<td style='vertical-align:top;width:330px;'><b>Level</b><br />
-															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Beginner'> Beginner<br />
-															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental'> Fundamental (formerly Basic)<br />
-															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Intermediate'> Intermediate<br />
-															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Advanced''> Advanced<br /></td>
+															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Beginner' required> Beginner<br />
+															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental' required> Fundamental (formerly Basic)<br />
+															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Intermediate' required> Intermediate<br />
+															<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Advanced' required> Advanced<br /></td>
 														<td style='vertical-align:top;'><b>Class Size</b><br />
 															<input type='text'class='formInputText' id='chk_class_size' name='inp_class_size' size='5' maxlength='5' value='6'><br />
 																(default class size is 6)</td></tr>
@@ -1498,10 +1498,10 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 										<tr><td style='vertical-align:top;width:330px;'><b>Sequence</b><br />
 												$classcount</td>
 											<td style='vertical-align:top;width:330px;'><b>Level</b><br />
-												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Beginner'> Beginner<br />
-												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental'> Fundamental (formerly Basic)<br />
-												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Intermediate'> Intermediate<br />
-												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Advanced''> Advanced<br /></td>
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Beginner' required> Beginner<br />
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental' required> Fundamental (formerly Basic)<br />
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Intermediate' required> Intermediate<br />
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Advanced' required> Advanced<br /></td>
 											<td style='vertical-align:top;'width:330px;><b>Class Size</b><br />
 												<input type='text'class='formInputText' id='chk_class_size' name='inp_class_size' size='5' maxlength='5' value='6'><br />
 													(default class size is 6)</td></tr>
