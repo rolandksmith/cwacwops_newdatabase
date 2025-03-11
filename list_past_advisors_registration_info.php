@@ -8,6 +8,7 @@ function list_past_advisors_registration_info_func() {
 	Modified 16Apr23 by Roland to fix action_code
 	Modified 13Jul23 by Roland to use consolidated tables
 	Modified 16Oct24 by Roland to use new database
+	Modified 11Mar25 by Roland to select which advisors should not get an email
 */
 
 
@@ -93,8 +94,8 @@ function list_past_advisors_registration_info_func() {
 				$futureSemester	 = $str_value;
 				$futureSemester	 = filter_var($futureSemester,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key 		== "myEncode") {
-				$myEncode		 = $str_value;
+			if ($str_key 		== "transferArray") {
+				$transferArray		 = $str_value;
 			}
 			if ($str_key 		== "inp_message") {
 				$inp_message	 = $str_value;
@@ -475,7 +476,7 @@ function list_past_advisors_registration_info_func() {
 				$content			.= "</tr>									
 										<tr><td colspan='$columnCount'><hr></td></tr>";
 				if (!$advisorOK) {				/// advisor not signed up for future semester
-					$advisorMissingArray[]	= "$thisAdvisor|$advisorName|$advisorPhone|$advisorEmail";
+					$advisorMissingArray[]	= "$advisorName|$thisAdvisor|$advisorPhone|$advisorEmail";
 				}
 			} else {
 				$content			.= "<tr><td colspan='$columnCount'>No Classes Found</td></tr>
@@ -484,8 +485,25 @@ function list_past_advisors_registration_info_func() {
 		}
 		$content				.= "</table><p>$advisorCount Advisors</p>";
 
-		$transferArray				= array();
-		$mySeq						= 0;
+		sort($advisorMissingArray);
+		// Send them an email?
+		$content					.= "<h4>Send an Email to the Unregistered Advisors?</h4>
+										<p>If you would like to send an email to the advisors who have not 
+										yet registered for the $futureSemester semester:<p>
+										<ul><li>Uncheck any of the advisors in the following list that 
+												should <b>NOT</b> get the email. All others will receive the 
+												email</li>
+											<li>Compose the email you would like to send</li>
+											<li>Click 'Submit'</li></ul>
+										<p>The subject line will read: 
+										CW Academy Is Missing You.</p>
+										<p>Otherwise, you may close this window.</p>
+										<form method='post' action='$theURL' 
+										name='selection_form_b' ENCTYPE='multipart/form-data'>
+										<input type='hidden' name='strpass' value='3'>
+										<input type='hidden' name='inp_mode' value='$inp_mode'>
+										<input type='hidden' name='inp_verbose' value='$inp_verbose'>";
+
 		$content					.= "<h4>Advisors Not Registered for the $futureSemester Semester</h4>
 										<table>
 									<tr><th>Call Sign</th>
@@ -495,11 +513,11 @@ function list_past_advisors_registration_info_func() {
 									</tr>";
 		foreach($advisorMissingArray as $thisData) {
 			$myArray				= explode("|",$thisData);
-			$thisCallSign			= $myArray[0];
-			$thisName				= $myArray[1];
+			$thisCallSign			= $myArray[1];
+			$thisName				= $myArray[0];
 			$thisPhone				= $myArray[2];
 			$thisEmail				= $myArray[3];
-			$content				.= "<tr><td>$thisCallSign</td>
+			$content				.= "<tr><td><input type='checkbox' class='formInputButton' name='transferArray[]' value='$thisCallSign&$thisName&$thisEmail' checked>$thisCallSign</td>
 											<td>$thisName</td>
 											<td>$thisPhone</td>
 											<td>$thisEmail</td>
@@ -507,23 +525,8 @@ function list_past_advisors_registration_info_func() {
 		}
 		$content					.="</table>";
 		$myInt						= count($advisorMissingArray);
-		$content					.= "$myInt past advisors not registered for the $futureSemester semester<br />";
-		
-		// Send them an email?
-		$myEncode					= base64_encode(json_encode($advisorMissingArray));
-		$content					.= "<h4>Send an Email to the Unregistered Advisors?</h4>
-										<p>If you would like to send an email to the advisors who have not 
-										yet registered for the $futureSemester semester, compose the email 
-										you would like to send and click 'Submit'. The subject line will read: 
-										CW Academy Is Missing You.</p>
-										<p>Otherwise, you may close this window.</p>
-										<form method='post' action='$theURL' 
-										name='selection_form_b' ENCTYPE='multipart/form-data'>
-										<input type='hidden' name='strpass' value='3'>
-										<input type='hidden' name='inp_mode' value='$inp_mode'>
-										<input type='hidden' name='inp_verbose' value='$inp_verbose'>
-										<input type='hidden' name='myEncode' value='$myEncode'>
-										<p>Message Text to be Sent to All Unregistered Advisors:</p>
+		$content					.= "$myInt past advisors not registered for the $futureSemester semester<br />
+										<p>Message Text to be Sent to selected Unregistered Advisors:</p>
 										<textarea class='formInputText' name='inp_message' rows='5' cols='50'></textarea>
 										<input class='formInputButton' type='submit' value='Submit' />
 										</form>";
@@ -531,32 +534,28 @@ function list_past_advisors_registration_info_func() {
 
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
-			echo "arrived at pass 3<br />";
-		}
-
-		$thisEncode		= base64_decode($myEncode);
-		$advisorMissingArray	= json_decode($thisEncode);
-		
-		if ($doDebug) {
-			echo "advisorMissingArray:<br /><pre>";
-			print_r($advisorMissingArray);
+			echo "arrived at pass 3<br />
+				  transferArray:<br /><pre>";
+			print_r($transferArray);
 			echo "</pre><br />";
 		}
 		
 		if ($inp_message == '') {
 			$content		.= "No message entered. Program ending.";
 		} else {
-			$content		.= "<h3>$jobname</h3>";
+			$myInt			= count($transferArray);
+			echo "myInt: $myInt<br />";
+			$content		.= "<h3>$jobname</h3>
+								<p>There are $myInt emails to send</p>";
 			$increment		= 0;
 			
 			$theSubject		= "CW Academy Is Missing You";
 			
-			foreach($advisorMissingArray as $thisValue) {
-				$myArray				= explode("|",$thisValue);
+			foreach($transferArray as $thisKey => $thisValue) {
+				$myArray				= explode("&",$thisValue);
 				$thisCallSign			= $myArray[0];
 				$thisName				= $myArray[1];
-				$thisPhone				= $myArray[2];
-				$thisEmail				= $myArray[3];
+				$thisEmail				= $myArray[2];
 				
 				$theContent				= "<p>To: $thisName ($thisCallSign):</p>
 											<p>$inp_message</p>
@@ -585,7 +584,7 @@ function list_past_advisors_registration_info_func() {
 					if ($testMode) {
 						$content			.= "Email would have been sent to $theRecipient<br />";
 					} else {
-						$content			.= "Email sent to $theRecipient<br />";
+						$content			.= "Email sent to $theRecipient - $thisName ($thisCallSign)<br />";
 					}
 				}
 			}
