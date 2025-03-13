@@ -43,10 +43,10 @@ function advisor_request_student_assessment_func() {
 									Intermediate: 5
 									Advanced: 6
 	timeout						how long student has to select an answer
-									Beginner: 15
-									Fundamental: 10
-									Intermediate: 10
-									Advanced: 10
+									Beginner: 20
+									Fundamental: 15
+									Intermediate: 15
+									Advanced: 15
 	callsigns					how many callsigns to include in the questions
 									Beginner: 0
 									All others 0,1,2,4,All
