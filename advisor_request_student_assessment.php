@@ -999,38 +999,31 @@ will be displayed there.</p>";
 					$thiseff			= $inp_eff;					// effective speed
 					$thisFreq			= '450,550,600,700';		// list of frequencies 400 - 700
 					$thisQuestions		= $inp_questions;			// number of questions 
+					$thisTimeout		= '30';						// default timeout
 
-					// min/max characters
+					// min/max characters and timeout
 					if ($student_level == 'Beginner') {
 						$thisminchars	= '2';
 						$thismaxchars	= '3'; 
+						$thisTimeout	= '20';
 					} elseif ($student_level == 'Fundamental') {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
+						$thisTimeout	= '15';
 					} elseif ($student_level == 'Intermediate') {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
+						$thisTimeout	= '15';
 					} elseif ($student_level == 'Advanced') {
 						$thisminchars	= '3';
-//						$thismaxchars	= '6'; 
+						$thismaxchars	= '6'; 
 						$thismaxchars	= '5'; 
+						$thisTimeout	= '15';
 					} else {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
 					}
 					
-					// timeout parameters
-					if ($student_level == 'Beginner') {
-						$thistimeout	= '20'; 
-					} elseif ($student_level == 'Fundamental') {
-						$thistimeout	= '15';
-					} elseif ($student_level == 'Intermediate') {
-						$thistimeout	= '15';
-					} elseif ($student_level == 'Advanced') {
-						$thistimeout	= '15';
-					} else {
-						$thistimeout	= '20';
-					}
 					if ($doDebug) {
 						echo "timeout parameters:<br />
 						      level: $student_level<br />
@@ -1049,9 +1042,9 @@ will be displayed there.</p>";
 					} elseif ($inp_cscount == '2') {
 						$thisCallsigns	= '2%201x3,2x2';
 					} elseif ($inp_cscount == '4') {
-						$thisCallsigns	= '4%201x3,2x2,complex';
+						$thisCallsigns	= 'complex';
 					} elseif ($inp_cscount == 'A') {
-						$thisCallsigns = "$inp_questions%201x3,2x2,complex";
+						$thisCallsigns = "$inp_questions%20complex";
 					}
 					if ($doDebug) {
 						echo "thisCallsigns: $thisCallsigns<br />";
@@ -1068,17 +1061,18 @@ will be displayed there.</p>";
 					$returnurl	= urlencode($myStr);
 					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
 					
+					$effective_date		 	= date('Y-m-d H:i:s');
+					$closeStr				= strtotime("+5 days");
+					$close_date				= date('Y-m-d H:i:s', $closeStr);
 					$reminder_text		= "<b>Morse Code Assessment</b> Your advisor $inp_callsign 
-requests that you do a Morse code proficiency assessment. The assessment program will give you $thisQuestions 
+requests that you do a Morse code proficiency assessment. The request will be available until $close_date. 
+The assessment program will give you $thisQuestions 
 questions in Morse code and then display a set of multiple choice answers to chose from. The questions will 
 consist of one word some of which may be abbreviations 
 or random characters. After 
 starting the assessment, the program will show some generic information about the process. When you 
 complete the assessment, the program will display your results and will also make the results 
 available to your advisor. To start the assessment, please click $url.";
-					$effective_date		 	= date('Y-m-d H:i:s');
-					$closeStr				= strtotime("+5 days");
-					$close_date				= date('Y-m-d H:i:s', $closeStr);
 					$inputParams		= array("effective_date|$effective_date|s",
 												"close_date|$close_date|s",
 												"resolved_date||s",
@@ -1089,7 +1083,7 @@ available to your advisor. To start the assessment, please click $url.";
 												"email_text||s",
 												"reminder_text|$reminder_text|s",
 												"resolved||s",
-												"token|$token|s");
+												"token||s");
 					$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
 					if ($insertResult[0] === FALSE) {
 						if ($doDebug) {
@@ -1231,13 +1225,16 @@ available to your advisor. To start the assessment, please click $url.";
 
 										// add advisor reminder
 
-										$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$inp_callsign&token=$token");
-										$reminder_text		= "<b>Morse Code Assessment Result</b> Your student 
-$student_last_name, $student_first_name ($inp_callsign) has completed the Morse code assessment you requested. 
-Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to view the results.";  
 										$effective_date		 	= date('Y-m-d H:i:s');
 										$closeStr				= strtotime("+5 days");
 										$close_date				= date('Y-m-d H:i:s', $closeStr);
+										$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$inp_callsign&token=$token");
+										$reminder_text		= "<b>Morse Code Assessment Result</b> Your student 
+$student_last_name, $student_first_name ($inp_callsign) has completed the Morse code assessment you requested. 
+Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to view the results. <b<Note:</b> 
+This reminder will expire when you view the assessment results by clicking on the link or on $close_date. 
+You can also view your student's assessment results at any time using the View Your Student's Morse Code 
+Assessments program on your Advisor Portal.";  
 										$inputParams		= array("effective_date|$effective_date|s",
 																	"close_date|$close_date|s",
 																	"resolved_date||s",
