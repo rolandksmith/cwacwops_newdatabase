@@ -43,9 +43,9 @@ function advisor_request_student_assessment_func() {
 									Intermediate: 5
 									Advanced: 6
 	timeout						how long student has to select an answer
-									Beginner: 20
-									Fundamental: 15
-									Intermediate: 15
+									Beginner: 30
+									Fundamental: 20
+									Intermediate: 20
 									Advanced: 15
 	callsigns					how many callsigns to include in the questions
 									Beginner: 0
@@ -1005,15 +1005,15 @@ will be displayed there.</p>";
 					if ($student_level == 'Beginner') {
 						$thisminchars	= '2';
 						$thismaxchars	= '3'; 
-						$thisTimeout	= '20';
+						$thisTimeout	= '30';
 					} elseif ($student_level == 'Fundamental') {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
-						$thisTimeout	= '15';
+						$thisTimeout	= '20';
 					} elseif ($student_level == 'Intermediate') {
 						$thisminchars	= '3';
 						$thismaxchars	= '5'; 
-						$thisTimeout	= '15';
+						$thisTimeout	= '20';
 					} elseif ($student_level == 'Advanced') {
 						$thisminchars	= '3';
 						$thismaxchars	= '6'; 
