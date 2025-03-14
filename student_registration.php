@@ -3878,13 +3878,13 @@ function student_registration_func() {
 											<tr><td colspan='2'>'<input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" value='Next' /></td></tr></table>
 											</form>";
 			}
-		} else {
-			if ($doDebug) {
-				echo "no master data found. Should not happen. Abort<br />";
-			}
-			$content		.= "<p>No Master Data record found. This is a program error. The sysadmin 
-								has been notified.</p>";
-			sendErrorEmail("$jobname pass100 no user master data found for $userName. Should not happen");
+//		} else {
+//			if ($doDebug) {
+//				echo "no master data found. Should not happen. Abort<br />";
+//			}
+//			$content		.= "<p>No Master Data record found. This is a program error. The sysadmin 
+//								has been notified.</p>";
+//			sendErrorEmail("$jobname pass100 no user master data found for $userName. Should not happen");
 		}
 
 		
