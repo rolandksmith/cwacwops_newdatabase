@@ -190,10 +190,10 @@ function display_reminders_for_a_callsign_func() {
 							<input type='hidden' name='strpass' value='2'>
 							<table style='border-collapse:collapse;'>
 							<tr><td>Callsign</td>
-								<td><input type='text' class='formInputText' name='inp_callsign' size='15' maxlength='16'></td></tr>
+								<td><input type='text' class='formInputText' name='inp_callsign' size='15' maxlength='15' autofocus></td></tr>
 							<tr><td>Type Run</td>
-								<td><input type='radio' class='formInputButton' name='inp_type' value='open' checked>Open Reminders Only<br />
-									<input type='radio' class='formInputButton' name='inp_type' value='all'>All Reminders</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_type' value='open'>Open Reminders Only<br />
+									<input type='radio' class='formInputButton' name='inp_type' value='all' checked>All Reminders</td></tr>
 							$testModeOption
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 							</form></p>";
@@ -254,8 +254,9 @@ function display_reminders_for_a_callsign_func() {
  						echo "got a reminder created $date_created<br />";
  					}
  					
- 					
- 					$content			.= "<tr><td style='vertical-align:top; width:250px;'><b>Record id:</b> $record_id</td>
+ 					$myStr				= "<a href='$siteURL/cwa-display-and-update-reminders/?strpass=2&do_add=N&record_id=$record_id' target='_blank'>$record_id</a>";
+
+ 					$content			.= "<tr><td style='vertical-align:top; width:250px;'><b>Record id:</b> $myStr</td>
  												<td colspan='3'>$reminder_text</td></tr>
  											<tr><td style='vertical-align:top;'><b>Effective Date:</b> $effective_date</td>
  												<td style='vertical-align:top; width:250px;'><b>Close Date:</b> $close_date</td>
