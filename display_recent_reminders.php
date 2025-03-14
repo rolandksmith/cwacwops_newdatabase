@@ -247,6 +247,7 @@ function display_recent_reminders_func() {
 								<th>Role</th>
 								<th>Reminder Text</th>
 								<th>Resolved</th>
+								<th>ID</th>
 								<th>Date Created</th></tr>";
 								
 			// get a list of reminders
@@ -283,11 +284,15 @@ function display_recent_reminders_func() {
 						$token				= $reminderRow->token;
 						$date_created		= $reminderRow->date_created;
 						$date_modified		= $reminderRow->date_modified;
-	
+						
+						if ($userRole == 'administrator') {
+							$myStr			= "<a href='$siteURL/cwa-display-and-update-reminders/?strpass=2&do_add=N&record_id=$record_id' target='_blank'>$record_id</a>";
+						}
 						$content			.= "<tr><td style='vertical-align:top;'>$call_sign</td>
 													<td style='vertical-align:top;'>$role</td>
 													<td style='vertical-align:top;'>$reminder_text</td>
 													<td style='vertical-align:top;'>$resolved</td>
+													<td style='vertical-align:top;'>$myStr</td>
 													<td style='vertical-align:top;'>$date_created</td></tr>";
 						$offset++;
 					}
