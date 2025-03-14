@@ -588,11 +588,13 @@ function student_and_advisor_color_chart_v2_func() {
 					$advisor_first_name 				= $advisorRow->user_first_name;
 					$advisor_last_name 					= $advisorRow->user_last_name;
 					$advisor_email 						= $advisorRow->user_email;
+					$advisor_ph_code 						= $advisorRow->user_ph_code;
 					$advisor_phone 						= $advisorRow->user_phone;
 					$advisor_city 						= $advisorRow->user_city;
 					$advisor_state 						= $advisorRow->user_state;
 					$advisor_zip_code 					= $advisorRow->user_zip_code;
 					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_country	 				= $advisorRow->user_country;
 					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 					$advisor_telegram 					= $advisorRow->user_telegram;
 					$advisor_signal 					= $advisorRow->user_signal;
@@ -619,30 +621,6 @@ function student_and_advisor_color_chart_v2_func() {
 					$advisor_date_created 				= $advisorRow->advisor_date_created;
 					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisor_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
-						}
-					}
 
 					if ($doDebug) {
 						echo "<br />Processing $advisor_call_sign<br />";
@@ -833,11 +811,13 @@ function student_and_advisor_color_chart_v2_func() {
 						$student_first_name 				= $studentRow->user_first_name;
 						$student_last_name 					= $studentRow->user_last_name;
 						$student_email 						= $studentRow->user_email;
+						$student_ph_code 					= $studentRow->user_ph_code;
 						$student_phone 						= $studentRow->user_phone;
 						$student_city 						= $studentRow->user_city;
 						$student_state 						= $studentRow->user_state;
 						$student_zip_code 					= $studentRow->user_zip_code;
 						$student_country_code 				= $studentRow->user_country_code;
+						$student_country 					= $studentRow->user_country;
 						$student_whatsapp 					= $studentRow->user_whatsapp;
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
@@ -899,30 +879,6 @@ function student_and_advisor_color_chart_v2_func() {
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
 	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
-
 						if ($doDebug) {
 							echo "<br />Procesing $student_call_sign<br />
 									student_email_number: $student_email_number<br />
@@ -2161,10 +2117,26 @@ function student_and_advisor_color_chart_v2_func() {
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("Student and Advisor Color Chart|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
+
 	return $content;
 }
 add_shortcode ('student_and_advisor_color_chart_v2', 'student_and_advisor_color_chart_v2_func');
