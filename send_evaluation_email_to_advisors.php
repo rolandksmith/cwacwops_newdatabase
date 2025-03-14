@@ -246,11 +246,13 @@ function send_evaluation_email_to_advisors_func() {
 					$advisor_first_name 				= $advisorRow->user_first_name;
 					$advisor_last_name 					= $advisorRow->user_last_name;
 					$advisor_email 						= $advisorRow->user_email;
+					$advisor_ph_code					= $advisorRow->user_ph_code;
 					$advisor_phone 						= $advisorRow->user_phone;
 					$advisor_city 						= $advisorRow->user_city;
 					$advisor_state 						= $advisorRow->user_state;
 					$advisor_zip_code 					= $advisorRow->user_zip_code;
 					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_country 					= $advisorRow->user_country;
 					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 					$advisor_telegram 					= $advisorRow->user_telegram;
 					$advisor_signal 					= $advisorRow->user_signal;
@@ -277,30 +279,6 @@ function send_evaluation_email_to_advisors_func() {
 					$advisor_date_created 				= $advisorRow->advisor_date_created;
 					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisor_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
-						}
-					}
 						
 					if ($doDebug) {
 						echo "<br />Processing $advisorTableName table record for advisor $advisor_call_sign<br />";
@@ -310,7 +288,7 @@ function send_evaluation_email_to_advisors_func() {
 					$haveAdditionalAdvisor				= FALSE;
 					if ($gotAdditionalAdvisors){
 						$doContinue						= FALSE;
-						if (in_array($advisorClass_call_sign,$additionalAdvisorsArray)) {
+						if (in_array($advisor_call_sign,$additionalAdvisorsArray)) {
 							$doContinue					= TRUE;
 							$haveAdditionalAdvisor		= TRUE;
 						}
@@ -339,11 +317,13 @@ function send_evaluation_email_to_advisors_func() {
 									$advisorClass_first_name 				= $advisorClassRow->user_first_name;
 									$advisorClass_last_name 				= $advisorClassRow->user_last_name;
 									$advisorClass_email 					= $advisorClassRow->user_email;
+									$advisorClass_ph_code					= $advisorClassRow->user_ph_code;
 									$advisorClass_phone 					= $advisorClassRow->user_phone;
 									$advisorClass_city 						= $advisorClassRow->user_city;
 									$advisorClass_state 					= $advisorClassRow->user_state;
 									$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
 									$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+									$advisorClass_country	 				= $advisorClassRow->user_country;
 									$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
 									$advisorClass_telegram 					= $advisorClassRow->user_telegram;
 									$advisorClass_signal 					= $advisorClassRow->user_signal;
@@ -408,40 +388,17 @@ function send_evaluation_email_to_advisors_func() {
 									$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 				
 				
-									// if you need the country name and phone code, include the following
-									$countrySQL		= "select * from wpw1_cwa_country_codes  
-														where country_code = '$advisorClass_country_code'";
-									$countrySQLResult	= $wpdb->get_results($countrySQL);
-									if ($countrySQLResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
-										$advisorClass_country		= "UNKNOWN";
-										$advisorClass_ph_code		= "";
-									} else {
-										$numCRows		= $wpdb->num_rows;
-										if ($doDebug) {
-											echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-										}
-										if($numCRows > 0) {
-											foreach($countrySQLResult as $countryRow) {
-												$advisorClass_country		= $countryRow->country_name;
-												$advisorClass_ph_code		= $countryRow->ph_code;
-											}
-										} else {
-											$advisorClass_country			= "Unknown";
-											$advisorClass_ph_code			= "";
-										}
-									}
-
 									if ($haveAdditionalAdvisor) {
 										$class_evaluation_complete	= '';
 										$classUpdateData		= array('tableName'=>$advisorClassTableName,
 																		'inp_method'=>'update',
-																		'inp_data'=>array('advisorclass_class_evaluation_complete'=>''),
+																		'inp_data'=>array('advisorclass_evaluation_complete'=>''),
 																		'inp_format'=>array('%s'),
 																		'jobname'=>$jobname,
-																		'inp_id'=>$advisorClass_id,
+																		'inp_id'=>$advisorClass_ID,
 																		'inp_callsign'=>$advisorClass_call_sign,
 																		'inp_semester'=>$theSemester,
+																		'inp_sequence'=>$advisorClass_sequence,
 																		'inp_who'=>$userName,
 																		'testMode'=>$testMode,
 																		'doDebug'=>$doDebug);
@@ -595,39 +552,39 @@ When all your evaluations are completed, you’ll be immediately able to registe
 
 		}
 	}
-
-	// send email that the job was run
-	$thisDate				= date('Y-m-d H:i:s');
-	$theRecipient			= 'kcgator@gmail.com';
-	$theSubject				= "Program Send Evaluation Email to Advisors Was Executed by $userName";
-	if ($testMode) {
-		$theContent			= "Send Evaluation Email to Advisors was run on $thisDate in TESTMODE";
-	} else {
-		$theContent			= "Send Evaluation Email to Advisors was run on $thisDate in PRODUCTION";
-	}
-	$theCc					= '';
-	$mailCode				= 18;
-	$increment				= 0;
-	if ($doTheEmails) {
-		$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-												'theSubject'=>$theSubject,
-												'theContent'=>$theContent,
-												'theCc'=>$theCc,
-												'mailCode'=>$mailCode,
-												'jobname'=>$jobname,
-												'increment'=>$increment,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug));
-	} else {
-		if ($doDebug) {
-			echo "final email would have been sent<br />";
+	if ($strPass == '2') {
+		// send email that the job was run
+		$thisDate				= date('Y-m-d H:i:s');
+		$theRecipient			= 'kcgator@gmail.com';
+		$theSubject				= "Program Send Evaluation Email to Advisors Was Executed by $userName";
+		if ($testMode) {
+			$theContent			= "Send Evaluation Email to Advisors was run on $thisDate in TESTMODE";
+		} else {
+			$theContent			= "Send Evaluation Email to Advisors was run on $thisDate in PRODUCTION";
 		}
-		$mailResult		= TRUE;
+		$theCc					= '';
+		$mailCode				= 18;
+		$increment				= 0;
+		if ($doTheEmails) {
+			$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+													'theSubject'=>$theSubject,
+													'theContent'=>$theContent,
+													'theCc'=>$theCc,
+													'mailCode'=>$mailCode,
+													'jobname'=>$jobname,
+													'increment'=>$increment,
+													'testMode'=>$testMode,
+													'doDebug'=>$doDebug));
+		} else {
+			if ($doDebug) {
+				echo "final email would have been sent<br />";
+			}
+			$mailResult		= TRUE;
+		}
+		if ($mailResult === FALSE) {
+			$content	.= "<p>Email at end of program failed</p>";
+		}
 	}
-	if ($mailResult === FALSE) {
-		$content	.= "<p>Email at end of program failed</p>";
-	}
-	
 	
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br />$myCount emails sent to advisors<br /><br /><p>Prepared at $thisTime</p>";
