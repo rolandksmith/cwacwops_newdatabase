@@ -248,7 +248,7 @@ function update_user_master($inpArray) {
 		// now see if there is a record by this id in the deleted table. If so, delete it
 		$thisData			= $wpdb->get_var("select user_call_sign from $userMasterDeletedTableName where user_id = $inp_id");
 		if ($thisData != NULL && $thisData != 0) {
-			$thisDelete		= $wpdb->delete($deleteTable,
+			$thisDelete		= $wpdb->delete($userMasterDeletedTableName,
 											array('user_id'=>$inp_id),
 											array('%d'));
 			if ($doDebug) {
@@ -274,7 +274,7 @@ function update_user_master($inpArray) {
 			return array(FALSE,"attempting to move $inp_id from $userMasterTableName to $userMasterDeletedTableName failed");
 		} else {
 			if ($doDebug) {
-				echo "copied advisor record $inp_id to $deleteTable<br />";
+				echo "copied advisor record $inp_id to $userMasterDeletedTableName<br />";
 			}
 			$deleteResult			= $wpdb->delete($tableName,
 													array('user_id'=>$inp_id),
