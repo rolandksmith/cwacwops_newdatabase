@@ -389,6 +389,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-all-advisors/' target='_blank'>Display All Advisors</a>
 								<li><a href='$siteURL/cwa-display-all-students/' target='_blank'>Display All Students</a>
 								<li><a href='$siteURL/cwa-display-and-update-advisor-signup-info/' target='_blank'>Display and Update Advisor Signup Info</a>
+								<li><a href='$siteURL/cwa-display-and-update-reminders/' target='_blank'>Display and Update Reminders</a>
 								<li><a href='$siteURL/cwa-display-and-update-student-signup-information/' target='_blank'>Display and Update Student Signup Information</a>
 								<li><a href='$siteURL/cwa-display-and-update-user-master-information/' target='_blank'>Display and Update User Master Information</a>
 								<li><a href='$siteURL/cwa-display-catalog-for-a-timezone/' target='_blank'>Display Catalog for a Timezone</a>
@@ -414,7 +415,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-list-advisors-with-s-students/' target='_blank'>List Advisors With S Students</a>
 								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
 								<li><a href='$siteURL/cwa-list-all-students/' target='_blank'>List All Students</a>
-								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a>
 								<li><a href='$siteURL/cwa-list-past-advisors-registration-info/' target='_blank'>List Past Advisors Registration Info</a>
 								<li><a href='$siteURL/cwa-list-student-responders/' target='_blank'>List Student Responders</a>
 								<li><a href='$siteURL/cwa-list-student-self-assessments/' target='_blank'>List Student Self Assessments</a>
@@ -424,10 +424,10 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-make-or-restore-backups/' target='_blank'>Make or Restore Backups</a>
 								<li><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a>
 								<li><a href='$siteURL/cwa-manage-directory/' target='_blank'>Manage Directory</a>
-								<li><a href='$siteURL/cwa-manage-reminders/' target='_blank'>Manage Reminders</a>
 								<li><a href='$siteURL/cwa-manage-temp-data/' target='_blank'>Manage Temp Data</a>
 								<li><a href='$siteURL/cwa-move-student-to-different-semester/' target='_blank'>Move Student to Different Semester</a>
 								<li><a href='$siteURL/cwa-move-unassigned-students-to-next-semester/' target='_blank'>Move Unassigned Students to Next Semester</a>
+								<li><a href='$siteURL/cwa-new-usernames-report/' target='_blank'>New Usernames Report</a>
 								<li><a href='$siteURL/cwa-practice-assessment/' target='_blank'>Practice Assessment</a>
 								<li><a href='$siteURL/cwa-prepare-advisors-for-student-assignments/' target='_blank'>Prepare Advisors for Student Assignments</a>
 								<li><a href='$siteURL/cwa-prepare-students-for-assignment-to-advisors/' target='_blank'>Prepare Students for Assignment to Advisors</a>
@@ -503,7 +503,6 @@ function program_list_func() {
 								<ul>
 								<li><a href='$siteURL/cwa-advisor-statistics/' target='_blank'>Advisor Statistics</a>
 								<li><a href='$siteURL/cwa-display-advisor-evaluation-statistics/' target='_blank'>Display Advisor Evaluation Statistics</a>
-								<li><a href='$siteURL/cwa-display-student-evaluation-of-advisors/' target='_blank'>Display Student Evaluation of Advisors</a>
 								<li><a href='$siteURL/cwa-gather-and-display-student-statistics/' target='_blank'>Gather and Display Student Statistics</a>
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
 								<li><a href='$siteURL/cwa-how-students-progressed-report/' target='_blank'>How Students Progressed Report</a>
@@ -515,7 +514,7 @@ function program_list_func() {
 								<ul>
 								<li><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
 								<li><a href='$siteURL/cwa-display-reminders-for-a-callsign/' target='_blank'>Display Reminders for a Callsign</a>
-								<li><a href='$siteURL/cwa-manage-reminders/' target='_blank'>Manage Reminders</a><br /><br />
+								<li><a href='$siteURL/cwa-display-and-update-reminders/' target='_blank'>Display and Update Reminders</a><br />
 								</ul>
 				
 								<h4>User Master</h4>
@@ -540,33 +539,17 @@ function program_list_func() {
 								<ul>
 								<li><a href='$siteURL/cwa-advisor-class-history/' target='_blank'>Advisor Class History</a>
 								<li><a href='$siteURL/cwa-advisor-class-report/' target='_blank'>Advisor Class Report</a>
-								<li><a href='$siteURL/cwa-advisors-with-unconfirmed-students/' target='_blank'>Advisors With Unconfirmed Students</a>
-								<li><a href='$siteURL/cwa-detailed-history-for-an-advisor/' target='_blank'>Detailed History for an Advisor</a>
-								<li><a href='$siteURL/cwa-display-all-advisors/' target='_blank'>Display All Advisors</a>
-								<li><a href='$siteURL/cwa-display-evaluations-for-an-advisor/' target='_blank'>Display Evaluations for an Advisor</a>
-								<li><a href='$siteURL/cwa-list-advisors-with-incomplete-evaluations/' target='_blank'>List Advisors With Incomplete Evaluations</a>
-								<li><a href='$siteURL/cwa-list-advisors-with-s-students/' target='_blank'>List Advisors With S Students</a>
-								<li><a href='$siteURL/cwa-list-past-advisors-registration-info/' target='_blank'>List Past Advisors Registration Info</a><br /><br />
-								</ul>
-								<h4>Advisor Reporting Programs</h4>
-								<ul>
-								<li><a href='$siteURL/cwa-advisor-class-report/' target='_blank'>Advisor Class Report</a>
-								<li><a href='$siteURL/cwa-advisor-request-student-assessment/' target='_blank'>Order Morse Code Proficiency Assessments</a>
-								<li><a href='$siteURL/cwa-advisor-play-cw-audio-clips/' target='_blank'>Advisor Play CW Audio Clips</a>
 								<li><a href='$siteURL/cwa-advisor-statistics/' target='_blank'>Advisor Statistics</a>
+								<li><a href='$siteURL/cwa-advisors-with-unconfirmed-students/' target='_blank'>Advisors With Unconfirmed Students</a>
 								<li><a href='$siteURL/cwa-detailed-history-for-an-advisor/' target='_blank'>Detailed History for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-advisor-evaluation-statistics/' target='_blank'>Display Advisor Evaluation Statistics</a>
 								<li><a href='$siteURL/cwa-display-all-advisors/' target='_blank'>Display All Advisors</a>
 								<li><a href='$siteURL/cwa-display-evaluations-for-an-advisor/' target='_blank'>Display Evaluations for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-replacement-requests/' target='_blank'>Display Replacement Requests</a>
-								<li><a href='$siteURL/cwa-display-student-evaluation-of-advisors/' target='_blank'>Display Student Evaluation of Advisors</a>
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
-								<li><a href='$siteURL/cwa-list-advisor…h-all-s-students/' target='_blank'>List Advisors With All S Students
-								<li><a href='$siteURL/cwa-list-advisors-with-s-students/' target='_blank'>List Advisors With S Students</a>
 								<li><a href='$siteURL/cwa-list-advisors-with-incomplete-evaluations/' target='_blank'>List Advisors With Incomplete Evaluations</a>
+								<li><a href='$siteURL/cwa-list-advisors-with-s-students/' target='_blank'>List Advisors With S Students</a>
 								<li><a href='$siteURL/cwa-list-past-advisors-registration-info/' target='_blank'>List Past Advisors Registration Info</a>
-								<li><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a>
-								<li><a href='$siteURL/cwa-advisor-request-student-assessment/' target='_blank'>Order Morse Code Proficiency Assessments</a>
 								<li><a href='$siteURL/cwa-show-advisor-class-assignments/' target='_blank'>Show Advisor Class Assignments</a>
 								</ul>
 				
@@ -577,6 +560,14 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-and-update-advisor-signup-info/' target='_blank'>Display and Update Advisor Signup Info</a><br /><br />
 								</ul>
 				
+								<h4>Student Portal Programs</h4>
+								<ul>
+								<li><a href='$siteURL/cwa-student-registration/' target='_blank'>Student Registration</a>
+								<li><a href='$siteURL/cwa-display-and-update-user-master-information/' target='_blank'>Display and Update User Master Information</a>
+								<li><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a>
+								<li><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a>
+								</ul>
+								
 								<h4>Student Reporting Programs</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a>
@@ -596,11 +587,13 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-show-detailed-history-for-student/' target='_blank'>Show Detailed History for Student</a>
 								<li><a href='$siteURL/cwa-student-progression-report/' target='_blank'>Student Progression Report</a>
 								</ul>
+
 								<h4>Student Utilities Programs</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-display-and-update-student-signup-information/' target='_blank'>Display and Update Student Signup Information</a>
 								<li><a href='$siteURL/cwa-student-report-generator/' target='_blank'>Student Report Generator</a>
 								</ul>
+
 								<h4>Programs Run via Link</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-evaluate-student/' target='_blank'>Evaluate Student</a>
@@ -634,8 +627,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-survey/' target='_blank'>Display Survey</a>
 								<li><a href='$siteURL/cwa-display-survey-results/' target='_blank'>Display Survey Results</a>
 								</ul>
-				
-					
+									
 								<td style='vertical-align:top;'>
 								<h4>Common Student / Advisor Management Tasks</h4>
 								<li><a href='$siteURL/cwa-make-or-restore-backups/' target='_blank'>Make or Restore Backups</a><br /><br />
@@ -670,8 +662,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
-								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a>
-								<li><a href='$siteURL/cwa-verify-temp-data/' target='_blank'>Verify Temp Data</a><br /><br />
+								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a><br /><br />
 								</ul>
 								<li><a href='$siteURL/cwa-assign-students-to-advisors-sequence/' target='_blank'>Assign Students to Advisors Sequence (TestMode)</a>
 								<ul>
