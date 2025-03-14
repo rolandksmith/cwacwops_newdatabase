@@ -448,10 +448,10 @@ function get_user_master_data($dataArray=array()) {
 											if ($userInsert === FALSE) {
 												handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
 												if ($doDebug) {
-													echo "attempting to insert data for $callsign into $userMasterTableName returned FALSE<br />";
+													echo "attempting to insert data for $user_call_sign into $userMasterTableName returned FALSE<br />";
 												}
 												$gotError			= TRUE;
-												$errors				.= "unable to insert $callsign info into $userMasterTableName table<br />";
+												$errors				.= "unable to insert $user_calls_ign info into $userMasterTableName table<br />";
 											} else {
 												$id			= $wpdb->insert_id;
 												if ($doDebug) {
