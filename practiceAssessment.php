@@ -10,7 +10,7 @@ function practiceAssessment_func() {
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -235,6 +235,9 @@ function practiceAssessment_func() {
 								and ip_address = '$userIP' 
 								order by date_written";
 			$ipCount		= $wpdb->get_var($sql);
+			if ($doDebug) {
+				echo "ran sql: $sql<br />";
+			}
 			if ($ipCount !== NULL) {
 				if ($ipCount > 1) {
 					$content	.= "<h3>$jobname</h3>
