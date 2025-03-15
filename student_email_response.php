@@ -197,11 +197,19 @@ prospective student responds to the verification email.</p>";
   	if ($doDebug) {
   		echo "<br />at pass 2<br />";
   	}
+	
+	$optionConvert			= array('1'=>"Move to $semesterTwo",
+									'2'=>"Move to $semesterThree",
+									'3'=>"Decline");
+	if ($inp_option != '1' && $inp_option != '2' && $inp_option != '3') {
+		$myStr				= "Unknown";
+	} else {
+		$myStr					= $optionConvert[$inp_option];
+	}
 
-	sendErrorEmail("Info Only: student_email_response called with studentID: $studentID and inp_option: $inp_option");
+	sendErrorEmail("Info Only: student_email_response called with studentID: $studentID and inp_option: $inp_option ($myStr)");
 
 	$content				.= "<h3>$jobname</h3>";
-
 // Student can only respond during the period 45 days before the semester starts 
 // to 10 days before the semester starts. Any response outside the time period
 // doesn't work.
