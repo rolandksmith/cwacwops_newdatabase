@@ -7,6 +7,7 @@ function new_usernames_report_func(){
 	If so, log the error to be displayed
 	
 	If the user has verified but does not have a registration
+	if more than 90 days have passed, delete the user
 	If fifteen days or more have passed,
 	log the error
 	if not more than sixteen days hve passed, 
@@ -88,6 +89,7 @@ function new_usernames_report_func(){
 	$noSignupCount			= 0;
 	$signupEmailCount		= 0;
 	$newSignup				= 0;
+	$userRecordsDeleted		= 0;
 	$userNameArray			= array();
 	$registrationArray		= array();
 	$recordsToBeDeleted		= "";
@@ -212,7 +214,7 @@ function new_usernames_report_func(){
 	if ($runTheJob) {
 /////// real start
 
-//		require_once( ABSPATH . 'wp-admin/includes/user.php' );
+		require_once( ABSPATH . 'wp-admin/includes/user.php' );
 
 		// get all registrations
 		$sql				= "SELECT id, 
@@ -449,6 +451,7 @@ function new_usernames_report_func(){
 								$fifteenDaysPlus		= FALSE;
 								$thirtyDays				= FALSE;
 								$thirtyDaysPlus			= FALSE;
+								$ninetyDaysPlus			= FALSE;
 								$sendVerifyEmail		= FALSE;
 								$sendSignupEmail		= FALSE;
 								$deleteUser				= FALSE;
@@ -468,6 +471,9 @@ function new_usernames_report_func(){
 								} elseif ($daysElapsed > 30) {
 									$thirtyDaysPlus		= TRUE;
 								}
+								if ($daysElapsed > 90) {
+									$ninetyDaysPlus		= TRUE;
+								}
 								
 								if (!$verifiedUser) {
 									if ($threeDays) {	// three days have passed. Send email
@@ -479,9 +485,12 @@ function new_usernames_report_func(){
 									}
 								}
 								if (!$registrationRecord) {
-									if ($thirtyDaysPlus) {
+									if ($ninetyDaysPlus){
 										$deleteUser			= TRUE;
 										$allUsersArray[$user_uppercase]['theError']	.= "No signup record for $daysElapsed days. Recommend deleting<br />";
+										$allUsersArray[$user_uppercase]['hasError']	= "Y";
+									} elseif ($thirtyDaysPlus) {
+										$allUsersArray[$user_uppercase]['theError']	.= "No signup record for $daysElapsed days. Added to text message queue<br />";
 										$allUsersArray[$user_uppercase]['hasError']	= "Y";
 										$recordsToBeDeleted	.= "$user_uppercase\t$user_last_name, $user_first_name\t$user_role\t$user_registered\n";
 									} elseif ($fifteenDaysPlus) {
@@ -498,6 +507,10 @@ function new_usernames_report_func(){
 								}
 								if ($sendSignupEmail) {
 									$sendSignupEmailArray[]	= "$user_email&$user_uppercase&$user_last_name, $user_first_name&$user_role";
+								}
+								if ($deleteUser) {
+									wp_delete_user( $user_id, null );
+									$userRecordsDeleted++;
 								}
 							}
 						}
@@ -691,6 +704,7 @@ to the CW Academy website and sign up for a class.</p>
 							$userUnverifiedCount User Records that are Unverified<br />
 							$noUserMasterCount Users with no user_master record (e.g., have never logged in)<br />
 							$noSignupCount Users with no signup record<br /><br />
+							$userRecordsDeleted Users with no signup record older than 90 days deleted<br />
 							$verifyEmailCount Verify reminder emails sent during this job<br />
 							$signupEmailCount Signup reminder emails sent during this job<br />";
 							
