@@ -54,6 +54,7 @@ function check_student_status_func() {
 	$inp_mode					= '';
 	$inp_verbose				= '';
 	$inp_verified				= FALSE;
+	$studentRegistrationURL		= "$siteURL/cwa-student-registration/";
 	
 
 // get the input information
@@ -562,7 +563,7 @@ than 48 days before the semester. Possible error");
 												preferences as requested in earlier emails from CW Academy. 
 												If you want to be considered for assignment to a class, 
 												you <span style='color:red;'><b>MUST</b></span> go to 
-												<a href='$studentRegistrationURL?inp_verify=Y&strpass=2'>Student Sign-up</a> 
+												<a href='$studentRegistrationURL'>Student Sign-up</a> 
 												and update your preferred class schedule and alternates.";
 							} else {
 								$content	.= "<tr><td style='vertical-align:top;'>Class Preferences</td>
