@@ -30,6 +30,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 	global $wpdb;
 
 //	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	if ($doDebug) {
 		 echo "<br />In Function generateClassTimes with $inp_tz,$inp_level,$inp_semester,$catalogMode<br />";
 	}
@@ -41,7 +42,8 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 										'Wednesday,Friday'=>'Thursday,Saturday',
 										'Sunday,Wednesday'=>'Monday,Thursday',
 										'Tuesday,Thursday'=>'Wednesday,Friday',
-										'Wednesday,Saturday'=>'Thursday,Sunday');
+										'Wednesday,Saturday'=>'Thursday,Sunday',
+										'Sunday,Thursday'=>'Monday,Friday');
 
 	$moveBackwardDays			= array('Monday,Thursday'=>'Sunday,Wednesday',
 										'Tuesday,Friday'=>'Monday,Thursday',
