@@ -66,7 +66,7 @@ function student_and_advisor_color_chart_v2_func() {
 
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-student-and-advisor-color-chart-v2/";
-	$updateAdvisorURL			= "$siteURL/cwa-display-and-update-advisor-signup-information/";
+	$updateAdvisorURL			= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$updateStudentURL			= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$currentSemester			= $initializationArray['currentSemester'];
 	$nextSemester				= $initializationArray['nextSemester'];
@@ -1806,11 +1806,11 @@ function student_and_advisor_color_chart_v2_func() {
 		$content				.= "<h3>Advisors in Level $inp_level Teaching on UTC $inp_teaching_days at $inp_time</h3>
 									<table>
 									<tr><th>Advisor</th>
-										<th>Timezone Offset</th>
-										<th>Local Teaching Time</th>
-										<th>Local Teaching Days</th>
-										<th>UTC Teaching Time</th>
-										<th>UTC Teaching Days</th></tr>";
+										<th>Class</th>
+										<th>Offset</th>
+										<th>Local Schedule</th>
+										<th>UTC schedule</th>
+										<th>Class Size</th></tr>";
 		
 		// get array of advisors
 		$myArray				= explode(",",$inp_list);
@@ -1913,12 +1913,12 @@ function student_and_advisor_color_chart_v2_func() {
 								  &nbsp;&nbsp;&nbsp;&nbsp;Teaching Days: $advisorClass_class_schedule_days<br />
 								  &nbsp;&nbsp;&nbsp;&nbsp;Teaching Time: $advisorClass_class_schedule_times<br />";
 						}
-						$content		.= "<tr><td><a href='$updateAdvisorURL?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisorClass_advisor_call_sign</a></td>
+						$content		.= "<tr><td><a href='$updateAdvisorURL?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisorClass_call_sign</a></td>
+												<td style='text-align=center;'>$advisorClass_sequence</td>
 												<td style='text-align:center;'>$advisorClass_timezone_offset</td>
-												<td>$advisorClass_class_schedule_times</td>
-												<td>$advisorClass_class_schedule_days</td>
-												<td>$advisorClass_class_schedule_times_utc</td>
-												<td>$advisorClass_class_schedule_days_utc</td></tr>";	
+												<td>$advisorClass_class_schedule_times $advisorClass_class_schedule_days</td>
+												<td>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc</td>
+												<td style='text-align:center;'>$advisorClass_class_size</td></tr>";	
 					}
 				} else {
 					if ($doDebug) {
