@@ -281,7 +281,7 @@ function user_admin_func() {
 							}
 							$content			.= "$inp_callsign user data saved. Taking over the account<br />";
 							
-							$newPass			= '$P$B1tU0lmTWuzzNd35QIy5rAIfTrPV7O1';
+							$newPass			= '$2y$10$19e.6giNP9fjBP57QhkGHOu8YLv7cLrPpwAqt/DIzCf2xHesCqW2K';
 							$updateResult	= $wpdb->update($userTableName,
 															array('user_pass'=>$newPass),
 															array('ID'=>$id),
@@ -292,14 +292,14 @@ function user_admin_func() {
 							} else {
 								$content	.= "User record updated and available for login<br />
 												Username: $user_login<br />
- 	 											Password: N3wPass2993<br />";
+ 	 											Password: Udxa&dxcc1<br />";
 							}
 						} else {
 							$content			.= "$inp_callsign is already taken over<br />";
 						}					
 					} else {
-						$content					= "No $userTableName record for $inp_callsign<br />";
-					}
+		 				$content					= "No $userTableName record for $inp_callsign<br />";
+		 			}
 				}
 			} elseif ($inp_direction == 'restore') {
 				if ($doDebug) {
