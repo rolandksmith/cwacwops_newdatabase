@@ -51,6 +51,40 @@ function display_and_update_student_signup_func() {
 	$updateMaster				= "$siteURL/cwa-display-and-update-user-master-information/";
 	$inp_mode					= '';
 	$inp_verbose				= '';
+	
+	$responseCode		= array(''=>'Not Specified',
+								'Y'=>'Available',
+								'R'=>'Declined');
+	$waitingCode		= array(''=>'Not Specified (same as not on waiting list)',
+								'Y'=>'On waiting list',
+								'N'=>'Not on waiting list');
+	$abandonedCode		= array(''=>'Did not abandon',
+								'Y'=>'Student abandoned registration process',
+								'N'=>'Student completed registration process');
+	$statusCode			= array(''=>'Not specified',
+								'C'=>'Student has been replaced',
+								'R'=>'Advisor has requested a replacement',
+								'S'=>'Advisor has not verified the studet',
+								'V'=>'Advisor has requested a replacement due to schedule',
+								'Y'=>'Student verified');
+	$reasonCode			= array(''=>'Not specified',
+								'X'=>'Do not assign to same advisor',
+								'E'=>'Student not evaluated but signed up for next level',
+								'H'=>'Student not promotable but signed up for next level',
+								'Q'=>'Advisor quite; student signed up for next level',
+								'W'=>'Student withdrew but signed up for next level',
+								'B'=>'Student is a bad actor');
+	$promotableCode		= array(''=>'Not specified',
+								'P'=>'Promotable',
+								'N'=>'Not Promotable',
+								'W'=>'Withdrew',
+								'Q'=>'Advisor quit');
+	$flexibleCode		= array(''=>'Not specified',
+								'Y'=>'Schedule is flexible',
+								'N'=>'Schedule is not flexible');
+	$catalogCode		= array(''=>'Not Specified',
+								'N'=>'Signed up with full catalog',
+								'Y'=>'Signed up before full catalog');
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -835,6 +869,17 @@ function display_and_update_student_signup_func() {
 						
 						} else {
 							$myStr		= formatActionLog($user_action_log);
+							
+							$responseStr	= $responseCode[$student_response];
+							$waitingStr		= $waitingCode[$student_waiting_list];
+							$abandonedStr	= $abandonedCode[$student_abandoned];
+							$statusStr		= $statusCode[$student_status];
+							$reasonStr		= $reasonCode[$student_hold_reason_code];
+							$promotableStr	= $promotableCode[$student_promotable];
+							$flexibleStr	= $flexibleCode[$student_flexible];
+							$catalogStr		= $catalogCode[$student_no_catalog];
+							
+							
 							$content	.= "<h4>$user_call_sign User Master Data</h4>
 											<p><a href='$theURL'>Display another student</a></p>
 											<form method='post' action='$updateMaster' 
@@ -914,7 +959,7 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Level<td>
 													<td>$student_level</td></tr>
 												<tr><td>Student Waiting List<td>
-													<td>$student_waiting_list</td></tr>
+													<td>$student_waiting_list $waitingStr</td></tr>
 												<tr><td>Student Request Date<td>
 													<td>$student_request_date</td></tr>
 												<tr><td>Student Semester<td>
@@ -928,13 +973,13 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Email Number<td>
 													<td>$student_email_number</td></tr>
 												<tr><td>Student Response<td>
-													<td>$student_response</td></tr>
+													<td>$student_response $responseStr</td></tr>
 												<tr><td>Student Response Date<td>
 													<td>$student_response_date</td></tr>
 												<tr><td>Student Abandoned<td>
-													<td>$student_abandoned</td></tr>
+													<td>$student_abandoned $abandonedStr</td></tr>
 												<tr><td>Student Student Status<td>
-													<td>$student_status</td></tr>
+													<td>$student_status $statusStr</td></tr>
 												<tr><td style='vertical-align:top;'>Student Action Log<td>
 													<td>$student_action_log</td></tr>
 												<tr><td>Student Pre Assigned Advisor<td>
@@ -942,7 +987,7 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Selected Date<td>
 													<td>$student_selected_date</td></tr>
 												<tr><td>Student No Catalog<td>
-													<td>$student_no_catalog</td></tr>
+													<td>$student_no_catalog $catalogStr</td></tr>
 												<tr><td>Student Hold Override<td>
 													<td>$student_hold_override</td></tr>
 												<tr><td>Student Assigned Advisor<td>
@@ -952,13 +997,13 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Advisor Class Timezone<td>
 													<td>$student_advisor_class_timezone</td></tr>
 												<tr><td>Student Hold Reason Code<td>
-													<td>$student_hold_reason_code</td></tr>
+													<td>$student_hold_reason_code $reasonStr</td></tr>
 												<tr><td>Student Class Priority<td>
 													<td>$student_class_priority</td></tr>
 												<tr><td>Student Assigned Advisor Class<td>
 													<td>$student_assigned_advisor_class</td></tr>
 												<tr><td>Student Promotable<td>
-													<td>$student_promotable</td></tr>
+													<td>$student_promotable $promotableStr</td></tr>
 												<tr><td>Student Excluded Advisor<td>
 													<td>$student_excluded_advisor</td></tr>
 												<tr><td>Student Student Survey Completion Date<td>
@@ -984,7 +1029,7 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Catalog Options<td>
 													<td>$student_catalog_options</td></tr>
 												<tr><td>Student Flexible<td>
-													<td>$student_flexible</td></tr>
+													<td>$student_flexible $flexibleStr</td></tr>
 												<tr><td>Student Date Created<td>
 													<td>$student_date_created</td></tr>
 												<tr><td>Student Date Updated<td>
@@ -1089,6 +1134,146 @@ function display_and_update_student_signup_func() {
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 					
+					$youthBlank				= 'checked';
+					$youthNo				= '';
+					$youthYes				= '';
+					if ($student_youth == '') {
+						$youthBlank			= 'checked';
+					} elseif ($student_youth == 'No') {
+						$youthNo			= 'checked';
+					} elseif ($student_youth == 'Yes') {
+						$youthYes			= 'checked';
+					}
+					
+					$promBlank				= 'checked';
+					$promPromoted			= '';
+					$promNotPromoted		= '';
+					$promWithdrew			= '';
+					$promQuit				= '';
+					if ($student_promotable == '') {
+						$promBlank			= 'checked';
+					} elseif ($student_promotable == 'P') {
+						$promPromoted		= 'checked';
+					} elseif ($student_promotable == 'N') {
+						$promNotPromoted 	= 'checked';
+					} elseif ($student_Promotable == 'W') {
+						$promWithdrew		= 'checked';
+					} elseif ($student_Promotable == 'Q') {
+						$promQuit			= 'checked';
+					}
+					
+					$responseBlank			= 'checked';
+					$responseY				= '';
+					$responseR				= '';
+					if ($student_response == '') {
+						$responseBlank		= 'checked';
+					} elseif ($student_response == 'Y') {
+						$responseY			= 'checked';
+					} elseif ($student_response == 'R') {
+						$responseR			= 'checked';
+					}
+					
+					$statusBlank			= 'checked';
+					$statusC				= '';
+					$statusR				= '';
+					$statusS				= '';
+					$statusV				= '';
+					$statusY				= '';
+					if ($student_status == '') {
+						$statusBlank		= 'checked';
+					} elseif ($student_status == 'C') {
+						$statusC			= 'checked';
+					} elseif ($student_status == 'R') {
+						$statusR			= 'checked';
+					} elseif ($student_status == 'S') {
+						$statusS			= 'checked';
+					} elseif ($student_status == 'V') {
+						$statusV			= 'checked';
+					} elseif ($student_status == 'Y') {
+						$statusY			= 'checked';
+					}
+					
+					$reasonBlank			= 'checked';
+					$reasonX				= '';
+					$reasonE				= '';
+					$reasonH				= '';
+					$reasonQ				= '';
+					$reasonW				= '';
+					$reasonB				= '';
+					if ($student_hold_reason_code == '') {
+						$reasonBlank		= 'checked';
+					} elseif ($student_hold_reason_code == 'X') {
+						$reasonX			= 'checked';
+					} elseif ($student_hold_reason_code == 'E') {
+						$reasonE			= 'checked';
+					} elseif ($student_hold_reason_code == 'H') {
+						$reasonH			= 'checked';
+					} elseif ($student_hold_reason_code == 'Q') {
+						$reasonQ			= 'checked';
+					} elseif ($student_hold_reason_code == 'W') {
+						$reasonW			= 'checked';
+					} elseif ($student_hold_reason_code == 'B') {
+						$reasonB			= 'checked';
+					}
+					
+					$abandonedBlank			= 'checked';
+					$abandonedY				= 'checked';
+					$abandonedN				= 'checked';
+					if ($student_abandoned == '') {
+						$abandonedBlank		= 'checked';
+					} elseif ($student_abandoned == 'Y') {
+						$abandonedY			= 'checked';
+					} elseif ($student_abandoned == 'N') {
+						$abandonedN			= 'checked';
+					}
+					
+					$levelBeg				= '';
+					$levelFun				= '';
+					$levelInt				= '';
+					$levelAdv				= '';
+					if ($student_level == 'Beginner') {
+						$levelBeg			= 'checked';
+					} elseif ($student_level == 'Fundamental') {
+						$levelFun			= 'checked';
+					} elseif ($student_level == 'Intermediate') {
+						$levelInt			= 'checked';
+					} elseif ($student_level == 'Advanced') {
+						$levelAdv			= 'checked';
+					}
+					
+					$waitingBlank			= 'checked';
+					$waitingY				= '';
+					$waitingN				= '';
+					if ($student_waiting_list == '') {
+						$waitingBlank		= 'checked';
+					} elseif ($student_waiting_list == 'Y') {
+						$waitingY			= 'checked';
+					} elseif ($student_waiting_list == 'N') {
+						$waitingN			= 'checked';
+					}
+					
+					$flexibleBlank			= 'checked';
+					$flexibleY				= '';
+					$flexibleN				= '';
+					if ($student_flexible == '') {
+						$flexibleBlank		= 'checked';
+					} elseif ($student_flexible == 'Y') {
+						$flexibleY			= 'checked';
+					} elseif ($student_flexible == 'N') {
+						$flexibleN			= 'checked';
+					}
+
+					$catalogBlank			= 'checked';
+					$catalogY				= '';
+					$catalogN				= '';
+					if ($student_no_catalog == '') {
+						$catalogBlank		= 'checked';
+					} elseif ($student_no_catalog == 'Y') {
+						$catalogY			= 'checked';
+					} elseif ($student_no_catalog == 'N') {
+						$catalogN			= 'checked';
+					}
+
 					$content				.= "<h3>Update $inp_callsign Signup Record</h3>
 												<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 												<form method='post' action='$theURL' 
@@ -1119,9 +1304,10 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_timezone_offset</td>
 													<td><input type='text' class='formInputText' name='inp_student_timezone_offset' length='20' 
 													maxlength='20' value='$student_timezone_offset'></td></tr>
-												<tr><td>student_youth</td>
-													<td><input type='text' class='formInputText' name='inp_student_youth' length='3' 
-													maxlength='3' value='$student_youth'></td></tr>
+												<tr><td style='vertical-align:top;'>student_youth</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_youth' value='' $youthBlank>Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_youth' value='No' $youthNo>No<br />
+														<input type='radio' class='formInputButton' name='inp_student_youth' value='Yes' $youthYes>Yes</td></tr>
 												<tr><td>student_age</td>
 													<td><input type='text' class='formInputText' name='inp_student_age' length='3' 
 													maxlength='3' value='$student_age'></td></tr>
@@ -1131,12 +1317,15 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_parent_email</td>
 													<td><input type='text' class='formInputText' name='inp_student_parent_email' length='50' 
 													maxlength='50' value='$student_parent_email'></td></tr>
-												<tr><td>student_level</td>
-													<td><input type='text' class='formInputText' name='inp_student_level' length='15' 
-													maxlength='15' value='$student_level'></td></tr>
-												<tr><td>student_waiting_list</td>
-													<td><input type='text' class='formInputText' name='inp_student_waiting_list' length='5' 
-													maxlength='5' value='$student_waiting_list'></td></tr>
+												<tr><td style='vertical-align:top;'>student_level</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_level' value='Beginner' $levelBeg>Beginner<br />
+														<input type='radio' class='formInputButton' name='inp_student_level' value='Fundamental' $levelFun>Fundamental<br />
+														<input type='radio' class='formInputButton' name='inp_student_level' value='Intermediate' $levelInt>Intermediate<br />
+														<input type='radio' class='formInputButton' name='inp_student_level' value='Advanced' $levelAdv>Advanced</td></tr>
+												<tr><td style='vertical-align:top;'>student_waiting_list</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_waiting_list' value='' $waitingBlank>Not Specified (same as not on the waiting list)<br />
+														<input type='radio' class='formInputButton' name='inp_student_waiting_list' value='N' $waitingN>N: Not on waiting list<br />
+														<input type='radio' class='formInputButton' name='inp_student_waiting_list' value='Y' $waitingY>Y: On waiting list</td></tr>
 												<tr><td>student_request_date</td>
 													<td><input type='text' class='formInputText' name='inp_student_request_date' length='20' 
 													maxlength='20' value='$student_request_date'></td></tr>
@@ -1154,19 +1343,25 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_email_number</td>
 													<td><input type='text' class='formInputText' name='inp_student_email_number' length='20' 
 													maxlength='20' value='$student_email_number'></td></tr>
-												<tr><td>student_response</td>
-													<td><input type='text' class='formInputText' name='inp_student_response' length='1' 
-													maxlength='1' value='$student_response'></td></tr>
+												<tr><td style='vertical-align:top;'>student_response</td>
+													<td ><input type='radio' class='formInputButton' name='inp_student_response' value='' $responseBlank>Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_response' value='Y' $responseY>Y: Available<br />
+														<input type='radio' class='formInputButton' name='inp_student_response' value='R' $responseR>R: Declined<br />
 												<tr><td>student_response_date</td>
 													<td><input type='text' class='formInputText' name='inp_student_response_date' length='20' 
 													maxlength='20' value='$student_response_date'></td></tr>
-												<tr><td>student_abandoned</td>
-													<td><input type='text' class='formInputText' name='inp_student_abandoned' length='1' 
-													maxlength='1' value='$student_abandoned'></td></tr>
-												<tr><td>student_status</td>
-													<td><input type='text' class='formInputText' name='inp_student_status' length='1' 
-													maxlength='1' value='$student_status'></td></tr>
-												<tr><td style='vertical-align:top;'>student_action_log</td>
+												<tr><td style='vertical-align:top;'>student_abandoned</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_abandoned' value='' $abandonedBlank>Did not abandon<br />
+														<input type='radio' class='formInputButton' name='inp_student_abandoned' value='Y' $abandonedY>Y: Student abandoned registration process<br />
+														<input type='radio' class='formInputButton' name='inp_student_abandoned' value='N' $abandonedN>N: Student completed registration</td></tr>
+												<tr><td style='vertical-align:top;'>student_status</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_status' value='' $statusBlank>Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='C' $statusC>C: Student has been replaced<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='R' $statusR>R: Advisor has requested a replacement<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='S' $statusS>S: Advisor has not verified the student<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='V' $statusV>V: Advisor has requested a replacement due to schedule<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='Y' $statusY>Y: Student verified<br />
+\												<tr><td style='vertical-align:top;'>student_action_log</td>
 													<td><textarea class='formInputText' name='inp_student_action_log' rows='5' cols='50'>$student_action_log</textarea></td></tr>
 												<tr><td>student_pre_assigned_advisor</td>
 													<td><input type='text' class='formInputText' name='inp_student_pre_assigned_advisor' length='15' 
@@ -1174,8 +1369,10 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_selected_date</td>
 													<td><input type='text' class='formInputText' name='inp_student_selected_date' length='20' 
 													maxlength='20' value='$student_selected_date'></td></tr>
-												<tr><td>student_no_catalog</td>
-													<td><input type='text' class='formInputText' name='inp_student_no_catalog' length='5' 
+												<tr><td style='vertical-align:top;'>student_no_catalog</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogBlank>Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogN>N: Signed up with full catalog<br />
+														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogY>Y: Signed up before full catalog</td></tr>
 													maxlength='5' value='$student_no_catalog'></td></tr>
 												<tr><td>student_hold_override</td>
 													<td><input type='text' class='formInputText' name='inp_student_hold_override' length='1' 
@@ -1189,18 +1386,26 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_advisor_class_timezone</td>
 													<td><input type='text' class='formInputText' name='inp_student_advisor_class_timezone' length='10' 
 													maxlength='10' value='$student_advisor_class_timezone'></td></tr>
-												<tr><td>student_hold_reason_code</td>
-													<td><input type='text' class='formInputText' name='inp_student_hold_reason_code' length='1' 
-													maxlength='1' value='$student_hold_reason_code'></td></tr>
+												<tr><td style='vertical-align:top;'>student_hold_reason_code</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='' $reasonBlank>Not specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='X' $reasonX>X: Do not assign to same advisor<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='E' $reasonE>Student not evaluated but signed up for next level<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='H' $reasonH>H: Student not promotable but signed up for next level<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='Q' $reasonQ>Q: Advisor quit; student signed up for next level <br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='W' $reasonW>W: Student withdrew but signed up for next level<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='B' $reasonB>B: Student is a bad actor</td></tr>
 												<tr><td>student_class_priority</td>
 													<td><input type='text' class='formInputText' name='inp_student_class_priority' length='20' 
 													maxlength='5' value='$student_class_priority'></td></tr>
 												<tr><td>student_assigned_advisor_class</td>
 													<td><input type='text' class='formInputText' name='inp_student_assigned_advisor_class' length='1' 
 													maxlength='1' value='$student_assigned_advisor_class'></td></tr>
-												<tr><td>student_promotable</td>
-													<td><input type='text' class='formInputText' name='inp_student_promotable' length='1' 
-													maxlength='1' value='$student_promotable'></td></tr>
+												<tr><td style='vertical-align:top;'>student_promotable</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_promotable' value='' $promBlank>Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promPromoted'>Promotable<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promNotPromoted'>Not Promotable<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='W' $promWithdrew'>Withdrew<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='Q' $promQuit'>Advisor quit</td></tr>
 												<tr><td style='vertical-align:top;'>student_excluded_advisor</td>
 													<td><textarea class='formInputText' name='inp_student_excluded_advisor' rows='5' cols='50'>$student_excluded_advisor</textarea></td></tr>
 												<tr><td>student_survey_completion_date</td>
@@ -1236,9 +1441,10 @@ function display_and_update_student_signup_func() {
 												<tr><td>student_catalog_options</td>
 													<td><input type='text' class='formInputText' name='inp_student_catalog_options' length='100' 
 													maxlength='100' value='$student_catalog_options'></td></tr>
-												<tr><td>student_flexible</td>
-													<td><input type='text' class='formInputText' name='inp_student_flexible' length='3' 
-													maxlength='3' value='$student_flexible'></td></tr>
+												<tr><td style='vertical-align:top;'>student_flexible</td>
+													<td><input type='radio' class='formInputButton' name='inp_student_flexible' value='' $flexibleBlank>Not specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_flexible' value='Y' $flexibleY>Y: Schedule is flexible<br />
+														<input type='radio' class='formInputButton' name='inp_student_flexible' value='N' $flexibleN>N: Schedule is not flexible</td></tr>
 												<tr><td>student_date_created</td>
 													<td><input type='text' class='formInputText' name='inp_student_date_created' length='20' 
 													maxlength='20' value='$student_date_created'></td></tr>
@@ -1731,6 +1937,7 @@ function display_and_update_student_signup_func() {
 								$user_date_updated		= $sqlRow->user_date_updated;
 				
 								$myStr			= formatActionLog($user_action_log);
+								
 								$content		.= "<h4>Student Master Data</h4>
 												<table style='width:900px;'>
 												<tr><td><b>Callsign<br />$user_call_sign</b></td>
@@ -1827,6 +2034,16 @@ function display_and_update_student_signup_func() {
 											if ($student_assigned_advisor != '') {
 												$assignedLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
 											}
+
+											$responseStr	= $responseCode[$student_response];
+											$waitingStr		= $waitingCode[$student_waiting_list];
+											$abandonedStr	= $abandonedCode[$student_abandoned];
+											$statusStr		= $statusCode[$student_status];
+											$reasonStr		= $reasonCode[$student_hold_reason_code];
+											$promotableStr	= $promotableCode[$student_promotable];
+											$flexibleStr	= $flexibleCode[$student_flexible];
+											$catalogStr		= $catalogCode[$student_no_catalog];
+
 						
 											$content			.= "<h4>Student Signup Created $student_date_created</h4>
 																	<table style='width:900px;'>
@@ -1849,13 +2066,13 @@ function display_and_update_student_signup_func() {
 																	<tr><td>Student Level<td>
 																		<td>$student_level</td></tr>
 																	<tr><td>Student Waiting List<td>
-																		<td>$student_waiting_list</td></tr>
+																		<td>$student_waiting_list $waitingStr</td></tr>
 																	<tr><td>Student Request Date<td>
 																		<td>$student_request_date</td></tr>
 																	<tr><td>Student Semester<td>
 																		<td>$student_semester</td></tr>
-																	<tr><td style='vertical-align:top;'>Student Notes<td>
-																		<td>$student_notes</td></tr>
+																	<tr><td>Student Notes<td>
+																		<td style='vertical-align:top;'>$student_notes</td></tr>
 																	<tr><td>Student Welcome Date<td>
 																		<td>$student_welcome_date</td></tr>
 																	<tr><td>Student Email Sent Date<td>
@@ -1863,13 +2080,13 @@ function display_and_update_student_signup_func() {
 																	<tr><td>Student Email Number<td>
 																		<td>$student_email_number</td></tr>
 																	<tr><td>Student Response<td>
-																		<td>$student_response</td></tr>
+																		<td>$student_response $responseStr</td></tr>
 																	<tr><td>Student Response Date<td>
 																		<td>$student_response_date</td></tr>
 																	<tr><td>Student Abandoned<td>
-																		<td>$student_abandoned</td></tr>
+																		<td>$student_abandoned $abandonedStr</td></tr>
 																	<tr><td>Student Student Status<td>
-																		<td>$student_status</td></tr>
+																		<td>$student_status $statusStr</td></tr>
 																	<tr><td style='vertical-align:top;'>Student Action Log<td>
 																		<td>$student_action_log</td></tr>
 																	<tr><td>Student Pre Assigned Advisor<td>
@@ -1877,7 +2094,7 @@ function display_and_update_student_signup_func() {
 																	<tr><td>Student Selected Date<td>
 																		<td>$student_selected_date</td></tr>
 																	<tr><td>Student No Catalog<td>
-																		<td>$student_no_catalog</td></tr>
+																		<td>$student_no_catalog $catalogStr</td></tr>
 																	<tr><td>Student Hold Override<td>
 																		<td>$student_hold_override</td></tr>
 																	<tr><td>Student Assigned Advisor<td>
@@ -1887,13 +2104,13 @@ function display_and_update_student_signup_func() {
 																	<tr><td>Student Advisor Class Timezone<td>
 																		<td>$student_advisor_class_timezone</td></tr>
 																	<tr><td>Student Hold Reason Code<td>
-																		<td>$student_hold_reason_code</td></tr>
+																		<td>$student_hold_reason_code $reasonStr</td></tr>
 																	<tr><td>Student Class Priority<td>
 																		<td>$student_class_priority</td></tr>
 																	<tr><td>Student Assigned Advisor Class<td>
 																		<td>$student_assigned_advisor_class</td></tr>
 																	<tr><td>Student Promotable<td>
-																		<td>$student_promotable</td></tr>
+																		<td>$student_promotable $promotableStr</td></tr>
 																	<tr><td>Student Excluded Advisor<td>
 																		<td>$student_excluded_advisor</td></tr>
 																	<tr><td>Student Student Survey Completion Date<td>
@@ -1919,7 +2136,7 @@ function display_and_update_student_signup_func() {
 																	<tr><td>Student Catalog Options<td>
 																		<td>$student_catalog_options</td></tr>
 																	<tr><td>Student Flexible<td>
-																		<td>$student_flexible</td></tr>
+																		<td>$student_flexible $flexibleStr</td></tr>
 																	<tr><td>Student Date Created<td>
 																		<td>$student_date_created</td></tr>
 																	<tr><td>Student Date Updated<td>
