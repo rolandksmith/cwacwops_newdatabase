@@ -674,11 +674,11 @@ function student_report_generator_func() {
                     echo "student_available_class_days included in report<br />";
                 }
             }
-            if ($str_key == 'istudent_ntervention_required') {
-                $istudent_ntervention_required_checked = 'X';
-                $reportConfig['istudent_ntervention_required_checked'] = 'X';
+            if ($str_key == 'student_intervention_required') {
+                $student_intervention_required_checked = 'X';
+                $reportConfig['student_intervention_required_checked'] = 'X';
                 if ($doDebug) {
-                    echo "istudent_ntervention_required included in report<br />";
+                    echo "student_intervention_required included in report<br />";
                 }
             }
             if ($str_key == 'student_copy_control') {
