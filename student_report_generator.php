@@ -121,7 +121,7 @@ function student_report_generator_func() {
     $student_excluded_advisor = '';
     $student_survey_completion_date = '';
     $student_available_class_days = '';
-    $istudent_ntervention_required = '';
+    $student_intervention_required = '';
     $student_copy_control = '';
     $student_first_class_choice = '';
     $student_second_class_choice = '';
@@ -194,7 +194,7 @@ function student_report_generator_func() {
     $student_excluded_advisor_checked = '';
     $student_survey_completion_date_checked = '';
     $student_available_class_days_checked = '';
-    $istudent_ntervention_required_checked = '';
+    $student_intervention_required_checked = '';
     $student_copy_control_checked = '';
     $student_first_class_choice_checked = '';
     $student_second_class_choice_checked = '';
@@ -1160,10 +1160,10 @@ function student_report_generator_func() {
 									name='student_available_class_days' value='student_available_class_days'>
 									<label for 'student_available_class_days'>student_available_class_days</label></td>
 								<td>student_available_class_days</td></tr>
-							<tr><td><input type='checkbox' class='formInputButton' id='istudent_ntervention_required' 
-									name='istudent_ntervention_required' value='istudent_ntervention_required'>
-									<label for 'istudent_ntervention_required'>istudent_ntervention_required</label></td>
-								<td>istudent_ntervention_required</td></tr>
+							<tr><td><input type='checkbox' class='formInputButton' id='student_intervention_required' 
+									name='student_intervention_required' value='student_intervention_required'>
+									<label for 'student_intervention_required'>student_intervention_required</label></td>
+								<td>student_intervention_required</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_copy_control' 
 									name='student_copy_control' value='student_copy_control'>
 									<label for 'student_copy_control'>student_copy_control</label></td>
@@ -1320,7 +1320,7 @@ function student_report_generator_func() {
         $nameConversionArray['student_excluded_advisor'] = 'student<br />excluded_advisor';
         $nameConversionArray['student_survey_completion_date'] = 'student<br />survey_completion_date';
         $nameConversionArray['student_available_class_days'] = 'student<br />available_class_days';
-        $nameConversionArray['istudent_ntervention_required'] = 'istudent<br />intervention_required';
+        $nameConversionArray['student_intervention_required'] = 'istudent<br />intervention_required';
         $nameConversionArray['student_copy_control'] = 'student<br />copy_control';
         $nameConversionArray['student_first_class_choice'] = 'student<br />first_class_choice';
         $nameConversionArray['student_second_class_choice'] = 'student<br />second_class_choice';
@@ -1659,8 +1659,8 @@ where rg_report_name = '$inp_report_name'";
                  $headerName = $nameConversionArray['student_available_class_days'];
                  $content .= "<th>$headerName</th>";
             }
-             if ($istudent_ntervention_required_checked == 'X') {
-                 $headerName = $nameConversionArray['istudent_ntervention_required'];
+             if ($student_intervention_required_checked == 'X') {
+                 $headerName = $nameConversionArray['student_intervention_required'];
                  $content .= "<th>$headerName</th>";
             }
              if ($student_copy_control_checked == 'X') {
@@ -2251,11 +2251,11 @@ where rg_report_name = '$inp_report_name'";
                 $content .= $headerName;
                 $needComma = TRUE;
             }
-            if ($istudent_ntervention_required_checked == 'X') {
+            if ($student_intervention_required_checked == 'X') {
                 if ($needComma) {
                     $content .= '	';
                 }
-                $headerName = $nameConversionArray['istudent_ntervention_required'];
+                $headerName = $nameConversionArray['student_intervention_required'];
                 $headerName = str_replace('<br />','_',$headerName);
                 $content .= $headerName;
                 $needComma = TRUE;
@@ -2639,8 +2639,8 @@ where rg_report_name = '$inp_report_name'";
                        if ($student_available_class_days_checked == 'X') {
                            $content .= "<td style='vertical-align:top'>$student_available_class_days</td>";
                         }
-                       if ($istudent_ntervention_required_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$istudent_ntervention_required</td>";
+                       if ($student_intervention_required_checked == 'X') {
+                           $content .= "<td style='vertical-align:top'>$student_intervention_required</td>";
                         }
                        if ($student_copy_control_checked == 'X') {
                            $content .= "<td style='vertical-align:top'>$student_copy_control</td>";
@@ -3098,11 +3098,11 @@ where rg_report_name = '$inp_report_name'";
                             $content .= $student_available_class_days;
                             $needComma = TRUE;
                         }
-                        if ($istudent_ntervention_required_checked == 'X') {
+                        if ($student_intervention_required_checked == 'X') {
                             if ($needComma) {
                                 $content .= '	';
                             }
-                            $content .= $istudent_ntervention_required;
+                            $content .= $student_intervention_required;
                             $needComma = TRUE;
                         }
                         if ($student_copy_control_checked == 'X') {
