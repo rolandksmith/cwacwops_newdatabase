@@ -2,7 +2,7 @@ function rkstest_func() {
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -180,15 +180,13 @@ function rkstest_func() {
 
 	if ("1" == $strPass) {
 		$content 		.= "<h3>$jobname</h3>
-							<p>Fix the logid in the audit log
+							<p>Run an audit
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
 							<table style='border-collapse:collapse;'>
-							<tr><td>Start</td>
-								<td><input type='text' class='formInputText' name='inp_start' size='10' maxlength='10' autofocus></td>
-							<tr><td>Start</td>
-								<td><input type='text' class='formInputText' name='inp_do' size='10' maxlength='10' value='10000'></td>
+							<tr><td>inp_value</td>
+								<td><input type='text' class='formInputText' name='inp_start' size='30' maxlength='30' autofocus></td>
 							$testModeOption
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
 							</form></p>";
@@ -198,56 +196,15 @@ function rkstest_func() {
 
 
 	} elseif ("2" == $strPass) {
-		$sql			= "select * from wpw1_cwa_audit_log limit $offset,$howMany";
-		$result			= $wpdb->get_results($sql);
-		if ($result === FALSE) {
-			handleWPDBError($jobname,$doDebug);
-			
+		$result		= audit_student_record($inp_start,$doDebug);
+		if ($result[0] === TRUE) {
+			$myStr		= $result[1];
+			$content	.= "<h3>$jobname</h3>$myStr";
 		} else {
-			$lastError = $wpdb->last_error;
-			if ($lastError != '') {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				foreach($result as $resultRow) {
-					$record_id	= $resultRow->record_id;
-					$logprogram	= $resultRow->logprogram;
-					$logtype	= $resultRow->logtype;
-					$logid		= $resultRow->logid;
-					$logdata	= $resultRow->logdata;
-					
-					$thisArray	= json_decode($logdata,TRUE);
-//					echo "thisArray<br /><pre>";
-//					print_r($thisArray);
-//					echo "</pre><br />";
-					$logtype		= strtoupper($logtype);
-//					echo "logtype = $logtype<br />";
-					if ($logtype == 'STUDENT' && $logprogram != 'EVALSTUDENT') {
-						$newLogid	= $thisArray['student_ID'];
-					} else {
-						$newLogid	= $thisArray['logid'];
-					}
-					if ($newLogid != $logid) {
-						$updateResult	= $wpdb->update('wpw1_cwa_audit_log',
-													array('logid'=>$newLogid),
-													array('record_id'=>$record_id),
-													array('%d'),
-													array('%d'));
-						if ($updateResult === FALSE) {
-							handleWPDBError($jobname,$dodebug);
-						} else {
-							if ($lastError != '') {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								echo "updated record_id $record_id logid of $logid to $newLogid<br />";
-							}
-						}
-					} else {
-//						echo "no update needed<br />";
-					}
-				}	
-			}
-			
+			$myStr		= $result[1];
+			$content	.= "<h3>$jobname</h3>Fail<br />$myStr";
 		}
+	
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
