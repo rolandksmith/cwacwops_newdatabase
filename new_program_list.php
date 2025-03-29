@@ -427,6 +427,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-manage-temp-data/' target='_blank'>Manage Temp Data</a>
 								<li><a href='$siteURL/cwa-move-student-to-different-semester/' target='_blank'>Move Student to Different Semester</a>
 								<li><a href='$siteURL/cwa-move-unassigned-students-to-next-semester/' target='_blank'>Move Unassigned Students to Next Semester</a>
+								<li><a href='$siteURL/cwa-new-student-report-generator/' target='_blank'>CWA New Student Report Generator</a>
 								<li><a href='$siteURL/cwa-new-usernames-report/' target='_blank'>New Usernames Report</a>
 								<li><a href='$siteURL/cwa-practice-assessment/' target='_blank'>Practice Assessment</a>
 								<li><a href='$siteURL/cwa-prepare-advisors-for-student-assignments/' target='_blank'>Prepare Advisors for Student Assignments</a>
@@ -460,7 +461,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-student-management/' target='_blank'>Student Management</a>
 								<li><a href='$siteURL/cwa-student-progression-report/' target='_blank'>Student Progression Report</a>
 								<li><a href='$siteURL/cwa-student-registration/' target='_blank'>Student Registration</a>
-								<li><a href='$siteURL/cwa-student-report-generator/' target='_blank'>CWA Student Report Generator</a>
 								<li><a href='$siteURL/cwa-thank-you-remove/' target='_blank'>Thank You Remove</a>
 								<li><a href='$siteURL/cwa-thank-you-yes/' target='_blank'>Thank You Yes</a>
 								<li><a href='$siteURL/cwa-update-advisor-service/' target='_blank'>Update Advisor Service</a>
@@ -591,7 +591,7 @@ function program_list_func() {
 								<h4>Student Utilities Programs</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-display-and-update-student-signup-information/' target='_blank'>Display and Update Student Signup Information</a>
-								<li><a href='$siteURL/cwa-student-report-generator/' target='_blank'>Student Report Generator</a>
+								<li><a href='$siteURL/cwa-new-student-report-generator/' target='_blank'>CWA New Student Report Generator</a>
 								</ul>
 
 								<h4>Programs Run via Link</h4>
