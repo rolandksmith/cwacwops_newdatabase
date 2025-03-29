@@ -638,3 +638,47 @@ try {
 UPDATE your_table_name
 SET your_column_name = REPLACE(your_column_name, '\|', '&');
 
+
+
+// prepare and download a file
+					// prepare the csv file and write the headers
+					$thisStr		= "$inp_callsign" . "_class_download.csv";
+					if (preg_match('/localhost/',$siteURL)) {
+						$thisFileName	= "wp-content/uploads/$thisStr";
+					} else {
+						$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$thisStr";
+					}
+					$thisFP			= fopen($thisFileName,'w');
+					$thisList		= ['class','call_sign','first_name','last_name','email','phone','state','country','whatsapp','signal','telegram','messenger'];
+					fputcsv($thisFP,$thisList,"\t");										
+
+
+
+						$thisList			= [$student_assigned_advisor_class,$student_call_sign,$student_first_name,$student_last_name,$student_email,$thisPhone,$student_state,$student_country,$student_whatsapp,$student_signal,$student_telegram,$student_messenger];
+						fputcsv($thisFP,$thisList,"\t");
+					}
+					fclose($thisFP);
+					if ($doDebug) {
+						echo "table is written and the file is ready to download<br />";
+					}
+					$content				.= "</pre><br />
+												<p>Click <a href='$siteURL/wp-content/uploads/$thisStr'>$thisStr</a> to download the csv file</p>
+
+
+
+
+// getting graduates for solid copy
+	run new student report generator
+		csv output, semicolon separaters
+		last name, first name, callsign
+	
+	Download the csv file ... will be named K7OJL_srg_download.csv	
+	for each level, run rksmih fixSemicolons.php which will fix the first semicolon
+	BBedit the level, change remaining semicolon with an open parenthesis 
+		add close parenthesis at the end of each line
+		check for quote marks, uppercase names
+	save the file under a new name so the next level can be processed
+	
+	
+
+		
