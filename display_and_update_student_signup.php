@@ -752,6 +752,7 @@ function display_and_update_student_signup_func() {
 					getInfo: $getInfo<br />";
 		}
 		if ($goOn) {
+			$firstTime		= TRUE;
 			$content	.= "<p>Displaying Data for $getInfo resulting from searching 
 							for $request_type of $request_info</p>";
 			// get the student signup info
@@ -863,62 +864,64 @@ function display_and_update_student_signup_func() {
 							echo "Displaying $student_call_sign for $student_semester semester<br />";
 						}
 						
-						if ($user_call_sign == NULL) {
-							$content	.= "<h4>$user_call_sign User Master Data</h4>
-											<p>No User Master Record Found</p>";
-						
-						} else {
-							$myStr		= formatActionLog($user_action_log);
+						if ($firstTime) {
+							$firstTime	= FALSE;
+							if ($user_call_sign == NULL) {
+								$content	.= "<h4>$user_call_sign User Master Data</h4>
+												<p>No User Master Record Found</p>";
 							
-							$responseStr	= $responseCode[$student_response];
-							$waitingStr		= $waitingCode[$student_waiting_list];
-							$abandonedStr	= $abandonedCode[$student_abandoned];
-							$statusStr		= $statusCode[$student_status];
-							$reasonStr		= $reasonCode[$student_hold_reason_code];
-							$promotableStr	= $promotableCode[$student_promotable];
-							$flexibleStr	= $flexibleCode[$student_flexible];
-							$catalogStr		= $catalogCode[$student_no_catalog];
+							} else {
+								$myStr		= formatActionLog($user_action_log);
+								
+								
+								
+								$content	.= "<h4>$user_call_sign User Master Data</h4>
+												<p><a href='$theURL'>Display another student</a></p>
+												<form method='post' action='$updateMaster' 
+												name='updateMaster_form' ENCTYPE='multipart/form-data'>
+												<input type='hidden' name='strpass' value='2'>
+												<input type='hidden' name='inp_callsign' value='$user_call_sign'>
+												<input type='hidden' name='request_type' value='callsign'>
+												<input type='hidden' name='request_info' value='$user_call_sign'>
+												<input type='hidden' name='inp_mode' value='$inp_mode'>
+												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+												<table style='width:900px;'>
+												<tr><td><b>Callsign<br />$user_call_sign</b></td>
+													<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+													<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+													<td><b>Email</b><br />$user_email</td></tr>
+												<tr><td><b>City</b><br />$user_city</td>
+													<td><b>State</b><br />$user_state</td>
+													<td><b>Zip Code</b><br />$user_zip_code</td>
+													<td><b>Country</b><br />$user_country</td></tr>
+												<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+													<td><b>Telegram</b><br />$user_telegram</td>
+													<td><b>Signal</b><br />$user_signal</td>
+													<td><b>Messenger</b><br />$user_messenger</td></tr>
+												<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
+													<td><b>Languages</b><br />$user_languages</td>
+													<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
+													<td></td></tr>
+												<tr><td><b>Date Created</b><br />user_$user_date_created</td>
+													<td><b>Date Updated</b><br />user_$user_date_updated</td>
+													<td></td>
+													<td></td></tr>
+												<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
+												<tr><td></td><td colspan='3'><input type='submit' class='formInputButton' name='submit' value='Update User Master Record' /></td></tr>
+												</table></form>";
 							
-							
-							$content	.= "<h4>$user_call_sign User Master Data</h4>
-											<p><a href='$theURL'>Display another student</a></p>
-											<form method='post' action='$updateMaster' 
-											name='updateMaster_form' ENCTYPE='multipart/form-data'>
-											<input type='hidden' name='strpass' value='2'>
-											<input type='hidden' name='inp_callsign' value='$user_call_sign'>
-											<input type='hidden' name='request_type' value='callsign'>
-											<input type='hidden' name='request_info' value='$user_call_sign'>
-											<input type='hidden' name='doDebug' value='$doDebug'>
-											<input type='hidden' name='testMode' value='$testMode'>
-											<input type='hidden' name='inp_mode' value='$inp_mode'>
-											<table style='width:900px;'>
-											<tr><td><b>Callsign<br />$user_call_sign</b></td>
-												<td><b>Name</b><br />$user_last_name, $user_first_name</td>
-												<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
-												<td><b>Email</b><br />$user_email</td></tr>
-											<tr><td><b>City</b><br />$user_city</td>
-												<td><b>State</b><br />$user_state</td>
-												<td><b>Zip Code</b><br />$user_zip_code</td>
-												<td><b>Country</b><br />$user_country</td></tr>
-											<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
-												<td><b>Telegram</b><br />$user_telegram</td>
-												<td><b>Signal</b><br />$user_signal</td>
-												<td><b>Messenger</b><br />$user_messenger</td></tr>
-											<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
-												<td><b>Languages</b><br />$user_languages</td>
-												<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
-												<td></td></tr>
-											<tr><td><b>Date Created</b><br />user_$user_date_created</td>
-												<td><b>Date Updated</b><br />user_$user_date_updated</td>
-												<td></td>
-												<td></td></tr>
-											<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
-											<tr><td></td><td colspan='3'><input type='submit' class='formInputButton' name='submit' value='Update User Master Record' /></td></tr>
-											</table></form>";
-						
+							}
 						}
 						
-						
+						$responseStr	= $responseCode[$student_response];
+						$waitingStr		= $waitingCode[$student_waiting_list];
+						$abandonedStr	= $abandonedCode[$student_abandoned];
+						$statusStr		= $statusCode[$student_status];
+						$reasonStr		= $reasonCode[$student_hold_reason_code];
+						$promotableStr	= $promotableCode[$student_promotable];
+						$flexibleStr	= $flexibleCode[$student_flexible];
+						$catalogStr		= $catalogCode[$student_no_catalog];
+
 						$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 						$preAssignedLink	= '';
 						if ($student_pre_assigned_advisor != '') {
@@ -936,8 +939,7 @@ function display_and_update_student_signup_func() {
 												<input type='hidden' name='request_type' value='callsign'>
 												<input type='hidden' name='request_info' value='$student_call_sign'>
 												<input type='hidden' name='inp_student_id' value='$student_ID'>
-												<input type='hidden' name='doDebug' value='$doDebug'>
-												<input type='hidden' name='testMode' value='$testMode'>
+												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
 												<tr><td>Student Student Id<td>
@@ -1037,9 +1039,7 @@ function display_and_update_student_signup_func() {
 												<tr><td></td>
 													<td><input type='submit' class='formInputButton' name='submit' value='Update Student Record' /></td></tr>
 												</table>
-												<p>Click <a href='$theURL/?strpass=3&inp_callsign=$student_call_sign&inp_student_id=$student_ID&inp_mode=$inp_mode&inp_verbose=$inp_verbose'>HERE</a>
-												to modify this signup record</p>
-												<p>Click <a href='$theURL'>Look Up a Different Student</a>";
+												<p><a href='$theURL'>Look Up a Different Student</a>";
 					}
 				} else {
 					$content		.= "<p>No signup record found for $inp_callsign</p>";
@@ -1070,7 +1070,7 @@ function display_and_update_student_signup_func() {
 		
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
-			echo "<br />Arrived at pass 2 with inp_callsign: $inp_callsign and inp_student_id: $inp_student_id<br />";
+			echo "<br />Arrived at pass 3 with inp_callsign: $inp_callsign and inp_student_id: $inp_student_id<br />";
 		}
 		
 		// get the record to be updated
@@ -1274,7 +1274,7 @@ function display_and_update_student_signup_func() {
 						$catalogN			= 'checked';
 					}
 
-					$content				.= "<h3>Update $inp_callsign Signup Record</h3>
+					$content				.= "<h3>Update $inp_callsign Signup Record for $student_semester Semester</h3>
 												<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 												<form method='post' action='$theURL' 
 												name='deletion_form' ENCTYPE='multipart/form-data'>
@@ -1360,8 +1360,8 @@ function display_and_update_student_signup_func() {
 														<input type='radio' class='formInputButton' name='inp_student_status' value='R' $statusR>R: Advisor has requested a replacement<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='S' $statusS>S: Advisor has not verified the student<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='V' $statusV>V: Advisor has requested a replacement due to schedule<br />
-														<input type='radio' class='formInputButton' name='inp_student_status' value='Y' $statusY>Y: Student verified<br />
-\												<tr><td style='vertical-align:top;'>student_action_log</td>
+														<input type='radio' class='formInputButton' name='inp_student_status' value='Y' $statusY>Y: Student verified</td>
+												<tr><td style='vertical-align:top;'>student_action_log</td>
 													<td><textarea class='formInputText' name='inp_student_action_log' rows='5' cols='50'>$student_action_log</textarea></td></tr>
 												<tr><td>student_pre_assigned_advisor</td>
 													<td><input type='text' class='formInputText' name='inp_student_pre_assigned_advisor' length='15' 
@@ -1373,7 +1373,6 @@ function display_and_update_student_signup_func() {
 													<td><input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogBlank>Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogN>N: Signed up with full catalog<br />
 														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogY>Y: Signed up before full catalog</td></tr>
-													maxlength='5' value='$student_no_catalog'></td></tr>
 												<tr><td>student_hold_override</td>
 													<td><input type='text' class='formInputText' name='inp_student_hold_override' length='1' 
 													maxlength='1' value='$student_hold_override'></td></tr>
