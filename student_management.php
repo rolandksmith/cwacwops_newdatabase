@@ -25,13 +25,14 @@ function student_management_func() {
   Modified 17Apr23 by Roland to fix action_log
   Modified 15Jul23 by Roland to use consolidated tables
   Modified 28Oct24 by Roland for new database formats
+  Modified 30Mar25 by Roland to add ability to remove or add an excluded advisor
   
   	
 */
 
 	global $wpdb, $studentTableName, $advisorTableName, $advisorClassTableName, $theSemester, $doDebug;
 
-	$doDebug					= FALSE;
+	$doDebug					= TRUE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$userName 					= $initializationArray['userName'];
@@ -357,6 +358,9 @@ function student_management_func() {
 				}
 				if ($preNumSRows > 0) {
 					$haveStudent	= TRUE;
+					if ($doDebug) {
+						echo "haveStudent is TRUE<br />";
+					}
 					foreach($studentResult as $studentRow) {
 						$student_master_ID 					= $studentRow->user_ID;
 						$student_master_call_sign 			= $studentRow->user_call_sign;
@@ -436,7 +440,7 @@ function student_management_func() {
 			}
 		}
 	}
-	
+		
 	// get the advisor information
 	if ($getAdvisor) {
 		if ($doDebug) {
@@ -693,7 +697,7 @@ function getTheReason($strReasonCode) {
 							<div style='clear:both;'>
 							<div style='float:left;'>
 								<li style='margin-left:2em;'><a href='$theURL?strpass=25' target='_blank'>Resolve Student 
-							Hold</div>
+							Hold<a/></div>
 							<div style='float:right;'><a href=\"javascript:window.alert('Removes the intervention_required hold code 
 							and sets the hold_override code so this hold will not be applied again to this student record. Function will have 
 							no effect after students are assigned to advisors.');\">
@@ -701,9 +705,23 @@ function getTheReason($strReasonCode) {
 
 							<div style='clear:both;'>
 							<div style='float:left;'>
-								<li style='margin-left:2em;'><a href='$theURL?strpass=100' target='_blank'>Confirm One or More Students</div>
+								<li style='margin-left:2em;'><a href='$theURL?strpass=100' target='_blank'>Confirm One or More Students</a></div>
 							<div style='float:right;'><a href=\"javascript:window.alert('The function will verify the each student is unassigned and not 
 							on hold. If verified, the response is set to Y');\">
+							<span style='color:orange;'><em>Note</em></span></span></div></div>
+							
+							<div style='clear:both;'>
+							<div style='float:left;'>
+								<li style='margin-left:2em;'><a href='$theURL?strpass=110' target='_blank'>Add Excluded Advisor to a Student</a></div>
+							<div style='float:right;'><a href=\"javascript:window.alert('If the specified advisor is not excluded from the 
+							specified student already, then the student record is updated with the specified excluded advisor');\">
+							<span style='color:orange;'><em>Note</em></span></span></div></div>
+							
+							<div style='clear:both;'>
+							<div style='float:left;'>
+								<li style='margin-left:2em;'><a href='$theURL?strpass=120' target='_blank'>Remove Excluded Advisor from a Student</a></div>
+							<div style='float:right;'><a href=\"javascript:window.alert('The specified advisor will be removed from all specified student 
+							records');\">
 							<span style='color:orange;'><em>Note</em></span></span></div></div>
 
 							<div style='clear:both;'></div>
@@ -813,7 +831,7 @@ function getTheReason($strReasonCode) {
 
 							<div style='clear:both;'>
 							<div style='float:left;'>
-								<li style='margin-left:2em;'><a href='$theURL?strpass=85' target='_blank'>Verify One or More Students</div>
+								<li style='margin-left:2em;'><a href='$theURL?strpass=85' target='_blank'>Verify One or More Students</a></div>
 							<div style='float:right;'><a href=\"javascript:window.alert('The function will verify that each 
 							student is assigned to a class and has a student_status of S. If so, the student_status will be set to Y.');\">
 							<span style='color:orange;'><em>Note</em></span></span></div></div>
@@ -4753,6 +4771,220 @@ function getTheReason($strReasonCode) {
 			}
 			$content				.= "<p>Processing completed</p>";
 		}
+		
+		
+/////// pass 110 -- add excluded advisor		
+		
+		
+	} elseif ("110" == $strPass) {
+		if ($doDebug) {
+			echo "<br />At pass 110 -- add excluded advisor<br />";
+		}
+		$jobname			= "Student Management Add Excluded Advisor";
+		$content			.= "<h3>$jobname</h3>
+								<p>Enter the student's call sign to which the specified advisor should be 
+								excluded</p>
+								<p><form method='post' action='$theURL' 
+								name='selection_form' ENCTYPE='multipart/form-data'>
+								<input type='hidden' name='strpass' value='112'>
+								<table style='border-collapse:collapse;'>
+								<tr><td style='width:150px;'>Student Call Sign:<br /></td>
+									<td><input class='formInputText' type='text' size= '50' maxlength='100' name='inp_student_callsign' autofocus></td></tr>
+								<tr><td style='width:150px;'>Excluded advisor callsign:<br /></td>
+									<td><input class='formInputText' type='text' size= '50' maxlength='100' name='inp_callsign'></td></tr>
+								$testModeOption
+								<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+								</form>";
+	} elseif ("112" == $strPass) {
+
+// $doDebug	= TRUE;
+
+		if ($doDebug) {
+			echo "<br />At pass 112 with inp_student_callsign $inp_student_callsign and advisor callsign: $inp_callsign<br />";
+		}
+		$jobname			= "Student Management Add Excluded Advisor";
+		$content			.= "<h3>$jobname</h3>";
+
+		$doProceed			= TRUE;		
+		if ($haveStudent) {
+			if ($doDebug) {
+				echo "Have student record. Preparing to update<br />
+				student_excluded_advisor: $student_excluded_advisor<br />";
+			}
+		} else {
+			if ($doDebug) {
+				echo "haveStudent is FALSE<br />";
+				$content		.= "<p>No record found for student $inp_student_callsign<br />";
+				$doProceed 		= FALSE;
+			}
+		}
+		if ($doProceed) {
+			$updateParams		= array();
+			$updateFormat		= array();
+			$doUpdate			= FALSE;
+			if ($student_excluded_advisor == '') {
+				// if excluded advisor is empty, add the advisor
+				$student_excluded_advisor	= $inp_callsign;
+				$updateParams['student_excluded_advisor']	= $student_excluded_advisor;
+				$updateFormat[]								= '%s';
+				$doUpdate									= TRUE;
+			} else {
+				// if excluded advisor is not empty, see of advisor already excluded
+				$matchStr		= "/$inp_callsign/";
+				if (preg_match($matchStr,$student_excluded_advisor)) {
+					if ($doDebug) {
+						echo "advisor $inp_callsign already excluded<br />";
+						$content	.= "<p>Advsiro $inp_callsign already excluded</p>";
+					}
+				} else {
+					// excluded advisor is not empty and can add the specified advisor
+					$student_excluded_advisor	.= "&$inp_callsign";
+					$updateParams['student_excluded_advisor']	= $student_excluded_advisor;
+					$updateFormat[]								= '%s';
+					$doUpdate									= TRUE;
+				}
+			}
+			if ($doUpdate) {
+				$studentUpdateData		= array('tableName'=>$studentTableName,
+												'inp_method'=>'update',
+												'inp_data'=>$updateParams,
+												'inp_format'=>$updateFormat,
+												'jobname'=>$jobname,
+												'inp_id'=>$student_ID,
+												'inp_callsign'=>$student_call_sign,
+												'inp_semester'=>$student_semester,
+												'inp_who'=>$userName,
+												'testMode'=>$testMode,
+												'doDebug'=>$doDebug);
+				$updateResult	= updateStudent($studentUpdateData);
+				if ($updateResult[0] === FALSE) {
+					$myError	= $wpdb->last_error;
+					$mySql		= $wpdb->last_query;
+					$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+					if ($doDebug) {
+						echo $errorMsg;
+					}
+					sendErrorEmail($errorMsg);
+					$content		.= "Unable to update content in $studentTableName<br />";
+				} else {
+					$content		.= "<p>Advisor $inp_callsign has been excluded for student $inp_student_callsign</p>";
+				}
+			} 
+		}		
+
+
+
+/////// pass 120 -- remove excluded advisor		
+		
+		
+	} elseif ("120" == $strPass) {
+		if ($doDebug) {
+			echo "<br />At pass 120 -- remove excluded advisor<br />";
+		}
+		$jobname			= "Student Management Remove Excluded Advisor";
+		$content			.= "<h3>$jobname</h3>
+								<p>Enter the student's call sign from which the specified advisor should be 
+								no longer be excluded</p>
+								<p><form method='post' action='$theURL' 
+								name='selection_form' ENCTYPE='multipart/form-data'>
+								<input type='hidden' name='strpass' value='122'>
+								<table style='border-collapse:collapse;'>
+								<tr><td style='width:150px;'>Student Call Sign:<br /></td>
+									<td><input class='formInputText' type='text' size= '50' maxlength='100' name='inp_student_callsign' autofocus></td></tr>
+								<tr><td style='width:150px;'>Excluded advisor callsign:<br /></td>
+									<td><input class='formInputText' type='text' size= '50' maxlength='100' name='inp_callsign'></td></tr>
+								$testModeOption
+								<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+								</form>";
+	} elseif ("122" == $strPass) {
+
+// $doDebug	= TRUE;
+
+		if ($doDebug) {
+			echo "<br />At pass 122 with inp_student_callsign $inp_student_callsign and advisor callsign: $inp_callsign<br />";
+		}
+		$jobname			= "Student Management Remove Excluded Advisor";
+		$content			.= "<h3>$jobname</h3>";
+
+		$doProceed			= TRUE;		
+		// get all the student records
+		// remove the advisor to be removed from each one, if present
+		
+		$sql			= "select student_id, 
+								  student_call_sign, 
+								  student_semester, 
+								  student_excluded_advisor 
+							from $studentTableName 
+							where student_call_sign = '$inp_student_callsign' 
+							order by student_request_date DESC";
+		$wpw1_cwa_student	= $wpdb->get_results($sql);
+		if ($wpw1_cwa_student === FALSE) {
+			handleWPDBError($jobname,$doDebug);
+		} else {
+			$numSRows									= $wpdb->num_rows;
+			if ($doDebug) {
+				echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
+			}
+			if ($numSRows > 0) {
+				$matchStr					= "/$inp_callsign/";
+				foreach ($wpw1_cwa_student as $studentRow) {
+					$student_id					= $studentRow->student_id;
+					$student_call_sign			= $studentRow->student_call_sign;
+					$student_semester			= $studentRow->student_semester;
+					$student_excluded_advisor	= $studentRow->student_excluded_advisor;
+
+					if ($doDebug) {
+						echo "<br />processing $student_call_sign<br />";
+					}
+
+					$excluded_advisor_hold		= $student_excluded_advisor;
+					$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
+					$str1 = "$inp_callsign&";
+					$str2 = "&$inp_callsign";
+					$str3 = "$inp_callsign";
+					$str4 = "&&";
+					$student_excluded_advisor = str_replace($str1,'',$student_excluded_advisor);
+					$student_excluded_advisor = str_replace($str2,'',$student_excluded_advisor);
+					$student_excluded_advisor = str_replace($str3,'',$student_excluded_advisor);
+					$student_excluded_advisor = str_replace($str4,'',$student_excluded_advisor);
+
+					if ($excluded_advisor_hold != $student_excluded_advisor) {
+						if ($doDebug) {
+							echo "Something changed. Original: $excluded_advisor_hold. Result; $student_excluded_advisor<br />";
+						}
+						$studentUpdateData		= array('tableName'=>$studentTableName,
+														'inp_method'=>'update',
+														'inp_data'=>array('student_excluded_advisor'=>$student_excluded_advisor),
+														'inp_format'=>array('%s'),
+														'jobname'=>$jobname,
+														'inp_id'=>$student_id,
+														'inp_callsign'=>$student_call_sign,
+														'inp_semester'=>$student_semester,
+														'inp_who'=>$userName,
+														'testMode'=>$testMode,
+														'doDebug'=>$doDebug);
+						$updateResult	= updateStudent($studentUpdateData);
+						if ($updateResult[0] === FALSE) {
+							$myError	= $wpdb->last_error;
+							$mySql		= $wpdb->last_query;
+							$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+							if ($doDebug) {
+								echo $errorMsg;
+							}
+							sendErrorEmail($errorMsg);
+							$content		.= "Unable to update content in $studentTableName<br />";
+						} else {
+							$content		.= "<p>Advisor $inp_callsign has been excluded in student record for $student_semester semester</p>";
+						}
+					} else {
+						$content			.= "<p>No removal requred in student record for $student_semester semester</p>";
+					}
+				}
+			} else {
+				$content		.= "<p>No student records found for $student_call_sign</p>";
+			}
+		} 
+
 	}
 
 	
