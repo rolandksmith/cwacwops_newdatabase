@@ -1345,7 +1345,7 @@ function assign_students_to_advisors_v3_func() {
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 
-					$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$student_call_sign</a>";
+					$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=FALSE' target='_blank'>$student_call_sign</a>";
 
 					debugReport("<br />Processing student $studentUpdateLink<br />
 								pre-assigned Advisor: $student_pre_assigned_advisor $student_assigned_advisor_class<br />
@@ -1911,7 +1911,7 @@ function assign_students_to_advisors_v3_func() {
 			$advisor_fifo_date		= $advisorArray[$advisorCallSign]['fifo date'];
 			$advisor_ID				= $advisorArray[$advisorCallSign]['ID'];
 			
-			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisorCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$advisorCallSign</a>";
+			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$advisorCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$advisorCallSign</a>";
 			debugReport("<br />Processing advisor $advisorUpdateLink<br />");
 			$thisNumberAdvisors++;
 								
@@ -1993,7 +1993,7 @@ function assign_students_to_advisors_v3_func() {
 							$student_second_choice	= $studentArray[$thisStudent]['second choice utc'];
 							$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
 							
-							$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$thisStudent&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisStudent</a>";
+							$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$thisStudent&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisStudent</a>";
 							debugReport("Adding line for $thisStudent<br />");
 							$hasAssessment			= FALSE;
 							$assessmentStr			= '';
@@ -2296,7 +2296,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 				$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
 				$student_excluded_advisor	= $studentArray[$thisStudent]['excluded advisor'];
 			
-				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
+				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
 				$findClassLink			= "<a href='$studentManagementURL?strpass=70&inp_student_callsign=$studentCallSign&inp_mode=$inp_mode' target='_blank'><b>Find Class</b></a>";
 
 				$unassignedCount++;
@@ -2373,8 +2373,8 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			$student_second_choice	= $studentArray[$studentCallSign]['second choice utc'];
 			$student_third_choice	= $studentArray[$studentCallSign]['third choice utc'];
 			
-			$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$studentCallSign</a>";
-			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
+			$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=FALSE' target='_blank'>$studentCallSign</a>";
+			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisAdvisor</a>";
 
 			$thisCount++;
 			$content				.= "<tr><td style='vertical-align:top;'>$student_last_name, $student_first_name ($studentUpdateLink)</td>
@@ -2436,8 +2436,8 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 					$student_third_choice	= $studentArray[$studentCallSign]['third choice'];
 					$student_level			= $studentArray[$studentCallSign]['level'];
 					
-					$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$studentCallSign</a>";
-					$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
+					$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=FALSE' target='_blank'>$studentCallSign</a>";
+					$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisAdvisor</a>";
 			
 
 					$content				.= "<tr><td style='vertical-align:top;'>$student_level</td>
@@ -2487,7 +2487,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			$thisLocal		= $myArray[6];
 			$thisUTC		= $myArray[7];
 					
-			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
+			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisAdvisor</a>";
 
 			$smallClassCount++;
 			$myInt				= $thisSize - $thisStudents;
@@ -2532,7 +2532,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 			$thisUTC		= $myArray[6];
 			$thisStudents	= $myArray[7];
 					
-			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisAdvisor</a>";
+			$advisorUpdateLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisAdvisor&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=FALSE' target='_blank'>$thisAdvisor</a>";
 			
 			$seatsOpenCount	= $seatsOpenCount + $thisOpen;
 			$content		.= "<tr><td style='vertical-align:top;'>$advisorUpdateLink</td>
@@ -2589,7 +2589,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 				$student_level			= $studentArray[$studentCallSign]['level'];
 				$holdCount++;
 					
-				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=one&doDebug=$doDebug&testMode=$testMode' target='_blank'>$studentCallSign</a>";
+				$studentUpdateLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=FALSE' target='_blank'>$studentCallSign</a>";
 			
 				$content				.= "<tr><td style='vertical-align:top;'>$student_level</td>
 													<td style='vertical-align:top;'>$student_time_zone</td>
