@@ -62,8 +62,8 @@ function make_or_restore_backups_func() {
 	$copy_wpw1_cwa_deleted_advisorclass2_wpw1_cwa_deleted_advisorclass		= FALSE;
 	$copy_wpw1_cwa_deleted_student_wpw1_cwa_deleted_student2				= FALSE;
 	$copy_wpw1_cwa_deleted_student2_wpw1_cwa_deleted_student				= FALSE;
-	$copy_wpw1_cwa_deleted_user_master_wpw1_cwa_deleted_user_master2		= FALSE;
-	$copy_wpw1_cwa_deleted_user_master2_wpw1_cwa_deleted_user_master		= FALSE;
+	$copy_wpw1_cwa_user_master_deleted_wpw1_cwa_user_master_deleted2		= FALSE;
+	$copy_wpw1_cwa_user_master_deleted2_wpw1_cwa_user_master_deleted		= FALSE;
 	$copy_wpw1_cwa_evaluate_advisor_wpw1_cwa_evaluate_advisor2				= FALSE;
 	$copy_wpw1_cwa_evaluate_advisor2_wpw1_cwa_evaluate_advisor				= FALSE;
 	$copy_wpw1_cwa_joblog_wpw1_cwa_joblog2									= FALSE;
@@ -157,10 +157,10 @@ function make_or_restore_backups_func() {
 				$deleted_student = filter_var($deleted_student,FILTER_UNSAFE_RAW);
 				$copy_wpw1_cwa_deleted_student_wpw1_cwa_deleted_student2 = TRUE;
 			}
-			if ($str_key == 'deleted_user_master') {
-				$deleted_user_master = $str_value;
-				$deleted_user_master = filter_var($deleted_user_master,FILTER_UNSAFE_RAW);
-				$copy_wpw1_cwa_deleted_user_master_wpw1_cwa_deleted_user_master2 = TRUE;
+			if ($str_key == 'user_master_deleted') {
+				$user_master_deleted = $str_value;
+				$user_master_deleted = filter_var($user_master_deleted,FILTER_UNSAFE_RAW);
+				$copy_wpw1_cwa_user_master_deleted_wpw1_cwa_user_master_deleted2 = TRUE;
 			}
 			if ($str_key == 'evaluate_advisor') {
 				$evaluate_advisor = $str_value;
@@ -273,10 +273,10 @@ function make_or_restore_backups_func() {
 				$deleted_student2 = filter_var($deleted_student2,FILTER_UNSAFE_RAW);
 				$copy_wpw1_cwa_deleted_student2_wpw1_cwa_deleted_student = TRUE;
 			}
-			if ($str_key == 'deleted_user_master2') {
-				$deleted_user_master2 = $str_value;
-				$deleted_user_master2 = filter_var($deleted_user_master2,FILTER_UNSAFE_RAW);
-				$copy_wpw1_cwa_deleted_user_master2_wpw1_cwa_deleted_user_master = TRUE;
+			if ($str_key == 'user_master_deleted2') {
+				$user_master_deleted2 = $str_value;
+				$user_master_deleted2 = filter_var($user_master_deleted2,FILTER_UNSAFE_RAW);
+				$copy_wpw1_cwa_user_master_deleted2_wpw1_cwa_user_master_deleted = TRUE;
 			}
 			if ($str_key == 'evaluate_advisor2') {
 				$evaluate_advisor2 = $str_value;
@@ -353,7 +353,7 @@ function make_or_restore_backups_func() {
 				$copy_wpw1_cwa_deleted_advisor_wpw1_cwa_deleted_advisor2				= TRUE;
 				$copy_wpw1_cwa_deleted_advisorclass_wpw1_cwa_deleted_advisorclass2		= TRUE;
 				$copy_wpw1_cwa_deleted_student_wpw1_cwa_deleted_student2				= TRUE;
-				$copy_wpw1_cwa_deleted_user_master_wpw1_cwa_deleted_user_master2		= TRUE;
+				$copy_wpw1_cwa_user_master_deleted_wpw1_cwa_user_master_deleted2		= TRUE;
 				$copy_wpw1_cwa_evaluate_advisor_wpw1_cwa_evaluate_advisor2				= TRUE;
 				$copy_wpw1_cwa_joblog_wpw1_cwa_joblog2									= TRUE;
 				$copy_wpw1_cwa_new_assessment_data_wpw1_cwa_new_assessment_data2		= TRUE;
@@ -380,7 +380,7 @@ function make_or_restore_backups_func() {
 				$copy_wpw1_cwa_deleted_advisor2_wpw1_cwa_deleted_advisor				= TRUE;
 				$copy_wpw1_cwa_deleted_advisorclass2_wpw1_cwa_deleted_advisorclass		= TRUE;
 				$copy_wpw1_cwa_deleted_student2_wpw1_cwa_deleted_student				= TRUE;
-				$copy_wpw1_cwa_deleted_user_master2_wpw1_cwa_deleted_user_master		= TRUE;
+				$copy_wpw1_cwa_user_master_deleted2_wpw1_cwa_user_master_deleted		= TRUE;
 				$copy_wpw1_cwa_evaluate_advisor2_wpw1_cwa_evaluate_advisor				= TRUE;
 				$copy_wpw1_cwa_joblog2_wpw1_cwa_joblog									= TRUE;
 				$copy_wpw1_cwa_new_assessment_data2_wpw1_cwa_new_assessment_data		= TRUE;
@@ -493,93 +493,80 @@ function make_or_restore_backups_func() {
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
-							<table style='width:800px;'>
+							<table style='width:900px;'>
 							<fieldset>
 							<legend>Indicate which copies should be made</legend>
 							
-<tr><td><input type='checkbox' class='formInputButton' id='copymain' name='copymain' value='copymain'>
-	<label for='copymain'>Copy All Tables to their backups</label></td></tr>							
-<tr><td><input type='checkbox' class='formInputButton' id='restoremain' name='restoremain' value='restoremain'>
-	<label for='restoremain'>Restore All Tables from their backups</label></td></tr>							
-<tr><td><hr></td></tr>
-							<tr><td><u>Main Tables to Backup Tables</u></td></tr>
+<tr><td><b><u>All Tables</u></b></td></tr>
+<tr><td><table style='width:900px;'>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='copymain' name='copymain' value='copymain' checked>Copy All Tables to their backups</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='restoremain' name='restoremain' value='restoremain'>Restore All Tables from their backups</td></tr>
+			</table></td></tr>
 
-<tr><td><input type='checkbox' class='formInputButton' id='advisor' name='advisor' value='advisor'>
-	<label for='advisor'>Copy advisor to advisor2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='advisorclass' name='advisorclass' value='advisorclass'>
-	<label for='advisorclass'>Copy advisorclass to advisorclass2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='audit_log' name='audit_log' value='audit_log'>
-	<label for='audit_log'>Copy audit_log to audit_log2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='current_catalog' name='current_catalog' value='current_catalog'>
-	<label for='current_catalog'>Copy current_catalog to current_catalog2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_advisor' name='deleted_advisor' value='deleted_advisor'>
-	<label for='deleted_advisor'>Copy deleted_advisor to deleted_advisor2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_advisorclass' name='deleted_advisorclass' value='deleted_advisorclass'>
-	<label for='deleted_advisorclass'>Copy deleted_advisorclass to deleted_advisorclass2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_student' name='deleted_student' value='deleted_student'>
-	<label for='deleted_student'>Copy deleted_student to deleted_student2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_user_master' name='deleted_user_master' value='deleted_user_master'>
-	<label for='deleted_user_master'>Copy deleted_user_master to deleted_user_master2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='evaluate_advisor' name='evaluate_advisor' value='evaluate_advisor'>
-	<label for='evaluate_advisor'>Copy evaluate_advisor to evaluate_advisor2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='joblog|joblog2' name='joblog|joblog2' value='joblog|joblog2'>
-	<label for='joblog|joblog2'>Copy joblog|joblog2 to joblog|joblog22</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='new_assessment_data' name='new_assessment_data' value='new_assessment_data'>
-	<label for='new_assessment_data'>Copy new_assessment_data to new_assessment_data2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='production_email' name='production_email' value='production_email'>
-	<label for='production_email'>Copy production_email to production_email2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='reminders' name='reminders' value='reminders'>
-	<label for='reminders'>Copy reminders to reminders2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='replacement_requests' name='replacement_requests' value='replacement_requests'>
-	<label for='replacement_requests'>Copy replacement_requests to replacement_requests2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='reports' name='reports' value='reports'>
-	<label for='reports'>Copy reports to reports2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='student' name='student' value='student'>
-	<label for='student'>Copy student to student2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='temp_data' name='temp_data' value='temp_data'>
-	<label for='temp_data'>Copy temp_data to temp_data2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master' name='user_master' value='user_master'>
-	<label for='user_master'>Copy user_master to user_master2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master_deleted' name='user_master_deleted' value='user_master_deleted'>
-	<label for='user_master_deleted'>Copy user_master_deleted to user_master_deleted2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master_history' name='user_master_history' value='user_master_history'>
-	<label for='user_master_history'>Copy user_master_history to user_master_history2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='usermeta' name='usermeta' value='usermeta'>
-	<label for='usermeta'>Copy usermeta to usermeta2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='users' name='users' value='users'>
-	<label for='users'>Copy users to users2</label></td></tr>
+<tr><td><b><u>User Related Tables</u></b></td></tr>
+<tr><td><table style='width:900px;'>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='user_master'          name='user_master'          value='user_master'>Copy user_master to user_master2</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='user_master2'         name='user_master2'         value='user_master2'>Copy user_master2 to user_master</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='user_master_deleted'  name='user_master_deleted'  value='user_master_deleted'>Copy user_master_deleted to user_master_deleted2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='user_master_deleted2' name='user_master_deleted2' value='user_master_deleted2'>Copy user_master_deleted2 to user_master_deleted</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='user_master_history'  name='user_master_history'  value='user_master_history'>Copy user_master_history to user_master_history2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='user_master_history2' name='user_master_history2' value='user_master_history2'>Copy user_master_history2 to user_master_history</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='users'                name='users'                value='users'><label for='users'>Copy users to users2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='users2'               name='users2'               value='users2'>Copy users2 to users</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='usermeta'             name='usermeta'             value='usermeta'>Copy usermeta to usermeta</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='usermeta2'            name='usermeta2'            value='usermeta2'>Copy usermeta2 to usermeta</td></tr>
+		</table></td></tr>
 
-							<tr><td><br /><u>Backup Tables to Main Tables</u></td></tr>
+<tr><td><b><u>Advisor Related Tables</u></b></td></tr>
+<tr><td><table style='width:900px;'>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='advisor' name='advisor' value='advisor'>Copy advisor to advisor2</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='advisor2' name='advisor2' value='advisor2'>Copy advisor2 to advisor</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_advisor' name='deleted_advisor' value='deleted_advisor'>Copy deleted_advisor to deleted_advisor2</label></td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_advisor2' name='deleted_advisor2' value='deleted_advisor2'>Copy deleted_advisor2 to deleted_advisor</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='advisorclass' name='advisorclass' value='advisorclass'>Copy advisorclass to advisorclass2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='advisorclass2' name='advisorclass2' value='advisorclass2'>Copy advisorclass2 to advisorclass</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_advisorclass' name='deleted_advisorclass' value='deleted_advisorclass'>Copy deleted_advisorclass to deleted_advisorclass2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_advisorclass2' name='deleted_advisorclass2' value='deleted_advisorclass2'>Copy deleted_advisorclass2 to deleted_advisorclass</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='evaluate_advisor' name='evaluate_advisor' value='evaluate_advisor'>Copy evaluate_advisor to evaluate_advisor2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='evaluate_advisor2' name='evaluate_advisor2' value='evaluate_advisor2'>Copy evaluate_advisor2 to evaluate_advisor</td></tr>
+		</table></td></tr>
 
+<tr><td><b><u>Student Related Tables</u></b></td></tr>
+<tr><td><table style='width:900px;'>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='student' name='student' value='student'>Copy student to student2</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='student2' name='student2' value='student2'>Copy student2 to student</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_student' name='deleted_student' value='deleted_student'>Copy deleted_student to deleted_student2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='deleted_student2' name='deleted_student2' value='deleted_student2'>Copy deleted_student2 to deleted_student</td></tr>
+		</table></td></tr>
 
-<tr><td style='width:800px;'><input type='checkbox' class='formInputButton' id='advisor2' name='advisor2' value='advisor2'> <label for='advisor2'>Copy advisor2 to advisor</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='advisorclass2' name='advisorclass2' value='advisorclass2'> <label for='advisorclass2'>Copy advisorclass2 to advisorclass</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='audit_log2' name='audit_log2' value='audit_log2'> <label for='audit_log2'>Copy audit_log2 to audit_log</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='current_catalog2' name='current_catalog2' value='current_catalog2'> <label for='current_catalog2'>Copy current_catalog2 to current_catalog</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_advisor2' name='deleted_advisor2' value='deleted_advisor2'> <label for='deleted_advisor2'>Copy deleted_advisor2 to deleted_advisor</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_advisorclass2' name='deleted_advisorclass2' value='deleted_advisorclass2'> <label for='deleted_advisorclass2'>Copy deleted_advisorclass2 to deleted_advisorclass</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_student2' name='deleted_student2' value='deleted_student2'> <label for='deleted_student2'>Copy deleted_student2 to deleted_student</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='deleted_user_master2' name='deleted_user_master2' value='deleted_user_master2'> <label for='deleted_user_master2'>Copy deleted_user_master2 to deleted_user_master</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='evaluate_advisor2' name='evaluate_advisor2' value='evaluate_advisor2'> <label for='evaluate_advisor2'>Copy evaluate_advisor2 to evaluate_advisor</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='joblog|joblog22' name='joblog|joblog22' value='joblog|joblog22'> <label for='joblog|joblog22'>Copy joblog|joblog22 to joblog|joblog2</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='new_assessment_data2' name='new_assessment_data2' value='new_assessment_data2'> <label for='new_assessment_data2'>Copy new_assessment_data2 to new_assessment_data</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='production_email2' name='production_email2' value='production_email2'> <label for='production_email2'>Copy production_email2 to production_email</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='reminders2' name='reminders2' value='reminders2'> <label for='reminders2'>Copy reminders2 to reminders</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='replacement_requests2' name='replacement_requests2' value='replacement_requests2'> <label for='replacement_requests2'>Copy replacement_requests2 to replacement_requests</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='reports2' name='reports2' value='reports2'> <label for='reports2'>Copy reports2 to reports</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='student2' name='student2' value='student2'> <label for='student2'>Copy student2 to student</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='temp_data2' name='temp_data2' value='temp_data2'> <label for='temp_data2'>Copy temp_data2 to temp_data</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master2' name='user_master2' value='user_master2'> <label for='user_master2'>Copy user_master2 to user_master</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master_deleted2' name='user_master_deleted2' value='user_master_deleted2'> <label for='user_master_deleted2'>Copy user_master_deleted2 to user_master_deleted</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='user_master_history2' name='user_master_history2' value='user_master_history2'> <label for='user_master_history2'>Copy user_master_history2 to user_master_history</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='usermeta2' name='usermeta2' value='usermeta2'> <label for='usermeta2'>Copy usermeta2 to usermeta</label></td></tr>
-<tr><td><input type='checkbox' class='formInputButton' id='users2' name='users2' value='users2'> <label for='users2'>Copy users2 to users</label></td></tr>
+<tr><td><b><u>All Other Tables</u></b></td></tr>
+<tr><td><table style='width:900px;'>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log' name='audit_log' value='audit_log'>Copy audit_log to audit_log2</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log2' name='audit_log2' value='audit_log2'>Copy audit_log2 to audit_log</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='current_catalog' name='current_catalog' value='current_catalog'>Copy current_catalog to current_catalog2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='current_catalog2' name='current_catalog2' value='current_catalog2'>Copy current_catalog2 to current_catalog</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='joblog' name='joblog' value='joblog'>Copy joblog to joblog2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='joblog2' name='joblog2' value='joblog2'>Copy joblog2 to joblog</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='new_assessment_data' name='new_assessment_data' value='new_assessment_data'>Copy new_assessment_data to new_assessment_data2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='new_assessment_data2' name='new_assessment_data2' value='new_assessment_data2'>Copy new_assessment_data2 to new_assessment_data</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='production_email' name='production_email' value='production_email'>Copy production_email to production_email2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='production_email2' name='production_email2' value='production_email2'>Copy production_email2 to production_email</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='reminders' name='reminders' value='reminders'>Copy reminders to reminders2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='reminders2' name='reminders2' value='reminders2'>Copy reminders2 to reminders</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='replacement_requests' name='replacement_requests' value='replacement_requests'>Copy replacement_requests to replacement_requests2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='replacement_requests2' name='replacement_requests2' value='replacement_requests2'>Copy replacement_requests2 to replacement_requests</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='reports' name='reports' value='reports'>Copy reports to reports2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='reports2' name='reports2' value='reports2'>Copy reports2 to reports</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='temp_data' name='temp_data' value='temp_data'>Copy temp_data to temp_data2</td>
+			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='temp_data2' name='temp_data2' value='temp_data2'>Copy temp_data2 to temp_data</td></tr>
+		</table></td></tr>
+
 <tr><td><hr></tr></td>
-							<tr><td><table>
+<tr><td><table style='width:900px;'>
 							$testModeOption
-							</table>
-							<tr><td><input class='formInputButton' type='submit' value='Submit' /></tr></td></table>
-							</fieldset></form></p>";
+		</table>
+<tr><td><input class='formInputButton' type='submit' value='Submit' /></tr></td>
+</table></fieldset></form></p>";
 	
 
 ///// Pass 2 -- do the work
@@ -632,10 +619,10 @@ function make_or_restore_backups_func() {
 				echo "copying wpw1_cwa_deleted_student to wpw1_cwa_deleted_student2<br />";
 			}
 		}
-		if ($copy_wpw1_cwa_deleted_user_master_wpw1_cwa_deleted_user_master2) {
-			$copyArray[] = 'wpw1_cwa_deleted_user_master|wpw1_cwa_deleted_user_master2';
+		if ($copy_wpw1_cwa_user_master_deleted_wpw1_cwa_user_master_deleted2) {
+			$copyArray[] = 'wpw1_cwa_user_master_deleted|wpw1_cwa_user_master_deleted2';
 			 if ($doDebug) {
-				echo "copying wpw1_cwa_deleted_user_master to wpw1_cwa_deleted_user_master2<br />";
+				echo "copying wpw1_cwa_user_master_deleted to wpw1_cwa_user_master_deleted2<br />";
 			}
 		}
 		if ($copy_wpw1_cwa_evaluate_advisor_wpw1_cwa_evaluate_advisor2) {
@@ -765,10 +752,10 @@ function make_or_restore_backups_func() {
 				echo "copying wpw1_cwa_deleted_student2 to wpw1_cwa_deleted_student<br />";
 			}
 		}
-		if ($copy_wpw1_cwa_deleted_user_master2_wpw1_cwa_deleted_user_master) {
-			$copyArray[] = 'wpw1_cwa_deleted_user_master2|wpw1_cwa_deleted_user_master';
+		if ($copy_wpw1_cwa_user_master_deleted2_wpw1_cwa_user_master_deleted) {
+			$copyArray[] = 'wpw1_cwa_user_master_deleted2|wpw1_cwa_user_master_deleted';
 			 if ($doDebug) {
-				echo "copying wpw1_cwa_deleted_user_master2 to wpw1_cwa_deleted_user_master<br />";
+				echo "copying wpw1_cwa_user_master_deleted2 to wpw1_cwa_user_master_deleted<br />";
 			}
 		}
 		if ($copy_wpw1_cwa_evaluate_advisor2_wpw1_cwa_evaluate_advisor) {
