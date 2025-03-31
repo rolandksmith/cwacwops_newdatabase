@@ -72,7 +72,7 @@ function new_usernames_report_func(){
 	$theURL					= "$siteURL/cwa-new-usernames-report/";
 	$studentUpdateURL		= "$siteURL/cwa-display-and-update-student-signup-information/";	
 	$advisorUpdateURL		= "$siteURL/cwa-display-and-update-advisor-signup-information/";
-	$userMasterUpdateURL	= "4siteURL/cwa-display-and-update-user-master-information/";	
+	$userMasterUpdateURL	= "$siteURL/cwa-display-and-update-user-master-information/";	
 	$jobname				= "New UserNames Report V$versionNumber";
 	$advisorTableName		= "wpw1_cwa_advisor";
 	$studentTableName		= "wpw1_cwa_student";
@@ -511,6 +511,8 @@ function new_usernames_report_func(){
 								if ($deleteUser) {
 									wp_delete_user( $user_id, null );
 									$userRecordsDeleted++;
+									$allUsersArray[$user_uppercase]['theError']	.= "Users and user_master records were deleted<br />";
+									$allUsersArray[$user_uppercase]['hasUserMaster']	= 'N';
 								}
 							}
 						}
