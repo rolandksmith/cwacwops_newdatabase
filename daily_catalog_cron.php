@@ -49,6 +49,7 @@ function daily_catalog_cron_process_v3_func() {
  	Modified 24May24 by Roland to do away with the abbreviated catalog process and 
  		display a nicely formated catalog
  	Modified 12Oct24 by Roland for the new database
+ 	Modified 29Mar25 by Roland to not include zero class size classes
 */
 
 
@@ -281,6 +282,7 @@ function daily_catalog_cron_process_v3_func() {
 							ac.advisorclass_sequence, 
 							ac.advisorclass_semester, 
 							ac.advisorclass_level, 
+							ac.advisorclass_class_size, 
 							ac.advisorclass_class_incomplete, 
 							ac.advisorclass_class_schedule_days_utc, 
 							ac.advisorclass_class_schedule_times_utc, 
@@ -291,6 +293,7 @@ function daily_catalog_cron_process_v3_func() {
 						LEFT JOIN wpw1_cwa_advisor a ON ac.advisorclass_call_sign = a.advisor_call_sign 
 							and a.advisor_semester = ac.advisorclass_semester 
 						WHERE ac.advisorclass_semester = '$proximateSemester' 
+							and ac.advisorclass_class_size != 0 
 						order by ac.advisorclass_call_sign";
 								   
 			$cwa_advisor		= $wpdb->get_results($sql);
@@ -309,6 +312,7 @@ function daily_catalog_cron_process_v3_func() {
 						$advisorClass_sequence 					= $advisorRow->advisorclass_sequence;
 						$advisorClass_semester					= $advisorRow->advisorclass_semester;
 						$advisorClass_level 					= $advisorRow->advisorclass_level;
+						$advisorClass_class_size				= $advisorRow->advisorclass_class_size;
 						$advisorClass_class_incomplete 			= $advisorRow->advisorclass_class_incomplete;
 						$advisorClass_class_schedule_days_utc 	= $advisorRow->advisorclass_class_schedule_days_utc;
 						$advisorClass_class_schedule_times_utc 	= $advisorRow->advisorclass_class_schedule_times_utc;
@@ -316,6 +320,7 @@ function daily_catalog_cron_process_v3_func() {
 						if ($doDebug) {
 							echo "<br /><b>Processing Advisor $advisorClass_call_sign Sequence $advisorClass_sequence</b> ($advisorClass_survey_score | $advisorClass_verify_response)<br />
 								  Level: $advisorClass_level<br />
+								  Size: $advisorClass_class_size<br />
 								  schedule Days: $advisorClass_class_schedule_days_utc 
 								  schedule times: $advisorClass_class_schedule_times_utc<br />";
 						}
