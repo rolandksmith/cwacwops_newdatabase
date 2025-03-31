@@ -100,6 +100,23 @@ function display_and_update_student_signup_func() {
 				$strPass		 = $str_value;
 				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key		== "submit") {
+				$submitValue	= $str_value;
+				$submitValue	= filter_var($submitValue,FILTER_UNSAFE_RAW);
+				
+//				echo "submitValue: $submitValue<br />";
+				if (preg_match('/Update Student Record/',$submitValue)) {
+					if ($doDebug) {
+						echo "have submitValue: $submitValue<br />";
+					}
+					$inp_student_id	= str_replace('Update Student Record ','',$submitValue);
+					$getStudent		= TRUE;
+					if ($doDebug) {
+						echo "extracted inp_student_id: $inp_student_id and set getStudent to TRUE<br />";
+					}
+				}
+				
+			}
 			if ($str_key 		== "inp_verbose") {
 				$inp_verbose	 = $str_value;
 				$inp_verbose	 = filter_var($inp_verbose,FILTER_UNSAFE_RAW);
@@ -763,7 +780,7 @@ function display_and_update_student_signup_func() {
 				$sql				= "select * from $studentTableName 
 										left join $userMasterTableName on student_call_sign = user_call_sign 
 										where student_call_sign = '$getInfo' 
-										order by student_date_created DESC";
+										order by student_id DESC";
 			} else {
 				$sql				= "select * from $studentTableName 
 										left join $userMasterTableName on student_call_sign = user_call_sign 
@@ -938,7 +955,6 @@ function display_and_update_student_signup_func() {
 												<input type='hidden' name='inp_callsign' value='$student_call_sign'>
 												<input type='hidden' name='request_type' value='callsign'>
 												<input type='hidden' name='request_info' value='$student_call_sign'>
-												<input type='hidden' name='inp_student_id' value='$student_ID'>
 												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
@@ -1037,7 +1053,7 @@ function display_and_update_student_signup_func() {
 												<tr><td>Student Date Updated<td>
 													<td>$student_date_updated</td></tr>
 												<tr><td></td>
-													<td><input type='submit' class='formInputButton' name='submit' value='Update Student Record' /></td></tr>
+													<td><input type='submit' class='formInputButton' name='submit' value='Update Student Record $student_ID' /></td></tr>
 												</table>
 												<p><a href='$theURL'>Look Up a Different Student</a>";
 					}
