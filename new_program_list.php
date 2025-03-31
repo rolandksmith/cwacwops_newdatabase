@@ -478,6 +478,7 @@ function program_list_func() {
 								<li><a href='$siteURL/utility-list-available-shortcodes/' target='_blank'>UTILITY - List Available Shortcodes</a>
 								<li><a href='$siteURL/utility-show-offsets-for-a-country-or-zip-code/' target='_blank'>UTILITY Show Offsets for a Country or Zip Code</a><br /><br />
 								
+								<li><a href='$siteURL/cwa-student-management/?strpass=110' target='_blank'>Add Excluded Advisor to a Student</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=40' target='_blank'>Add Unassigned Student to an Advisor's Class</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=90' target='_blank'>Assign a Student to an Advisor regardless</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=100' target='_blank'>Confirm One or More Students</a>
@@ -491,6 +492,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-student-management/?strpass=2' target='_blank'>Pre-assign Student to an Advisor</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=55' target='_blank'>Re-assign a Student to Another Advisor</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=60' target='_blank'>Remove and/or Unassign a Student</a>
+								<li><a href='$siteURL/cwa-student-management/?strpass=120' target='_blank'>Remove Excluded Advisor from a Student</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=25' target='_blank'>Resolve Student Hold</a>
 								<li><a href='$siteURL/cwa-student-management/' target='_blank'>Student Management</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=50' target='_blank'>Unassign a Student Regardless of Status</a>
@@ -688,6 +690,8 @@ function program_list_func() {
 									<li><a href='$siteURL/cwa-student-management/?strpass=7' target='_blank'>List Students Needing Intervention</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=25' target='_blank'>Resolve Student Hold</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=100' target='_blank'>Confirm One or More Students</a><br />
+									<li><a href='$siteURL/cwa-student-management/?strpass=110' target='_blank'>Add Excluded Advisor to a Student</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=120' target='_blank'>Remove Excluded Advisor from a Student</a>
 									</ol>
 								<li><strong>Useful Functions Any Time</strong>
 									<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
