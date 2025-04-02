@@ -3579,14 +3579,15 @@ function student_registration_func() {
 			if ($haveStudentData) {
 			
 				// remove student_response of 'R' if present
-				if ($student_response = 'R') {
+				if ($student_response == 'R') {
 					if ($doDebug) {
 						echo "have a student_response of 'R'. Resetting to blank<br />";
 					}
 					$actionDate			= date('dMy H:i');
-					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed status of R ";
+					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed student_status of R ";
 					$updateParams		= array('student_action_log'=>$student_action_log,
-												'student_response'=>'');
+												'student_status'=>'');
+					sendErrorEmail("STDREG $student_call_sign removed student_status of R");
 					$updateFormat		= array('%s','%s');
 					$studentUpdateData		= array('tableName'=>$studentTableName,
 													'inp_method'=>'update',
