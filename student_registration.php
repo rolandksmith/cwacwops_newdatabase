@@ -3584,7 +3584,7 @@ function student_registration_func() {
 						echo "have a student_response of 'R'. Resetting to blank<br />";
 					}
 					$actionDate			= date('dMy H:i');
-					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed student_status of R ";
+					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed student_response of R ";
 					$updateParams		= array('student_action_log'=>$student_action_log,
 												'student_status'=>'');
 					sendErrorEmail("STDREG $student_call_sign removed student_status of R");
