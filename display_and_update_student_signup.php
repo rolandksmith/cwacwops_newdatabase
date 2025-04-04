@@ -60,7 +60,8 @@ function display_and_update_student_signup_func() {
 								'N'=>'Not on waiting list');
 	$abandonedCode		= array(''=>'Did not abandon',
 								'Y'=>'Student abandoned registration process',
-								'N'=>'Student completed registration process');
+								'N'=>'Student completed registration process',
+								'0'=>'Did not abandon');
 	$statusCode			= array(''=>'Not specified',
 								'C'=>'Student has been replaced',
 								'R'=>'Advisor has requested a replacement',
