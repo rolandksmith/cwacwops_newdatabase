@@ -66,6 +66,10 @@ function this_is_a_function_func() {
 				$strPass		 = $str_value;
 				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "inp_rsave") {
+				$inp_rsave		 = $str_value;
+				$inp_rsave		 = filter_var($inp_rsave,FILTER_UNSAFE_RAW);
+			}
 			if ($str_key 		== "inp_verbose") {
 				$inp_verbose	 = $str_value;
 				$inp_verbose	 = filter_var($inp_verbose,FILTER_UNSAFE_RAW);
@@ -205,9 +209,13 @@ function this_is_a_function_func() {
 		if ($doDebug) {
 			echo "Calling function to save the report as Current Student and Advisor Assignments<br />";
 		}
-		$storeResult	= storeReportData_func("Current Student and Advisor Assignments",$content);
-		if ($storeResult !== FALSE) {
-			$content	.= "<br />Report stored in reports pod as $storeResult";
+		$storeResult	= storeReportData_v2($jobname,$content);
+		if ($storeResult[0] !== FALSE) {
+			$reportName	= $storeResult[1];
+			$reportID	= $storeResult[2];
+			$content	.= "<br />Report stored in reports as $reportName<br />
+							Go to'Display Saved Reports' or url<br/>
+							$siteURL/cwa-display-saved-report/?strpass=3&token=&inp_id=$reportID<br /><br />";
 		} else {
 			$content	.= "<br />Storing the report in the reports pod failed";
 		}
