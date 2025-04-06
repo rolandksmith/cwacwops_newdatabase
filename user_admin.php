@@ -1,8 +1,20 @@
 function user_admin_func() {
 
+/*	Interaction between programs
+
+	When taking over an account
+		temp_data token is admin, callsign is the callsign of the account being taken over
+		the reminderToken is in the json variable
+		set up the reminder with the reminderToken
+			the link goes to pass 2 with the
+				inp_callsign being the account to recover
+				inp_direction set to 'recover'
+				token set to reminderToken
+
+*/
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -48,6 +60,7 @@ function user_admin_func() {
 	$inp_semester				= '';
 	$inp_rsave					= '';
 	$jobname					= "User Administration V$versionNumber";
+	$token						= '';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -188,6 +201,7 @@ function user_admin_func() {
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
+							<input type='hidden' name='token' value='$token'>
 							<table style='border-collapse:collapse;'>
 							<tr><td style='vertical-align:top;'>Callsign to be managed</td>
 								<td style='vertical-align:top;'><input type='text' class='formInputText' size='30' maxlength='30' name='inp_callsign' autofocus></td></tr>
@@ -204,7 +218,9 @@ function user_admin_func() {
 
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass $strPass with inp_callsign: $inp_callsign and direction: $inp_direction<br />";
+			echo "<br />at pass $strPass with inp_callsign: $inp_callsign<br />
+				  direction: $inp_direction<br />
+				  token: $token<br />";
 		}	
 		$content			.= "<h3>$jobname</h3>";
 		$doProceed			= TRUE;
@@ -259,11 +275,44 @@ function user_admin_func() {
 							if ($doDebug) {
 								echo "ran $sql<br />and found count was $thisInt<br />";
 							}
-							$content		.= "$inp_callsign eligible to take over<br />";															
+							$content		.= "$inp_callsign eligible to take over<br />";	
+							
+							// setup reminder to restore account
+							$effective_date		 	= date('Y-m-d H:i:s');
+							$closeStr				= strtotime("+30 days");
+							$close_date				= date('Y-m-d H:i:s', $closeStr);
+							$email_text				= "<p></p>";
+							$reminderToken			= mt_rand();
+							$reminder_text			= "<p><b>Restore Account:</b> Advisor $inp_callsign account has been taken 
+														over by $userName. Click <a href='$theURL?strpass=2&inp_callsign=$inp_callsign&inp_direction=restore&token=$reminderToken' target='_blank'>HERE</a> to restore 
+														the account</p>";
+							$inputParams		= array("effective_date|$effective_date|s",
+														"close_date|$close_date|s",
+														"resolved_date||s",
+														"send_reminder|N|s",
+														"send_once|Y|s",
+														"call_sign|$userName|s",
+														"role||s",
+														"email_text|$email_text|s",
+														"reminder_text|$reminder_text|s",
+														"resolved||s",
+														"token|$reminderToken|s");
+							$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+							if ($insertResult[0] === FALSE) {
+								if ($doDebug) {
+									echo "inserting reminder failed: $insertResult[1]<br />";
+								}
+								$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+							} else {
+								$content		.= "Reminder successfully added<br />";
+							}
+																					
 						
 							// set up the data to be saved in temp_data
 							$dataArray			= array('email'=>$user_email,
-														'password'=>$user_pass);
+														'password'=>$user_pass, 
+														'username'=>$user_login,
+														'reminderToken'=>$reminderToken);
 							$jsonData			= json_encode($dataArray);
 							$dateWritten		= date('Y-m-d H:i:s');
 							$addResult			= $wpdb->insert($tempTableName,
@@ -283,14 +332,15 @@ function user_admin_func() {
 							
 							$newPass			= '$2y$10$19e.6giNP9fjBP57QhkGHOu8YLv7cLrPpwAqt/DIzCf2xHesCqW2K';
 							$updateResult	= $wpdb->update($userTableName,
-															array('user_pass'=>$newPass),
+															array('user_pass'=>$newPass,
+																   'user_email'=>$userEmail),
 															array('ID'=>$id),
-															array('%s'),
+															array('%s','%s'),
 															array('%d'));
 							if ($updateResult === FALSE) {
 								handleWPDBError($jobname,$doDebug);
 							} else {
-								$content	.= "User record updated and available for login<br />
+								$content	.= "User record updated and available for login<br /><br />
 												Username: $user_login<br />
  	 											Password: Udxa&dxcc1<br />";
 							}
@@ -322,7 +372,7 @@ function user_admin_func() {
 						foreach($tempResult as $tempResultRow) {
 							$record_id		= $tempResultRow->record_id;
 							$callsign		= $tempResultRow->callsign;
-							$token			= $tempResultRow->token;
+							$tempToken		= $tempResultRow->token;
 							$temp_data		= $tempResultRow->temp_data;
 							$date_written	= $tempResultRow->date_written;
 						}
@@ -330,6 +380,16 @@ function user_admin_func() {
 						$myArray			= json_decode($temp_data,TRUE);
 						$oldEmail			= $myArray['email'];
 						$oldPassword		= $myArray['password'];
+						$oldUserName		= $myArray['username'];
+						$reminderToken		= $myArray['reminderToken'];
+						
+						if ($doDebug) {
+							echo "got the following from temp_data:<br />
+									oldEmail: $oldEmail<br />
+									oldPassword: $oldPassword<br />
+									oldUserName: $oldUserName<br />
+									reminderToken: $reminderToken<br />";
+						}
 						
 						// now get the user record
 						$sql			= "select * from $userTableName 
@@ -360,9 +420,10 @@ function user_admin_func() {
 								}
 								// update the user record
 								$updateResult				= $wpdb->update($userTableName,
-																			array('user_email'=>$oldEmail),
+																			array('user_email'=>$oldEmail,
+																					'user_pass'=>$oldPassword),
 																			array('ID'=>$id),
-																			array('%s'),
+																			array('%s','%s'),
 																			array('%d'));
 								if ($updateResult === FALSE) {
 									handleWPDBError($jobname,$doDebug);
@@ -372,6 +433,16 @@ function user_admin_func() {
 									}
 									$content				.= "$inp_callsign user data has been restored<br />";
 									
+									// resolve the reminder
+									$resolveResult				= resolve_reminder($userName,$reminderToken,$testMode,$doDebug);
+									if ($resolveResult === FALSE) {
+										if ($doDebug) {
+											echo "resolve_reminder for $inp_callsign and $reminderToken failed<br />";
+										}
+									} else {
+										$content	.= "Reminder has been resolved<br />";
+									}
+
 									// now delete the temp_data record
 									$deleteResult			= $wpdb->delete($tempTableName, 
 																		array('callsign'=>$inp_callsign,
@@ -383,7 +454,7 @@ function user_admin_func() {
 										if ($doDebug) {
 											echo "deleting $inp_callsign admin token resulted in deleting $deleteResult rows<br />";
 										}
-										$content			.= "Temp_data record for $inp_callsign has been deleted<br />
+										$content			.= "Temp_data record for $inp_callsign has been deleted<br /><br />
 																$inp_callsign user record has been restored<br />";
 									}
 								}
