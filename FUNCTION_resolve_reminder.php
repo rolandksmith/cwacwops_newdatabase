@@ -42,27 +42,34 @@ function resolve_reminder($inp_callsign='',$token='',$testMode=FALSE,$doDebug=FA
 												array('%s','%s'));
 	}
 //	if ($doDebug) {
-//		$lastQuery		= $wpdb->last_query;
-//		$lastError		= $wpdb->last_error;
-//		echo "lastQuery: $lastQuery<br />
-//			   lastError: $lastError<br />
-//				updateResult:<br /><pre>";
-//		print_r($updateResult);
-//		echo "</pre><br />";
 //	}
 	if ($updateResult === FALSE) {
 		$lastError			= $wpdb->last_error;
 		$lastQuery			= $wpdb->last_query;
 		if ($doDebug) {
-			echo "update using $inp_callsign and $token failed. Error: $lastError<br />Query: $lastQuery<br />";
+			echo "update using $inp_callsign and $token failed<br />
+				  lastQuery: $lastQuery<br />
+				   lastError: $lastError<br />
+					updateResult:<br /><pre>";
+					print_r($updateResult);
+					echo "</pre><br />";
 		}
 		return FALSE;
 	} else {
-		if ($doDebug) {
-			echo "reminder resolved. Returning<br /><br />";
+		$lastQuery			= $wpdb->last_query;	
+		// updateResult should have the number of affected rows. Should be 1
+		if ($updateResult == 1) {
+			if ($doDebug) {
+				$lastQuery			= $wpdb->last_query;	
+				echo "ran $lastQuery<br />and reminder for $inp_callsign with token $token updated $updateResult rows<br />";
+			}
+			return TRUE;
+		} else {
+			if ($doDebug) {
+				echo "running $lastQuery<br />affected $updateResult rows<br />";
+			}
+			return FALSE;
 		}
-		return TRUE;
 	}
-
 }
 add_action('resolve_reminder','resolve_reminder');
