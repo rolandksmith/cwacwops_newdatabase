@@ -682,3 +682,5 @@ SET your_column_name = REPLACE(your_column_name, '\|', '&');
 	
 
 		
+// display the last record in a table
+	SELECT * FROM `wpw1_cwa_reminders` WHERE record_id = (select max(record_id) from wpw1_cwa_reminders);
