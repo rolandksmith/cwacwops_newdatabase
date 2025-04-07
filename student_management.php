@@ -1006,7 +1006,7 @@ function getTheReason($strReasonCode) {
 						if ($doDebug) {
 							echo "No advisor found with the call sign $inp_advisor_callsign in the $nextSemester semester in level $student_level<br />";
 						}
-						$content	.= "Advisor $inp_advisor_callsign is not signed up in the $nextSemester semester in level $student_level.";
+						$content	.= "Advisor $inp_advisor_callsign does not have a $student_level class in the $nextSemester semester.";
 					}
 				}
 			}
