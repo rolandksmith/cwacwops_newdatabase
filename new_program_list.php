@@ -446,6 +446,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-semester-raw-comparison-statistics/' target='_blank'>Semester Raw Comparison Statistics</a>
 								<li><a href='$siteURL/cwa-send-advisor-email-to-view-student-evaluations/' target='_blank'>Send Advisor Email to View Student Evaluations</a>
 								<li><a href='$siteURL/cwa-send-an-email/' target='_blank'>Send an Email</a>
+								<li><a href='$siteURL/cwa-send-an-email-to-a-list/' target='_blank'>Send an Email to a List</a>
 								<li><a href='$siteURL/cwa-send-congratulations-email-to-students/' target='_blank'>Send Congratulations Email to Students</a>
 								<li><a href='$siteURL/cwa-send-email-to-student-to-evaluate-advisor/' target='_blank'>Send Email to Student to Evaluate Advisor</a>
 								<li><a href='$siteURL/cwa-send-end-of-semester-assessment-email-to-advisors/' target='_blank'>Send End of Semester Assessment Email to Advisors</a>
@@ -616,6 +617,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
 								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
 								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
+								<li><a href='$siteURL/cwa-send-an-email-to-a-list/' target='_blank'>Send an Email to a List</a>
 								<li><a href='$siteURL/cwa-update-advisor-service/' target='_blank'>Update Advisor Service</a>
 								<li><a href='$siteURL/rkstest-function-test/' target='_blank'>RKSTEST Function Test</a>
 								<li><a href='$siteURL/rkstest-run-arbitrary-php-code/' target='_blank'>RKSTEST Run Arbitrary PHP Code</a><br /><br />
@@ -822,8 +824,6 @@ function program_list_func() {
 								request replacement students, check Morse Code Proficency Assessments.</p>
 							<p><a href='$siteURL/cwa-view-a-student-assessment/' target='_blank'>View Your Student's Morse Code Assessments</a><br />
 								This program allows the advisor to view one of his student's Morse Code Proficiency Assessments.</p>
-							<p><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
-								Displays recent reminders starting with the most recent reminder. Displays 25 at a time</p>
 							<p><a href='$siteURL/cwa-advisor-registration/' target='_blank'>Sign up for an Advisor Class</a><br />
 								This program provides the ability to sign up for an upcoming semester and specify 
 								what class(es) the advisor wishes to hold, and when those classes would be held. 
