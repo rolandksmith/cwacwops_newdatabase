@@ -14,7 +14,7 @@ function user_admin_func() {
 */
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -61,6 +61,8 @@ function user_admin_func() {
 	$inp_rsave					= '';
 	$jobname					= "User Administration V$versionNumber";
 	$token						= '';
+	$inp_direction				= 'pass1';
+	$jobcomments				= '';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -223,6 +225,7 @@ function user_admin_func() {
 				  token: $token<br />";
 		}	
 		$content			.= "<h3>$jobname</h3>";
+		$jobcomments		= $inp_callsign;
 		$doProceed			= TRUE;
 		$myStr				= strtolower($userName);
 		$myStr1				= strtolower($inp_callsign);
@@ -311,7 +314,7 @@ function user_admin_func() {
 							// set up the data to be saved in temp_data
 							$dataArray			= array('email'=>$user_email,
 														'password'=>$user_pass, 
-														'username'=>$user_login,
+														'username'=>$userName,
 														'reminderToken'=>$reminderToken);
 							$jsonData			= json_encode($dataArray);
 							$dateWritten		= date('Y-m-d H:i:s');
@@ -484,9 +487,23 @@ function user_admin_func() {
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> $inp_direction,
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> $jobcomments,
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
