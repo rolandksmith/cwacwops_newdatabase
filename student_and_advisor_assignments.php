@@ -1862,13 +1862,25 @@ function getTheReason($strReasonCode) {
 					$content				.= "</table>
 												<p><em>Clicking on the student call sign will open the Display and Update Student function</em></p>";
 				} else {
-					$content				.= "<tr><td colspan='6'>No students on hold<?td></tr></table>";
+					$content				.= "<tr><td colspan='6'>No students on hold</td></tr></table>";
 				}
 			}
 			if ($doDebug) {
 				echo "end of the students on hold report<br />";
 			}
 //////////////	end of students on hold report
+
+			$content .= "<p><a href='#report1'>Go to the Advisor Assignment Information Report</a><br />\n
+						<a href='#report2'>Go to the Students Assignment Information</a><br />\n
+						<a href='#reportW'>Go to the Students Who Withdrew</a><br />\n
+						<a href='#reportX'>Go to the Students Who Were Requested to be Replaced Report</a><br />\n
+						<a href='#reportBB'>Go to All Advisors and Class Slots</a><br />\n
+						<a href='#reportS'>Go to the Advisors with Small Classes Report</a><br />\n
+						<a href='#reportY'>Go to the Advisor Class Slots Available Report</a><br />\n
+						<a href='#report3'>Go to the Unassigned Student Information Report</a><br />\n
+						<a href='#reportH'>Go to the Students on Hold Report</a><br />\n
+						</p>\n";
+
 
 	}
 
