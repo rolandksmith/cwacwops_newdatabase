@@ -2644,6 +2644,18 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 //////////////	end of error report
 
 
+		$content				.= "<p><a href='#report1'>Go to the Advisor Classes and Assigned Students Report</a><br />
+									<a href='#report3'>Go to the Unassigned Students Report</a><br />
+									<a href='#report2'>Go to the Student Assignment Information Report</a><br />
+									<a href='#reportA'>Go to the Arbitrarily Assigned Students Report</a><br />
+									<a href='#reportS'>Go to the Advisors with Small Classes Report</a><br />
+									<a href='#reportY'>Go to the Advisors With Open Seats Report</a><br />
+									<a href='#reportH'>Go to the Students on Hold Report</a><br />
+									<a href='#reportO'>Go to the Advisor Class Size Overridden Report</a><br />
+									<a href='#reportE'>Go to the Errors Report</a><br />
+									</p>";
+
+
 
 ////////////// 	if requested, update student records with the assigned advisor
 
