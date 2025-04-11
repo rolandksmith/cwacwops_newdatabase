@@ -1744,9 +1744,9 @@ function getTheReason($strReasonCode) {
 		$jobname			= "Student Management Override Excluded Advisor";
 		$madeChange			= FALSE;
 		if ($haveStudent) {
-			$test1			= "/$inp_advisor_call_sign/";
-			$test2			= "/\|$inp_advisor_call_sign/";
-			$test3			= "/&$inp_advisor_call_sign/";
+			$test1			= "/$inp_advisor_callsign/";
+			$test2			= "/\|$inp_advisor_callsign/";
+			$test3			= "/&$inp_advisor_callsign/";
 			if (preg_match($test1,$student_excluded_advisor)) {
 				if (preg_match($test2,$student_excluded_advisor)) {
 					$student_excluded_advisor = str_replace("\|$inp_advisor_callsign","",$student_excluded_advisor);
