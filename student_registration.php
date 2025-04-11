@@ -4223,7 +4223,7 @@ function student_registration_func() {
 							allowSignup: $allowSignup<br />";
 				}
 				$needsAssessment = FALSE;
-				$stringToPass 	= "inp_callsign=$inp_callsign&inp_phone=$inp_phone&inp_ph_code=$inp_ph_code&inp_email=$inp_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
+				$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
 				$enstr			= base64_encode($stringToPass);
 				$thisDate		= date('Y-m-d H:i:s');
 				// save the enstr info in the temporary table
