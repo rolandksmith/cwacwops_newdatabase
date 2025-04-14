@@ -1387,7 +1387,7 @@ function display_and_update_user_master_func() {
 
 						$doProceed			= TRUE;
 						// do the update
-						$user_action_log					= $inp_action_log . " / $actionLogDate $userName $jobname $updateLog";
+						$user_action_log					= $user_action_log . " / $actionLogDate $userName $jobname $updateLog";
 						$updateParams['user_action_log']	= $user_action_log;
 						$updateFormat[]						= '%s';
 						$userMasterData			= array('tableName'=>$userMasterTableName,
