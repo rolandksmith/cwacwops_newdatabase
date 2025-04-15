@@ -383,6 +383,8 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-cron-process/' target='_blank'>Daily Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
+								<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
+								<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Cleanup</a>
 								<li><a href='$siteURL/cwa-decline-student-reassignment/' target='_blank'>Decline Student Reassignment</a>
 								<li><a href='$siteURL/cwa-detailed-history-for-an-advisor/' target='_blank'>Detailed History for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-advisor-evaluation-statistics/' target='_blank'>Display Advisor Evaluation Statistics</a>
@@ -666,7 +668,9 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
-								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a><br /><br />
+								<li><a href='$siteURL/cwa-new-usernames-report/' target='_blank'>New Usernames Report</a>
+								<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
+								<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Cleanup</a>
 								</ul>
 								<li><a href='$siteURL/cwa-assign-students-to-advisors-sequence/' target='_blank'>Assign Students to Advisors Sequence (TestMode)</a>
 								<ul>
