@@ -32,7 +32,7 @@ function daily_uploads_cleanup_func() {
 		echo "</pre><br />";
 	}
 	$userName				= $initializationArray['userName'];
-	$siteURL				= $initializationArray['siteURL'];
+	$siteURL				= $initializationArray['siteurl'];
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
 	ini_set('memory_limit','256M');
@@ -132,7 +132,7 @@ function daily_uploads_cleanup_func() {
 		
 		// get the directory content
 		if (preg_match('/localhost/',$siteURL)) {
-			$filePath	= "/Users/rksmih/cwa-docker/www/wp-content/uploads/";
+			$filePath	= "wp-content/uploads/";
 		} else {
 			$filePath	= "/home/cwacwops/public_html/wp-content/uploads/";
 		}
