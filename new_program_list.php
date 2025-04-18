@@ -1,11 +1,31 @@
 function program_list_func() {
 
+/*	program_list is the main page for CW Academy
+
+	All programs, functions, and tools for managing CW Academy 
+	advisors, classes, and students are executed from this page
+	
+*/
+
+	if ( ! defined( 'ABSPATH' ) ) {
+			exit;
+	}
+	$initializationArray = data_initialization_func();
+	$siteURL			= $initializationArray['siteurl'];
+
+	if ( ! is_user_logged_in() ) {
+		$content		= "<h4>Welcome to CW Academy</h4>
+							<p>To set up a username and password click 
+								<a href='$siteURL/register/'>HERE</a></p>
+							<p>If you have a username and password, click 
+								<a href='$siteURL/login/'>HERE</a> to log in</a></p>";
+		return $content;
+	}
 
 	global $wpdb;
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);
@@ -15,7 +35,6 @@ function program_list_func() {
 	$userName			= strtoupper($initializationArray['userName']);
 	$userRole			= $initializationArray['userRole'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$siteURL			= $initializationArray['siteurl'];
 	$strPass			= "0";
 	$currentSemester	= $initializationArray['currentSemester'];
 	$nextSemester		= $initializationArray['nextSemester'];
@@ -491,6 +510,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-student-management/?strpass=80' target='_blank'>Find Possible Students for an Advisor's Class</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=7' target='_blank'>List Students Needing Intervention</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=35' target='_blank'>Move Student to a Different Level and Unassign</a>
+								<li><a href='$siteURL/cwa-student-management/?strpass=45' target='_blank'>Make Student Available</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=30' target='_blank'>Override Excluded Advisor</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=2' target='_blank'>Pre-assign Student to an Advisor</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=55' target='_blank'>Re-assign a Student to Another Advisor</a>
@@ -711,6 +731,7 @@ function program_list_func() {
 									<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
 									<li><a href='$siteURL/cwa-student-management/?strpass=35' target='_blank'>Move Student to a Different Level and Unassign</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=40' target='_blank'>Add Unassigned Student to an Advisor's Class</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=45' target='_blank'>Make Student Available</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=50' target='_blank'>Unassign a Student Regardless of Status</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=55' target='_blank'>Re-assign a Student to Another Advisor</a>
 									<li><a href='$siteURL/cwa-student-management/?strpass=70' target='_blank'>Find Possible Classes for a Student</a>
