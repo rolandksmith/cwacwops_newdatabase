@@ -32,7 +32,7 @@ function student_management_func() {
 
 	global $wpdb, $studentTableName, $advisorTableName, $advisorClassTableName, $theSemester, $doDebug;
 
-	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$userName 					= $initializationArray['userName'];
@@ -790,6 +790,13 @@ function getTheReason($strReasonCode) {
 								<li style='margin-left:2em;'><a href='$theURL?strpass=40' target='_blank'>Add Unassigned Student to an Advisor's Class</a></div>
 							<div style='float:right;'><a href=\"javascript:window.alert('The student call sign, advisor call sign, and the advisor and class where the student will be 
 							assigned should be known. If the student is not unassigned, the function will fail.');\">
+							<span style='color:orange;'><em>Note</em></span></span></div></div>	
+
+							<div style='clear:both;'>
+							<div style='float:left;'>
+								<li style='margin-left:2em;'><a href='$theURL?strpass=45' target='_blank'>Make a Student Available for Assignment</a></div>
+							<div style='float:right;'><a href=\"javascript:window.alert('The student's information will be reset such that the student is 
+							available for assignment to an advisor class. If the student is already assigned to a class, no changes will be made.');\">
 							<span style='color:orange;'><em>Note</em></span></span></div></div>	
 
 							<div style='clear:both;'>
@@ -2321,6 +2328,111 @@ function getTheReason($strReasonCode) {
 			$content	.= "Student call sign of $inp_student_callsign not found in the $studentTableName table. This request was aborted.<br />";
 		}
 
+
+
+/////		Pass 45		Make student available for assignment
+
+	} elseif ("45" == $strPass) {
+		$jobname		= "Student Management Make Student Available";
+		$content .= "<h3>$jobname</h3>
+					<p>Enter the student call sign to be processed. If the student is not assigned to an advisor class,
+					the student's information will be updated such that the student is available for 
+					assignment to a class.</p>
+					<p>If the student semester is a future semester, the student will be pulled into the $proximateSemester semester</p>
+					<p>If the student is assigned to a class, no changes will be made.</p>
+					<form method='post' action='$theURL' 
+					name='selection_form' ENCTYPE='multipart/form-data'>
+						<input type='hidden' name='strpass' value='46'>
+					<table style='border-collapse:collapse;'>
+					<tr><td style='width:150px;'>Student Call Sign:</td><td>
+						<input class='formInputText' type='text' size= '30' maxlength='30' name='inp_student_callsign' autofocus></td></tr>
+					$testModeOption
+					<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+					</form>";
+
+
+
+	} elseif ("46" == $strPass) {				// do the actual record cleanup
+// $testMode	= TRUE;
+// $doDebug	= TRUE;
+		if ($doDebug) {
+			echo "<br />at pass 46 with inp_student_callsign of $inp_student_callsign<br />";
+			if ($haveStudent) {
+				echo "haveStudent is TRUE<br />";
+			} else {
+				echo "haveStudent is FALSE<br />";
+			}
+		}
+
+		$jobname		= "Student Management Make Student Available";
+		$isSuccessful	= TRUE;
+		$content .= "<h3>$jobname $inp_student_callsign</h3>";
+
+		// get the student info and process
+		if ($haveStudent) {
+			if ($doDebug) {
+				echo "<br />Processing student $student_call_sign:<br />
+				&nbsp;&nbsp;&nbsp;Student Response: $student_response<br />
+				&nbsp;&nbsp;&nbsp;Student Status: $student_status<br />
+				&nbsp;&nbsp;&nbsp;Level: $student_level<br />
+				&nbsp;&nbsp;&nbsp;Assigned Advisor: $student_assigned_advisor<br />
+				&nbsp;&nbsp;&nbsp;Assigned Advisor's Class: $student_assigned_advisor_class<br />";
+			}
+			if ($student_assigned_advisor == '') {
+				$actionDate			= date('Y-m-d H:i:s');
+				$student_action_log	.= " / $actionDate $userName StdMgmt Changed student response, student status, 
+email number, abandoned, intervention required, and semester as needed to make student 
+available for assignment ";
+				$updateParams		= array('student_response'=>'Y',
+											'student_status'=>'',
+											'student_email_number'=>0,
+											'student_abandoned'=>'N',
+											'student_intervention_required'=>'',
+											'student_action_log'=>$student_action_log);
+											
+				if ($student_excluded_advisor != ''){
+					$updateParams['student_hold_reason_code']	= 'X';
+				} else {
+					$updateParams['student_hold_reason_code']	= '';
+				}
+				$updateFormat			= array('%s','%s','%d','%s','%s','%s');
+				if ($student_semester != $proximateSemester) {
+					$updateParams['student_semester']			= $proximateSemester;
+					$updateFormat[]		= '%s';
+					$content			.= "Student $inp_student_callsign semester was $student_semester. 
+											Student is moved to the $proximateSemester semester<br />";
+				}
+				$studentUpdateData		= array('tableName'=>$studentTableName,
+												'inp_method'=>'update',
+												'inp_data'=>$updateParams,
+												'inp_format'=>$updateFormat,
+												'jobname'=>$jobname,
+												'inp_id'=>$student_ID,
+												'inp_callsign'=>$student_call_sign,
+												'inp_semester'=>$proximateSemester,
+												'inp_who'=>$userName,
+												'testMode'=>$testMode,
+												'doDebug'=>$doDebug);
+				$updateResult	= updateStudent($studentUpdateData);
+				if ($updateResult[0] === FALSE) {
+					$myError	= $wpdb->last_error;
+					$mySql		= $wpdb->last_query;
+					$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+					if ($doDebug) {
+						echo $errorMsg;
+					}
+					sendErrorEmail($errorMsg);
+					$content		.= "Unable to update content in $studentTableName<br />";
+				} else {
+					$content		.= "Student $inp_student_callsign is now available for assignment<br />";
+				}
+			} else {
+				$content			.= "<p>Student $inp_student_callsign is assigned to $student_assigned_advisor advisor class $student_assitned_advisor_class. 
+										No action taken</p>";
+			} 
+		} else {
+			$content 	.= "<p>No student with the call sign of $inp_student_callsign found in the $studentTableName table. No action taken.</p>";
+		}
 
 
 /////		Pass 50		unassign a  student
