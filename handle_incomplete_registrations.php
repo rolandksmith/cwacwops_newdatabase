@@ -1,6 +1,6 @@
 function handle_incomplete_registrations_func() {
 
-/*
+/* Program is obsolete -- 14Apr25 by Roland
 
 run (sql1) select * from wpw1_cwa_temp_data where token = 'tracking' and temp_data = 'NYYYNN' order by callsign
 
