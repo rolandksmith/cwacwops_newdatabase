@@ -19,6 +19,10 @@ function student_report_generator_func() {
 	Modified 1Oct23 by Roland to make wpw1_cwa_old_student table available
 		and to implement the static report capability
 	Modified 27Aug24 by Roland to use user_master table
+	Modified extensively 27Mar25 by Roland 
+		added ability to sequence the fields in the output
+		added ability to download the csv file (if generated)
+		Significantly reduced the number of lines of code
 */
 
 	global $wpdb;
@@ -60,6 +64,86 @@ function student_report_generator_func() {
 	$rg_config					= '';
 	$inp_report					= '';
 	$theURL					 	= "$siteURL/cwa-student-report-generator/";
+	$sequenceArray				= array();
+	$tabType					= 'tab';
+	$tabTypeArray				= array('tab'=>"\t",
+										'comma'=>',',
+										'semicolons'=>';');
+	$tabValue					= "\t";
+
+	$fieldArray = array('user_ID',
+						'user_call_sign',
+						'user_last_name',
+						'user_first_name',
+						'user_email',
+						'user_ph_code',
+						'user_phone',
+						'user_city',
+						'user_state',
+						'user_zip_code',
+						'user_country_code',
+						'user_country',
+						'user_whatsapp',
+						'user_telegram',
+						'user_signal',
+						'user_messenger',
+						'user_action_log',
+						'user_timezone_id',
+						'user_languages',
+						'user_survey_score',
+						'user_is_admin',
+						'user_role',
+						'user_date_created',
+						'user_date_updated',
+						'student_id',
+						'student_call_sign',
+						'student_time_zone',
+						'student_timezone_offset',
+						'student_youth',
+						'student_age',
+						'student_parent',
+						'student_parent_email',
+						'student_level',
+						'student_waiting_list',
+						'student_request_date',
+						'student_semester',
+						'student_notes',
+						'student_welcome_date',
+						'student_email_sent_date',
+						'student_email_number',
+						'student_response',
+						'student_response_date',
+						'student_abandoned',
+						'student_status',
+						'student_action_log',
+						'student_pre_assigned_advisor',
+						'student_selected_date',
+						'student_no_catalog',
+						'student_hold_override',
+						'student_messaging',
+						'student_assigned_advisor',
+						'student_advisor_select_date',
+						'student_advisor_class_timezone',
+						'student_hold_reason_code',
+						'student_class_priority',
+						'student_assigned_advisor_class',
+						'student_promotable',
+						'student_excluded_advisor',
+						'student_survey_completion_date',
+						'student_available_class_days',
+						'student_intervention_required',
+						'student_copy_control',
+						'student_first_class_choice',
+						'student_second_class_choice',
+						'student_third_class_choice',
+						'student_first_class_choice_utc',
+						'student_second_class_choice_utc',
+						'student_third_class_choice_utc',
+						'student_catalog_options',
+						'student_flexible',
+						'student_date_created',
+						'student_date_updated');
+
 
     $user_ID = '';
     $user_call_sign = '';
@@ -133,6 +217,7 @@ function student_report_generator_func() {
     $student_flexible = '';
     $student_date_created = '';
     $student_date_updated = '';
+
 
     $user_ID_checked = '';
     $user_call_sign_checked = '';
@@ -758,13 +843,453 @@ function student_report_generator_func() {
                     echo "student_date_updated included in report<br />";
                 }
             }
+
+           if ($str_key == 'user_ID_sequence') {
+                if ($str_value != '') {
+    	            $user_ID_sequence = $str_value;
+					$sequenceArray[$user_ID_sequence]	= 'user_ID';
+				}
+            }
+            if ($str_key == 'user_call_sign_sequence') {
+                if ($str_value != '') {
+	                $user_call_sign_sequence = $str_value;
+					$sequenceArray[$user_call_sign_sequence]	= 'user_call_sign';
+				}
+            }
+            if ($str_key == 'user_first_name_sequence') {  
+                if ($str_value != '') {
+			        $user_first_name_sequence = $str_value;
+					$sequenceArray[$user_first_name_sequence]	= 'user_first_name';
+				}
+            }
+            if ($str_key == 'user_last_name_sequence') {
+                if ($str_value != '') {
+	                $user_last_name_sequence = $str_value;
+					$sequenceArray[$user_last_name_sequence]	= 'user_last_name';
+				}
+            }
+            if ($str_key == 'user_email_sequence') {
+                if ($str_value != '') {
+	                $user_email_sequence = $str_value;
+					$sequenceArray[$user_email_sequence]	= 'user_email';
+				}
+            }
+            if ($str_key == 'user_ph_code_sequence') {
+                if ($str_value != '') {
+	                $user_ph_code_sequence = $str_value;
+					$sequenceArray[$user_ph_code_sequence]	= 'user_ph_code';
+				}
+            }
+            if ($str_key == 'user_phone_sequence') {
+                if ($str_value != '') {
+	                $user_phone_sequence = $str_value;
+					$sequenceArray[$user_phone_sequence]	= 'user_phone';
+				}
+            }
+            if ($str_key == 'user_city_sequence') {
+                if ($str_value != '') {
+	                $user_city_sequence = $str_value;
+					$sequenceArray[$user_city_sequence]	= 'user_city';
+				}
+            }
+            if ($str_key == 'user_state_sequence') {
+                if ($str_value != '') {
+	                $user_state_sequence = 	$str_value;
+					$sequenceArray[$user_state_sequence]	= 'user_state';
+				}
+            }
+            if ($str_key == 'user_zip_code_sequence') {
+                if ($str_value != '') {
+	                $user_zip_code_sequence = $str_value;
+					$sequenceArray[$user_zip_code_sequence]	= 'user_zip_code';
+				}
+            }
+            if ($str_key == 'user_country_code_sequence') {
+                if ($str_value != '') {
+	                $user_country_code_sequence = $str_value;
+					$sequenceArray[$user_country_code_sequence]	= 'user_country_code';
+				}
+            }
+            if ($str_key == 'user_country_sequence') {
+                if ($str_value != '') {
+	                $user_country_sequence = $str_value;
+					$sequenceArray[$user_country_sequence]	= 'user_country';
+				}
+            }
+            if ($str_key == 'user_whatsapp_sequence') {
+                if ($str_value != '') {
+	                $user_whatsapp_sequence = $str_value;
+					$sequenceArray[$user_whatsapp_sequence]	= 'user_whatsapp';
+				}
+            }
+            if ($str_key == 'user_telegram_sequence') {
+                if ($str_value != '') {
+	                $user_telegram_sequence = $str_value;
+					$sequenceArray[$user_telegram_sequence]	= 'user_telegram';
+				}
+            }
+            if ($str_key == 'user_signal_sequence') {
+                if ($str_value != '') {
+	                $user_signal_sequence = $str_value;
+					$sequenceArray[$user_signal_sequence]	= 'user_signal';
+				}
+            }
+            if ($str_key == 'user_messenger_sequence') {
+                if ($str_value != '') {
+	                $user_messenger_sequence = $str_value;
+					$sequenceArray[$user_messenger_sequence]	= 'user_messenger';
+				}
+            }
+            if ($str_key == 'user_action_log_sequence') {
+                if ($str_value != '') {
+	                $user_action_log_sequence = $str_value;
+					$sequenceArray[$user_action_log_sequence]	= 'user_action_log';
+				}
+            }
+            if ($str_key == 'user_timezone_id_sequence') {
+                if ($str_value != '') {
+	                $user_timezone_id_sequence = $str_value;
+					$sequenceArray[$user_timezone_id_sequence]	= 'user_timezone_id';
+				}
+            }
+            if ($str_key == 'user_languages_sequence') {
+                if ($str_value != '') {
+	                $user_languages_sequence = $str_value;
+					$sequenceArray[$user_languages_sequence]	= 'user_languages';
+				}
+            }
+            if ($str_key == 'user_survey_score_sequence') {
+                if ($str_value != '') {
+	                $user_survey_score_sequence = $str_value;
+					$sequenceArray[$user_survey_score_sequence]	= 'user_survey_score';
+				}
+            }
+            if ($str_key == 'user_is_admin_sequence') {
+                if ($str_value != '') {
+	                $user_is_admin_sequence = $str_value;
+					$sequenceArray[$user_is_admin_sequence]	= 'user_is_admin';
+				}
+            }
+            if ($str_key == 'user_role_sequence') {
+                if ($str_value != '') {
+	                $user_role_sequence = $str_value;
+					$sequenceArray[$user_role_sequence]	= 'user_role';
+				}
+            }
+            if ($str_key == 'user_date_created_sequence') {
+                if ($str_value != '') {
+	                $user_date_created_sequence = $str_value;
+					$sequenceArray[$user_date_created_sequence]	= 'user_date_created';
+				}
+            }
+            if ($str_key == 'user_date_updated_sequence') {
+                if ($str_value != '') {
+	                $user_date_updated_sequence = $str_value;
+					$sequenceArray[$user_date_updated_sequence]	= 'user_role';
+				}
+            }
+            if ($str_key == 'student_id_sequence') {
+                if ($str_value != '') {
+	                $student_id_sequence = $str_value;
+					$sequenceArray[$student_id_sequence]	= 'student_id';
+				}
+            }
+            if ($str_key == 'student_call_sign_sequence') {
+                if ($str_value != '') {
+	                $student_call_sign_sequence = $str_value;
+					$sequenceArray[$student_call_sign_sequence]	= 'student_call_sign';
+				}
+            }
+            if ($str_key == 'student_time_zone_sequence') {
+                if ($str_value != '') {
+	                $student_time_zone_sequence = $str_value;
+					$sequenceArray[$student_time_zone_sequence]	= 'student_time_zone';
+				}
+            }
+            if ($str_key == 'student_timezone_offset_sequence') {
+                if ($str_value != '') {
+	                $student_timezone_offset_sequence = $str_value;
+					$sequenceArray[$student_timezone_offset_sequence]	= 'student_timezone_offset';
+				}
+            }
+            if ($str_key == 'student_youth_sequence') {
+                if ($str_value != '') {
+	                $student_youth_sequence = $str_value;
+					$sequenceArray[$student_youth_sequence]	= 'student_youth';
+				}
+            }
+            if ($str_key == 'student_age_sequence') {
+                if ($str_value != '') {
+	                $student_age_sequence = $str_value;
+					$sequenceArray[$student_age_sequence]	= 'student_age';
+				}
+            }
+            if ($str_key == 'student_parent_sequence') {
+                if ($str_value != '') {
+	                $student_parent_sequence = $str_value;
+					$sequenceArray[$student_parent_sequence]	= 'student_parent';
+				}
+            }
+            if ($str_key == 'student_parent_email_sequence') {
+                if ($str_value != '') {
+	                $student_parent_email_sequence = $str_value;
+					$sequenceArray[$student_parent_email_sequence]	= 'student_parent_email';
+				}
+            }
+            if ($str_key == 'student_level_sequence') {
+                if ($str_value != '') {
+	                $student_level_sequence = $str_value;
+					$sequenceArray[$student_level_sequence]	= 'student_level';
+				}
+            }
+            if ($str_key == 'student_waiting_list_sequence') {
+                if ($str_value != '') {
+	                $student_waiting_list_sequence = $str_value;
+					$sequenceArray[$student_waiting_list_sequence]	= 'student_waiting_list';
+				}
+            }
+            if ($str_key == 'student_request_date_sequence') {
+                if ($str_value != '') {
+	                $student_request_date_sequence = $str_value;
+					$sequenceArray[$student_request_date_sequence]	= 'student_request_date';
+				}
+            }
+            if ($str_key == 'student_semester_sequence') {
+                if ($str_value != '') {
+	                $student_semester_sequence = $str_value;
+					$sequenceArray[$student_semester_sequence]	= 'student_semester';
+				}
+            }
+            if ($str_key == 'student_notes_sequence') {
+                if ($str_value != '') {
+	                $student_notes_sequence = $str_value;
+					$sequenceArray[$student_notes_sequence]	= 'student_notes';
+				}
+            }
+            if ($str_key == 'student_welcome_date_sequence') {
+                if ($str_value != '') {
+	                $student_welcome_date_sequence = $str_value;
+					$sequenceArray[$student_welcome_date_sequence]	= 'student_welcome_date';
+				}
+            }
+            if ($str_key == 'student_email_sent_date_sequence') {
+                if ($str_value != '') {
+	                $student_email_sent_date_sequence = $str_value;
+					$sequenceArray[$student_email_sent_date_sequence]	= 'student_email_sent_date';
+				}
+            }
+            if ($str_key == 'student_email_number_sequence') {
+                if ($str_value != '') {
+	                $student_email_number_sequence = $str_value;
+					$sequenceArray[$student_email_number_sequence]	= 'student_email_number';
+				}
+            }
+            if ($str_key == 'student_response_sequence') {
+                if ($str_value != '') {
+	                $student_response_sequence = $str_value;
+					$sequenceArray[$student_response_sequence]	= 'student_response';
+				}
+            }
+            if ($str_key == 'student_response_date_sequence') {
+                if ($str_value != '') {
+	                $student_response_date_sequence = $str_value;
+					$sequenceArray[$student_response_date_sequence]	= 'student_response_date';
+				}
+            }
+            if ($str_key == 'student_abandoned_sequence') {
+                if ($str_value != '') {
+	                $student_abandoned_sequence = $str_value;
+					$sequenceArray[$student_abandoned_sequence]	= 'student_abandoned';
+				}
+            }
+            if ($str_key == 'student_status_sequence') {
+                if ($str_value != '') {
+	                $student_status_sequence = $str_value;
+					$sequenceArray[$student_status_sequence]	= 'student_status';
+				}
+            }
+            if ($str_key == 'student_action_log_sequence') {
+                if ($str_value != '') {
+	                $student_action_log_sequence = $str_value;
+					$sequenceArray[$student_action_log_sequence]	= 'student_action_log';
+				}
+            }
+            if ($str_key == 'student_pre_assigned_advisor_sequence') {
+                if ($str_value != '') {
+	                $student_pre_assigned_advisor_sequence = $str_value;
+					$sequenceArray[$student_pre_assigned_advisor_sequence]	= 'student_pre_assigned_advisor';
+				}
+            }
+            if ($str_key == 'student_selected_date_sequence') {
+                if ($str_value != '') {
+	                $student_selected_date_sequence = $str_value;
+					$sequenceArray[$student_selected_date_sequence]	= 'student_selected_date';
+				}
+            }
+            if ($str_key == 'student_no_catalog_sequence') {
+                if ($str_value != '') {
+	                $student_no_catalog_sequence = $str_value;
+					$sequenceArray[$student_no_catalog_sequence]	= 'student_no_catalog';
+				}
+            }
+            if ($str_key == 'student_hold_override_sequence') {
+                if ($str_value != '') {
+	                $student_hold_override_sequence = $str_value;
+					$sequenceArray[$student_hold_override_sequence]	= 'student_hold_override';
+				}
+            }
+            if ($str_key == 'student_messaging_sequence') {
+                if ($str_value != '') {
+	                $student_messaging_sequence = $str_value;
+					$sequenceArray[$student_messaging_sequence]	= 'student_messaging';
+				}
+            }
+            if ($str_key == 'student_assigned_advisor_sequence') {
+                if ($str_value != '') {
+	                $student_assigned_advisor_sequence = $str_value;
+					$sequenceArray[$student_assigned_advisor_sequence]	= 'student_assigned_advisor';
+				}
+            }
+            if ($str_key == 'student_advisor_select_date_sequence') {
+                if ($str_value != '') {
+	                $student_advisor_select_date_sequence = $str_value;
+					$sequenceArray[$student_advisor_select_date_sequence]	= 'student_advisor_select_date';
+				}
+            }
+            if ($str_key == 'student_advisor_class_timezone_sequence') {
+                if ($str_value != '') {
+	                $student_advisor_class_timezone_sequence = $str_value;
+					$sequenceArray[$student_advisor_class_timezone_sequence]	= 'student_advisor_class_timezone';
+				}
+            }
+            if ($str_key == 'student_hold_reason_code_sequence') {
+                if ($str_value != '') {
+	                $student_hold_reason_code_sequence = $str_value;
+					$sequenceArray[$student_hold_reason_code_sequence]	= 'student_hold_reason_code';
+				}
+            }
+            if ($str_key == 'student_class_priority_sequence') {
+                if ($str_value != '') {
+	                $student_class_priority_sequence = $str_value;
+					$sequenceArray[$student_class_priority_sequence]	= 'student_class_priority';
+				}
+            }
+            if ($str_key == 'student_assigned_advisor_class_sequence') {
+                if ($str_value != '') {
+	                $student_assigned_advisor_class_sequence = $str_value;
+					$sequenceArray[$student_assigned_advisor_class_sequence]	= 'student_assigned_advisor_class';
+				}
+            }
+            if ($str_key == 'student_promotable_sequence') {
+                if ($str_value != '') {
+	                $student_promotable_sequence = $str_value;
+					$sequenceArray[$student_promotable_sequence]	= 'student_promotable';
+				}
+            }
+            if ($str_key == 'student_excluded_advisor_sequence') {
+                if ($str_value != '') {
+	                $student_excluded_advisor_sequence = $str_value;
+					$sequenceArray[$student_excluded_advisor_sequence]	= 'student_excluded_advisor';
+				}
+            }
+            if ($str_key == 'student_survey_completion_date_sequence') {
+                if ($str_value != '') {
+	                $student_survey_completion_date_sequence = $str_value;
+					$sequenceArray[$student_survey_completion_date_sequence]	= 'student_survey_completion_date';
+				}
+            }
+            if ($str_key == 'student_available_class_days_sequence') {
+                if ($str_value != '') {
+	                $student_available_class_days_sequence = $str_value;
+					$sequenceArray[$student_available_class_days_sequence]	= 'student_available_class_days';
+				}
+            }
+            if ($str_key == 'student_intervention_required_sequence') {
+                if ($str_value != '') {
+	                $student_intervention_required_sequence = $str_value;
+					$sequenceArray[$student_intervention_required_sequence]	= 'student_intervention_required';
+				}
+            }
+            if ($str_key == 'student_copy_control_sequence') {
+                if ($str_value != '') {
+	                $student_copy_control_sequence = $str_value;
+					$sequenceArray[$student_copy_control_sequence]	= 'student_copy_control';
+				}
+            }
+            if ($str_key == 'student_first_class_choice_sequence') {
+                if ($str_value != '') {
+	                $student_first_class_choice_sequence = $str_value;
+					$sequenceArray[$student_first_class_choice_sequence]	= 'student_first_class_choice';
+				}
+            }
+            if ($str_key == 'student_second_class_choice_sequence') {
+                if ($str_value != '') {
+	                $student_second_class_choice_sequence = $str_value;
+					$sequenceArray[$student_second_class_choice_sequence]	= 'student_second_class_choice';
+				}
+            }
+            if ($str_key == 'student_third_class_choice_sequence') {
+                if ($str_value != '') {
+	                $student_third_class_choice_sequence = $str_value;
+					$sequenceArray[$student_third_class_choice_sequence]	= 'student_third_class_choice';
+				}
+			}
+            if ($str_key == 'student_first_class_choice_utc_sequence') {
+                if ($str_value != '') {
+	                $student_first_class_choice_utc_sequence = $str_value;
+					$sequenceArray[$student_first_class_choice_utc_sequence]	= 'student_first_class_choice_utc';
+				}
+            }
+            if ($str_key == 'student_second_class_choice_utc_sequence') {
+                if ($str_value != '') {
+	                $student_second_class_choice_utc_sequence = $str_value;
+					$sequenceArray[$student_second_class_choice_utc_sequence]	= 'student_second_class_choice_utc';
+				}
+            }
+            if ($str_key == 'student_third_class_choice_utc_sequence') {
+                if ($str_value != '') {
+	                $student_third_class_choice_utc_sequence = $str_value;
+					$sequenceArray[$student_third_class_choice_utc_sequence]	= 'student_third_class_choice_utc';
+				}
+            }
+            if ($str_key == 'student_catalog_options_sequence') {
+                if ($str_value != '') {
+	                $student_catalog_options_sequence = $str_value;
+					$sequenceArray[$student_catalog_options_sequence]	= 'student_catalog_options';
+				}
+            }
+            if ($str_key == 'student_flexible_sequence') {
+                if ($str_value != '') {
+	                $student_flexible_sequence = $str_value;
+					$sequenceArray[$student_flexible_sequence]	= 'student_flexible';
+				}
+            }
+            if ($str_key == 'student_date_created_sequence') {
+                if ($str_value != '') {
+	                $student_date_created_sequence = $str_value;
+					$sequenceArray[$student_date_created_sequence]	= 'student_date_created';
+				}
+            }
+            if ($str_key == 'student_date_updated_sequence') {
+                if ($str_value != '') {
+	                $student_date_updated_sequence = $str_value;
+					$sequenceArray[$student_date_updated_sequence]	= 'student_date_updated';
+				}
+            }
+
+
+
+
 			if($str_key					== "where") {
 				$where					 = $str_value;
 // echo "where b4 filter: $where<br />";
 //				$where					 = filter_var($where,FILTER_UNSAFE_RAW);
-				$where					= str_replace("&#39;","'",$where);
+//				$where					= str_replace("&#39;","'",$where);
 				$where					= stripslashes($where);
 // echo "where after filter: $where<br />";
+			}
+			if ($str_key 				== "configWhere") {
+				$where					= base64_decode($str_value);
 			}
 			if($str_key					== "inp_report") {
 				$inp_report				 = $str_value;
@@ -805,6 +1330,10 @@ function student_report_generator_func() {
 			if($str_key					== "output_type") {
 				$output_type					 = $str_value;
 				$output_type				 = filter_var($output_type,FILTER_UNSAFE_RAW);
+			}
+			if($str_key					== "tabType") {
+				$tabType					 = $str_value;
+				$tabType				 = filter_var($tabType,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -924,295 +1453,438 @@ function student_report_generator_func() {
 							<fieldset>
 							<legend>Indicate which fields should be on the report</legend>
 							<tr><th colspan='2' style='width:300px;'>User Master Fields</th></tr>
-							<tr><th>Report Field</th><th>Table Name</th></tr>
+							<tr><th style='width:250px;'>Report Field</th><th style='width:150px;'>Sequence</th><th>Table Name</th></tr>
 						   <tr><td><input type='checkbox' class='formInputButton' id='user_ID' 
 									name='user_ID' value='user_ID'>
 									<label for 'user_ID'>user_ID</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_ID_sequence' size='5' maxlength='5'></td>
 								<td>user_ID</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_call_sign' 
 									name='user_call_sign' value='user_call_sign'>
 									<label for 'user_call_sign'>user_call_sign</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_call_sign_sequence' size='5' maxlength='5'></td>
 								<td>user_call_sign</td></tr>
-							<tr><td><input type='checkbox' class='formInputButton' id='user_first_name' 
-									name='user_first_name' value='user_first_name'>
-									<label for 'user_first_name'>user_first_name</label></td>
-								<td>user_first_name</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_last_name' 
 									name='user_last_name' value='user_last_name'>
 									<label for 'user_last_name'>user_last_name</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_last_name_sequence' size='5' maxlength='5'></td>
 								<td>user_last_name</td></tr>
+							<tr><td><input type='checkbox' class='formInputButton' id='user_first_name' 
+									name='user_first_name' value='user_first_name'>
+									<label for 'user_first_name'>user_first_name</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_first_name_sequence' size='5' maxlength='5'></td>
+								<td>user_first_name</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_email' 
 									name='user_email' value='user_email'>
 									<label for 'user_email'>user_email</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_email_sequence' size='5' maxlength='5'></td>
 								<td>user_email</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_ph_code' 
 									name='user_ph_code' value='user_ph_code'>
 									<label for 'user_ph_code'>user_ph_code</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_ph_code_sequence' size='5' maxlength='5'></td>
 								<td>user_ph_code</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_phone' 
 									name='user_phone' value='user_phone'>
 									<label for 'user_phone'>user_phone</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_phone_sequence' size='5' maxlength='5'></td>
 								<td>user_phone</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_city' 
 									name='user_city' value='user_city'>
 									<label for 'user_city'>user_city</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_city_sequence' size='5' maxlength='5'></td>
 								<td>user_city</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_state' 
 									name='user_state' value='user_state'>
 									<label for 'user_state'>user_state</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_state_sequence' size='5' maxlength='5'></td>
 								<td>user_state</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_zip_code' 
 									name='user_zip_code' value='user_zip_code'>
 									<label for 'user_zip_code'>user_zip_code</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_zip_code_sequence' size='5' maxlength='5'></td>
 								<td>user_zip_code</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_country_code' 
 									name='user_country_code' value='user_country_code'>
 									<label for 'user_country_code'>user_country_code</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_country_code_sequence' size='5' maxlength='5'></td>
 								<td>user_country_code</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_country' 
 									name='user_country' value='user_country'>
 									<label for 'user_country'>user_country</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_country_sequence' size='5' maxlength='5'></td>
 								<td>user_country</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_whatsapp' 
 									name='user_whatsapp' value='user_whatsapp'>
 									<label for 'user_whatsapp'>user_whatsapp</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_whatsapp_sequence' size='5' maxlength='5'></td>
 								<td>user_whatsapp</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_telegram' 
 									name='user_telegram' value='user_telegram'>
 									<label for 'user_telegram'>user_telegram</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_telegram_sequence' size='5' maxlength='5'></td>
 								<td>user_telegram</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_signal' 
 									name='user_signal' value='user_signal'>
 									<label for 'user_signal'>user_signal</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_signal_sequence' size='5' maxlength='5'></td>
 								<td>user_signal</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_messenger' 
 									name='user_messenger' value='user_messenger'>
 									<label for 'user_messenger'>user_messenger</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_messenger_sequence' size='5' maxlength='5'></td>
 								<td>user_messenger</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_action_log' 
 									name='user_action_log' value='user_action_log'>
 									<label for 'user_action_log'>user_action_log</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_action_log_sequence' size='5' maxlength='5'></td>
 								<td>user_action_log</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_timezone_id' 
 									name='user_timezone_id' value='user_timezone_id'>
 									<label for 'user_timezone_id'>user_timezone_id</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_timezone_id_sequence' size='5' maxlength='5'></td>
 								<td>user_timezone_id</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_languages' 
 									name='user_languages' value='user_languages'>
 									<label for 'user_languages'>user_languages</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_languages_sequence' size='5' maxlength='5'></td>
 								<td>user_languages</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_survey_score' 
 									name='user_survey_score' value='user_survey_score'>
 									<label for 'user_survey_score'>user_survey_score</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_survey_score_sequence' size='5' maxlength='5'></td>
 								<td>user_survey_score</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_is_admin' 
 									name='user_is_admin' value='user_is_admin'>
 									<label for 'user_is_admin'>user_is_admin</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_is_admin_sequence' size='5' maxlength='5'></td>
 								<td>user_is_admin</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_role' 
 									name='user_role' value='user_role'>
 									<label for 'user_role'>user_role</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_role_sequence' size='5' maxlength='5'></td>
 								<td>user_role</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_date_created' 
 									name='user_date_created' value='user_date_created'>
 									<label for 'user_date_created'>user_date_created</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_date_created_sequence' size='5' maxlength='5'></td>
 								<td>user_date_created</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='user_date_updated' 
 									name='user_date_updated' value='user_date_updated'>
 									<label for 'user_date_updated'>user_date_updated</label></td>
+								<td><input type='text' class='formInputText' 
+									name='user_date_updated_sequence' size='5' maxlength='5'></td>
 								<td>user_date_updated</td></tr>
 	
 							<tr><th colspan='2'>Student Fields</th></tr>
-							<tr><th>Report Field</th><th>Table Name</th></tr>
+							<tr><th>Report Field</th><th>Sequence</th><th>Table Name</th></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_id' 
 									name='student_id' value='student_id'>
 									<label for 'student_id'>student_id</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_id_sequence' size='5' maxlength='5'></td>
 								<td>student_id</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_timezone_offset' 
 									name='student_timezone_offset' value='student_timezone_offset'>
 									<label for 'student_timezone_offset'>student_timezone_offset</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_timezone_offset_sequence' size='5' maxlength='5'></td>
 								<td>student_timezone_offset</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_youth' 
 									name='student_youth' value='student_youth'>
 									<label for 'student_youth'>student_youth</label></td>
+ 								<td><input type='text' class='formInputText' 
+									name='student_youth_sequence' size='5' maxlength='5'></td>
 								<td>student_youth</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_age' 
 									name='student_age' value='student_age'>
 									<label for 'student_age'>student_age</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_age_sequence' size='5' maxlength='5'></td>
 								<td>student_age</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_parent' 
 									name='student_parent' value='student_parent'>
 									<label for 'student_parent'>student_parent</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_parent_sequence' size='5' maxlength='5'></td>
 								<td>student_parent</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_parent_email' 
 									name='student_parent_email' value='student_parent_email'>
 									<label for 'student_parent_email'>student_parent_email</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_parent_email_sequence' size='5' maxlength='5'></td>
 								<td>student_parent_email</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_level' 
 									name='student_level' value='student_level'>
 									<label for 'student_level'>student_level</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_level_sequence' size='5' maxlength='5'></td>
 								<td>student_level</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_waiting_list' 
 									name='student_waiting_list' value='student_waiting_list'>
 									<label for 'student_waiting_list'>student_waiting_list</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_waiting_list_sequence' size='5' maxlength='5'></td>
 								<td>student_waiting_list</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_request_date' 
 									name='student_request_date' value='student_request_date'>
 									<label for 'student_request_date'>student_request_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_request_date_sequence' size='5' maxlength='5'></td>
 								<td>student_request_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_semester' 
 									name='student_semester' value='student_semester'>
 									<label for 'student_semester'>student_semester</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_semester_sequence' size='5' maxlength='5'></td>
 								<td>student_semester</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_notes' 
 									name='student_notes' value='student_notes'>
 									<label for 'student_notes'>student_notes</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_notes_sequence' size='5' maxlength='5'></td>
 								<td>student_notes</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_welcome_date' 
 									name='student_welcome_date' value='student_welcome_date'>
 									<label for 'student_welcome_date'>student_welcome_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_welcome_date_sequence' size='5' maxlength='5'></td>
 								<td>student_welcome_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_email_sent_date' 
 									name='student_email_sent_date' value='student_email_sent_date'>
 									<label for 'student_email_sent_date'>student_email_sent_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_email_sent_date_sequence' size='5' maxlength='5'></td>
 								<td>student_email_sent_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_email_number' 
 									name='student_email_number' value='student_email_number'>
 									<label for 'student_email_number'>student_email_number</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_email_number_sequence' size='5' maxlength='5'></td>
 								<td>student_email_number</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_response' 
 									name='student_response' value='student_response'>
 									<label for 'student_response'>student_response</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_response_sequence' size='5' maxlength='5'></td>
 								<td>student_response</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_response_date' 
 									name='student_response_date' value='student_response_date'>
 									<label for 'student_response_date'>student_response_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_response_date_sequence' size='5' maxlength='5'></td>
 								<td>student_response_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_abandoned' 
 									name='student_abandoned' value='student_abandoned'>
 									<label for 'student_abandoned'>student_abandoned</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_abandoned_sequence' size='5' maxlength='5'></td>
 								<td>student_abandoned</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_status' 
 									name='student_status' value='student_status'>
 									<label for 'student_status'>student_status</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_status_sequence' size='5' maxlength='5'></td>
 								<td>student_status</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_action_log' 
 									name='student_action_log' value='student_action_log'>
 									<label for 'student_action_log'>student_action_log</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_action_log_sequence' size='5' maxlength='5'></td>
 								<td>student_action_log</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_pre_assigned_advisor' 
 									name='student_pre_assigned_advisor' value='student_pre_assigned_advisor'>
 									<label for 'student_pre_assigned_advisor'>student_pre_assigned_advisor</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_pre_assigned_advisor_sequence' size='5' maxlength='5'></td>
 								<td>student_pre_assigned_advisor</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_selected_date' 
 									name='student_selected_date' value='student_selected_date'>
 									<label for 'student_selected_date'>student_selected_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_selected_date_sequence' size='5' maxlength='5'></td>
 								<td>student_selected_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_no_catalog' 
 									name='student_no_catalog' value='student_no_catalog'>
 									<label for 'student_no_catalog'>student_no_catalog</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_no_catalog_sequence' size='5' maxlength='5'></td>
 								<td>student_no_catalog</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_hold_override' 
 									name='student_hold_override' value='student_hold_override'>
 									<label for 'student_hold_override'>student_hold_override</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_hold_override_sequence' size='5' maxlength='5'></td>
 								<td>student_hold_override</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_messaging' 
 									name='student_messaging' value='student_messaging'>
 									<label for 'student_messaging'>student_messaging</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_messaging_sequence' size='5' maxlength='5'></td>
 								<td>student_messaging</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_assigned_advisor' 
 									name='student_assigned_advisor' value='student_assigned_advisor'>
 									<label for 'student_assigned_advisor'>student_assigned_advisor</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_assigned_advisor_sequence' size='5' maxlength='5'></td>
 								<td>student_assigned_advisor</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_advisor_select_date' 
 									name='student_advisor_select_date' value='student_advisor_select_date'>
 									<label for 'student_advisor_select_date'>student_advisor_select_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_select_date_sequence' size='5' maxlength='5'></td>
 								<td>student_advisor_select_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_advisor_class_timezone' 
 									name='student_advisor_class_timezone' value='student_advisor_class_timezone'>
 									<label for 'student_advisor_class_timezone'>student_advisor_class_timezone</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_advisor_class_timezone_sequence' size='5' maxlength='5'></td>
 								<td>student_advisor_class_timezone</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_hold_reason_code' 
 									name='student_hold_reason_code' value='student_hold_reason_code'>
 									<label for 'student_hold_reason_code'>student_hold_reason_code</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_hold_reason_code_sequence' size='5' maxlength='5'></td>
 								<td>student_hold_reason_code</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_class_priority' 
 									name='student_class_priority' value='student_class_priority'>
 									<label for 'student_class_priority'>student_class_priority</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_class_priority_sequence' size='5' maxlength='5'></td>
 								<td>student_class_priority</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_assigned_advisor_class' 
 									name='student_assigned_advisor_class' value='student_assigned_advisor_class'>
 									<label for 'student_assigned_advisor_class'>student_assigned_advisor_class</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_assigned_advisor_class_sequence' size='5' maxlength='5'></td>
 								<td>student_assigned_advisor_class</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_promotable' 
 									name='student_promotable' value='student_promotable'>
 									<label for 'student_promotable'>student_promotable</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_promotable_sequence' size='5' maxlength='5'></td>
 								<td>student_promotable</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_excluded_advisor' 
 									name='student_excluded_advisor' value='student_excluded_advisor'>
 									<label for 'student_excluded_advisor'>student_excluded_advisor</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_excluded_advisor_sequence' size='5' maxlength='5'></td>
 								<td>student_excluded_advisor</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_survey_completion_date' 
 									name='student_survey_completion_date' value='student_survey_completion_date'>
 									<label for 'student_survey_completion_date'>student_survey_completion_date</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_survey_completion_date_sequence' size='5' maxlength='5'></td>
 								<td>student_survey_completion_date</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_available_class_days' 
 									name='student_available_class_days' value='student_available_class_days'>
 									<label for 'student_available_class_days'>student_available_class_days</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_available_class_days_sequence' size='5' maxlength='5'></td>
 								<td>student_available_class_days</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_intervention_required' 
 									name='student_intervention_required' value='student_intervention_required'>
 									<label for 'student_intervention_required'>student_intervention_required</label></td>
-								<td>student_intervention_required</td></tr>
+								<td><input type='text' class='formInputText' 
+									name='student_intervention_required_sequence' size='5' maxlength='5'></td>
+								<td>istudent_intervention_required</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_copy_control' 
 									name='student_copy_control' value='student_copy_control'>
 									<label for 'student_copy_control'>student_copy_control</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_copy_control_sequence' size='5' maxlength='5'></td>
 								<td>student_copy_control</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_first_class_choice' 
 									name='student_first_class_choice' value='student_first_class_choice'>
 									<label for 'student_first_class_choice'>student_first_class_choice</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_first_class_choice_sequence' size='5' maxlength='5'></td>
 								<td>student_first_class_choice</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_second_class_choice' 
 									name='student_second_class_choice' value='student_second_class_choice'>
 									<label for 'student_second_class_choice'>student_second_class_choice</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_second_class_choice_sequence' size='5' maxlength='5'></td>
 								<td>student_second_class_choice</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_third_class_choice' 
 									name='student_third_class_choice' value='student_third_class_choice'>
 									<label for 'student_third_class_choice'>student_third_class_choice</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_third_class_choice_sequence' size='5' maxlength='5'></td>
 								<td>student_third_class_choice</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_first_class_choice_utc' 
 									name='student_first_class_choice_utc' value='student_first_class_choice_utc'>
 									<label for 'student_first_class_choice_utc'>student_first_class_choice_utc</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_first_class_choice_utc_sequence' size='5' maxlength='5'></td>
 								<td>student_first_class_choice_utc</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_second_class_choice_utc' 
 									name='student_second_class_choice_utc' value='student_second_class_choice_utc'>
 									<label for 'student_second_class_choice_utc'>student_second_class_choice_utc</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_second_class_choice_utc_sequence' size='5' maxlength='5'></td>
 								<td>student_second_class_choice_utc</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_third_class_choice_utc' 
 									name='student_third_class_choice_utc' value='student_third_class_choice_utc'>
 									<label for 'student_third_class_choice_utc'>student_third_class_choice_utc</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_third_class_choice_utc_sequence' size='5' maxlength='5'></td>
 								<td>student_third_class_choice_utc</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_catalog_options' 
 									name='student_catalog_options' value='student_catalog_options'>
 									<label for 'student_catalog_options'>student_catalog_options</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_catalog_options_sequence' size='5' maxlength='5'></td>
 								<td>student_catalog_options</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_flexible' 
 									name='student_flexible' value='student_flexible'>
 									<label for 'student_flexible'>student_flexible</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_flexible_sequence' size='5' maxlength='5'></td>
 								<td>student_flexible</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_date_created' 
 									name='student_date_created' value='student_date_created'>
 									<label for 'student_date_created'>student_date_created</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_date_created_sequence' size='5' maxlength='5'></td>
 								<td>student_date_created</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_date_updated' 
 									name='student_date_updated' value='student_date_updated'>
 									<label for 'student_date_updated'>student_date_updated</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_date_updated_sequence' size='5' maxlength='5'></td>
 								<td>student_date_updated</td></tr>
 							</table></p>
 	
 							<p>Select Output Format<br />
 							<input type='radio' id='table' name='output_type' value='table' $table_checked> Table Report<br />
-							<input type='radio' id='comma' name='output_type' value='comma' $comma_checked> Tab Delimited Report<br /></p>
+							<input type='radio' id='comma' name='output_type' value='comma' $comma_checked> Tab Delimited Report<br />
+							<div style='margin-left:20px;'><input type='radio' class='formInputButton' name='tabType' value='tab' checked>Delimited by tabs<br />
+															<input type='radio' class='formInputButton' name='tabType' value='comma'>Delimited by commas<br />
+															<input type='radio' class='formInputButton' name='tabType' value='semicolons'>Delimited by semicolons</div></p>
 							
 							<p>Which Mode<br />
 							<input type='radio' id='student' name='mode_type' value='production' checked='checked'> Production<br />
@@ -1239,14 +1911,19 @@ function student_report_generator_func() {
 							
 							<p><input class='formInputButton' type='submit' value='Submit' />
 							</form></p>
-	
-							<br /><br /><p>Examples of the 'where' clause:<br />
-							To include students for a particular semester: <em>semester='2021 Apr/May'</em><br /><br />
-							To include students assigned to a specific advisor: <em>assigned_advisor='WR7Q'</em><br /><br />
+							<br /><br /><p><b>Sequence: </b>If you want the output fields to be in a specific order, 
+							enter the sequence numbers for each field to be displayed. If any fields are sequenced, all of the 
+							selected fields need to have a sequence number, otherwise the order the fields will be displayed is 
+							indeterminate. Recommend numbering the sequence numbers by 10's to allow for changes</p>
+							<br /><p>Examples of the 'where' clause:<br />
+							To include students for a particular semester: <em>student_semester='2021 Apr/May'</em><br /><br />
+							To include students assigned to a specific advisor: <em>student_assigned_advisor='WR7Q'</em><br /><br />
 							To include students for a particular semester but exclude students with a response of 'R': 
-							<em>semester='2021 Apr/May' and response != 'R'</em><br /><br />
+							<em>student_semester='2021 Apr/May' and student_response != 'R'</em><br /><br />
 							Include all students with the phrase 'not promotable' in the student action log: <em>student_action_log 
 							like '%not promotable%'</em><br /><br />
+							To include students with a response of Y and status of S or Y or V: <em>student_response = 'Y' and (student_status = 'S' 
+							or student_status = 'Y' or student_status = 'V')</em><br /><br />
 							To include all future semesters, use <em>futureSemester</em>. For example: level = 'Fundamental' and futureSemester <br /><br />
 							To search current or upcoming semester use <em>proximateSemester</em> <br />
 							</p>";
@@ -1258,7 +1935,31 @@ function student_report_generator_func() {
 		if ($doDebug) {
 			echo "<br />at pass 2<br />";
 		}		
-	
+
+		if ($doDebug) {
+			echo "reportConfig array:<br /><pre>";
+			print_r($reportConfig);
+			echo "</pre><br />";
+			
+			echo "sequenceArray:<br /><pre>";
+			print_r($sequenceArray);
+			echo "</pre><br />";
+		}
+
+
+	// set logical on how the report is to be run
+	$doBySequence		= FALSE;
+	if (count($sequenceArray) > 0) {
+		$doBySequence	= TRUE;
+		if ($doDebug) {
+			echo "doing the report by sequence number<br />";
+		}
+	} else {
+		if ($doDebug) {
+			echo "doing the report by field<br />";
+		}
+	}
+
 // Array to convert database name to display name
         $nameConversionArray['user_ID'] = 'user<br />ID';
         $nameConversionArray['user_call_sign'] = 'user<br />call_sign';
@@ -1336,56 +2037,70 @@ function student_report_generator_func() {
 		// Begin the Report Output
 
 		if ($inp_config == 'Y') {		// saving the report configuration
+			if ($doDebug) {
+				echo "saving the report configuration<br />";
+			}
 			if ($inp_report_name != '') {
-				$whereStr						= htmlentities($where,ENT_QUOTES);
-				$reportConfig['where']			= $whereStr;
-				$reportConfig['orderby']		= $orderby;
-				$reportConfig['output_type']	= $output_type;
-				$reportConfig['mode_type']		= $mode_type;
+//				$whereStr								= htmlentities($where,ENT_QUOTES);
+				$reportConfiguration['where']			= $where;
+				$reportConfiguration['orderby']			= $orderby;
+				$reportConfiguration['output_type']		= $output_type;
+				$reportConfiguration['mode_type']		= $mode_type;
+				$reportConfiguration['tabType']			= $tabType;
 				if ($doDebug) {
-					$reportConfig['inp_debug']	= 'Y';
+					$reportConfiguration['inp_debug']	= 'Y';
 				} else {
-					$reportConfig['inp_debug']	= 'N';
+					$reportConfiguration['inp_debug']	= 'N';
 				}
-				$reportConfig['inp_config']		= 'N';
-				$myStr							= date('Y-m-d H:i:s');
-				$rg_config						= addslashes(json_encode($reportConfig));
+				$reportConfiguration['inp_config']		= 'N';
+				$checkedArray							= json_encode($reportConfig);
+				$reportConfiguration['reportConfig']	= $checkedArray;
+				$rg_sequence							= json_encode($sequenceArray);
+				$reportConfiguration['sequenceArray']	= $rg_sequence;
+				$myStr									= date('Y-m-d H:i:s');
+				$rg_config								= addslashes(json_encode($reportConfiguration));
 				
 				// if the report name already exists, update else insert
-				$reportNameCount			= $wpdb->get_var("select count(rg_report_name) from wpw1_cwa_report_configurations where rg_report_name = '$inp_report_name'");
+				$reportNameCount		= $wpdb->get_var("select count(rg_report_name) from wpw1_cwa_report_configurations where rg_report_name = '$inp_report_name'");
 				if ($reportNameCount == 0) {
 					if ($doDebug) {
 						echo "report name $inp_report_name is new<br />\n";
 					}
-					$reportQuery = "insert into wpw1_cwa_report_configurations 
-(rg_report_name, rg_table, rg_config, date_written) values 
-('$inp_report_name', 'student', '$rg_config', '$myStr')";
+					$insertResult		= $wpdb->insert('wpw1_cwa_report_configurations',
+													array('rg_report_name'=>$inp_report_name,
+														  'rg_table'=>'student',
+														  'rg_config'=>$rg_config,
+														  'date_written'=>$myStr),
+													array('%s','%s','%s','%s'));
+					if ($insertResult === FALSE) {
+						handleWPDBError($jobname,$doDebug,'attempting to insert config record');
+					} else {
+						if ($doDebug) {
+							echo "config successfully inserted<br />";
+						}
+					}
+
 				} else {
 					if ($doDebug) {
 						echo "report name $inp_report_name is being updated<br />\n";
 					}
-					$reportQuery = "update wpw1_cwa_report_configurations 
-set rg_table = 'student', 
-	rg_config = '$rg_config', 
-	date_written = '$myStr' 
-where rg_report_name = '$inp_report_name'";
-				}
-				
-				if ($doDebug) {
-					echo "Preparing to save the report configuration. SQL: $reportQuery<br />\n";
-				}
-				// run the reportQuery
-				$reportResult	= $wpdb->query($reportQuery);
-				if ($reportResult === FALSE) {
-					if ($doDebug) {
-						$thisError	= $wpdb->last_error;
-						$thisSQL	= $wpdb->last_query;
-						echo "writing to wpw1_cwa_report_configurations failed. Error: $thisError<br />\nSQL: $thisSQL<br />\n";
+					$updateResult		= $wpdb->update('wpw1_cwa_report_configurations',
+													array('rg_table'=>'student',
+														  'rg_config'=>$rg_config,
+														  'date_written'=>$myStr),
+													array('rg_report_name'=>$inp_report_name),
+													array('%s','%s','%s'),
+													array('%s'));
+					if ($updateResult === FALSE) {
+						handleWPDBError($jobname,$doDebug,"attempting to update $inp_report_name report");
+					} else {
+						if ($doDebug) {
+							echo "report successfully updated<br />";
+						}
 					}
-					$content		.= "<p>Unable to store report configuration</p>\n";
 				}
 			}
-		}
+		} 
 		
 		$myInt = strpos($where,'futureSemester');
 		if ($myInt !== FALSE) {
@@ -1401,6 +2116,10 @@ where rg_report_name = '$inp_report_name'";
 			$myReportName		= '';
 		}
 		
+		if ($doDebug) {
+			echo "report setup complete<br />";
+		}
+		
 		$content				.= "<h2>Generated Report from the $studentTableName Table</h2>
 									$myReportName
 									<p>Save report: $inp_report<br />";
@@ -1413,954 +2132,95 @@ where rg_report_name = '$inp_report_name'";
 		if ($orderby != '') {
 			$sql	= "$sql order by $orderby";
 		}
+//		$sql = "$sql limit 10";
 		$content	.= "SQL: $sql</p>";
 		if ($doDebug) {
 			echo "output_type is $output_type<br />";
 		}
-		if ($output_type == 'table') {
-			$content .= "<table><tr>";
-             if ($user_ID_checked == 'X') {
-                 $headerName = $nameConversionArray['user_ID'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_call_sign_checked == 'X') {
-                 $headerName = $nameConversionArray['user_call_sign'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_first_name_checked == 'X') {
-                 $headerName = $nameConversionArray['user_first_name'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_last_name_checked == 'X') {
-                 $headerName = $nameConversionArray['user_last_name'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_email_checked == 'X') {
-                 $headerName = $nameConversionArray['user_email'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_ph_code_checked == 'X') {
-                 $headerName = $nameConversionArray['user_ph_code'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_phone_checked == 'X') {
-                 $headerName = $nameConversionArray['user_phone'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_city_checked == 'X') {
-                 $headerName = $nameConversionArray['user_city'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_state_checked == 'X') {
-                 $headerName = $nameConversionArray['user_state'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_zip_code_checked == 'X') {
-                 $headerName = $nameConversionArray['user_zip_code'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_country_code_checked == 'X') {
-                 $headerName = $nameConversionArray['user_country_code'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_country_checked == 'X') {
-                 $headerName = $nameConversionArray['user_country'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_whatsapp_checked == 'X') {
-                 $headerName = $nameConversionArray['user_whatsapp'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_telegram_checked == 'X') {
-                 $headerName = $nameConversionArray['user_telegram'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_signal_checked == 'X') {
-                 $headerName = $nameConversionArray['user_signal'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_messenger_checked == 'X') {
-                 $headerName = $nameConversionArray['user_messenger'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_action_log_checked == 'X') {
-                 $headerName = $nameConversionArray['user_action_log'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_timezone_id_checked == 'X') {
-                 $headerName = $nameConversionArray['user_timezone_id'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_languages_checked == 'X') {
-                 $headerName = $nameConversionArray['user_languages'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_survey_score_checked == 'X') {
-                 $headerName = $nameConversionArray['user_survey_score'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_is_admin_checked == 'X') {
-                 $headerName = $nameConversionArray['user_is_admin'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_role_checked == 'X') {
-                 $headerName = $nameConversionArray['user_role'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_date_created_checked == 'X') {
-                 $headerName = $nameConversionArray['user_date_created'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($user_date_updated_checked == 'X') {
-                 $headerName = $nameConversionArray['user_date_updated'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_id_checked == 'X') {
-                 $headerName = $nameConversionArray['student_id'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_call_sign_checked == 'X') {
-                 $headerName = $nameConversionArray['student_call_sign'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_time_zone_checked == 'X') {
-                 $headerName = $nameConversionArray['student_time_zone'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_timezone_offset_checked == 'X') {
-                 $headerName = $nameConversionArray['student_timezone_offset'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_youth_checked == 'X') {
-                 $headerName = $nameConversionArray['student_youth'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_age_checked == 'X') {
-                 $headerName = $nameConversionArray['student_age'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_parent_checked == 'X') {
-                 $headerName = $nameConversionArray['student_parent'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_parent_email_checked == 'X') {
-                 $headerName = $nameConversionArray['student_parent_email'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_level_checked == 'X') {
-                 $headerName = $nameConversionArray['student_level'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_waiting_list_checked == 'X') {
-                 $headerName = $nameConversionArray['student_waiting_list'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_request_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_request_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_semester_checked == 'X') {
-                 $headerName = $nameConversionArray['student_semester'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_notes_checked == 'X') {
-                 $headerName = $nameConversionArray['student_notes'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_welcome_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_welcome_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_email_sent_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_email_sent_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_email_number_checked == 'X') {
-                 $headerName = $nameConversionArray['student_email_number'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_response_checked == 'X') {
-                 $headerName = $nameConversionArray['student_response'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_response_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_response_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_abandoned_checked == 'X') {
-                 $headerName = $nameConversionArray['student_abandoned'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_status_checked == 'X') {
-                 $headerName = $nameConversionArray['student_status'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_action_log_checked == 'X') {
-                 $headerName = $nameConversionArray['student_action_log'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_pre_assigned_advisor_checked == 'X') {
-                 $headerName = $nameConversionArray['student_pre_assigned_advisor'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_selected_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_selected_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_no_catalog_checked == 'X') {
-                 $headerName = $nameConversionArray['student_no_catalog'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_hold_override_checked == 'X') {
-                 $headerName = $nameConversionArray['student_hold_override'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_messaging_checked == 'X') {
-                 $headerName = $nameConversionArray['student_messaging'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_assigned_advisor_checked == 'X') {
-                 $headerName = $nameConversionArray['student_assigned_advisor'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_advisor_select_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_advisor_select_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_advisor_class_timezone_checked == 'X') {
-                 $headerName = $nameConversionArray['student_advisor_class_timezone'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_hold_reason_code_checked == 'X') {
-                 $headerName = $nameConversionArray['student_hold_reason_code'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_class_priority_checked == 'X') {
-                 $headerName = $nameConversionArray['student_class_priority'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_assigned_advisor_class_checked == 'X') {
-                 $headerName = $nameConversionArray['student_assigned_advisor_class'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_promotable_checked == 'X') {
-                 $headerName = $nameConversionArray['student_promotable'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_excluded_advisor_checked == 'X') {
-                 $headerName = $nameConversionArray['student_excluded_advisor'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_survey_completion_date_checked == 'X') {
-                 $headerName = $nameConversionArray['student_survey_completion_date'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_available_class_days_checked == 'X') {
-                 $headerName = $nameConversionArray['student_available_class_days'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_intervention_required_checked == 'X') {
-                 $headerName = $nameConversionArray['student_intervention_required'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_copy_control_checked == 'X') {
-                 $headerName = $nameConversionArray['student_copy_control'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_first_class_choice_checked == 'X') {
-                 $headerName = $nameConversionArray['student_first_class_choice'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_second_class_choice_checked == 'X') {
-                 $headerName = $nameConversionArray['student_second_class_choice'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_third_class_choice_checked == 'X') {
-                 $headerName = $nameConversionArray['student_third_class_choice'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_first_class_choice_utc_checked == 'X') {
-                 $headerName = $nameConversionArray['student_first_class_choice_utc'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_second_class_choice_utc_checked == 'X') {
-                 $headerName = $nameConversionArray['student_second_class_choice_utc'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_third_class_choice_utc_checked == 'X') {
-                 $headerName = $nameConversionArray['student_third_class_choice_utc'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_catalog_options_checked == 'X') {
-                 $headerName = $nameConversionArray['student_catalog_options'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_flexible_checked == 'X') {
-                 $headerName = $nameConversionArray['student_flexible'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_date_created_checked == 'X') {
-                 $headerName = $nameConversionArray['student_date_created'];
-                 $content .= "<th>$headerName</th>";
-            }
-             if ($student_date_updated_checked == 'X') {
-                 $headerName = $nameConversionArray['student_date_updated'];
-                 $content .= "<th>$headerName</th>";
-            }
-			$content	.= "</tr>";	
+		if ($doBySequence) {
+			ksort($sequenceArray);
+			if ($output_type == 'table') {
+				$content .= "<table><tr>";
+				foreach($sequenceArray as $thisSequence => $thisField) {
+					$headerName	= $nameConversionArray[$thisField];
+					$content .= "<th>$headerName</th>";
+				}
+				$content .= "</tr>";			
+			} else {
+				$tabValue		= $tabTypeArray[$tabType];
+				$needComma = FALSE;
+				$content		.= "<pre>";
+				// prepare the csv file and write the headers
+				$csvStr		= "$userName" . "_srg_download.csv";
+				if (preg_match('/localhost/',$siteURL)) {
+					$thisFileName	= "wp-content/uploads/$csvStr";
+				} else {
+					$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$csvStr";
+				}
+				if ($doDebug) {
+					echo "set up to write $thisFileName<br />";
+				}
+				$thisFP			= fopen($thisFileName,'w');
+				$thisOutput		= array();
+				foreach($sequenceArray as $thisSequence => $thisField) {
+					if ($needComma) {
+						$content .= $tabValue;
+					}
+					$headerName	= $nameConversionArray[$thisField];
+					$headerName = str_replace('<br />','_',$headerName);
+					$thisOutput[] = $headerName;
+					$content .= $headerName;
+					$needComma = TRUE;
+				}
+				$content .= "\n";
+				fputcsv($thisFP,$thisOutput,$tabValue);
+			}
+		
 		} else {
-			$needComma = FALSE;
-			$content		.= "<pre>";
-            if ($user_ID_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_ID'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_call_sign_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_call_sign'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_first_name_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_first_name'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_last_name_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_last_name'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_email_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_email'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_ph_code_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_ph_code'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_phone_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_phone'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_city_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_city'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_state_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_state'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_zip_code_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_zip_code'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_country_code_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_country_code'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_country_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_country'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_whatsapp_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_whatsapp'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_telegram_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_telegram'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_signal_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_signal'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_messenger_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_messenger'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_action_log_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_action_log'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_timezone_id_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_timezone_id'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_languages_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_languages'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_survey_score_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_survey_score'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_is_admin_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_is_admin'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_role_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_role'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_date_created_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_date_created'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($user_date_updated_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['user_date_updated'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_id_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_id'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_call_sign_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_call_sign'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_time_zone_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_time_zone'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_timezone_offset_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_timezone_offset'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_youth_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_youth'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_age_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_age'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_parent_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_parent'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_parent_email_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_parent_email'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_level_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_level'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_waiting_list_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_waiting_list'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_request_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_request_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_semester_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_semester'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_notes_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_notes'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_welcome_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_welcome_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_email_sent_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_email_sent_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_email_number_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_email_number'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_response_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_response'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_response_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_response_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_abandoned_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_abandoned'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_status_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_status'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_action_log_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_action_log'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_pre_assigned_advisor_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_pre_assigned_advisor'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_selected_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_selected_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_no_catalog_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_no_catalog'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_hold_override_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_hold_override'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_messaging_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_messaging'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_assigned_advisor_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_assigned_advisor'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_advisor_select_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_advisor_select_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_advisor_class_timezone_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_advisor_class_timezone'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_hold_reason_code_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_hold_reason_code'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_class_priority_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_class_priority'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_assigned_advisor_class_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_assigned_advisor_class'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_promotable_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_promotable'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_excluded_advisor_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_excluded_advisor'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_survey_completion_date_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_survey_completion_date'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_available_class_days_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_available_class_days'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_intervention_required_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_intervention_required'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_copy_control_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_copy_control'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_first_class_choice_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_first_class_choice'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_second_class_choice_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_second_class_choice'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_third_class_choice_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_third_class_choice'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_first_class_choice_utc_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_first_class_choice_utc'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_second_class_choice_utc_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_second_class_choice_utc'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_third_class_choice_utc_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_third_class_choice_utc'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_catalog_options_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_catalog_options'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_flexible_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_flexible'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_date_created_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_date_created'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-            if ($student_date_updated_checked == 'X') {
-                if ($needComma) {
-                    $content .= '	';
-                }
-                $headerName = $nameConversionArray['student_date_updated'];
-                $headerName = str_replace('<br />','_',$headerName);
-                $content .= $headerName;
-                $needComma = TRUE;
-            }
-			$content	.= "\n";
+			if ($output_type == 'table') {
+				$content .= "<table><tr>";
+				
+				foreach($fieldArray as $thisField) {
+					if (${$thisField . '_checked'} == 'X') {
+						$headerName = $nameConversionArray[$thisField];
+						 $content .= "<th>$headerName</th>";
+					}			
+				}
+				$content	.= "</tr>";	
+			} else {
+				$tabValue		= $tabTypeArray[$tabType];
+				$needComma = FALSE;
+				$content		.= "<pre>";
+				// prepare the csv file and write the headers
+				$csvStr		= "$userName" . "_srg_download.csv";
+				if (preg_match('/localhost/',$siteURL)) {
+					$thisFileName	= "wp-content/uploads/$csvStr";
+				} else {
+					$thisFileName	= "/home/cwacwops/public_html/wp-content/uploads/$csvStr";
+				}
+				if ($doDebug) {
+					echo "set up to write $thisFileName<br />";
+				}
+				$thisFP			= fopen($thisFileName,'w');
+				$thisOutput		= array();
+				foreach($fieldArray as $thisField) {
+					if (${$thisField . '_checked'} == 'X') {
+						if ($needComma) {
+							$content .= $tabValue;
+						}
+						$headerName = $nameConversionArray[$thisField];
+						$headerName = str_replace('<br />','_',$headerName);
+						$content .= $headerName;
+						$thisOutput[] = $headerName;
+						$needComma = TRUE;
+					}			
+				}
+				$content	.= "\n";
+				fputcsv($thisFP,$thisOutput,$tabValue);
+			}
 		}
+
+
 ///// read the student table
 		$myCount					= 0;
 		$wpw1_cwa_student			= $wpdb->get_results($sql);
@@ -2454,742 +2314,90 @@ where rg_report_name = '$inp_report_name'";
 					if ($doDebug) {
 						echo "Processing $student_call_sign<br />\n";
 					}
-					if ($output_type == 'table') {
-						$content	.= "<tr>";
-                       if ($user_ID_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_ID</td>";
-                        }
-                       if ($user_call_sign_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'><a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug=$doDebug&testMode=$testMode'  
-                           				target='_blank'>$user_call_sign</td>";
-                        }
-                       if ($user_first_name_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_first_name</td>";
-                        }
-                       if ($user_last_name_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_last_name</td>";
-                        }
-                       if ($user_email_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_email</td>";
-                        }
-                       if ($user_ph_code_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_ph_code</td>";
-                        }
-                       if ($user_phone_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_phone</td>";
-                        }
-                       if ($user_city_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_city</td>";
-                        }
-                       if ($user_state_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_state</td>";
-                        }
-                       if ($user_zip_code_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_zip_code</td>";
-                        }
-                       if ($user_country_code_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_country_code</td>";
-                        }
-                       if ($user_country_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_country</td>";
-                        }
-                       if ($user_whatsapp_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_whatsapp</td>";
-                        }
-                       if ($user_telegram_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_telegram</td>";
-                        }
-                       if ($user_signal_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_signal</td>";
-                        }
-                       if ($user_messenger_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_messenger</td>";
-                        }
-                       if ($user_action_log_checked == 'X') {
-                       		$mystr = formatActionLog($user_action_log);
-                           $content .= "<td style='vertical-align:top'>$mystr</td>";
-                        }
-                       if ($user_timezone_id_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_timezone_id</td>";
-                        }
-                       if ($user_languages_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_languages</td>";
-                        }
-                       if ($user_survey_score_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_survey_score</td>";
-                        }
-                       if ($user_is_admin_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_is_admin</td>";
-                        }
-                       if ($user_role_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_role</td>";
-                        }
-                       if ($user_date_created_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_date_created</td>";
-                        }
-                       if ($user_date_updated_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$user_date_updated</td>";
-                        }
-                       if ($student_id_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_id</td>";
-                        }
-                       if ($student_call_sign_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_call_sign</td>";
-                        }
-                       if ($student_time_zone_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_time_zone</td>";
-                        }
-                       if ($student_timezone_offset_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_timezone_offset</td>";
-                        }
-                       if ($student_youth_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_youth</td>";
-                        }
-                       if ($student_age_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_age</td>";
-                        }
-                       if ($student_parent_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_parent</td>";
-                        }
-                       if ($student_parent_email_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_parent_email</td>";
-                        }
-                       if ($student_level_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_level</td>";
-                        }
-                       if ($student_waiting_list_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_waiting_list</td>";
-                        }
-                       if ($student_request_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_request_date</td>";
-                        }
-                       if ($student_semester_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_semester</td>";
-                        }
-                       if ($student_notes_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_notes</td>";
-                        }
-                       if ($student_welcome_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_welcome_date</td>";
-                        }
-                       if ($student_email_sent_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_email_sent_date</td>";
-                        }
-                       if ($student_email_number_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_email_number</td>";
-                        }
-                       if ($student_response_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_response</td>";
-                        }
-                       if ($student_response_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_response_date</td>";
-                        }
-                       if ($student_abandoned_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_abandoned</td>";
-                        }
-                       if ($student_status_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_status</td>";
-                        }
-                       if ($student_action_log_checked == 'X') {
-                       		$mystr = formatActionLog($student_action_log);
-                           $content .= "<td style='vertical-align:top'>$mystr</td>";
-        				}
-                       if ($student_pre_assigned_advisor_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_pre_assigned_advisor</td>";
-                        }
-                       if ($student_selected_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_selected_date</td>";
-                        }
-                       if ($student_no_catalog_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_no_catalog</td>";
-                        }
-                       if ($student_hold_override_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_hold_override</td>";
-                        }
-                       if ($student_messaging_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_messaging</td>";
-                        }
-                       if ($student_assigned_advisor_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_assigned_advisor</td>";
-                        }
-                       if ($student_advisor_select_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_advisor_select_date</td>";
-                        }
-                       if ($student_advisor_class_timezone_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_advisor_class_timezone</td>";
-                        }
-                       if ($student_hold_reason_code_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_hold_reason_code</td>";
-                        }
-                       if ($student_class_priority_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_class_priority</td>";
-                        }
-                       if ($student_assigned_advisor_class_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_assigned_advisor_class</td>";
-                        }
-                       if ($student_promotable_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_promotable</td>";
-                        }
-                       if ($student_excluded_advisor_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_excluded_advisor</td>";
-                        }
-                       if ($student_survey_completion_date_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_survey_completion_date</td>";
-                        }
-                       if ($student_available_class_days_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_available_class_days</td>";
-                        }
-                       if ($student_intervention_required_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_intervention_required</td>";
-                        }
-                       if ($student_copy_control_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_copy_control</td>";
-                        }
-                       if ($student_first_class_choice_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_first_class_choice</td>";
-                        }
-                       if ($student_second_class_choice_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_second_class_choice</td>";
-                        }
-                       if ($student_third_class_choice_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_third_class_choice</td>";
-                        }
-                       if ($student_first_class_choice_utc_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_first_class_choice_utc</td>";
-                        }
-                       if ($student_second_class_choice_utc_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_second_class_choice_utc</td>";
-                        }
-                       if ($student_third_class_choice_utc_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_third_class_choice_utc</td>";
-                        }
-                       if ($student_catalog_options_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_catalog_options</td>";
-                        }
-                       if ($student_flexible_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_flexible</td>";
-                        }
-                       if ($student_date_created_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_date_created</td>";
-                        }
-                       if ($student_date_updated_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'>$student_date_updated</td>";
-                        }
-						$content	.= "</tr>\n";
-					} else {			// output will be a comma separated file
-						$needComma = FALSE;
-                        if ($user_ID_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_ID;
-                            $needComma = TRUE;
-                        }
-                        if ($user_call_sign_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_call_sign;
-                            $needComma = TRUE;
-                        }
-                        if ($user_first_name_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_first_name;
-                            $needComma = TRUE;
-                        }
-                        if ($user_last_name_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_last_name;
-                            $needComma = TRUE;
-                        }
-                        if ($user_email_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_email;
-                            $needComma = TRUE;
-                        }
-                        if ($user_ph_code_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_ph_code;
-                            $needComma = TRUE;
-                        }
-                        if ($user_phone_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_phone;
-                            $needComma = TRUE;
-                        }
-                        if ($user_city_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_city;
-                            $needComma = TRUE;
-                        }
-                        if ($user_state_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_state;
-                            $needComma = TRUE;
-                        }
-                        if ($user_zip_code_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_zip_code;
-                            $needComma = TRUE;
-                        }
-                        if ($user_country_code_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_country_code;
-                            $needComma = TRUE;
-                        }
-                        if ($user_country_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_country;
-                            $needComma = TRUE;
-                        }
-                        if ($user_whatsapp_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_whatsapp;
-                            $needComma = TRUE;
-                        }
-                        if ($user_telegram_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_telegram;
-                            $needComma = TRUE;
-                        }
-                        if ($user_signal_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_signal;
-                            $needComma = TRUE;
-                        }
-                        if ($user_messenger_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_messenger;
-                            $needComma = TRUE;
-                        }
-                        if ($user_action_log_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_action_log;
-                            $needComma = TRUE;
-                        }
-                        if ($user_timezone_id_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_timezone_id;
-                            $needComma = TRUE;
-                        }
-                        if ($user_languages_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_languages;
-                            $needComma = TRUE;
-                        }
-                        if ($user_survey_score_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_survey_score;
-                            $needComma = TRUE;
-                        }
-                        if ($user_is_admin_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_is_admin;
-                            $needComma = TRUE;
-                        }
-                        if ($user_role_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_role;
-                            $needComma = TRUE;
-                        }
-                        if ($user_date_created_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_date_created;
-                            $needComma = TRUE;
-                        }
-                        if ($user_date_updated_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $user_date_updated;
-                            $needComma = TRUE;
-                        }
-                        if ($student_id_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_id;
-                            $needComma = TRUE;
-                        }
-                        if ($student_call_sign_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_call_sign;
-                            $needComma = TRUE;
-                        }
-                        if ($student_time_zone_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_time_zone;
-                            $needComma = TRUE;
-                        }
-                        if ($student_timezone_offset_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_timezone_offset;
-                            $needComma = TRUE;
-                        }
-                        if ($student_youth_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_youth;
-                            $needComma = TRUE;
-                        }
-                        if ($student_age_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_age;
-                            $needComma = TRUE;
-                        }
-                        if ($student_parent_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_parent;
-                            $needComma = TRUE;
-                        }
-                        if ($student_parent_email_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_parent_email;
-                            $needComma = TRUE;
-                        }
-                        if ($student_level_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_level;
-                            $needComma = TRUE;
-                        }
-                        if ($student_waiting_list_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_waiting_list;
-                            $needComma = TRUE;
-                        }
-                        if ($student_request_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_request_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_semester_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_semester;
-                            $needComma = TRUE;
-                        }
-                        if ($student_notes_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_notes;
-                            $needComma = TRUE;
-                        }
-                        if ($student_welcome_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_welcome_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_email_sent_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_email_sent_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_email_number_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_email_number;
-                            $needComma = TRUE;
-                        }
-                        if ($student_response_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_response;
-                            $needComma = TRUE;
-                        }
-                        if ($student_response_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_response_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_abandoned_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_abandoned;
-                            $needComma = TRUE;
-                        }
-                        if ($student_status_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_status;
-                            $needComma = TRUE;
-                        }
-                        if ($student_action_log_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_action_log;
-                            $needComma = TRUE;
-                        }
-                        if ($student_pre_assigned_advisor_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_pre_assigned_advisor;
-                            $needComma = TRUE;
-                        }
-                        if ($student_selected_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_selected_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_no_catalog_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_no_catalog;
-                            $needComma = TRUE;
-                        }
-                        if ($student_hold_override_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_hold_override;
-                            $needComma = TRUE;
-                        }
-                        if ($student_messaging_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_messaging;
-                            $needComma = TRUE;
-                        }
-                        if ($student_assigned_advisor_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_assigned_advisor;
-                            $needComma = TRUE;
-                        }
-                        if ($student_advisor_select_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_advisor_select_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_advisor_class_timezone_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_advisor_class_timezone;
-                            $needComma = TRUE;
-                        }
-                        if ($student_hold_reason_code_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_hold_reason_code;
-                            $needComma = TRUE;
-                        }
-                        if ($student_class_priority_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_class_priority;
-                            $needComma = TRUE;
-                        }
-                        if ($student_assigned_advisor_class_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_assigned_advisor_class;
-                            $needComma = TRUE;
-                        }
-                        if ($student_promotable_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_promotable;
-                            $needComma = TRUE;
-                        }
-                        if ($student_excluded_advisor_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_excluded_advisor;
-                            $needComma = TRUE;
-                        }
-                        if ($student_survey_completion_date_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_survey_completion_date;
-                            $needComma = TRUE;
-                        }
-                        if ($student_available_class_days_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_available_class_days;
-                            $needComma = TRUE;
-                        }
-                        if ($student_intervention_required_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_intervention_required;
-                            $needComma = TRUE;
-                        }
-                        if ($student_copy_control_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_copy_control;
-                            $needComma = TRUE;
-                        }
-                        if ($student_first_class_choice_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_first_class_choice;
-                            $needComma = TRUE;
-                        }
-                        if ($student_second_class_choice_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_second_class_choice;
-                            $needComma = TRUE;
-                        }
-                        if ($student_third_class_choice_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_third_class_choice;
-                            $needComma = TRUE;
-                        }
-                        if ($student_first_class_choice_utc_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_first_class_choice_utc;
-                            $needComma = TRUE;
-                        }
-                        if ($student_second_class_choice_utc_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_second_class_choice_utc;
-                            $needComma = TRUE;
-                        }
-                        if ($student_third_class_choice_utc_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_third_class_choice_utc;
-                            $needComma = TRUE;
-                        }
-                        if ($student_catalog_options_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_catalog_options;
-                            $needComma = TRUE;
-                        }
-                        if ($student_flexible_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_flexible;
-                            $needComma = TRUE;
-                        }
-                        if ($student_date_created_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_date_created;
-                            $needComma = TRUE;
-                        }
-                        if ($student_date_updated_checked == 'X') {
-                            if ($needComma) {
-                                $content .= '	';
-                            }
-                            $content .= $student_date_updated;
-                            $needComma = TRUE;
-                        }
-						$content	.= "\n";
-					}				
+					if ($doBySequence) {
+						if ($output_type == 'table') {
+							$content	.= "<tr>";
+							foreach($sequenceArray as $thisSeq => $thisField) {
+								$dataToDisplay = ${$thisField};
+								$myStr = $dataToDisplay;
+								if ($thisField == 'user_call_sign') {
+									$myStr = "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+												target='_blank'>$dataToDisplay</a>";
+								}
+								if ($thisField == 'student_assigned_advisor') {
+									$myStr = "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+												target='_blank'>$dataToDisplay</a>";
+								}
+								if ($thisField == 'student_pre_assigned_advisor') {
+									$myStr = "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+												target='_blank'>$dataToDisplay</a>";
+								}
+							   $content .= "<td style='vertical-align:top'>$myStr</td>";
+							}
+							$content	.= "</tr>";
+						} else {
+							$needComma = FALSE;
+							$thisOutput = array();
+							foreach($sequenceArray as $thisSeq => $thisField) {								
+								if ($needComma) {
+									$content .= $tabValue;
+								}
+								$thisOutput[] = $$thisField;
+								$content .= $$thisField;
+								$needComma = TRUE;
+							}
+							$content .= "\n";
+							fputcsv($thisFP,$thisOutput,$tabValue);
+
+						}
+					} else {
+						if ($output_type == 'table') {
+							$content	.= "<tr>";
+							foreach($fieldArray as $thisField) {
+								if (${$thisField . '_checked'} == 'X') {
+									$dataToDisplay = ${$thisField};
+									$myStr = $dataToDisplay;
+									if ($thisField == 'user_call_sign') {
+										$myStr = "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+													target='_blank'>$dataToDisplay</a>";
+									}
+									if ($thisField == 'student_assigned_advisor') {
+										$myStr = "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+													target='_blank'>$dataToDisplay</a>";
+									}
+									if ($thisField == 'student_pre_assigned_advisor') {
+										$myStr = "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$dataToDisplay&inp_depth=one&doDebug&testMode' 
+													target='_blank'>$dataToDisplay</a>";
+									}
+								   $content .= "<td style='vertical-align:top'>$myStr</td>";
+								}
+							}
+							$content	.= "</tr>\n";
+						} else {			// output will be a comma separated file
+							$needComma = FALSE;
+							$thisOutput = array();
+							foreach($fieldArray as $thisField) {
+								if (${$thisField . '_checked'} == 'X') {
+									if ($needComma) {
+										$content .= $tabValue;
+									}
+									$content .= $$thisField;
+									$thisOutput[] = $$thisField;
+									$needComma = TRUE;
+								}
+							}
+							$content	.= "\n";
+							fputcsv($thisFP,$thisOutput,$tabValue);
+						}	
+					}			
 				}
 			}
 			if ($output_type == 'table') {
 				$content	.= "</table>";
 			} else {
 				$content	.= "</pre>";
+				fclose($thisFP);
+				$content	.= "<p><p>Click <a href='$siteURL/wp-content/uploads/$csvStr'>$csvStr</a> to download the csv file</p>";
 			}
 			$content		.= "<br /><br />$myCount records printed<br />";
 		}
@@ -3206,9 +2414,24 @@ where rg_report_name = '$inp_report_name'";
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	if ($doDebug) {
 		echo "<br />Testing to save report: $inp_report<br />\n";
