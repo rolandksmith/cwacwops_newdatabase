@@ -106,6 +106,7 @@ function updateStudent($inpArray) {
 			  inp_method: $inp_method<br />
 			  jobname: $jobname<br />
 			  inp_id: $inp_id<br />
+			  inp_callsign: $inp_callsign<br />
 			  inp_semester: $inp_semester<br />
 			  inp_who: $inp_who<br />
 			  testMode: $testMode<br />
