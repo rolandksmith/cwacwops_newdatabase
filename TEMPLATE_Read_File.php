@@ -165,6 +165,7 @@
 								<td><b>Role</b><br />$user_role</td>
 								<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
 							<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
+			}
 			$content	.= "</table>
 							<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode' 
 							target='_blank'>HERE</a> to update the advisor Master Data</p>";
