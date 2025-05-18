@@ -1,4 +1,4 @@
-function getOffsetFromIdentifier($identifier='',$semester='',$doDebug=FALSE) {
+function getOffsetFromIdentifier($identifier='',$semester='',$doDebug) {
 
 /*	returns the offset to UTC for a specified timezone identifier and semester
 
@@ -48,7 +48,7 @@ function getOffsetFromIdentifier($identifier='',$semester='',$doDebug=FALSE) {
 		$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
 		$dateTimeUTC 			= new DateTime($thisNewDate,$dateTimeZoneUTC);
 		$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
-		$timezone_offset 		= $php2/3600;
+		$timezone_offset 		= round($php2/3600.0,1);
 	
 		return $timezone_offset;
 	}
