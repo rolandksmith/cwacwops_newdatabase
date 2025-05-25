@@ -960,99 +960,99 @@ function display_and_update_student_signup_func() {
 												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
-												<tr><td>Student Student Id<td>
+												<tr><td>Student Student Id</td>
 													<td>$updateLink</td></tr>
-												<tr><td>Student Call Sign<td>
+												<tr><td>Student Call Sign</td>
 													<td>$student_call_sign</td></tr>
-												<tr><td>Student Time Zone<td>
+												<tr><td>Student Time Zone</td>
 													<td>$student_time_zone</td></tr>
-												<tr><td>Student Timezone Offset<td>
+												<tr><td>Student Timezone Offset</td>
 													<td>$student_timezone_offset</td></tr>
-												<tr><td>Student Youth<td>
+												<tr><td>Student Youth</td>
 													<td>$student_youth</td></tr>
-												<tr><td>Student Age<td>
+												<tr><td>Student Age</td>
 													<td>$student_age</td></tr>
-												<tr><td>Student Student Parent<td>
+												<tr><td>Student Student Parent</td>
 													<td>$student_parent</td></tr>
-												<tr><td>Student Student Parent Email<td>
+												<tr><td>Student Student Parent Email</td>
 													<td>$student_parent_email</td></tr>
-												<tr><td>Student Level<td>
+												<tr><td>Student Level</td>
 													<td>$student_level</td></tr>
-												<tr><td>Student Waiting List<td>
+												<tr><td>Student Waiting List</td>
 													<td>$student_waiting_list $waitingStr</td></tr>
-												<tr><td>Student Request Date<td>
+												<tr><td>Student Request Date</td>
 													<td>$student_request_date</td></tr>
-												<tr><td>Student Semester<td>
+												<tr><td>Student Semester</td>
 													<td>$student_semester</td></tr>
-												<tr><td>Student Notes<td>
+												<tr><td>Student Notes</td>
 													<td style='vertical-align:top;'>$student_notes</td></tr>
-												<tr><td>Student Welcome Date<td>
+												<tr><td>Student Welcome Date</td>
 													<td>$student_welcome_date</td></tr>
-												<tr><td>Student Email Sent Date<td>
+												<tr><td>Student Email Sent Date</td>
 													<td>$student_email_sent_date</td></tr>
-												<tr><td>Student Email Number<td>
+												<tr><td>Student Email Number</td>
 													<td>$student_email_number</td></tr>
-												<tr><td>Student Response<td>
+												<tr><td>Student Response</td>
 													<td>$student_response $responseStr</td></tr>
-												<tr><td>Student Response Date<td>
+												<tr><td>Student Response Date</td>
 													<td>$student_response_date</td></tr>
-												<tr><td>Student Abandoned<td>
+												<tr><td>Student Abandoned</td>
 													<td>$student_abandoned $abandonedStr</td></tr>
-												<tr><td>Student Student Status<td>
+												<tr><td>Student Student Status</td>
 													<td>$student_status $statusStr</td></tr>
-												<tr><td style='vertical-align:top;'>Student Action Log<td>
+												<tr><td style='vertical-align:top;'>Student Action Log</td>
 													<td>$student_action_log</td></tr>
-												<tr><td>Student Pre Assigned Advisor<td>
+												<tr><td>Student Pre Assigned Advisor</td>
 													<td>$preAssignedLink</td></tr>
-												<tr><td>Student Selected Date<td>
+												<tr><td>Student Selected Date</td>
 													<td>$student_selected_date</td></tr>
-												<tr><td>Student No Catalog<td>
+												<tr><td>Student No Catalog</td>
 													<td>$student_no_catalog $catalogStr</td></tr>
-												<tr><td>Student Hold Override<td>
+												<tr><td>Student Hold Override</td>
 													<td>$student_hold_override</td></tr>
-												<tr><td>Student Assigned Advisor<td>
+												<tr><td>Student Assigned Advisor</td>
 													<td>$assignedLink</td></tr>
-												<tr><td>Student Advisor Select Date<td>
+												<tr><td>Student Advisor Select Date</td>
 													<td>$student_advisor_select_date</td></tr>
-												<tr><td>Student Advisor Class Timezone<td>
+												<tr><td>Student Advisor Class Timezone</td>
 													<td>$student_advisor_class_timezone</td></tr>
-												<tr><td>Student Hold Reason Code<td>
+												<tr><td>Student Hold Reason Code</td>
 													<td>$student_hold_reason_code $reasonStr</td></tr>
-												<tr><td>Student Class Priority<td>
+												<tr><td>Student Class Priority</td>
 													<td>$student_class_priority</td></tr>
-												<tr><td>Student Assigned Advisor Class<td>
+												<tr><td>Student Assigned Advisor Class</td>
 													<td>$student_assigned_advisor_class</td></tr>
-												<tr><td>Student Promotable<td>
+												<tr><td>Student Promotable</td>
 													<td>$student_promotable $promotableStr</td></tr>
-												<tr><td>Student Excluded Advisor<td>
+												<tr><td>Student Excluded Advisor</td>
 													<td>$student_excluded_advisor</td></tr>
-												<tr><td>Student Student Survey Completion Date<td>
+												<tr><td>Student Student Survey Completion Date</td>
 													<td>$student_survey_completion_date</td></tr>
-												<tr><td>Student Available Class Days<td>
+												<tr><td>Student Available Class Days</td>
 													<td>$student_available_class_days</td></tr>
-												<tr><td>Student Intervention Required<td>
+												<tr><td>Student Intervention Required</td>
 													<td>$student_intervention_required</td></tr>
-												<tr><td>Student Copy Control<td>
+												<tr><td>Student Copy Control</td>
 													<td>$student_copy_control</td></tr>
-												<tr><td>Student First Class Choice<td>
+												<tr><td>Student First Class Choice</td>
 													<td>$student_first_class_choice</td></tr>
-												<tr><td>Student Second Class Choice<td>
+												<tr><td>Student Second Class Choice</td>
 													<td>$student_second_class_choice</td></tr>
-												<tr><td>Student Third Class Choice<td>
+												<tr><td>Student Third Class Choice</td>
 													<td>$student_third_class_choice</td></tr>
-												<tr><td>Student First Class Choice Utc<td>
+												<tr><td>Student First Class Choice Utc</td>
 													<td>$student_first_class_choice_utc</td></tr>
-												<tr><td>Student Second Class Choice Utc<td>
+												<tr><td>Student Second Class Choice Utc</td>
 													<td>$student_second_class_choice_utc</td></tr>
-												<tr><td>Student Third Class Choice Utc<td>
+												<tr><td>Student Third Class Choice Utc</td>
 													<td>$student_third_class_choice_utc</td></tr>
-												<tr><td>Student Catalog Options<td>
+												<tr><td>Student Catalog Options</td>
 													<td>$student_catalog_options</td></tr>
-												<tr><td>Student Flexible<td>
+												<tr><td>Student Flexible</td>
 													<td>$student_flexible $flexibleStr</td></tr>
-												<tr><td>Student Date Created<td>
+												<tr><td>Student Date Created</td>
 													<td>$student_date_created</td></tr>
-												<tr><td>Student Date Updated<td>
+												<tr><td>Student Date Updated</td>
 													<td>$student_date_updated</td></tr>
 												<tr><td></td>
 													<td><input type='submit' class='formInputButton' name='submit' value='Update Student Record $student_ID' /></td></tr>
@@ -2068,99 +2068,99 @@ function display_and_update_student_signup_func() {
 						
 											$content			.= "<h4>Student Signup Created $student_date_created</h4>
 																	<table style='width:900px;'>
-																	<tr><td>Student Student Id<td>
+																	<tr><td>Student Student Id</td>
 																		<td>$updateLink</td></tr>
-																	<tr><td>Student Call Sign<td>
+																	<tr><td>Student Call Sign</td>
 																		<td>$student_call_sign</td></tr>
-																	<tr><td>Student Time Zone<td>
+																	<tr><td>Student Time Zone</td>
 																		<td>$student_time_zone</td></tr>
-																	<tr><td>Student Timezone Offset<td>
+																	<tr><td>Student Timezone Offset</td>
 																		<td>$student_timezone_offset</td></tr>
-																	<tr><td>Student Youth<td>
+																	<tr><td>Student Youth</td>
 																		<td>$student_youth</td></tr>
-																	<tr><td>Student Age<td>
+																	<tr><td>Student Age</td>
 																		<td>$student_age</td></tr>
-																	<tr><td>Student Student Parent<td>
+																	<tr><td>Student Student Parent</td>
 																		<td>$student_parent</td></tr>
-																	<tr><td>Student Student Parent Email<td>
+																	<tr><td>Student Student Parent Email</td>
 																		<td>$student_parent_email</td></tr>
-																	<tr><td>Student Level<td>
+																	<tr><td>Student Level</td>
 																		<td>$student_level</td></tr>
-																	<tr><td>Student Waiting List<td>
+																	<tr><td>Student Waiting List</td>
 																		<td>$student_waiting_list $waitingStr</td></tr>
-																	<tr><td>Student Request Date<td>
+																	<tr><td>Student Request Date</td>
 																		<td>$student_request_date</td></tr>
-																	<tr><td>Student Semester<td>
+																	<tr><td>Student Semester</td>
 																		<td>$student_semester</td></tr>
-																	<tr><td>Student Notes<td>
+																	<tr><td>Student Notes</td>
 																		<td style='vertical-align:top;'>$student_notes</td></tr>
-																	<tr><td>Student Welcome Date<td>
+																	<tr><td>Student Welcome Date</td>
 																		<td>$student_welcome_date</td></tr>
-																	<tr><td>Student Email Sent Date<td>
+																	<tr><td>Student Email Sent Date</td>
 																		<td>$student_email_sent_date</td></tr>
-																	<tr><td>Student Email Number<td>
+																	<tr><td>Student Email Number</td>
 																		<td>$student_email_number</td></tr>
-																	<tr><td>Student Response<td>
+																	<tr><td>Student Response</td>
 																		<td>$student_response $responseStr</td></tr>
-																	<tr><td>Student Response Date<td>
+																	<tr><td>Student Response Date</td>
 																		<td>$student_response_date</td></tr>
-																	<tr><td>Student Abandoned<td>
+																	<tr><td>Student Abandoned</td>
 																		<td>$student_abandoned $abandonedStr</td></tr>
-																	<tr><td>Student Student Status<td>
+																	<tr><td>Student Student Status</td>
 																		<td>$student_status $statusStr</td></tr>
-																	<tr><td style='vertical-align:top;'>Student Action Log<td>
+																	<tr><td style='vertical-align:top;'>Student Action Log</td>
 																		<td>$student_action_log</td></tr>
-																	<tr><td>Student Pre Assigned Advisor<td>
+																	<tr><td>Student Pre Assigned Advisor</td>
 																		<td>$preAssignedLink</td></tr>
-																	<tr><td>Student Selected Date<td>
+																	<tr><td>Student Selected Date</td>
 																		<td>$student_selected_date</td></tr>
-																	<tr><td>Student No Catalog<td>
+																	<tr><td>Student No Catalog</td>
 																		<td>$student_no_catalog $catalogStr</td></tr>
-																	<tr><td>Student Hold Override<td>
+																	<tr><td>Student Hold Override</td>
 																		<td>$student_hold_override</td></tr>
-																	<tr><td>Student Assigned Advisor<td>
+																	<tr><td>Student Assigned Advisor</td>
 																		<td>$assignedLink</td></tr>
-																	<tr><td>Student Advisor Select Date<td>
+																	<tr><td>Student Advisor Select Date</td>
 																		<td>$student_advisor_select_date</td></tr>
-																	<tr><td>Student Advisor Class Timezone<td>
+																	<tr><td>Student Advisor Class Timezone</td>
 																		<td>$student_advisor_class_timezone</td></tr>
-																	<tr><td>Student Hold Reason Code<td>
+																	<tr><td>Student Hold Reason Code</td>
 																		<td>$student_hold_reason_code $reasonStr</td></tr>
-																	<tr><td>Student Class Priority<td>
+																	<tr><td>Student Class Priority</td>
 																		<td>$student_class_priority</td></tr>
-																	<tr><td>Student Assigned Advisor Class<td>
+																	<tr><td>Student Assigned Advisor Class</td>
 																		<td>$student_assigned_advisor_class</td></tr>
-																	<tr><td>Student Promotable<td>
+																	<tr><td>Student Promotable</td>
 																		<td>$student_promotable $promotableStr</td></tr>
-																	<tr><td>Student Excluded Advisor<td>
+																	<tr><td>Student Excluded Advisor</td>
 																		<td>$student_excluded_advisor</td></tr>
-																	<tr><td>Student Student Survey Completion Date<td>
+																	<tr><td>Student Student Survey Completion Date</td>
 																		<td>$student_survey_completion_date</td></tr>
-																	<tr><td>Student Available Class Days<td>
+																	<tr><td>Student Available Class Days</td>
 																		<td>$student_available_class_days</td></tr>
-																	<tr><td>Student Intervention Required<td>
+																	<tr><td>Student Intervention Required</td>
 																		<td>$student_intervention_required</td></tr>
-																	<tr><td>Student Copy Control<td>
+																	<tr><td>Student Copy Control</td>
 																		<td>$student_copy_control</td></tr>
-																	<tr><td>Student First Class Choice<td>
+																	<tr><td>Student First Class Choice</td>
 																		<td>$student_first_class_choice</td></tr>
-																	<tr><td>Student Second Class Choice<td>
+																	<tr><td>Student Second Class Choice</td>
 																		<td>$student_second_class_choice</td></tr>
-																	<tr><td>Student Third Class Choice<td>
+																	<tr><td>Student Third Class Choice</td>
 																		<td>$student_third_class_choice</td></tr>
-																	<tr><td>Student First Class Choice Utc<td>
+																	<tr><td>Student First Class Choice Utc</td>
 																		<td>$student_first_class_choice_utc</td></tr>
-																	<tr><td>Student Second Class Choice Utc<td>
+																	<tr><td>Student Second Class Choice Utc</td>
 																		<td>$student_second_class_choice_utc</td></tr>
-																	<tr><td>Student Third Class Choice Utc<td>
+																	<tr><td>Student Third Class Choice Utc</td>
 																		<td>$student_third_class_choice_utc</td></tr>
-																	<tr><td>Student Catalog Options<td>
+																	<tr><td>Student Catalog Options</td>
 																		<td>$student_catalog_options</td></tr>
-																	<tr><td>Student Flexible<td>
+																	<tr><td>Student Flexible</td>
 																		<td>$student_flexible $flexibleStr</td></tr>
-																	<tr><td>Student Date Created<td>
+																	<tr><td>Student Date Created</td>
 																		<td>$student_date_created</td></tr>
-																	<tr><td>Student Date Updated<td>
+																	<tr><td>Student Date Updated</td>
 																		<td>$student_date_updated</td></tr>
 																	</table>
 																	<p>Click <a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID'>HERE</a>
