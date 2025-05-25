@@ -13,9 +13,17 @@ function program_list_func() {
 	}
 	$validUser 			= $initializationArray['validUser'];
 	$userName			= strtoupper($initializationArray['userName']);
+	$siteURL			= $initializationArray['siteurl'];
+//	CHECK THIS!								//////////////////////
+	if ($userName == '') {
+		$content		.= "You must be logged in to access this information<br />
+							Click <a href='$siteURL/login/'>HERE</a> to log into CW Academy<br /><br />
+							Click <a href='$sigURL/register/'>HERE</a> to register";
+		return $content;
+	}
+	
 	$userRole			= $initializationArray['userRole'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$siteURL			= $initializationArray['siteurl'];
 	$strPass			= "0";
 	$currentSemester	= $initializationArray['currentSemester'];
 	$nextSemester		= $initializationArray['nextSemester'];
@@ -37,10 +45,6 @@ function program_list_func() {
 								and click on 'Submit'. The system will update the timezone ID. When that is complete, please close that tab and refresh this tab.</p>";
 
 	
-//	CHECK THIS!								//////////////////////
-	if ($userName == '') {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
-	}
 
 //	ini_set('memory_limit','256M');
 //	ini_set('max_execution_time',0);
