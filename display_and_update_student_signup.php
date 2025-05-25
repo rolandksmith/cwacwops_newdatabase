@@ -876,7 +876,7 @@ function display_and_update_student_signup_func() {
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
 			
-						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
+//						$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 						$student_action_log						= formatActionLog($student_action_log);
 						
 						if ($doDebug) {
@@ -960,7 +960,7 @@ function display_and_update_student_signup_func() {
 												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 												<input type='hidden' name='inp_mode' value='$inp_mode'>
 												<table style='width:900px;'>
-												<tr><td>Student Student Id</td>
+												<tr><td style='width:300px;'>Student Student Id</td>
 													<td>$updateLink</td></tr>
 												<tr><td>Student Call Sign</td>
 													<td>$student_call_sign</td></tr>
@@ -2068,7 +2068,7 @@ function display_and_update_student_signup_func() {
 						
 											$content			.= "<h4>Student Signup Created $student_date_created</h4>
 																	<table style='width:900px;'>
-																	<tr><td>Student Student Id</td>
+																	<tr><td style='width:300px;'>Student Student Id</td>
 																		<td>$updateLink</td></tr>
 																	<tr><td>Student Call Sign</td>
 																		<td>$student_call_sign</td></tr>
