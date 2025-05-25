@@ -66,6 +66,7 @@ function display_and_update_student_signup_func() {
 								'C'=>'Student has been replaced',
 								'R'=>'Advisor has requested a replacement',
 								'S'=>'Advisor has not verified the studet',
+								'U'=>'No available class for student',
 								'V'=>'Advisor has requested a replacement due to schedule',
 								'Y'=>'Student verified');
 	$reasonCode			= array(''=>'Not specified',
@@ -1194,6 +1195,7 @@ function display_and_update_student_signup_func() {
 					$statusC				= '';
 					$statusR				= '';
 					$statusS				= '';
+					$statusU				= '';
 					$statusV				= '';
 					$statusY				= '';
 					if ($student_status == '') {
@@ -1204,6 +1206,8 @@ function display_and_update_student_signup_func() {
 						$statusR			= 'checked';
 					} elseif ($student_status == 'S') {
 						$statusS			= 'checked';
+					} elseif ($student_status == 'U') {
+						$statusU			= 'checked';
 					} elseif ($student_status == 'V') {
 						$statusV			= 'checked';
 					} elseif ($student_status == 'Y') {
@@ -1376,6 +1380,7 @@ function display_and_update_student_signup_func() {
 														<input type='radio' class='formInputButton' name='inp_student_status' value='C' $statusC>C: Student has been replaced<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='R' $statusR>R: Advisor has requested a replacement<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='S' $statusS>S: Advisor has not verified the student<br />
+														<input type='radio' class='formInputButton' name='inp_student_status' value='S' $statusU>U: No available class for student<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='V' $statusV>V: Advisor has requested a replacement due to schedule<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='Y' $statusY>Y: Student verified</td>
 												<tr><td style='vertical-align:top;'>student_action_log</td>
@@ -2039,7 +2044,7 @@ function display_and_update_student_signup_func() {
 											$student_date_updated			  		= $studentRow->student_date_updated;
 								
 											$student_action_log						= formatActionLog($student_action_log);
-											$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
+//											$student_excluded_advisor_array			= explode("|",$student_excluded_advisor);
 											
 											$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 											$preAssignedLink	= '';
