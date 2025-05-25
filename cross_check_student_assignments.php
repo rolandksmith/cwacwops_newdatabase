@@ -209,12 +209,20 @@ function cross_check_student_assignments_func() {
 			echo "DEBUG <br />at pass2<br />";
 		}
 		
-		$content		.= "<h3>$jobname</h3>";
+		$content		.= "<h3>$jobname</h3>
+							<h4>Comparing Student Record to Advisor Record</h4>
+							<table>
+							<tr><th>Student</th>
+								<th>Assigned Advisor</th>
+								<th>Assigned Class</th>
+								<th>Error</th></tr>";
 	
-		// load students into studentArray
 		$sql		= "select * from $studentTableName 
 						where student_semester = '$proximateSemester' 
-						order by student_call_sign";
+						and student_response = 'Y' 
+						and (student_status = 'Y' 
+							or student_status = 'S') 
+						order by student_call_sign ";
 		$wpw1_cwa_student	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_student === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -273,26 +281,130 @@ function cross_check_student_assignments_func() {
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
 	
-					if ($student_status == 'Y' || $student_status == 'S') {
+					$studentLink			= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
+					$assignedAdvisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
+	
+					// see if the student is in the advisorclass record	
+					$foundStudent	= FALSE;
+					$studentCount	= 0;
+					$sql		= "select * from $advisorClassTableName 
+									where advisorclass_semester = '$proximateSemester' 
+									and advisorclass_call_sign = '$student_assigned_advisor' 
+									and advisorclass_sequence = '$student_assigned_advisor_class'";
+					$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+					if ($wpw1_cwa_advisorclass === FALSE) {
+						handleWPDBError($jobname,$doDebug);
+					} else {
+						$numACRows			= $wpdb->num_rows;
 						if ($doDebug) {
-//							echo "DEBUG Processing $student_call_sign<br />";
+							echo "DEBUG ran $sql<br />and found $numACRows rows<br />";
 						}
-						if (!array_key_exists($student_call_sign,$studentArray)) {
-							$studentArray[$student_call_sign]['advisor']	= $student_assigned_advisor;					
-							$studentArray[$student_call_sign]['class']		= $student_assigned_advisor_class;
+						if ($numACRows > 0) {
+							foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+								$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+								$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+								$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+								$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+								$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+								$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+								$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+								$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+								$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+								$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+								$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+								$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+								$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+								$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+								$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+								$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+								$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+								$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+								$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+								$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+								$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+								$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+								$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+								$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+								$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+								$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+								$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+								$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+								$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+								$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+								$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+								$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+								$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+								$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+								$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+								$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+								$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+								$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+								$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+								$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+								$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+								$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+								$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+								$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+								$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+								$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+					
+								$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$advisorClass_call_sign</a>";
+								$classCount				= 0;
+								for ($snum=1;$snum<31;$snum++) {
+									if ($snum < 10) {
+										$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+									} else {
+										$strSnum		= strval($snum);
+									}
+									$theInfo			= ${'advisorClass_student' . $strSnum};
+									if ($theInfo != '') {
+										if ($theInfo == $student_call_sign) {
+											$foundStudent = TRUE;
+											$studentCount++;
+										}
+									}
+								}
+							}
+						}
+					}
+					$errorStr		= "";
+					if (!$foundStudent) {
+						$errorStr	.= "Student not found in advisorClass record";
+					}
+					if ($studentCount > 1) {
+						if ($errorStr == '') {
+							$errorStr	.= "Student found $studentCount times in advisorClass record";
 						} else {
-							echo "DEBUG <b>ERROR</b>Duplicate $student_call_sign. 2nd rec $student_ID<br />";
+							$errorStr	.= "<br />Student found $studentCount times in advisorClass record";
 						}
+					}
+					if ($errorStr != '') {
+						$content		.= "<tr><td>$studentLink</td>
+												<td>$assignedAdvisorLink</td>
+												<td>$student_assigned_advisor_class</td>
+												<td>$errorStr</td></tr>";
 					}
 				}
 			} else {
 				$content	.= "<p>No students found!</p>";
 			}
 		}
-		// now loadup the advisorTable
+		$content			.= "</table>";
+		flush();
+
+		// now check advisorClass against student record
+		$content		.= "<h4>Comparing AdvisorClass Record to Student Record</h4>
+							<table>
+							<tr><th>Advisor</th>
+								<th>Class</th>
+								<th>Student</th>
+								<th>Error</th></tr>";
 		$sql		= "select * from $advisorClassTableName 
 						where advisorclass_semester = '$proximateSemester' 
-						order by advisorclass_call_sign, advisorclass_sequence";
+						order by advisorclass_call_sign, advisorclass_sequence ";
 		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisorclass === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -355,150 +467,114 @@ function cross_check_student_assignments_func() {
 					$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 		
 					$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$advisorClass_call_sign</a>";
-//					if ($advisorClass_number_students > 0) {
-						$classCount				= 0;
-						for ($snum=1;$snum<31;$snum++) {
-							if ($snum < 10) {
-								$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+					for ($snum=1;$snum<31;$snum++) {
+						if ($snum < 10) {
+							$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+						} else {
+							$strSnum		= strval($snum);
+						}
+						$theInfo			= ${'advisorClass_student' . $strSnum};
+						if ($theInfo != '') {
+							$foundStudent	= FALSE;
+							$studentCount	= 0;
+							$errorStr		= "";
+							
+							// get any matching student records
+							$studentSQL		= "select * from $studentTableName 
+												where student_call_sign like '$theInfo'  
+												and student_semester = '$proximateSemester' 
+												and student_response = 'Y' 
+												and (student_status = 'Y' 
+													or student_status = 'S')";
+
+							$wpw1_cwa_student	= $wpdb->get_results($studentSQL);
+							if ($wpw1_cwa_student === FALSE) {
+								handleWPDBError($jobname,$doDebug);
 							} else {
-								$strSnum		= strval($snum);
-							}
-							$theInfo			= ${'advisorClass_student' . $strSnum};
-							if ($theInfo != '') {
-								$classCount++;
-								$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
-								if (array_key_exists($theInfo,$advisorArray)) {
-									$content	.= "$theInfo already assigned to a different advisor<br />";
+								$numSRows									= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "DEBUG ran $studentSQL<br />and retrieved $numSRows rows from $studentTableName table<br >";
 								}
-								$theSeq++;
-								$advisorArray[$theInfo][$theSeq]['advisor']	= $advisorClass_call_sign;
-								$advisorArray[$theInfo][$theSeq]['class']	= $advisorClass_sequence;
-								
-								// there should be a studentArray record 
-								if (array_key_exists($theInfo,$studentArray)) {
-									if ($studentArray[$theInfo]['advisor'] == $advisorClass_call_sign && $studentArray[$theInfo]['class'] == $advisorClass_sequence) {
-										if ($doDebug) {
-//											echo "all OK<br />";
+								if ($numSRows > 0) {
+									foreach ($wpw1_cwa_student as $studentRow) {
+										$student_ID								= $studentRow->student_id;
+										$student_call_sign						= $studentRow->student_call_sign;
+										$student_time_zone  					= $studentRow->student_time_zone;
+										$student_timezone_offset				= $studentRow->student_timezone_offset;
+										$student_youth  						= $studentRow->student_youth;
+										$student_age  							= $studentRow->student_age;
+										$student_parent 						= $studentRow->student_parent;
+										$student_parent_email  					= strtolower($studentRow->student_parent_email);
+										$student_level  						= $studentRow->student_level;
+										$student_waiting_list 					= $studentRow->student_waiting_list;
+										$student_request_date  					= $studentRow->student_request_date;
+										$student_semester						= $studentRow->student_semester;
+										$student_notes  						= $studentRow->student_notes;
+										$student_welcome_date  					= $studentRow->student_welcome_date;
+										$student_email_sent_date  				= $studentRow->student_email_sent_date;
+										$student_email_number  					= $studentRow->student_email_number;
+										$student_response  						= strtoupper($studentRow->student_response);
+										$student_response_date  				= $studentRow->student_response_date;
+										$student_abandoned  					= $studentRow->student_abandoned;
+										$student_status  						= strtoupper($studentRow->student_status);
+										$student_action_log  					= $studentRow->student_action_log;
+										$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+										$student_selected_date  				= $studentRow->student_selected_date;
+										$student_no_catalog  					= $studentRow->student_no_catalog;
+										$student_hold_override  				= $studentRow->student_hold_override;
+										$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+										$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+										$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+										$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+										$student_class_priority  				= $studentRow->student_class_priority;
+										$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+										$student_promotable  					= $studentRow->student_promotable;
+										$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+										$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+										$student_available_class_days  			= $studentRow->student_available_class_days;
+										$student_intervention_required  		= $studentRow->student_intervention_required;
+										$student_copy_control  					= $studentRow->student_copy_control;
+										$student_first_class_choice  			= $studentRow->student_first_class_choice;
+										$student_second_class_choice  			= $studentRow->student_second_class_choice;
+										$student_third_class_choice  			= $studentRow->student_third_class_choice;
+										$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+										$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+										$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+										$student_catalog_options				= $studentRow->student_catalog_options;
+										$student_flexible						= $studentRow->student_flexible;
+										$student_date_created 					= $studentRow->student_date_created;
+										$student_date_updated			  		= $studentRow->student_date_updated;
+						
+										$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
+										
+										if ($student_assigned_advisor != $advisorClass_call_sign) {
+											if ($student_assigned_advisor != '') {
+												$assignedAdvisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
+											} else {
+												$assignedAdvisorLink	= "empty";
+											}
+											$content					.= "<tr><td>$advisorLink</td>
+																				<td>$advisorClass_sequence</td>
+																				<td>$studentLink</td>
+																				<td>Student Assigned Advisor is $assignedAdvisorLink Class: $student_assigned_advisor_class</td></tr>";
 										}
-									} else {
-										if ($doDebug) {
-											echo "DEBUG $student_call_sign is in $advisorLink class $advisorClass_sequence but has different value in student record<br />";
-										}
-										$content		.= "$student_call_sign is in $advisorLink class $advisorClass_sequence but has different value in student record<br />";
 									}
 								} else {
-									if ($doDebug) {
-										echo "DEBUG $student_call_sign is in the $advisorLink record, but doesn't exist in studentArray<br />";
-									}
 									$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$theInfo&inp_depth=one&doDebug&testMode' target='_blank'>$theInfo</a>";
-									$content	.= "$studentLink is in the $advisorLink record, but doesn't exist in studentArray<br />";
+									$content		.= "<tr><td>$advisorLink</td>
+															<td>$advisorClass_sequence</td>
+															<td>$studentLink</td>
+															<td>No corresonding student record found</td></tr>";
 								}
 							}
 						}
-						if ($advisorClass_number_students != $classCount) {
-							$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$advisorClass_call_sign</a>";
-							$content		.= "Advisor $advisorClass_call_sign record says $advisorClass_number_students, count is $classCount<br />";
-						}
-//					}
+					}
 				}
+				$content	.= "</table>";
 			} else {
-				$content	.= "<p>No advisorclass records found!</p>";
+				$content	.= "No advisorclass records found<br />";
 			}
 		}
-		if ($doDebug) {
-			ksort($studentArray);
-			ksort($advisorArray);
-			echo "DEBUG studentArray:<br /><pre>";
-			print_r($studentArray);
-			echo "</pre><br />DEBUG advisorArray:<br /><pre>";
-			print_r($advisorArray);
-			echo "</pre><br />";
-		}
-		
-		// have both arrays. Checking students against advisors
-		$content		.= "<h4>Checking studentArray against advisorArray</h4>";
-		foreach($studentArray as $student_call_sign=>$studentData) {
-//			$content		.= "<br />Checking studentArray $student_call_sign ";
-			$thisAdvisor	= $studentArray[$student_call_sign]['advisor'];
-			$thisClass		= $studentArray[$student_call_sign]['class'];
-			
-			if (array_key_exists($student_call_sign,$advisorArray)) { 
-				$myInt		= count($advisorArray[$student_call_sign]);
-				if ($myInt > 1) {
-					if ($doDebug) {
-						echo "DEBUG $student_call_sign assigned to $myInt advisorclasses<br />";						
-					}
-					$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
-					$content	.= "$studentLink assigned to multiple advisors/classes<br />";
-					foreach($advisorArray[$student_call_sign] as $thisSeq => $advisorData) {
-						$theAdvisor	= $advisorArray[$student_call_sign][$thisSeq]['advisor'];
-						$theClass	= $advisorArray[$student_call_sign][$thisSeq]['class'];
-						$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$theAdvisor&inp_depth=one&doDebug&testMode' target='_blank'>$theAdvisor</a>";
-//						$content	.= "Checking sequence $thisSeq which has advisor $theAdvisor and class $theClass<br />";
-						if ($thisAdvisor == $theAdvisor) {	// advisors match
-							if ($thisClass == $theClass) {	// class matches
-								if ($doDebug) {
-									echo "DEBUG $studentLink matches $advisorLink class $theClass<br />";
-								}
-								$content	.= "$studentLink matches up with $advisorLink class $theClass<br />";
-							} else {
-								if ($doDebug) {
-									echo "DEBUG $studentLink matches $advisorLink but student class $thisClass does not match advisor class $theClass<br />";
-								}
-								$content	.= "$tudentLink matches $advisorLink but not $theClass<br />";
-							}
-						} else {
-							if ($doDebug) {
-								echo "DEBUG advisor $advisorLink doesn't match the $studentLink<br />";
-							}
-							$content	.= "$student_call_sign doesn't match $theAdvisor<br />";
-						}
-					}
-				} else {		// only one advisor record for the student. See if advisor and class match
-					foreach($advisorArray[$student_call_sign] as $thisSeq => $advisorData) {
-						$theAdvisor	= $advisorArray[$student_call_sign][$thisSeq]['advisor'];
-						$theClass	= $advisorArray[$student_call_sign][$thisSeq]['class'];
-						if ($thisAdvisor == $theAdvisor && $thisClass == $theClass) {
-							if ($doDebug) {
-//								echo "DEBUG $student_call_sign matches up with advisorclass info<br />";
-							}
-						} else { 
-							if ($doDebug) {
-								echo "DEBUG $student_call_sign doesn't match advisorclass info<br />";
-							}
-							$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
-							$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$thisAdvisor&inp_depth=one&doDebug&testMode' target='_blank'>$thisAdvisor</a>";
-							$content		.= "$studentLink has $thisAdvisor $thisClass. Advisorclass has $advisorLink $theClass<br />";
-						}
-					}
-				}
-			} else {
-				$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
-				$advisorLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$thisAdvisor&inp_depth=one&doDebug&testMode' target='_blank'>$thisAdvisor</a>";
-				$content		.= "Student $studentLink record is assigned to $advisorLink class $thisClass. Not in advisorClass record<br />";
-			}
-		}
-/*
-		$content			.= "<br /><h4>Chaecking AdvisorArray against studentArray</h4>";
-		foreach($advisorArray as $student_call_sign=>$advisorData) {
-//			$content		.= "<br />Checking advisorArray $student_call_sign ";
-			$classAdvisor	= $advisorArray[$student_call_sign]['advisor'];
-			$classClass		= $advisorArray[$student_call_sign]['class'];
-			
-			if (array_key_exists($student_call_sign,$studentArray)) {
-				$thisAdvisor	= $studentArray[$student_call_sign]['advisor'];
-				$thisClass		= $studentArray[$student_call_sign]['class'];
-				
-				if ($thisAdvisor == $classAdvisor && $thisClass == $classClass) {
-//					$content	.= "OK<br />";
-				} else {
-					$content	.= "<br />Checking advisorArray $student_call_sign<b>NOK</b><br />
-									Student advisor / class: $thisAdvisor / $thisClass<br />
-									Advisor advisor / class: $classAdvisor / $classClass<br />";
-				}
-			}		
-		}	
-*/		
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
