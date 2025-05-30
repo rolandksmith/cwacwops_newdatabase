@@ -1056,7 +1056,7 @@ will be displayed there.</p>";
 					$thisVocab			= "threek";					// either threek or original
 					$thisInfor			= "Advisor%20Request";		// reason for the assessment
 	
-					$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&minchars=$thisminchars&words=1&maxchars=$thismaxchars&callsigns=$thisCallsigns&answers=$thisAnswers&timeout=$thistimeout&level=$student_level&token=$token&vocab=$thisVocab&infor=$thisInfor";
+					$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&minchars=$thisminchars&words=1&maxchars=$thismaxchars&callsigns=$thisCallsigns&answers=$thisAnswers&timeout=30&level=$student_level&token=$token&vocab=$thisVocab&infor=$thisInfor";
 					$myStr		= "$siteURL/cwa-advisor-request-student-assessment/?strpass=10&inp_callsign=$student_call_sign&token=$token";
 					$returnurl	= urlencode($myStr);
 					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
