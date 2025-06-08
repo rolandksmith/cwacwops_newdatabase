@@ -23,7 +23,7 @@ function send_mid_term_verification_email_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -215,8 +215,8 @@ td:last-child {
 		// get all the advisor records for this semester
 		$sql					= "select * from $advisorTableName 
 									left join $userMasterTableName on advisor_call_sign = user_call_sign 
-									where semester='$currentSemester' 
-									and survey_score != '6'";
+									where advisor_semester='$currentSemester' 
+									and user_survey_score != '6'";
 		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 		if ($wpw1_cwa_advisor === FALSE) {
 			handleWPDBError($jobname,$doDebug);
@@ -227,19 +227,42 @@ td:last-child {
 			}
 			if ($numARows > 0) {
 				foreach ($wpw1_cwa_advisor as $advisorRow) {
+					$advisor_master_ID 					= $advisorRow->user_ID;
+					$advisor_master_call_sign			= $advisorRow->user_call_sign;
+					$advisor_first_name 				= $advisorRow->user_first_name;
+					$advisor_last_name 					= $advisorRow->user_last_name;
+					$advisor_email 						= $advisorRow->user_email;
+					$advisor_phone 						= $advisorRow->user_phone;
+					$advisor_city 						= $advisorRow->user_city;
+					$advisor_state 						= $advisorRow->user_state;
+					$advisor_zip_code 					= $advisorRow->user_zip_code;
+					$advisor_country_code 				= $advisorRow->user_country_code;
+					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
+					$advisor_telegram 					= $advisorRow->user_telegram;
+					$advisor_signal 					= $advisorRow->user_signal;
+					$advisor_messenger 					= $advisorRow->user_messenger;
+					$advisor_master_action_log 			= $advisorRow->user_action_log;
+					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
+					$advisor_languages 					= $advisorRow->user_languages;
+					$advisor_survey_score 				= $advisorRow->user_survey_score;
+					$advisor_is_admin					= $advisorRow->user_is_admin;
+					$advisor_role 						= $advisorRow->user_role;
+					$advisor_master_date_created 		= $advisorRow->user_date_created;
+					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
+
 					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->call_sign);
-					$advisor_semester 					= $advisorRow->semester;
-					$advisor_welcome_email_date 		= $advisorRow->welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->verify_response);
-					$advisor_action_log 				= $advisorRow->action_log;
-					$advisor_class_verified 			= $advisorRow->class_verified;
-					$advisor_control_code 				= $advisorRow->control_code;
-					$advisor_date_created 				= $advisorRow->date_created;
-					$advisor_date_updated 				= $advisorRow->date_updated;
-					$advisor_replacement_status 		= $advisorRow->replacement_status;
+					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
+					$advisor_semester 					= $advisorRow->advisor_semester;
+					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
+					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+					$advisor_action_log 				= $advisorRow->advisor_action_log;
+					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+					$advisor_control_code 				= $advisorRow->advisor_control_code;
+					$advisor_date_created 				= $advisorRow->advisor_date_created;
+					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 
 					$doProceed							= TRUE;
 					if ($doDebug) {
@@ -256,9 +279,9 @@ td:last-child {
 						// see if the advisor has any students
 						$sql			= "SELECT count(student_id) as student_count 
 											from $studentTableName 
-											where semester='$currentSemester' 
-											and assigned_advisor='$advisor_call_sign' 
-											and student_status='Y'";
+											where student_semester='$currentSemester' 
+											and student_assigned_advisor='$advisor_call_sign' 
+											and (student_status='Y' or student_status='S')";
 						$student_count	= $wpdb->get_var($sql);
 						if ($student_count == 0) {
 							$doProceed			= FALSE;
@@ -322,7 +345,7 @@ CW Academy</p>";
 							$advisor_action_log		= "$advisor_action_log / $actionDate MIDVERIFY mid-term verification 
 email sent to the advisor ";
 							$advisor_action_log 	= addslashes($advisor_action_log);
-							$sql		= "update $advisorTableName set action_log='$advisor_action_log' where advisor_id=$advisor_ID";
+							$sql		= "update $advisorTableName set advisor_action_log='$advisor_action_log' where advisor_id=$advisor_ID";
 							$result		= $wpdb->query($sql);
 							if ($result === FALSE) {
 								if ($doDebug) {
@@ -336,9 +359,18 @@ email sent to the advisor ";
 								}
 							}
 							// add the reminder for the advisor
-							$effective_date		 	= date('Y-m-d H:i:s');
-							$closeStr				= strtotime("+5 days");
-							$close_date				= date('Y-m-d H:i:s', $closeStr);
+							$returnArray			= wp_to_local($advisor_timezone_id,0,5);
+							if ($returnArray === FALSE) {
+								if ($doDebug) {
+									echo "advisor timezone id of $advisor_timezone_id is bogus<br />";
+								}
+								$effective_date		= date('Y-m-d H:i:s');
+								$closeStr			= strtotime("+5 days");
+								$close_date			= date('Y-m-d H:i:s', $closeStr);
+							} else {
+								$effective_date		= $returnArray['effective'];
+								$close_date			= $returnArray['expiration'];							
+							}
 							$token					= mt_rand();
 							$email_text				= "<p></p>";
 							$reminder_text			= "<b>Mid-term Student Verification</b> 
