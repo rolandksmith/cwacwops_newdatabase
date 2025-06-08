@@ -30,7 +30,7 @@ function verify_advisor_class_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$myDate							= date('dMy hi') . 'z';
 	$initializationArray			= data_initialization_func();
@@ -38,6 +38,7 @@ function verify_advisor_class_func() {
 	$userName						= $initializationArray['userName'];
 	$userRole						= $initializationArray['userRole'];
 	$currentSemester				= $initializationArray['currentSemester'];
+	$prevSemester					= $initializationArray['prevSemester'];
 	$siteURL						= $initializationArray['siteurl'];
 	$validTestmode					= $initializationArray['validTestmode'];
 
@@ -262,9 +263,12 @@ function verify_advisor_class_func() {
 		
 
 			// Get advisor record for this advisor
+			if ($currentSemester == 'Not in Session') {
+				$currentSemester	= $prevSemester;
+			}
 			$sql				= "select * from $advisorTableName 
 									left join $userMasterTableName on user_call_sign = advisor_call_sign 
-									where call_sign='$inp_advisor' 
+									where advisor_call_sign='$inp_advisor' 
 									and advisor_semester='$currentSemester'";
 			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
 			if ($wpw1_cwa_advisor === FALSE) {
@@ -358,7 +362,7 @@ function verify_advisor_class_func() {
 						$sql					= "select * from $advisorClassTableName 
 												   where advisorclass_call_sign='$inp_advisor' 
 												   and advisorclass_semester='$currentSemester' 
-												   order by sequence";
+												   order by advisorclass_sequence";
 						$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 						if ($wpw1_cwa_advisorclass === FALSE) {
 							handleWPDBError($jobname,$doDebug);
@@ -421,7 +425,7 @@ function verify_advisor_class_func() {
 
 									$firstTime				= TRUE;
 
-									for ($snum=1;$snum<=$class_number_students;$snum++) {
+									for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
 										if ($snum < 10) {
 											$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
 										} else {
@@ -517,11 +521,11 @@ function verify_advisor_class_func() {
 														$student_date_updated			  		= $studentRow->student_date_updated;
 
 														if ($doDebug) {
-															echo "Have a student $student_call_sign status: $student_student_status; level: $student_level<br />";
+															echo "Have a student $student_call_sign status: $student_status; level: $student_level<br />";
 														}
 
 														$doProceed								= FALSE;
-														if ($student_student_status == 'Y' || $student_student_status == 'S') {
+														if ($student_status == 'Y' || $student_student_status == 'S') {
 															$doProceed							= TRUE;
 														} else {
 															$doProceed							= FALSE;
@@ -560,7 +564,7 @@ function verify_advisor_class_func() {
 											}
 										}
 									}
-									$content		.= "<tr><td colspan='2'><b>$class_number_students Students</b></td></tr>";
+									$content		.= "<tr><td colspan='2'><b>$advisorClass_number_students Students</b></td></tr>";
 								}			/// end of advisorClass
 								if ($gotStudent) {
 									$content	.= "
@@ -731,7 +735,7 @@ function verify_advisor_class_func() {
 
 						} else {			// student attending. Is the student status an 'S'?
 						
-							if ($student_student_status == 'S') {			// make this a 'Y'
+							if ($student_status == 'S') {			// make this a 'Y'
 								$updateData		= array('student_status'=>'Y');
 								$updateFormat	= array('%s');
 								$updateStudent	= TRUE;
@@ -836,9 +840,6 @@ function verify_advisor_class_func() {
 											from $advisorTableName 
 											where advisor_id=$inp_advisor_id";
 			$wpw1_cwa_advisor			= $wpdb->get_results($sql);
-			if ($doDebug) {
-				handleWPDBError($jobname,$doDebug);
-			}
 			if ($wpw1_cwa_advisor === FALSE) {
 				handleWPDBError($jobname,$doDebug);
 			} else {
