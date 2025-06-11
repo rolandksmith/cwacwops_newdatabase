@@ -48,7 +48,7 @@ function manage_advisor_class_assignments_func() {
 	if ($userRole != 'administrator') {
 		$doDebug		= FALSE;
 		$testMode		= FALSE;
-	}
+//	}
 	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
@@ -405,6 +405,7 @@ function manage_advisor_class_assignments_func() {
 												<input type='hidden' name='inp_callsign' value='$inp_callsign'>
 												<input type='hidden' name='student_call_sign' value='$student_call_sign'>
 												<input type='hidden' name='studentid' value='$student_ID'>
+												<input type='hidden' name='inp_vebose' value='$inp_verbose'>
 												<input type='hidden' name='token' value='$token'>
 												<table>
 												<tr><td>Student $student_call_sign has been assigned to your class. After contacting 
