@@ -81,19 +81,19 @@ function move_student_to_different_semester_func() {
 			}
 			if ($str_key 		== "strpass") {
 				$strPass		 = $str_value;
-				$strPass		 = filter_var($strPass,FILTER_SANITIZE_STRING);
+				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_callSign") {
 				$inp_callSign	 = strtoupper($str_value);
-				$inp_callSign	 = filter_var($inp_callSign,FILTER_SANITIZE_STRING);
+				$inp_callSign	 = filter_var($inp_callSign,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_semesterA") {
 				$inp_semesterA	 = $str_value;
-				$inp_semesterA	 = filter_var($inp_semesterA,FILTER_SANITIZE_STRING);
+				$inp_semesterA	 = filter_var($inp_semesterA,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_semesterB") {
 				$inp_semesterB	 = $str_value;
-				$inp_semesterB	 = filter_var($inp_semesterB,FILTER_SANITIZE_STRING);
+				$inp_semesterB	 = filter_var($inp_semesterB,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
