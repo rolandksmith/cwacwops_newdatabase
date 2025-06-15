@@ -44,6 +44,7 @@ function advisor_statistics_func() {
 	$myString			= '';
 	$strPass			= '1';
 	$theURL				= "$siteURL/cwa-advisor-statistics/";
+	$jobname			= "Prepare and Display Advisor Statistics";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -164,7 +165,7 @@ function advisor_statistics_func() {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$content 		.= "<h3>Prepare and Display Advisor Statistics for $nextSemester</h3>
+		$content 		.= "<h3>$jobname for $nextSemester</h3>
 							<p><form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
@@ -208,7 +209,7 @@ function advisor_statistics_func() {
 					$advisor_telegram 					= $advisorRow->user_telegram;
 					$advisor_signal 					= $advisorRow->user_signal;
 					$advisor_messenger 					= $advisorRow->user_messenger;
-					$advisor_action_log 				= $advisorRow->user_action_log;
+					$advisor_master_action_log 			= $advisorRow->user_action_log;
 					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
 					$advisor_languages 					= $advisorRow->user_languages;
 					$advisor_survey_score 				= $advisorRow->user_survey_score;
@@ -230,30 +231,6 @@ function advisor_statistics_func() {
 					$advisor_date_created 				= $advisorRow->advisor_date_created;
 					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advislr_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
-						}
-					}
 
 
 					if ($doDebug) {
@@ -374,7 +351,7 @@ function advisor_statistics_func() {
 			print_r($countArray);
 			echo "</pre><br />";
 		}
-		$content	.= "<h3>Advisor Statistics as of $thisTime</h3>";
+		$content	.= "<h3>$jobname as of $thisTime</h3>";
 		foreach ($countArray as $key0=>$value0) {
 			$content	.= "<h4>$key0 Semester</h4><table><tr><th>Item</th><th>Value</th></tr>";
 			$theCount	= $value0['total'];
