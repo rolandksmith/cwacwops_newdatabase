@@ -229,6 +229,7 @@ and clarification please contact the appropriate person at
 				$advisorTableName			= 'wpw1_cwa_advisor2';
 				$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
 				$userMasterTableName		= 'wpw1_cwa_user_master2';
+				$badActorTableName			= 'wpw1_cwa_bad_actor';
 				echo "Function is under development. Using test data, not the production data.<br />";
 				$theStatement				= "<p>Running in TESTMODE using Test Data.</p>";
 			} else {
@@ -236,6 +237,7 @@ and clarification please contact the appropriate person at
 				$advisorTableName			= 'wpw1_cwa_advisor';
 				$advisorClassTableName		= 'wpw1_cwa_advisorclass';
 				$userMasterTableName		= 'wpw1_cwa_user_master';
+				$badActorTableName			= 'wpw1_cwa_bad_actor';
 				$theStatement				= "";
 			}
 
@@ -341,289 +343,346 @@ and clarification please contact the appropriate person at
 								echo "&nbsp;&nbsp;&nbsp;&nbsp;advisor has a verify_respone of $advisor_verify_response. Bypassing. <br />";
 							}
 						} else {
-							// general test for all advisors except those with a survey score of 6				
-							if ($advisor_survey_score != 6 && $advisor_survey_score != 9 && $advisor_survey_score != 13) {
-								// Look for this advisor in past semesters and see if survey score is 6 (bad actor)
-								$dumpAdvisor				= FALSE;
-								$sevenSurveyScore			= FALSE;
-								$sql						= "select * from $advisorTableName 
-																where advisor_call_sign='$advisor_call_sign' 
-																and advisor_semester != '$nextSemester' 
-																order by advisor_date_created ";
-								$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-								if ($wpw1_cwa_advisor === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-								} else {	
-									$numPARows				= $wpdb->num_rows;
-									if ($doDebug) {
-										echo "ran $sql<br />and found $numPARows rows in $advisorTableName<br />";
+							// see if advisor is in the bad actors table. If so, put on hold
+							$putOnHold		= FALSE;
+							$baSQL			= "select * from $badActorTableName 
+												where call_sign = '$advisor_call_sign' 
+												and status = 'A'";
+							$baResult		= $wpdb->get_results($baSQL);
+							if ($baResult === FALSE) {
+								handleWPDBError($jobname,$doDebug,"attempting to check bad actor table");
+								$putOnHold	= TRUE;
+							} else {
+								$numBARows	= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $baSQL<br />and retrieved $numBARows rows<br />";
+								}
+								if ($numBARows > 0) {
+									$putOnHold	= TRUE;
+								}
+							}
+							if ($putOnHold) {
+								if ($doDebug) {
+									echo "$advisorCallSign has an active bad actor record and will be put on hold<br />";
+								}
+								$content		.= "<p>Advisor $advisor_call_sign has an active Bad Actors record. Survey score has been set to 6</p>";
+								$dumpAdvisor	= TRUE;
+								$advisor_action_log	.= "$advisor_action_log / actionDate ADVPREP Past advisor record had survey_score of 6. Advisor is in bad actors table. Setting survey score to 6 ";
+								$updateParams		= array('advisor_survey_score'=>6,
+															'advisor-action_log'=>$advisor_action_log);
+								$updateFormat		= array('%d','%s');
+								if ($saveChanges) {
+									$advisorUpdateData		= array('tableName'=>$advisorTableName,
+																	'inp_method'=>'update',
+																	'inp_data'=>$updateParams,
+																	'inp_format'=>$updateFormat,
+																	'jobname'=>$jobname,
+																	'inp_id'=>$advisor_ID,
+																	'inp_callsign'=>$advisor_call_sign,
+																	'inp_semester'=>$advisor_semester,
+																	'inp_who'=>$userName,
+																	'testMode'=>$testMode,
+																	'doDebug'=>$doDebug);
+									$updateResult	= updateAdvisor($advisorUpdateData);
+									if ($updateResult[0] === FALSE) {
+										$myError	= $wpdb->last_error;
+										$mySql		= $wpdb->last_query;
+										$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+										if ($doDebug) {
+											echo $errorMsg;
+										}
+										sendErrorEmail($errorMsg);
+										$content		.= "Unable to update content in $advisorTableName<br />";
+									} else {
+										if ($doDebug) {
+											echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
+										}
 									}
-									if ($numPARows > 0) {
-										$theSurveyScore								= 0;
-										foreach ($wpw1_cwa_advisor as $advisorRow) {
-											$advisor_ID						= $advisorRow->advisor_id;
-											$advisor_call_sign 				= strtoupper($advisorRow->advisor_call_sign);
-											$advisor_semester 					= $advisorRow->advisor_semester;
-											$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-											$advisor_verify_email_date 		= $advisorRow->advisor_verify_email_date;
-											$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-											$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-											$advisor_action_log 				= $advisorRow->advisor_action_log;
-											$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-											$advisor_control_code 				= $advisorRow->advisor_control_code;
-											$advisor_date_created 				= $advisorRow->advisor_date_created;
-											$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-											$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-									
-											if ($doDebug) {
-												echo "Got $advisorTableName record for $advisor_call_sign. Checking survey score of $advisor_survey_score<br />";
-											}
-											if ($advisor_survey_score == 6) {
-												$theSurveyScore			   = $advisor_survey_score;
-											}
-											if ($advisor_survey_score == 7) {
-												$sevenSurveyScore			= TRUE;
-											}
-										}			// end of while loop
-										if ($theSurveyScore == '6') {
-											$content	.= "<br />Setting survey_score to 6 for $advisorUpdateLink as advisor shows a survey score or  6<br />";
-											if ($doDebug) {
-												echo "advisor survey score was 6. Setting survey_score for this advisor to 6<br />";
-											}
-											$advisor_action_log	.= "$advisor_action_log / actionDate ADVPREP Past advisor record had survey_score of 6. Setting survey_score to 6. ";
-											$updateParams		= array('advisor_survey_score'=>6,
-																		'advisor-action_log'=>$advisor_action_log);
-											$updateFormat		= array('%d','%s');
-											if ($saveChanges) {
-												$advisorUpdateData		= array('tableName'=>$advisorTableName,
-																				'inp_method'=>'update',
-																				'inp_data'=>$updateParams,
-																				'inp_format'=>$updateFormat,
-																				'jobname'=>$jobname,
-																				'inp_id'=>$advisor_ID,
-																				'inp_callsign'=>$advisor_call_sign,
-																				'inp_semester'=>$advisor_semester,
-																				'inp_who'=>$userName,
-																				'testMode'=>$testMode,
-																				'doDebug'=>$doDebug);
-												$updateResult	= updateAdvisor($advisorUpdateData);
-												if ($updateResult[0] === FALSE) {
-													$myError	= $wpdb->last_error;
-													$mySql		= $wpdb->last_query;
-													$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-													if ($doDebug) {
-														echo $errorMsg;
-													}
-													sendErrorEmail($errorMsg);
-													$content		.= "Unable to update content in $advisorTableName<br />";
-												} else {
-													if ($doDebug) {
-														echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
-													}
-													$trashCount++;
-													$theResult	= sendAdvisorEmail($advisor_call_sign,$advisor_email);
-													if ($theResult) {
-														$emailsSent++;
-													} else {
-														echo "Email to $advisor_call_sign putting registration on hold failed<br />";
-													}									
-												}
-											}
-									
-										} else {
-											if ($doDebug) {
-												echo "advisor survey score was not 6. Continuing<br />";
-											}
-											if ($sevenSurveyScore) {
-												$advisor_survey_score 				= 7;
-												$updateParams['advisor_survey_score']		= 7;
-												$updateFormat[]						= '%d';
+								}
+							} else {
+								// general test for all advisors except those with a survey score of 6				
+								if ($advisor_survey_score != 6 && $advisor_survey_score != 9 && $advisor_survey_score != 13) {
+									// Look for this advisor in past semesters and see if survey score is 6 (bad actor)
+									$dumpAdvisor				= FALSE;
+									$sevenSurveyScore			= FALSE;
+									$sql						= "select * from $advisorTableName 
+																	where advisor_call_sign='$advisor_call_sign' 
+																	and advisor_semester != '$nextSemester' 
+																	order by advisor_date_created ";
+									$wpw1_cwa_advisor	= $wpdb->get_results($sql);
+									if ($wpw1_cwa_advisor === FALSE) {
+										handleWPDBError($jobname,$doDebug);
+									} else {	
+										$numPARows				= $wpdb->num_rows;
+										if ($doDebug) {
+											echo "ran $sql<br />and found $numPARows rows in $advisorTableName<br />";
+										}
+										if ($numPARows > 0) {
+											$theSurveyScore								= 0;
+											foreach ($wpw1_cwa_advisor as $advisorRow) {
+												$advisor_ID						= $advisorRow->advisor_id;
+												$advisor_call_sign 				= strtoupper($advisorRow->advisor_call_sign);
+												$advisor_semester 					= $advisorRow->advisor_semester;
+												$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
+												$advisor_verify_email_date 		= $advisorRow->advisor_verify_email_date;
+												$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
+												$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
+												$advisor_action_log 				= $advisorRow->advisor_action_log;
+												$advisor_class_verified 			= $advisorRow->advisor_class_verified;
+												$advisor_control_code 				= $advisorRow->advisor_control_code;
+												$advisor_date_created 				= $advisorRow->advisor_date_created;
+												$advisor_date_updated 				= $advisorRow->advisor_date_updated;
+												$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
+										
 												if ($doDebug) {
-													echo "$advisorTableName has a record with survey score of 7. Setting this advisor to 7<br />";
+													echo "Got $advisorTableName record for $advisor_call_sign. Checking survey score of $advisor_survey_score<br />";
 												}
-											}					
-											if ($advisor_survey_score == 7) {
+												if ($advisor_survey_score == 6) {
+													$theSurveyScore			   = $advisor_survey_score;
+												}
+												if ($advisor_survey_score == 7) {
+													$sevenSurveyScore			= TRUE;
+												}
+											}			// end of while loop
+											if ($theSurveyScore == '6') {
+												$content	.= "<br />Setting survey_score to 6 for $advisorUpdateLink as advisor shows a survey score or  6<br />";
 												if ($doDebug) {
-													echo "advisor has a survey score of 7<br />";
+													echo "advisor survey score was 6. Setting survey_score for this advisor to 6<br />";
 												}
-												$studentFound			= FALSE;
-												$studentArray			= array();
-												/// build advisorArray of the advisor classes: advisorArray['advisor_call_sign|level] = sequence
-												/// get all of the advisor classes for the next semester
-												/// if advisor class is incomplete, ignore the record
-								
-												$sql					= "select * from $advisorClassTableName 
-																		   where advisorclass_semester='$nextSemester' 
-																		   		and advisorclass_call_sign='$advisor_call_sign'";
-												$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-												if ($wpw1_cwa_advisorclass === FALSE) {
-													handleWPDBError($jobname,$doDebug);
-												} else {
-													$numACRows						= $wpdb->num_rows;
-													if ($doDebug) {
-														echo "ran $sql<br />and found $numACRows rows<br />";
-													}
-													if ($numACRows > 0) {
-														foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-															$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-															$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-															$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-															$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-															$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-															$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-															$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-															$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-															$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-															$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-															$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-															$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-															$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-															$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-															$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-															$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-															$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-															$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-															$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-															$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-															$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-															$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-															$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-															$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-															$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-															$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-															$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-															$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-															$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-															$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-															$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-															$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-															$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-															$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-															$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-															$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-															$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-															$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-															$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-															$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-															$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-															$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-															$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-															$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-															$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-															$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-															$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-															$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-															$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-
-								
-															$advisorArrayKey							= "$advisorClass_call_sign|$advisorClass_level";
-															$advisorArray[$advisorArrayKey]				= $advisorClass_sequence;
-
+												$advisor_action_log	.= "$advisor_action_log / actionDate ADVPREP Past advisor record had survey_score of 6. Setting survey_score to 6. ";
+												$updateParams		= array('advisor_survey_score'=>6,
+																			'advisor-action_log'=>$advisor_action_log);
+												$updateFormat		= array('%d','%s');
+												if ($saveChanges) {
+													$advisorUpdateData		= array('tableName'=>$advisorTableName,
+																					'inp_method'=>'update',
+																					'inp_data'=>$updateParams,
+																					'inp_format'=>$updateFormat,
+																					'jobname'=>$jobname,
+																					'inp_id'=>$advisor_ID,
+																					'inp_callsign'=>$advisor_call_sign,
+																					'inp_semester'=>$advisor_semester,
+																					'inp_who'=>$userName,
+																					'testMode'=>$testMode,
+																					'doDebug'=>$doDebug);
+													$updateResult	= updateAdvisor($advisorUpdateData);
+													if ($updateResult[0] === FALSE) {
+														$myError	= $wpdb->last_error;
+														$mySql		= $wpdb->last_query;
+														$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+														if ($doDebug) {
+															echo $errorMsg;
 														}
-														$content					.= "<br />Processing $advisorUpdateLink who has a survey score of 7<br />";
-
-														// read the class table for all previous advisor classes and build an array of students who
-														// have taken a class from this advisor
-														$studentArray				= array();
-														$sql					 	= "select * from $advisorClassTableName 
-																					   where advisorclass_call_sign='$advisor_call_sign' 
-																					   and advisorclass_semester != '$nextSemester' ";
-														$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-														if ($wpw1_cwa_advisorclass === FALSE) {
-															handleWPDBError($jobname,$doDebug);
+														sendErrorEmail($errorMsg);
+														$content		.= "Unable to update content in $advisorTableName<br />";
+													} else {
+														if ($doDebug) {
+															echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
+														}
+														$trashCount++;
+														$theResult	= sendAdvisorEmail($advisor_call_sign,$advisor_email);
+														if ($theResult) {
+															$emailsSent++;
 														} else {
-															$numACRows				= $wpdb->num_rows;
-															if ($doDebug) {
-																echo "ran $sql<br />and found $numACRows rows in $advisorClassTableName table<br />";
+															echo "Email to $advisor_call_sign putting registration on hold failed<br />";
+														}									
+													}
+												}
+										
+											} else {
+												if ($doDebug) {
+													echo "advisor survey score was not 6. Continuing<br />";
+												}
+												if ($sevenSurveyScore) {
+													$advisor_survey_score 				= 7;
+													$updateParams['advisor_survey_score']		= 7;
+													$updateFormat[]						= '%d';
+													if ($doDebug) {
+														echo "$advisorTableName has a record with survey score of 7. Setting this advisor to 7<br />";
+													}
+												}					
+												if ($advisor_survey_score == 7) {
+													if ($doDebug) {
+														echo "advisor has a survey score of 7<br />";
+													}
+													$studentFound			= FALSE;
+													$studentArray			= array();
+													/// build advisorArray of the advisor classes: advisorArray['advisor_call_sign|level] = sequence
+													/// get all of the advisor classes for the next semester
+													/// if advisor class is incomplete, ignore the record
+									
+													$sql					= "select * from $advisorClassTableName 
+																			   where advisorclass_semester='$nextSemester' 
+																					and advisorclass_call_sign='$advisor_call_sign'";
+													$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+													if ($wpw1_cwa_advisorclass === FALSE) {
+														handleWPDBError($jobname,$doDebug);
+													} else {
+														$numACRows						= $wpdb->num_rows;
+														if ($doDebug) {
+															echo "ran $sql<br />and found $numACRows rows<br />";
+														}
+														if ($numACRows > 0) {
+															foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+																$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+																$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+																$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+																$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+																$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+																$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+																$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+																$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+																$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+																$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+																$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+																$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+																$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+																$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+																$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+																$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+																$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+																$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+																$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+																$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+																$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+																$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+																$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+																$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+																$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+																$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+																$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+																$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+																$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+																$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+																$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+																$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+																$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+																$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+																$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+																$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+																$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+																$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+																$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+																$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+																$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+																$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+																$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+																$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+																$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+																$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+																$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+																$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+																$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+	
+									
+																$advisorArrayKey							= "$advisorClass_call_sign|$advisorClass_level";
+																$advisorArray[$advisorArrayKey]				= $advisorClass_sequence;
+	
 															}
-															if ($numACRows > 0) {
-																foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-																	$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-																	$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-																	$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-																	$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-																	$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-																	$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-																	$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-																	$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-																	$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-																	$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-																	$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-																	$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-																	$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-																	$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-																	$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-																	$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-																	$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-																	$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-																	$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-																	$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-																	$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-																	$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-																	$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-																	$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-																	$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-																	$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-																	$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-																	$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-																	$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-																	$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-																	$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-																	$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-																	$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-																	$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-																	$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-																	$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-																	$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-																	$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-																	$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-																	$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-																	$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-																	$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-																	$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-																	$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-																	$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-																	$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-																	$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-																	$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-																	$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-
-																	if ($doDebug) {
-																		echo "Processing $advisorClass_callsign Semester: $advisorClass_semester sequence: $advisorClass_sequence<br />";
-																	}
-																	for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
-																		if ($snum < 10) {
-																			$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
-																		} else {
-																			$strSnum		= strval($snum);
-																		}
+															$content					.= "<br />Processing $advisorUpdateLink who has a survey score of 7<br />";
+	
+															// read the class table for all previous advisor classes and build an array of students who
+															// have taken a class from this advisor
+															$studentArray				= array();
+															$sql					 	= "select * from $advisorClassTableName 
+																						   where advisorclass_call_sign='$advisor_call_sign' 
+																						   and advisorclass_semester != '$nextSemester' ";
+															$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
+															if ($wpw1_cwa_advisorclass === FALSE) {
+																handleWPDBError($jobname,$doDebug);
+															} else {
+																$numACRows				= $wpdb->num_rows;
+																if ($doDebug) {
+																	echo "ran $sql<br />and found $numACRows rows in $advisorClassTableName table<br />";
+																}
+																if ($numACRows > 0) {
+																	foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
+																		$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
+																		$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+																		$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
+																		$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
+																		$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+																		$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+																		$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
+																		$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+																		$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+																		$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+																		$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+																		$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
+																		$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+																		$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
+																		$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+																		$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
+																		$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
+																		$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
+																		$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
+																		$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
+																		$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
+																		$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
+																		$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
+																		$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
+																		$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
+																		$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
+																		$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
+																		$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
+																		$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
+																		$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
+																		$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
+																		$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
+																		$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
+																		$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
+																		$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
+																		$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
+																		$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
+																		$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
+																		$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
+																		$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
+																		$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
+																		$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
+																		$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
+																		$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
+																		$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
+																		$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
+																		$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+																		$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+																		$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+	
 																		if ($doDebug) {
-																			echo "Processing advisorClass_student$strSnum<br />";
+																			echo "Processing $advisorClass_callsign Semester: $advisorClass_semester sequence: $advisorClass_sequence<br />";
 																		}
-																		$theInfo			= ${'advisorClass_student' . $strSnum};
-																		if ($theInfo != '') {
-																			if (!in_array($theInfo,$studentArray)) {
-																				$studentArray[]	= $theInfo;
-																				if ($doDebug) {
-																					echo "added $theInfo to studentArray<br />";
-																				}
+																		for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
+																			if ($snum < 10) {
+																				$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
 																			} else {
-																				if ($doDebug) {
-																					echo "$theInfo already in the array<br />";
+																				$strSnum		= strval($snum);
+																			}
+																			if ($doDebug) {
+																				echo "Processing advisorClass_student$strSnum<br />";
+																			}
+																			$theInfo			= ${'advisorClass_student' . $strSnum};
+																			if ($theInfo != '') {
+																				if (!in_array($theInfo,$studentArray)) {
+																					$studentArray[]	= $theInfo;
+																					if ($doDebug) {
+																						echo "added $theInfo to studentArray<br />";
+																					}
+																				} else {
+																					if ($doDebug) {
+																						echo "$theInfo already in the array<br />";
+																					}
 																				}
 																			}
 																		}
+																	}				// end of while ... all class records processed
+																} else {
+																	if ($doDebug) {
+																		echo "No records found in $advisorClassTableName<br />";
 																	}
-																}				// end of while ... all class records processed
-															} else {
-																if ($doDebug) {
-																	echo "No records found in $advisorClassTableName<br />";
 																}
 															}
 														}
 													}
-												}
-												if ((count($studentArray)) > 0) {
+													if ((count($studentArray)) > 0) {
 /* if there are records in the studentArray
  *	sort the array
  *	foreach student in the array
@@ -631,160 +690,161 @@ and clarification please contact the appropriate person at
  *		if so, set advisor to advisor_call_sign (pre-assign)
  *
 */
-													sort($studentArray);
-													if ($doDebug) {
-														echo "Finished building array for  $advisor_call_sign<br /><pre>";
-														print_r($studentArray);
-														echo "</pre><br />";
-													}
-													$studentFound				= FALSE;
-													foreach ($studentArray as $theStudent) {
+														sort($studentArray);
 														if ($doDebug) {
-															echo "processing studentArray $theStudent<br />";
+															echo "Finished building array for  $advisor_call_sign<br /><pre>";
+															print_r($studentArray);
+															echo "</pre><br />";
 														}
-														$sql					= "select * from $studentTableName 
-																					where student_semester='$nextSemester' 
-																					and student_call_sign='$theStudent' 
-																					and student_response='Y'";
-														$wpw1_cwa_student		= $wpdb->get_results($sql);
-														if ($wpw1_cwa_student === FALSE) {
-															handleWPDBError($jobname,$doDebug);
-														} else {
-															$numSRows			= $wpdb->num_rows;
+														$studentFound				= FALSE;
+														foreach ($studentArray as $theStudent) {
 															if ($doDebug) {
-																echo "ran $sql<br />and found $numSRows rows<br />";
+																echo "processing studentArray $theStudent<br />";
 															}
-															if ($numSRows > 0) {
-																foreach ($wpw1_cwa_student as $studentRow) {
-																	$student_ID								= $studentRow->student_id;
-																	$student_call_sign						= $studentRow->student_call_sign;
-																	$student_time_zone  					= $studentRow->student_time_zone;
-																	$student_timezone_offset				= $studentRow->student_timezone_offset;
-																	$student_youth  						= $studentRow->student_youth;
-																	$student_age  							= $studentRow->student_age;
-																	$student_student_parent 				= $studentRow->student_parent;
-																	$student_parent_email  					= strtolower($studentRow->student_parent_email);
-																	$student_level  						= $studentRow->student_level;
-																	$student_waiting_list 					= $studentRow->student_waiting_list;
-																	$student_request_date  					= $studentRow->student_request_date;
-																	$student_semester						= $studentRow->student_semester;
-																	$student_notes  						= $studentRow->student_notes;
-																	$student_welcome_date  					= $studentRow->student_welcome_date;
-																	$student_email_sent_date  				= $studentRow->student_email_sent_date;
-																	$student_email_number  					= $studentRow->student_email_number;
-																	$student_response  						= strtoupper($studentRow->student_response);
-																	$student_response_date  				= $studentRow->student_response_date;
-																	$student_abandoned  					= $studentRow->student_abandoned;
-																	$student_status  						= strtoupper($studentRow->student_status);
-																	$student_action_log  					= $studentRow->student_action_log;
-																	$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-																	$student_selected_date  				= $studentRow->student_selected_date;
-																	$student_no_catalog  					= $studentRow->student_no_catalog;
-																	$student_hold_override  				= $studentRow->student_hold_override;
-																	$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-																	$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-																	$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-																	$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-																	$student_class_priority  				= $studentRow->student_class_priority;
-																	$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-																	$student_promotable  					= $studentRow->student_promotable;
-																	$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-																	$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
-																	$student_available_class_days  			= $studentRow->student_available_class_days;
-																	$student_intervention_required  		= $studentRow->student_intervention_required;
-																	$student_copy_control  					= $studentRow->student_copy_control;
-																	$student_first_class_choice  			= $studentRow->student_first_class_choice;
-																	$student_second_class_choice  			= $studentRow->student_second_class_choice;
-																	$student_third_class_choice  			= $studentRow->student_third_class_choice;
-																	$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-																	$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-																	$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-																	$student_catalog_options				= $studentRow->student_catalog_options;
-																	$student_flexible						= $studentRow->student_flexible;
-																	$student_date_created 					= $studentRow->student_date_created;
-																	$student_date_updated			  		= $studentRow->student_date_updated;
-
-
-																	$studentUpdateData						= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>";
-
-																	$updateParams							= array();
-																	$updateFormat							= array();
-//																	if ($doDebug) {
-//																		echo "Looking at $student_call_sign response: $student_response; status: $student_status; excluded advisor: $student_excluded_advisor<br />";
-//																	}
-																	$thisNeedle		= "/$advisor_call_sign/";
-																	if (preg_match($thisNeedle,$student_excluded_advisor) === FALSE) {
-																		if ($student_pre_assigned_advisor == '' || $student_pre_assigned_advisor == $advisor_call_sign) { 		// must not already be pre-assigned
-																			// see if advisor has a class at the level the student is registered for.
-																			// if so, pre-assign the student
-									
-																			$advisorArrayKey							= "$advisor_call_sign|$student_level";
-																			if (array_key_exists($advisorArrayKey,$advisorArray)) {   /// have a match
-																				$theSequence							= $advisorArray[$advisorArrayKey];												
-																				$updateParams['student_pre_assigned_advisor']	= $advisor_call_sign;
-																				$updateFormat[]							= '%s';
-																				$updateParams['student_assigned_advisor_class']	= $theSequence;
-																				$updateFormat[]							= '%d';
-																				$content								.= "&nbsp;&nbsp&nbsp;Previous student $student_call_sign ($studentUpdateData) pre-assigned to $advisor_call_sign sequence $theSequence<br />";
-																				$preAssignedCount++;
-																				$studentFound							= TRUE;
-																				if ($doDebug) {
-																					echo "setting pre_assigned_advisor to $advisor_call_sign for student $student_call_sign ($student_level) and assigned_advisor_class to $theSequence<br />";
-																				}
-																				$student_action_log 					.= "$student_action_log / $actionDate ADVPREP pre-assigned student to $advisor_call_sign ";
-																				$updateParams['action_log']				= $student_action_log;
-																				$updateFormat[]							= '%s';
-																				if ($saveChanges) {
-																					$studentUpdateData		= array('tableName'=>$studentTableName,
-																													'inp_method'=>'update',
-																													'inp_data'=>$updateParams,
-																													'inp_format'=>$updateFormat,
-																													'jobname'=>$jobname,
-																													'inp_id'=>$student_ID,
-																													'inp_callsign'=>$student_call_sign,
-																													'inp_semester'=>$student_semester,
-																													'inp_who'=>$userName,
-																													'testMode'=>$testMode,
-																													'doDebug'=>$doDebug);
-																					$updateResult	= updateStudent($studentUpdateData);
-																					if ($updateResult[0] === FALSE) {
-																						$myError	= $wpdb->last_error;
-																						$mySql		= $wpdb->last_query;
-																						$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-																						if ($doDebug) {
-																							echo $errorMsg;
-																						}
-																						sendErrorEmail($errorMsg);
-																						$content		.= "Unable to update content in $studentTableName<br />";
-																					} else {
-																						if ($doDebug) {
-																							echo "Successfully updated $student_call_sign record at $student_ID<br />";
+															$sql					= "select * from $studentTableName 
+																						where student_semester='$nextSemester' 
+																						and student_call_sign='$theStudent' 
+																						and student_response='Y'";
+															$wpw1_cwa_student		= $wpdb->get_results($sql);
+															if ($wpw1_cwa_student === FALSE) {
+																handleWPDBError($jobname,$doDebug);
+															} else {
+																$numSRows			= $wpdb->num_rows;
+																if ($doDebug) {
+																	echo "ran $sql<br />and found $numSRows rows<br />";
+																}
+																if ($numSRows > 0) {
+																	foreach ($wpw1_cwa_student as $studentRow) {
+																		$student_ID								= $studentRow->student_id;
+																		$student_call_sign						= $studentRow->student_call_sign;
+																		$student_time_zone  					= $studentRow->student_time_zone;
+																		$student_timezone_offset				= $studentRow->student_timezone_offset;
+																		$student_youth  						= $studentRow->student_youth;
+																		$student_age  							= $studentRow->student_age;
+																		$student_student_parent 				= $studentRow->student_parent;
+																		$student_parent_email  					= strtolower($studentRow->student_parent_email);
+																		$student_level  						= $studentRow->student_level;
+																		$student_waiting_list 					= $studentRow->student_waiting_list;
+																		$student_request_date  					= $studentRow->student_request_date;
+																		$student_semester						= $studentRow->student_semester;
+																		$student_notes  						= $studentRow->student_notes;
+																		$student_welcome_date  					= $studentRow->student_welcome_date;
+																		$student_email_sent_date  				= $studentRow->student_email_sent_date;
+																		$student_email_number  					= $studentRow->student_email_number;
+																		$student_response  						= strtoupper($studentRow->student_response);
+																		$student_response_date  				= $studentRow->student_response_date;
+																		$student_abandoned  					= $studentRow->student_abandoned;
+																		$student_status  						= strtoupper($studentRow->student_status);
+																		$student_action_log  					= $studentRow->student_action_log;
+																		$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
+																		$student_selected_date  				= $studentRow->student_selected_date;
+																		$student_no_catalog  					= $studentRow->student_no_catalog;
+																		$student_hold_override  				= $studentRow->student_hold_override;
+																		$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
+																		$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
+																		$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
+																		$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
+																		$student_class_priority  				= $studentRow->student_class_priority;
+																		$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
+																		$student_promotable  					= $studentRow->student_promotable;
+																		$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
+																		$student_student_survey_completion_date	= $studentRow->student_survey_completion_date;
+																		$student_available_class_days  			= $studentRow->student_available_class_days;
+																		$student_intervention_required  		= $studentRow->student_intervention_required;
+																		$student_copy_control  					= $studentRow->student_copy_control;
+																		$student_first_class_choice  			= $studentRow->student_first_class_choice;
+																		$student_second_class_choice  			= $studentRow->student_second_class_choice;
+																		$student_third_class_choice  			= $studentRow->student_third_class_choice;
+																		$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
+																		$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
+																		$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
+																		$student_catalog_options				= $studentRow->student_catalog_options;
+																		$student_flexible						= $studentRow->student_flexible;
+																		$student_date_created 					= $studentRow->student_date_created;
+																		$student_date_updated			  		= $studentRow->student_date_updated;
+	
+	
+																		$studentUpdateData						= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>";
+	
+																		$updateParams							= array();
+																		$updateFormat							= array();
+//																		if ($doDebug) {
+//																			echo "Looking at $student_call_sign response: $student_response; status: $student_status; excluded advisor: $student_excluded_advisor<br />";
+//																		}
+																		$thisNeedle		= "/$advisor_call_sign/";
+																		if (preg_match($thisNeedle,$student_excluded_advisor) === FALSE) {
+																			if ($student_pre_assigned_advisor == '' || $student_pre_assigned_advisor == $advisor_call_sign) { 		// must not already be pre-assigned
+																				// see if advisor has a class at the level the student is registered for.
+																				// if so, pre-assign the student
+										
+																				$advisorArrayKey							= "$advisor_call_sign|$student_level";
+																				if (array_key_exists($advisorArrayKey,$advisorArray)) {   /// have a match
+																					$theSequence							= $advisorArray[$advisorArrayKey];												
+																					$updateParams['student_pre_assigned_advisor']	= $advisor_call_sign;
+																					$updateFormat[]							= '%s';
+																					$updateParams['student_assigned_advisor_class']	= $theSequence;
+																					$updateFormat[]							= '%d';
+																					$content								.= "&nbsp;&nbsp&nbsp;Previous student $student_call_sign ($studentUpdateData) pre-assigned to $advisor_call_sign sequence $theSequence<br />";
+																					$preAssignedCount++;
+																					$studentFound							= TRUE;
+																					if ($doDebug) {
+																						echo "setting pre_assigned_advisor to $advisor_call_sign for student $student_call_sign ($student_level) and assigned_advisor_class to $theSequence<br />";
+																					}
+																					$student_action_log 					.= "$student_action_log / $actionDate ADVPREP pre-assigned student to $advisor_call_sign ";
+																					$updateParams['action_log']				= $student_action_log;
+																					$updateFormat[]							= '%s';
+																					if ($saveChanges) {
+																						$studentUpdateData		= array('tableName'=>$studentTableName,
+																														'inp_method'=>'update',
+																														'inp_data'=>$updateParams,
+																														'inp_format'=>$updateFormat,
+																														'jobname'=>$jobname,
+																														'inp_id'=>$student_ID,
+																														'inp_callsign'=>$student_call_sign,
+																														'inp_semester'=>$student_semester,
+																														'inp_who'=>$userName,
+																														'testMode'=>$testMode,
+																														'doDebug'=>$doDebug);
+																						$updateResult	= updateStudent($studentUpdateData);
+																						if ($updateResult[0] === FALSE) {
+																							$myError	= $wpdb->last_error;
+																							$mySql		= $wpdb->last_query;
+																							$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+																							if ($doDebug) {
+																								echo $errorMsg;
+																							}
+																							sendErrorEmail($errorMsg);
+																							$content		.= "Unable to update content in $studentTableName<br />";
+																						} else {
+																							if ($doDebug) {
+																								echo "Successfully updated $student_call_sign record at $student_ID<br />";
+																							}
 																						}
 																					}
 																				}
-																			}
-																		} else {
-																			if ($doDebug) {
-																				echo "student already has a pre-assigned advisor of $student_pre_assigned_advisor<br />";
+																			} else {
+																				if ($doDebug) {
+																					echo "student already has a pre-assigned advisor of $student_pre_assigned_advisor<br />";
+																				}
 																			}
 																		}
+																	}	// end of the while statement ... should only have one record
+																} else {
+																	if ($doDebug) {
+																		echo "$theStudent has no class registrations<br />";
 																	}
-																}	// end of the while statement ... should only have one record
-															} else {
-																if ($doDebug) {
-																	echo "$theStudent has no class registrations<br />";
 																}
-															}
-														}									
-													}
-												} else {
-													if ($doDebug) {
-														echo "No past students found<br />";
+															}									
+														}
+													} else {
+														if ($doDebug) {
+															echo "No past students found<br />";
+														}
 													}
 												}
 											}
-										}
-									} 
+										} 
+									}
 								}
 							}
 						}
