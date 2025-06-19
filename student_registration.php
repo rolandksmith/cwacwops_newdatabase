@@ -114,6 +114,7 @@ function student_registration_func() {
 	$inp_sked1					= '';
 	$inp_sked2					= '';
 	$inp_sked3					= '';
+	$inp_sked_timex				= array();
 	$inp_first_class_choice		= '';
 	$inp_second_class_choice	= '';
 	$inp_third_class_choice		= '';
