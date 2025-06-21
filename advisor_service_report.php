@@ -320,8 +320,13 @@ function advisor_service_report_func() {
 									echo "processing semester $semester of $classes classes<br />";
 								}
 								$myArray 		= explode(" ",$semester);
-								$thisYear		= $myArray[0];
-								$thisMonths		= $myArray[1];
+								if (str_contains($myArray[0],'/')) {
+									$thisYear		= $myArray[1];
+									$thisMonths		= $myArray[0];
+								} else {
+									$thisYear		= $myArray[0];
+									$thisMonths		= $myArray[1];
+								}
 								
 								$newMonth		= $monthsArray[$thisMonths];
 								$newSemester	= "$thisYear,$newMonth";
@@ -393,6 +398,9 @@ function advisor_service_report_func() {
 		foreach($classesArray as $thisAdvisor => $thisData) {
 			$thisClasses		= intval($classesArray[$thisAdvisor]['classes']);
 			$thisNewClasses		= intval($classesArray[$thisAdvisor]['newClasses']);
+			if ($thisNewClasses === 0) {
+				$thisNewClasses = '';
+			}
 			$thisLastSemester	= $classesArray[$thisAdvisor]['lastSemester'];
 
 			$myArray			= explode(",",$thisLastSemester);
