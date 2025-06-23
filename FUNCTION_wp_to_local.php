@@ -17,6 +17,23 @@ function wp_to_local($timeZoneId, $effectiveOffset, $expirationOffset) {
 					  
 				dates are in Y-m-d H:i:s format
 	returns FALSE if there is an error
+	
+	Example for setting a reminder
+		$returnArray		= wp_to_local($advisor_tz_id, 0, 5);
+		if ($returnArray === FALSE) {
+			if ($doDebug) {
+				echo "called wp_to_local with $advisor_tz_id, 0, 5 which returned FALSE<br />";
+			} else {
+				sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+			}
+			$effective_date		= date('Y-m-d 00:00:00');
+			$closeStr			= strtotime("+ 5 days");
+			$close_date			= date('Y-m-d 00:00:00',$closeStr);
+		} else {
+			$effective_date		= $returnArray[0];
+			$close_date			= $returnArray[1];
+		}
+	
 */
 
 	$doDebug		= TRUE;
