@@ -30,13 +30,13 @@ function wp_to_local($timeZoneId, $effectiveOffset, $expirationOffset) {
 			$closeStr			= strtotime("+ 5 days");
 			$close_date			= date('Y-m-d 00:00:00',$closeStr);
 		} else {
-			$effective_date		= $returnArray[0];
-			$close_date			= $returnArray[1];
+			$effective_date		= $returnArray['effective'];
+			$close_date			= $returnArray['expiration'];
 		}
 	
 */
 
-	$doDebug		= TRUE;
+	$doDebug		= FALSE;
 	if ($doDebug) {
 		echo "<br /><b>In wp_to_local</b> with timeZoneId = $timeZoneId, effectiveOffset = $effectiveOffset, and expirationOffset = $expirationOffset<br />";
 	}
