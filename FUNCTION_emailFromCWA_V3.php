@@ -47,7 +47,7 @@ function emailFromCWA_v3($mailParameters) {
 	15 to theRecipient Tcc Roland, Bob, Andy	(same as 11)
 	16 to Roland
 	17 to Bob, tcc Roland, Andy
-	18 to Bob, Roland, Andy
+	18 to Bob, Roland, Andy, Chris
 	19 to Bob tcc Roland, Andy
 	20 to Bob, Joe Tcc Roland, Andy
 	21 to theRecipient Bcc Bob, Roland, Andy
@@ -121,6 +121,7 @@ function emailFromCWA_v3($mailParameters) {
 	$roland			= "rolandksmith@gmail.com";
 	$bob			= "kcgator@gmail.com";
 	$andy		 	= "abunker@gmail.com";
+	$chris			= "cdherter@gmail.com";
 
 	$thisTo			= '';
 	$theCc			= '';
@@ -247,7 +248,7 @@ function emailFromCWA_v3($mailParameters) {
 			if ($doDebug) {
 				$debugLog	.= "doing case 18<br />";
 			}
-			$thisTo			= "$bob,$roland,$andy";
+			$thisTo			= "$bob,$roland,$andy,$chris";
 			$thisBcc		= "";
 			$thisTcc		= "";
 			break;
