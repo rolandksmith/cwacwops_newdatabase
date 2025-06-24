@@ -155,6 +155,7 @@ function advisor_request_student_assessment_func() {
 	$inp_wpm					= '';
 	$inp_eff					= '';
 	$class_level				= '';
+	$class_offset				= 0.0;
 	$advisor_first_name			= '';
 	$advisor_last_name			= '';
 	$advisorClassCount			= 0;
@@ -261,6 +262,10 @@ function advisor_request_student_assessment_func() {
 			if ($str_key 			== "advisorCallSign") {
 				$advisorCallSign		 = $str_value;
 				$advisorCallSign		 = strtoupper(filter_var($advisorCallSign,FILTER_UNSAFE_RAW));
+			}
+			if ($str_key 			== "class_offset") {
+				$class_offset		 = $str_value;
+				$class_offset		 = strtoupper(filter_var($class_offset,FILTER_UNSAFE_RAW));
 			}
 			if ($str_key 		== "inp_verbose") {
 				$inp_verbose	 = $str_value;
@@ -748,6 +753,7 @@ function advisor_request_student_assessment_func() {
 									<input type='hidden' name='strpass' value='5'>
 									<input type='hidden' name='enstr' value='$enstr'>
 									<input type='hidden' name='class_level' value='$advisorClass_level'>
+									<input type='hidden' name='class_offset' value='$advisorClass_timezone_offset'>
 									<input type='hidden' name='nextClass' value='$nextClass'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
@@ -832,6 +838,7 @@ function advisor_request_student_assessment_func() {
 					$student_call_sign		= $inp_callsign;
 					$student_level			= $class_level;
 					$student_email			= $advisorEmail;
+					$student_timezone_offset	= $class_offset;
 					$haveData				= TRUE;
 					$haveUsername			= TRUE;						
 				} else {
@@ -1027,7 +1034,7 @@ will be displayed there.</p>";
 					if ($doDebug) {
 						echo "timeout parameters:<br />
 						      level: $student_level<br />
-						      thistimeout: $thistimeout<br />";
+						      thisTimeout: $thisTimeout<br />";
 					}
 					
 					// number of callsigns parameters
@@ -1061,7 +1068,11 @@ will be displayed there.</p>";
 					$returnurl	= urlencode($myStr);
 					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
 					
-					$effective_date		 	= date('Y-m-d H:i:s');
+					$thisTimestamp			= date('Y-m-d H:i:s');
+					$thisTimestamp			= strtotime($thisTimestamp);
+					$newOffset				= $student_timezone_offset * 3600;
+					$newTimestamp			= $thisTimestamp + $newOffset;
+					$effective_date			= date('Y-m-d H:i:s',$newTimestamp);
 					$closeStr				= strtotime("+5 days");
 					$close_date				= date('Y-m-d H:i:s', $closeStr);
 					$reminder_text		= "<b>Morse Code Assessment</b> Your advisor $inp_callsign 
@@ -1205,6 +1216,7 @@ available to your advisor. To start the assessment, please click $url.";
 						foreach ($wpw1_cwa_student as $studentRow) {
 							$student_first_name						= $studentRow->user_first_name;
 							$student_last_name						= stripslashes($studentRow->user_last_name);
+							$student_timezone_offset				= $studentRow->student_timezone_offset;
 							$student_assigned_advisor				= $studentRow->student_assigned_advisor;
 							$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 
@@ -1225,7 +1237,11 @@ available to your advisor. To start the assessment, please click $url.";
 
 										// add advisor reminder
 
-										$effective_date		 	= date('Y-m-d H:i:s');
+										$thisTimestamp			= date('Y-m-d H:i:s');
+										$thisTimestamp			= strtotime($thisTimestamp);
+										$newOffset				= $student_timezone_offset * 3600;
+										$newTimestamp			= $thisTimestamp + $newOffset;
+										$effective_date			= date('Y-m-d H:i:s',$newTimestamp);
 										$closeStr				= strtotime("+5 days");
 										$close_date				= date('Y-m-d H:i:s', $closeStr);
 										$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$inp_callsign&token=$token");
