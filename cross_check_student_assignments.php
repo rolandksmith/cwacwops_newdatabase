@@ -2,9 +2,8 @@ function cross_check_student_assignments_func() {
 
 /*	Cross Check Student Assignments
 
-	Reads student table and stores all student assignments in an array
-	Then reads the advisorclass table and loads assignemnts into an array
-	The two arrays are cross-checked with each other
+	Reads student table and compares assignment to what is in the advisorClass table
+	Then reads the advisorclass table and compares that to the student record
 	
 	Created 16Dec24 by Roland
 	
