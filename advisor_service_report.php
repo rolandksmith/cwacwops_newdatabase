@@ -398,9 +398,6 @@ function advisor_service_report_func() {
 		foreach($classesArray as $thisAdvisor => $thisData) {
 			$thisClasses		= intval($classesArray[$thisAdvisor]['classes']);
 			$thisNewClasses		= intval($classesArray[$thisAdvisor]['newClasses']);
-			if ($thisNewClasses === 0) {
-				$thisNewClasses = '';
-			}
 			$thisLastSemester	= $classesArray[$thisAdvisor]['lastSemester'];
 
 			$myArray			= explode(",",$thisLastSemester);
@@ -520,6 +517,9 @@ function advisor_service_report_func() {
 				$doPrint		= TRUE;
 			}
 			if ($doPrint) {
+				if ($thisNewClasses === 0) {
+					$thisNewClasses = '';
+				}
 				$content		.= "<tr><td>$nameStr ($thisAdvisor)</td>
 										<td style='text-align:right;'>$thisClasses</td>
 										<td style='text-align:right;'>$thisNewClasses</td>
