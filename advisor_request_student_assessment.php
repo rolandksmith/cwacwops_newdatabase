@@ -31,7 +31,8 @@ function advisor_request_student_assessment_func() {
 									Intermediate: 3, 5. 7, 10
 									Advanced: 3, 5, 7, 10
 	words						number of words per question
-									always 1 
+									Beginner & Fundamental: 1
+									Intermediate & Advanced: 2
 	minchars					minimum number of characters in the question
 									Beginner: 2
 									Fundamental: 3
@@ -711,15 +712,16 @@ function advisor_request_student_assessment_func() {
 												<input type='radio' class='formInputButton' name='inp_wpm' value='25' checked> 25cpm";
 						$eff_params			= "<input type='radio' class='formInputButton' name='inp_eff' value='13'> 13wpm Effective<br />
 												<input type='radio' class='formInputButton' name='inp_eff' value='15'> 15wpm Effective<br />
-												<input type='radio' class='formInputButton' name='inp_eff' value='18'> 18wpm Effective<br />
-												<input type='radio' class='formInputButton' name='inp_eff' value='20' checked> 20wpm Effective";
+												<input type='radio' class='formInputButton' name='inp_eff' value='18' checked> 18wpm Effective<br />
+												<input type='radio' class='formInputButton' name='inp_eff' value='20' > 20wpm Effective<br />
+												<input type='radio' class='formInputButton' name='inp_eff' value='25' > 25wpm Effective";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='7' > 7 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' >2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' >1 Callsign<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked >2 Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='4'>4 Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='A'>All Callsigns<br />";
 						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
@@ -727,24 +729,24 @@ function advisor_request_student_assessment_func() {
 												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					} elseif ($advisorClass_level == 'Advanced') {
 						$wpm_params			= "<input type='radio' class='formInputButton' name='inp_wpm' value='20'> 20cpm<br />
-												<input type='radio' class='formInputButton' name='inp_wpm' value='25'> 25cpm<br />
-												<input type='radio' class='formInputButton' name='inp_wpm' value='30' checked> 30cpm<br />
+												<input type='radio' class='formInputButton' name='inp_wpm' value='25' checked> 25cpm<br />
+												<input type='radio' class='formInputButton' name='inp_wpm' value='30' > 30cpm<br />
 												<input type='radio' class='formInputButton' name='inp_wpm' value='35'> 35cpm";
 						$eff_params			= "<input type='radio' class='formInputButton' name='inp_eff' value='20'> 20wpm Effective<br />
-												<input type='radio' class='formInputButton' name='inp_eff' value='25'> 25wpm Effective<br />
-												<input type='radio' class='formInputButton' name='inp_eff' value='30' checked> 30wpm Effective<br />
+												<input type='radio' class='formInputButton' name='inp_eff' value='25' checked> 25wpm Effective<br />
+												<input type='radio' class='formInputButton' name='inp_eff' value='30' > 30wpm Effective<br />
 												<input type='radio' class='formInputButton' name='inp_eff' value='35'> 35wpm Effective<br />";
 						$questions_params	= "<input type='radio' class='formInputButton' name='inp_questions' value='3'>3 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='5' checked> 5 Questions<br />
-											   <input type='radio' class='formInputButton' name='inp_questions' value='7' > 7 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='5' > 5 Questions<br />
+											   <input type='radio' class='formInputButton' name='inp_questions' value='7' checked> 7 Questions<br />
 											   <input type='radio' class='formInputButton' name='inp_questions' value='10'> 10 Questions";
 						$callsigns_params	= "<input type='radio' class='formInputButton' name='inp_cscount' value='0'>No Callsigns<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' checked>1 Callsign<br />
-											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' >2 Callsigns<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='1' >1 Callsign<br />
+											   <input type='radio' class='formInputButton' name='inp_cscount' value='2' checked>2 Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='4' >4 Callsigns<br />
 											   <input type='radio' class='formInputButton' name='inp_cscount' value='A' >All Callsigns<br />";
-						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' checked>5 Answers<br />
-												<input type='radio' class='formInputButton' name='inp_answers' value='7'>7 Answers<br />
+						$answers_params		= "<input type='radio' class='formInputButton' name='inp_answers' value='5' >5 Answers<br />
+												<input type='radio' class='formInputButton' name='inp_answers' value='7' checked>7 Answers<br />
 												<input type='radio' class='formInputButton' name='inp_answers' value='10'>10 Answers";
 					}
 					$content	.= "<h4>Class $advisorClass_sequence $advisorClass_level</h4>
@@ -1024,7 +1026,6 @@ will be displayed there.</p>";
 					} elseif ($student_level == 'Advanced') {
 						$thisminchars	= '3';
 						$thismaxchars	= '6'; 
-						$thismaxchars	= '5'; 
 						$thisTimeout	= '15';
 					} else {
 						$thisminchars	= '3';
@@ -1063,7 +1064,7 @@ will be displayed there.</p>";
 					$thisVocab			= "threek";					// either threek or original
 					$thisInfor			= "Advisor%20Request";		// reason for the assessment
 	
-					$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&minchars=$thisminchars&words=1&maxchars=$thismaxchars&callsigns=$thisCallsigns&answers=$thisAnswers&timeout=30&level=$student_level&token=$token&vocab=$thisVocab&infor=$thisInfor";
+					$url 		= "<a href='https://cw-assessment.vercel.app?mode=specific&callsign=$thisCallsign&cpm=$thiswpm&eff=$thiseff&freq=$thisFreq&questions=$thisQuestions&minchars=$thisminchars&words=2&maxchars=$thismaxchars&callsigns=$thisCallsigns&answers=$thisAnswers&timeout=30&level=$student_level&token=$token&vocab=$thisVocab&infor=$thisInfor";
 					$myStr		= "$siteURL/cwa-advisor-request-student-assessment/?strpass=10&inp_callsign=$student_call_sign&token=$token";
 					$returnurl	= urlencode($myStr);
 					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
@@ -1320,7 +1321,7 @@ has completed the requested Morse code assessment. Please log into
 		}
 		
 		$content	.= "<h3>$jobname</h3>
-						<p>Enter the advisor's callsign you wish to emulate/p>
+						<p>Enter the advisor's callsign you wish to emulate</p>
 						<form method='post' action='$theURL' 
 						name='advisor_emulation_form' ENCTYPE='multipart/form-data'>
 						<input type='hidden' name='strpass' value='1'>
