@@ -316,6 +316,7 @@ function display_and_update_user_master_func() {
 		$studentTableName			= "wpw1_cwa_student2";
 		$countryCodesTableName		= 'wpw1_cwa_country_codes';
 		$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
+		$advisorTableName			= 'wpw1_cwa_advisor2';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history2';
 	} else {
 		$extMode					= 'pd';
@@ -323,6 +324,7 @@ function display_and_update_user_master_func() {
 		$studentTableName			= "wpw1_cwa_student";
 		$countryCodesTableName		= 'wpw1_cwa_country_codes';
 		$advisorClassTableName		= 'wpw1_cwa_advisorclass';
+		$advisorTableName			= 'wpw1_cwa_advisor';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history';
 	}
 
@@ -467,16 +469,6 @@ function display_and_update_user_master_func() {
 						$user_date_created		= $sqlRow->user_date_created;
 						$user_date_updated		= $sqlRow->user_date_updated;
 
-						$errorMsg				= "";
-						if ($user_zip_code == '') {
-							$errorMsg			= "<p><b>CRITICAL</b> The zip / postal code was invalid. Please 
-													click 'Update' and correct your zip / postal code information.</p>";
-						} elseif ($user_timezone_id == '??') {
-							$errorMsg			= "<p><b>CRITICAL</b> Your information is incomplete. Please 
-													click the 'Update' button and verify your city, state or province, and Zip / Postal Code 
-													information</p>";
-						}
-
 						$myStr			= formatActionLog($user_action_log);
 						$timezoneMsg	= '';
 						if ($user_timezone_id == '??') {
@@ -487,9 +479,7 @@ function display_and_update_user_master_func() {
 												<ul><li>Country: the value in this field must 
 														be a valid country name
 													<li>Zip / Postal Code: the code must valid 
-														or, if Postal Codes are not used in 
-														$user_country, this field must be 
-														'N/A'
+														for residents of the United States.
 													<li>City: the value in this field must be 
 														a valid city name
 													<li>State / Province: Again, a valid name
@@ -532,9 +522,65 @@ function display_and_update_user_master_func() {
 											<tr><td colspan='4'><input type='submit' class='formInputButton' name='submit' value='Update $user_call_sign' /></td></tr>
 											</table></form>";
 						if ($loginRole == 'administrator') {
+							// see if there is a student or an advisor record
+							$haveStudentRecord	= FALSE;
+							$sql1		= "select student_id, student_semester, student_level 
+											from $studentTableName 
+											where student_call_sign like '$user_call_sign' 
+											order by student_id DESC 
+											limit 1";
+							$student_result	= $wpdb->get_results($sql1);
+							if ($student_result === FALSE) {
+								handleWPDBError($jobname,$doDebug,"attempting to find a student record");
+							} else {
+								$numSRows	= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $sql1<br />and retrieved $numSRows rows<br />";
+								}
+								if ($numSRows > 0) {
+									$haveStudentRecord = TRUE;
+									foreach($student_result as $student_role) {
+										$student_id			= $student_role->student_id;
+										$student_semester	= $student_role->student_semester;
+										$student_level		= $student_role->student_level;
+									}
+								}
+							}
+							$haveAdvisorRecord		= FALSE;
+							$sql2					= "select advisor_id, advisor_semester 
+														from $advisorTableName 
+														order by advisor_id DESC 
+														limit 1";
+							$advisor_result	= $wpdb->get_results($sql2);
+							if ($advisor_result === FALSE) {
+								handleWPDBError($jobname,$doDebug,"attempting to find a advisor record");
+							} else {
+								$numARows	= $wpdb->num_rows;
+								if ($doDebug) {
+									echo "ran $sql2<br />and retrieved $numARows rows<br />";
+								}
+								if ($numARows > 0) {
+									$haveAdvisorRecord = TRUE;
+									foreach($advisor_result as $advisorRow) {
+										$advisor_id			= $advisorRow->advisor_id;
+										$advisor_semester	= $advisorRow->advisor_semester;
+									}
+								}
+							}
+																				
+						
+						
 							$content	.= "<p>To List User Master Change History for $user_call_sign click 
 											<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
 											target='_blank'>HERE</a></p>";
+							if ($haveStudentRecord) {
+								$content	.= "<p>There is a <a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=all&doDebug&testMode' target='_blank'>student record</a> 
+												for $student_semester semester $student_level level</p>";
+							}
+							if ($haveAdvisorRecord) {
+								$content	.= "<p>There is an <a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=all&doDebug&testMode' target='_blank'>advisor record</a> 
+												for $advisor_semester</p>";
+							}
 						}
 						
 						$displayedAlready	= TRUE;
