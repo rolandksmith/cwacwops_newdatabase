@@ -19,8 +19,8 @@ $defaultClassSize				= 6;
 $userName						= "";
 
 // determine if current user is a valid user
-	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL'); 
-	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q');
+	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL','KF7WX','kf7wx'); 
+	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q','KF7WX','kf7wx');
 	$current_user 				= wp_get_current_user();
 	
 //	echo "current_user:<br /><pre>";
