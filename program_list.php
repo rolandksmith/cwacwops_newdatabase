@@ -18,7 +18,7 @@ function program_list_func() {
 	if ($userName == '') {
 		$content		.= "You must be logged in to access this information<br />
 							Click <a href='$siteURL/login/'>HERE</a> to log into CW Academy<br /><br />
-							Click <a href='$sigURL/register/'>HERE</a> to register";
+							Click <a href='$siteURL/register/'>HERE</a> to register";
 		return $content;
 	}
 	
@@ -410,6 +410,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-student-evaluation-of-advisors/' target='_blank'>Display Student Evaluation of Advisors</a>
 								<li><a href='$siteURL/cwa-display-student-history/' target='_blank'>Display Student History</a>
 								<li><a href='$siteURL/cwa-evaluate-student/' target='_blank'>Evaluate Student</a>
+								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions (UNDER DEVELOPMENT)</a>
 								<li><a href='$siteURL/cwa-gather-and-display-student-statistics/' target='_blank'>Gather and Display Student Statistics</a>
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
@@ -628,12 +629,13 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-manage-directory/' target='_blank'>Manage Directory</a>
 								</ul>
 								
-								<h4>Survey Questionnaires (UNDER DEVELOPMENT)</h4>
+								<h4>UNDER DEVELOPMENT</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-advisor-request-student-survey/' target='_blank'>Advisor Request Student Survey</a>
 								<li><a href='$siteURL/cwa-setup-survey/' target='_blank'>Setup Survey</a>
 								<li><a href='$siteURL/cwa-display-survey/' target='_blank'>Display Survey</a>
 								<li><a href='$siteURL/cwa-display-survey-results/' target='_blank'>Display Survey Results</a>
+								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions (UNDER DEVELOPMENT)</a>
 								</ul>
 									
 								<td style='vertical-align:top;'>
@@ -965,9 +967,24 @@ function program_list_func() {
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime",$doDebug);
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
