@@ -48,6 +48,7 @@ function list_advisors_incomplete_evaluations_func() {
 	$theURL						= "$siteURL/cwa-list-advisors-with-incomplete-evaluations/";
 	$advisorCount				= 0;
 	$unevaluatedArray			= array();
+	$jobname					= "List Advisors with Incomplete Evaluations";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -170,7 +171,7 @@ function list_advisors_incomplete_evaluations_func() {
 			echo "Function starting.<br />";
 		}
 		
-			$content 		.= "<h3>List Advisors with Incomplete Evaluations</h3>
+			$content 		.= "<h3>$jobname</h3>
 								<p>The function cycles through all advisor classes for the current semester (or the 
 								previous semester if the current semester is not in session) and generates a list of 
 								all advisors who have not completed their evaluations.</p>
@@ -198,7 +199,7 @@ function list_advisors_incomplete_evaluations_func() {
 		$totalEvaluated			= 0;
 		$prevCallSign			= '';
 
-		$content			.= "<h3>Advisors with Incomplete Evaluations for $theSemester</h3>
+		$content			.= "<h3>$jobname for $theSemester</h3>
 								<table>
 								<tr><th>Advisor</th>
 									<th>Name</th>
@@ -475,9 +476,24 @@ function list_advisors_incomplete_evaluations_func() {
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("List Advisors with Incomplete Evaluations|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
