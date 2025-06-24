@@ -416,16 +416,16 @@ function send_evaluation_email_to_advisors_func() {
 											if ($doDebug) {
 												echo "&nbsp;&nbsp;&nbsp;Advisor will get an email<br />";
 											}					
-											$advisorArrayValue		= "$advisorClass_call_sign|$advisor_email|$advisor_first_name|$advisor_last_name|$advisor_phone";
+											$advisorArrayValue		= "$advisorClass_call_sign|$advisor_email|$advisor_first_name|$advisor_last_name|$advisor_phone|$advisor_timezone_id";
 											if (!in_array($advisorArrayValue,$advisorArray)) {
 												$advisorArray[]		= $advisorArrayValue;
 												if ($doDebug) {
-													echo "&nbsp;&nbsp;&nbsp;Adding $advisorClass_call_sign ,$advisor_email,$advisor_first_name,$advisor_last_name,$advisor_phone to advisorArray<br />";
+													echo "&nbsp;&nbsp;&nbsp;Adding $advisorClass_call_sign ,$advisor_email,$advisor_first_name,$advisor_last_name,$advisor_phone,$advisor_timezone_id to advisorArray<br />";
 												}
 											}
 										} else {
 											if ($doDebug) {
-												echo "AdvisorClass record bypassed as evaluations are complete or no students. class_evaluation_complete = $class_evaluation_complete | class_number_students = $class_number_students<br />";
+												echo "AdvisorClass record bypassed as evaluations are complete or no students. class_evaluation_complete = $advisorClass_class_evaluation_complete | class_number_students = $advisorClass_number_students<br />";
 											}
 										}
 									}
@@ -457,6 +457,7 @@ function send_evaluation_email_to_advisors_func() {
 			$advisor_first_name	= $advisorData[2];
 			$advisor_last_name	= $advisorData[3];
 			$advisor_phone		= $advisorData[4];
+			$advisor_tz_id		= $advisorData[5];
 			
 			if ($doDebug) {
 				echo "Getting email ready to send to $advisor_email ($advisor_call_sign)<br />";
@@ -524,9 +525,21 @@ Please click
 <b>Evaluate Students</b></a>. A CWA web page will display and allow you to enter your evaluations. 
 When all your evaluations are completed, you’ll be immediately able to register as an advisor for the next semester.";
 
-			$effective_date		= date('Y-m-d 00:00:00');
-			$closeStr			= strtotime("+ 4 days");
-			$close_date			= date('Y-m-d 00:00:00',$closeStr);
+
+			$returnArray		= wp_to_local($advisor_tz_id, 0, 5);
+			if ($returnArray === FALSE) {
+				if ($doDebug) {
+					echo "called wp_to_local with $advisor_tz_id, 0, 5 which returned FALSE<br />";
+				} else {
+					sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+				}
+				$effective_date		= date('Y-m-d 00:00:00');
+				$closeStr			= strtotime("+ 5 days");
+				$close_date			= date('Y-m-d 00:00:00',$closeStr);
+			} else {
+				$effective_date		= $returnArray['effective'];
+				$close_date			= $returnArray['expiration'];
+			}
 			$token				= mt_rand();
 			$inputParams		= array("effective_date|$effective_date|s",
 										"close_date|$close_date|s",
