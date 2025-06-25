@@ -64,6 +64,7 @@ function display_and_update_student_signup_func() {
 								'0'=>'Did not abandon');
 	$statusCode			= array(''=>'Not specified',
 								'C'=>'Student has been replaced',
+								'N'=>'Advisor declined replacement student',
 								'R'=>'Advisor has requested a replacement',
 								'S'=>'Advisor has not verified the studet',
 								'U'=>'No available class for student',
@@ -931,15 +932,47 @@ function display_and_update_student_signup_func() {
 							
 							}
 						}
-						
-						$responseStr	= $responseCode[$student_response];
-						$waitingStr		= $waitingCode[$student_waiting_list];
-						$abandonedStr	= $abandonedCode[$student_abandoned];
-						$statusStr		= $statusCode[$student_status];
-						$reasonStr		= $reasonCode[$student_hold_reason_code];
-						$promotableStr	= $promotableCode[$student_promotable];
-						$flexibleStr	= $flexibleCode[$student_flexible];
-						$catalogStr		= $catalogCode[$student_no_catalog];
+
+						if (array_key_exists($student_response,$responseCode)) {
+							$responseStr	= $responseCode[$student_response];
+						} else {
+							$responseStr	= "(undefined)";
+						}
+						if (array_key_exists($student_waiting_list,$waitingCode)) {
+							$waitingStr		= $waitingCode[$student_waiting_list];
+						} else {
+							$waitingStr		= "(undefined)";
+						}
+						if (array_key_exists($student_abandoned,$abandonedCode)) {
+							$abandonedStr	= $abandonedCode[$student_abandoned];
+						} else {
+							$abandonedStr	= "(undefined)";
+						}
+						if (array_key_exists($student_status,$statusCode)) {
+							$statusStr		= $statusCode[$student_status];
+						} else {
+							$statusStr		= "(undefined)";
+						}
+						if (array_key_exists($student_hold_reason_code,$reasonCode)) {
+							$reasonStr		= $reasonCode[$student_hold_reason_code];
+						} else {
+							$reasonStr		= "(undefined)";
+						}
+						if (array_key_exists($student_promotable,$promotableCode)) {
+							$promotableStr	= $promotableCode[$student_promotable];
+						} else {
+							$promotableStr	= "(undefined)";
+						}
+						if (array_key_exists($student_flexible,$flexibleCode)) {
+							$flexibleStr	= $flexibleCode[$student_flexible];
+						} else {
+							$flexibleStr	= "(undefined)";
+						}
+						if (array_key_exists($student_no_catelog,$catalogCode)) {
+							$catalogStr		= $catalogCode[$student_no_catalog];
+						} else {
+							$catalogStr		= "(undefined)";
+						}
 
 						$updateLink			= "<a href='$theURL/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 						$preAssignedLink	= '';
