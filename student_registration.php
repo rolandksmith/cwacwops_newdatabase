@@ -875,7 +875,7 @@ function student_registration_func() {
 			if ($doDebug) {
 				echo "haveInpCallsign and allowSignup<br />";
 			}
-			$sql 	= "select* from $studentTableName 
+			$sql 	= "select * from $studentTableName 
 						left join $userMasterTableName on user_call_sign = student_call_sign 
 						where student_call_sign = '$inp_callsign' 
 						and (student_semester = '$nextSemester' 
@@ -908,6 +908,16 @@ function student_registration_func() {
 							 or student_semester = '$semesterTwo' 
 							 or student_semester = '$semesterThree' 
 							 or student_semester = '$semesterFour')";
+		} elseif (!$haveInpCallsign && !$haveStudentID && $allowSignup) {
+			$myStr	= strtoupper($userName);
+			$sql 	= "select * from $studentTableName 
+						left join $userMasterTableName on user_call_sign = student_call_sign 
+						where student_call_sign = '$myStr' 
+						and (student_semester = '$nextSemester' 
+							 or student_semester = '$semesterTwo' 
+							 or student_semester = '$semesterThree' 
+							 or student_semester = '$semesterFour')";
+		
 		}
 	}
 //	if ($doDebug) {
@@ -1118,16 +1128,22 @@ function student_registration_func() {
 						}
 						$thisSemester				= $studentRow->student_semester;
 						$thisPromotable				= $studentRow->student_promotable;
+						$thisStudentStatus			= $studentRow->student_status;
 						
 						if ($doDebug) {
 							echo "<br />thisSemester: $thisSemester<br />
-								  thisPromotable: $thisPromotable<br />";
+								  thisPromotable: $thisPromotable<br />
+								  thisStudentStatus: $thisStudentStatus<br />";
 						}
 								
 						if ($thisSemester == $currentSemester) {
 							$gotCurrentSemester 	= TRUE;
 							if ($thisPromotable != '') {
 								$gotPromotable		= TRUE;
+							}
+							if ($thisStudentStatus == 'C' || $thisStudentStatus == 'R' || $thisStudentStatus == 'V') {
+								$gotCurrentSemester	= FALSE;
+								$allowSignup		= TRUE;
 							}
 						} else {
 							$gotFutureSemester		= TRUE;
