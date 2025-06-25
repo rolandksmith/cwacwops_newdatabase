@@ -113,23 +113,7 @@ function displayAssessment($inp_callsign='',$inp_token='',$doDebug=FALSE) {
 			}
 			if ($numASRows > 0) {
 				$report				= "<h4>Assessment Details for $inp_callsign</h4>
-										<table style='width:auto;'>
-										<tr><th>Score</th>
-											<th>Level</th>
-											<th>Date</th>
-											<th>Char Speed</th>
-											<th>Eff Speed</th>
-											<th>Qs</th>
-											<th>Words</th>
-											<th>Word Length</th>
-											<th>Callsigns</th>
-											<th>Answrs</th>
-											<th>Vocab</th>
-											<th>Info</th>
-											<th>Q</th>
-											<th>What Was Sent</th>
-											<th>What Was Copied</th>
-											<th>Points Gained</th></tr>";
+										<table style='width:1200px;'>";
 				foreach($assessmentResult as $newAssessment) {				
 					$record_id		= $newAssessment->record_id;
 					$thiscallsign	= $newAssessment->callsign;
@@ -173,7 +157,24 @@ function displayAssessment($inp_callsign='',$inp_token='',$doDebug=FALSE) {
 						}
 					}
 					$stubDate		= substr($thisDate,0,10);
-					$report			.= "<tr><td style='text-align:center;vertical-align:top;'>$thisScore</td>
+					$report			.= "<tr><th>Score</th>
+											<th>Level</th>
+											<th>Date</th>
+											<th>Char Speed</th>
+											<th>Eff Speed</th>
+											<th>Qs</th>
+											<th>Words</th>
+											<th>Word Length</th>
+											<th>Callsigns</th>
+											<th>Answers</th>
+											<th>Vocab</th>
+											<th>Info</th>
+											<th>Q</th>
+											<th>What Was Sent</th>
+											<th>What Was Copied</th>
+											<th>Points Gained</th></tr>
+
+										<tr><td style='text-align:center;vertical-align:top;'>$thisScore</td>
 											<td style='vertical-align:top;'>$thisLevel</td>
 											<td style='text-align:center;vertical-align:top;'>$stubDate</td>
 											<td style='text-align:center;vertical-align:top;'>$thiscpm</td>
