@@ -1141,7 +1141,7 @@ function student_registration_func() {
 							if ($thisPromotable != '') {
 								$gotPromotable		= TRUE;
 							}
-							if ($thisStudentStatus == 'C' || $thisStudentStatus == 'R' || $thisStudentStatus == 'V') {
+							if ($thisStudentStatus == 'C' || $thisStudentStatus == 'R' || $thisStudentStatus == 'V' || $thisStudentStatus == 'N') {
 								$gotCurrentSemester	= FALSE;
 								$allowSignup		= TRUE;
 							}
