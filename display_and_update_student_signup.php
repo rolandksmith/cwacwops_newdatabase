@@ -968,7 +968,7 @@ function display_and_update_student_signup_func() {
 						} else {
 							$flexibleStr	= "(undefined)";
 						}
-						if (array_key_exists($student_no_catelog,$catalogCode)) {
+						if (array_key_exists($student_no_catalog,$catalogCode)) {
 							$catalogStr		= $catalogCode[$student_no_catalog];
 						} else {
 							$catalogStr		= "(undefined)";
