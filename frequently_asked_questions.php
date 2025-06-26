@@ -15,7 +15,7 @@ function frequently_asked_questions_func() {
 */ 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -38,8 +38,6 @@ function frequently_asked_questions_func() {
 	$userDisplayName	= $initializationArray['userDisplayName'];
 	$userRole			= $initializationArray['userRole'];
 	
-	$userRole			= 'advisor';
-
 	if (!in_array($userName,$validTestmode) && $doDebug) {	// turn off doDebug if not a testmode user
 		$doDebug			= FALSE;
 		$testMode			= FALSE;
@@ -441,7 +439,8 @@ function frequently_asked_questions_func() {
 												<td>$faq_date_created</td></tr>
 											<tr><td>Date Updated</td>
 												<td>$faq_date_updated</td></tr>
-											<tr><td colspan='2'><input class='formInputButton' name='inp_submit' type='submit' value='Update' /></td></table></form>";
+											<tr><td><input class='formInputButton' name='inp_submit' type='submit' value='Update' /></td>
+												<td><input class='formInputButton' name='inp_submit' type='submit' value='Delete' /></td></table></form>";
 					}
 				}
 			}
@@ -783,112 +782,130 @@ respond to the question</p>";
 
 	} elseif ("94" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 94 doing the actual update<br />";
+			echo "<br />at pass 94 doing the actual update or delete<br />";
 		}
-		$content	.= "<h3>$jobname</h3>
-						<h4>Updating $inp_record_id</h4>";
-		$sql		= "select * from $faqTableName 
-						where faq_record_id = $inp_record_id";
-		$faqResult	= $wpdb->get_results($sql);
-		if ($faqResult === FALSE) {
-			handleWPDBError($jobname,$doDebug,"attempting to get new questions");
-			$content	.= "Unable to read $faqTableName table";
-		} else {
-			$numFRows	= $wpdb->num_rows;
+		
+		if ($inp_submit == 'Delete') {
 			if ($doDebug) {
-				echo "ran $sql<br />and retrieved $numFRows rows<br />";
+				echo "deleting $inp_record_id<br />";
 			}
-			if ($numFRows > 0) {
-				foreach($faqResult as $faqRow) {
-					$faq_record_id		= $faqRow->faq_record_id;
-					$faq_category		= $faqRow->faq_category;
-					$faq_question		= $faqRow->faq_question;
-					$faq_answer			= $faqRow->faq_answer;
-					$faq_tags			= $faqRow->faq_tags;
-					$faq_status			= $faqRow->faq_status;
-					$faq_submitted_by	= $faqRow->faq_submitted_by;
-					$faq_date_created	= $faqRow->faq_date_created;
-					$faq_date_updated	= $faqRow->faq_date_updated;
-
-					$updateParams		= array();
-					$updateFormat		= array();
-					$updateData			= "";
-
-					if ($inp_category != $faq_category) {
-						$updateParams['faq_category']	= $inp_category;
-						$updateFormat[]					= '%s';
-						$updateData		.= "Category changed to $inp_category<br />";
-					}
-					if ($inp_question != $faq_question) {
-						$updateParams['faq_question']	= $inp_question;
-						$updateFormat[]					= '%s';
-						$updateData		.= "Question changed to $inp_question<br />";
-					}
-					if ($inp_answer != $faq_answer) {
-						$updateParams['faq_answer']	= $inp_answer;
-						$updateFormat[]					= '%s';
-						$updateData		.= "Answer changed to $inp_answer<br />";
-					}
-//					if ($inp_tags != $faq_tags) {
-//						$updateParams['faq_tags']	= $inp_tags;
-//						$updateFormat[]					= '%s';
-//						$updateData		.= "Tags changed to $inp_tags<br />";
-//					}
-					$updateParams['faq_status']		= 'A';
-					$updateFormat[]					= '%s';
-					$updateResult		= $wpdb->update($faqTableName,
-														$updateParams,
-														array('faq_record_id'=>$inp_record_id),
-														$updateFormat,
-														array('%d'));
-					if ($updateResult === FALSE) {
-						handleWPDBError($jobname,$doDebug,"attempting to update $faqTableName");
-						$content		.= "<p>Update failed</p>";
-					} else {
-						$content		.= $updateData;
-						
-						$submitterEmail	= $wpdb->get_var("select user_email 
-														  from $userMasterTableName 
-														  where user_call_sign like '$faq_submitted_by'");
-						if ($submitterEmail === FALSE) {
-							handleWPDBError($jobname,$doDebug,"trying to get submitters email address");
-						} else {
-							// email submitter that question has been answered
+			$content	.= "<h3>$jobname</h3>
+							<h4>Deleting Record $inp_record_id</h4>";
+			$deleteResult	= $wpdb->delete($faqTableName,
+											array('faq_record_id'=>$inp_record_id),
+											array('%d'));
+			if ($deleteResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,"attempting to delete $inp_record_id");
+				$content	.= "<p>Deleting $inp_record_id failed</p>";
+			} else {
+				$content	.= "<p>Record $inp_record_id successfully deleted</p>";
+			}
+		} else {
+			$content	.= "<h3>$jobname</h3>
+							<h4>Updating $inp_record_id</h4>";
+			$sql		= "select * from $faqTableName 
+							where faq_record_id = $inp_record_id";
+			$faqResult	= $wpdb->get_results($sql);
+			if ($faqResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,"attempting to get new questions");
+				$content	.= "Unable to read $faqTableName table";
+			} else {
+				$numFRows	= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $sql<br />and retrieved $numFRows rows<br />";
+				}
+				if ($numFRows > 0) {
+					foreach($faqResult as $faqRow) {
+						$faq_record_id		= $faqRow->faq_record_id;
+						$faq_category		= $faqRow->faq_category;
+						$faq_question		= $faqRow->faq_question;
+						$faq_answer			= $faqRow->faq_answer;
+						$faq_tags			= $faqRow->faq_tags;
+						$faq_status			= $faqRow->faq_status;
+						$faq_submitted_by	= $faqRow->faq_submitted_by;
+						$faq_date_created	= $faqRow->faq_date_created;
+						$faq_date_updated	= $faqRow->faq_date_updated;
 	
-							$theSubject		= "CW Academy Frequently Asked Questions Response";
-							$theContent		= "<p>Your question: $faq_question<br />
+						$updateParams		= array();
+						$updateFormat		= array();
+						$updateData			= "";
+	
+						if ($inp_category != $faq_category) {
+							$updateParams['faq_category']	= $inp_category;
+							$updateFormat[]					= '%s';
+							$updateData		.= "Category changed to $inp_category<br />";
+						}
+						if ($inp_question != $faq_question) {
+							$updateParams['faq_question']	= $inp_question;
+							$updateFormat[]					= '%s';
+							$updateData		.= "Question changed to $inp_question<br />";
+						}
+						if ($inp_answer != $faq_answer) {
+							$updateParams['faq_answer']	= $inp_answer;
+							$updateFormat[]					= '%s';
+							$updateData		.= "Answer changed to $inp_answer<br />";
+						}
+//						if ($inp_tags != $faq_tags) {
+//							$updateParams['faq_tags']	= $inp_tags;
+//							$updateFormat[]					= '%s';
+//							$updateData		.= "Tags changed to $inp_tags<br />";
+//						}
+						$updateParams['faq_status']		= 'A';
+						$updateFormat[]					= '%s';
+						$updateResult		= $wpdb->update($faqTableName,
+															$updateParams,
+															array('faq_record_id'=>$inp_record_id),
+															$updateFormat,
+															array('%d'));
+						if ($updateResult === FALSE) {
+							handleWPDBError($jobname,$doDebug,"attempting to update $faqTableName");
+							$content		.= "<p>Update failed</p>";
+						} else {
+							$content		.= $updateData;
+							
+							$submitterEmail	= $wpdb->get_var("select user_email 
+															  from $userMasterTableName 
+															  where user_call_sign like '$faq_submitted_by'");
+							if ($submitterEmail === FALSE) {
+								handleWPDBError($jobname,$doDebug,"trying to get submitters email address");
+							} else {
+								// email submitter that question has been answered
+		
+								$theSubject		= "CW Academy Frequently Asked Questions Response";
+								$theContent		= "<p>Your question: $faq_question<br />
 has been updated: $inp_answer</p>
 <p>73,<br />CW Academy</p>";
-
-							$mailResult		= emailFromCWA_v3(array('theRecipient'=>$submitterEmail,
-																		'theContent'=>$theContent,
-																		'theSubject'=>$theSubject,
-																		'theCc'=>'',
-																		'theBcc'=>'',
-																		'theAttachment'=>'',
-																		'mailCode'=>11,
-																		'jobname'=>$jobname,
-																		'increment'=>0,
-																		'testMode'=>$testMode,
-																		'doDebug'=>$doDebug));
-//							if ($doDebug) {
-//								echo "mailResult:<br /><pre>";
-//								print_r($mailResult);
-//								echo "</pre><br />";
-//							}
-							if ($mailResult[0] === FALSE) {
-								if ($doDebug) {
-									echo "mail to $faq_submitted_by failed:<br />$mailResult[1]<br />";
+	
+								$mailResult		= emailFromCWA_v3(array('theRecipient'=>$submitterEmail,
+																			'theContent'=>$theContent,
+																			'theSubject'=>$theSubject,
+																			'theCc'=>'',
+																			'theBcc'=>'',
+																			'theAttachment'=>'',
+																			'mailCode'=>11,
+																			'jobname'=>$jobname,
+																			'increment'=>0,
+																			'testMode'=>$testMode,
+																			'doDebug'=>$doDebug));
+//								if ($doDebug) {
+//									echo "mailResult:<br /><pre>";
+//									print_r($mailResult);
+//									echo "</pre><br />";
+//								}
+								if ($mailResult[0] === FALSE) {
+									if ($doDebug) {
+										echo "mail to $faq_submitted_by failed:<br />$mailResult[1]<br />";
+									}
+									$content		.= "<p>Email to $faq_submitted_by failed</p>";
+								} else {
+									$content		.= "<p>Question updated and submitter has been notified</p>";
 								}
-								$content		.= "<p>Email to $faq_submitted_by failed</p>";
-							} else {
-								$content		.= "<p>Question updated and submitter has been notified</p>";
 							}
 						}
 					}
+				} else {
+					$content	.= "<p>No record found with id $inp_record_id</p>";
 				}
-			} else {
-				$content	.= "<p>No record found with id $inp_record_id</p>";
 			}
 		}
 
