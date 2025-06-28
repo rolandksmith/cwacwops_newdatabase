@@ -1200,6 +1200,7 @@ function student_registration_func() {
 					} elseif ($gotCurrentSemester === TRUE && $gotPromotable === TRUE && $gotFutureSemester === FALSE) {
 						$showSignup			= TRUE;
 						$showAll			= FALSE;
+						$allowSignup		= TRUE;
 						
 					} elseif ($gotCurrentSemester === TRUE && $gotPromotable === TRUE && $gotFutureSemester === TRUE) {
 						$showSignup			= FALSE;
