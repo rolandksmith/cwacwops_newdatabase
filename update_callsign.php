@@ -2,7 +2,7 @@ function update_callsign_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -175,6 +175,7 @@ function update_callsign_func() {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
 		$extMode		= 'tm';
+		// table format: table name|field to change|action log field|id field name
 		$changeTables 	= array('wpw1_cwa_advisor|advisor_call_sign2|advisor_action_log|advisor_id',
 								'wpw1_cwa_advisorclass2|advisorclass_call_sign|advisorclass_action_log|advisorclass_id',
 								'wpw1_cwa_audio_assessment2|call_sign|assessment_notes|record_id',
@@ -191,13 +192,15 @@ function update_callsign_func() {
 								'wpw1_cwa_user_master_deleted2|user_call_sign|user_action_log|user_ID',
 								'wpw1_cwa_user_master_history2|historywho&historycallsign||record_id',
 								'wpw1_cwa_user_master2|user_call_sign|user_action_log|user_ID',
-								'wpw1_users2|user_login&user_nicename||ID');
+								'wpw1_users2|user_login&user_nicename||ID',
+								'wpw1_cwa_faq2|faq_submitted_by||faq_record_id');
 		$userMasterTableName	= 'wpw1_cwa_user_master2';
 		$studentTableName		= 'wpw1_cwa_student2';
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
 		
 	} else {
 		$extMode		= 'pd';
+		// table format: table name|field to change|action log field|id field name
 		$changeTables 	= array('wpw1_cwa_advisor|advisor_call_sign|advisor_action_log|advisor_id',
 								'wpw1_cwa_advisorclass|advisorclass_call_sign|advisorclass_action_log|advisorclass_id',
 								'wpw1_cwa_audio_assessment|call_sign|assessment_notes|record_id',
@@ -214,8 +217,8 @@ function update_callsign_func() {
 								'wpw1_cwa_user_master_deleted|user_call_sign|user_action_log|user_ID',
 								'wpw1_cwa_user_master_history|historywho&historycallsign||record_id',
 								'wpw1_cwa_user_master|user_call_sign|user_action_log|user_ID',
-								'wpw1_users|user_login&user_nicename||ID');
-
+								'wpw1_users|user_login&user_nicename||ID',
+								'wpw1_cwa_faq|faq_submitted_by||faq_record_id');
 		$userMasterTableName	= 'wpw1_cwa_user_master';
 		$studentTableName		= 'wpw1_cwa_student';
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass';
@@ -593,6 +596,7 @@ changed from $inp_old_callsign to $inp_new_callsign ";
 					}
 				}
 			}
+			
 			
 			// finally, store the previous callsign in the updated user_master record
 			if ($doDebug) {
