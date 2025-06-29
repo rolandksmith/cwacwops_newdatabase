@@ -8,7 +8,7 @@ function check_student_status_func() {
 */
 	global $wpdb,$doDebug, $testMode, $advisorClassTableName, $userMasterTableName;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -649,12 +649,28 @@ than 48 days before the semester. Possible error");
 												advisor has removed you from the class. Either the class did not 
 												meet your needs or you did not respond to the advisor. If you need further assistance, please contact 
 												the appropriate person at <a href='https://cwops.org/cwa-class-resolution/' target='_blank'>CWA Class Resolution</a>.</p>";	
-							} elseif ($student_status == 'Y') {
+							} elseif ($student_status == 'Y' && $student_promotable == '') {
 								$content	.= "<tr><td style='vertical-align:top;'>Assigned Advisor</td>
 													<td>$student_assigned_advisor</td></tr>
 												</table>
 												<p>The semester is underway. You have been assigned to a class and your advisor has contacted you to give 
 												you the actual class schedule and confirmed that you will be able to participate in this class.</p>";
+							} elseif ($student_status == 'Y' && $student_promotable != '') {
+								if ($student_promotable == 'P') {
+									$content	.= "</table>
+													<p>You have successfully completed the class and can sign up for the next level class</p>";
+								} elseif ($student_promotable == 'W') {
+									$content	.= "</table>
+													<p>You withdrew from the class. You can sign up for a class</p>";
+								} elseif ($student_promotable == 'N') {
+									$content	.= "</table>
+													<p>The class is complete, however your advisor marked you as not having met the class criteria. 
+													You should sign up to take the class again</p>";
+								} else {
+									$content	.= "</table>
+													<p>The class is complete. You may sign up for a future class</p>";
+								}
+								
 							} else {
 								$content	.= "<p>You were registered for the $student_semester semester for a 
 												$student_level class. You said that you were not available 
