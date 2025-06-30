@@ -2133,9 +2133,21 @@ function assign_students_to_advisors_v3_func() {
 					}
 					
 					// add the reminder to the advisor portal
-					$effective_date		= date('Y-m-d H:i:s');
-					$closeStr			= strtotime("+20 days");
-					$close_date			= date('Y-m-d H:i:s', $closeStr);
+					$returnArray		= wp_to_local($advisor_time_zone, 0, 14);
+					if ($returnArray === FALSE) {
+						if ($doDebug) {
+							echo "called wp_to_local with $advisor_time_zone 0, 14 which returned FALSE<br />";
+						} else {
+							sendErrorEmail("$jobname calling wp_to_local with $advisor_time_zone, 0, 14 returned FALSE");
+						}
+						$effective_date		= date('Y-m-d 00:00:00');
+						$closeStr			= strtotime("+ 14 days");
+						$close_date			= date('Y-m-d 00:00:00',$closeStr);
+					} else {
+						$effective_date		= $returnArray['effective'];
+						$close_date			= $returnArray['expiration'];
+					}
+
 					$token				= mt_rand();
 
 					$email_text			= "<p>To: $advisor_last_name, $advisor_first_name ($advisorCallSign):</p>
