@@ -726,9 +726,23 @@ to the CW Academy website and sign up for a class.</p>
 			$thisStr	= 'Testmode';
 		}
 		$ipAddr			= get_the_user_ip();
-		$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|1: $elapsedTime|$ipAddr");
-		if ($result == 'FAIL') {
-			$content	.= "<p>writing to joblog.txt failed</p>";
+		$theTitle		= esc_html(get_the_title());
+		$jobmonth		= date('F Y');
+		$updateData		= array('jobname' 		=> $jobname,
+								'jobdate' 		=> $nowDate,
+								'jobtime'		=> $nowTime,
+								'jobwho' 		=> $userName,
+								'jobmode'		=> 'Time',
+								'jobdatatype' 	=> $thisStr,
+								'jobaddlinfo'	=> "$strPass: $elapsedTime",
+								'jobip' 		=> $ipAddr,
+								'jobmonth' 		=> $jobmonth,
+								'jobcomments' 	=> '',
+								'jobtitle' 		=> $theTitle,
+								'doDebug'		=> $doDebug);
+		$result			= write_joblog2_func($updateData);
+		if ($result === FALSE){
+			$content	.= "<p>writing to joblog failed</p>";
 		}
 		
 		// store the report in the reports table
