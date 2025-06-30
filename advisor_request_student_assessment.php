@@ -1069,13 +1069,21 @@ will be displayed there.</p>";
 					$returnurl	= urlencode($myStr);
 					$url		= "$url" . "&returnurl=$returnurl' target='_blank'>Perform Assessment</a>";
 					
-					$thisTimestamp			= date('Y-m-d H:i:s');
-					$thisTimestamp			= strtotime($thisTimestamp);
-					$newOffset				= $student_timezone_offset * 3600;
-					$newTimestamp			= $thisTimestamp + $newOffset;
-					$effective_date			= date('Y-m-d H:i:s',$newTimestamp);
-					$closeStr				= strtotime("+5 days");
-					$close_date				= date('Y-m-d H:i:s', $closeStr);
+					$returnArray		= wp_to_local($student_timezone_id, 0, 14);
+					if ($returnArray === FALSE) {
+						if ($doDebug) {
+							echo "called wp_to_local with $student_timezone_id, 0, 14 which returned FALSE<br />";
+						} else {
+							sendErrorEmail("$jobname calling wp_to_local with $student_timezone_id, 0, 14 returned FALSE");
+						}
+						$effective_date		= date('Y-m-d 00:00:00');
+						$closeStr			= strtotime("+ 14 days");
+						$close_date			= date('Y-m-d 00:00:00',$closeStr);
+					} else {
+						$effective_date		= $returnArray['effective'];
+						$close_date			= $returnArray['expiration'];
+					}
+
 					$reminder_text		= "<b>Morse Code Assessment</b> Your advisor $inp_callsign 
 requests that you do a Morse code proficiency assessment. The request will be available until $close_date. 
 The assessment program will give you $thisQuestions 
@@ -1235,16 +1243,24 @@ available to your advisor. To start the assessment, please click $url.";
 								if ($numARows > 0) {
 									foreach ($wpw1_cwa_advisor as $advisorRow) {
 										$advisor_email 						= strtolower($advisorRow->user_email);
+										$advisor_timezone_id				= $advisorRow->user_timezone_id;				
 
 										// add advisor reminder
+										$returnArray		= wp_to_local($advisor_timezone_id, 0, 14);
+										if ($returnArray === FALSE) {
+											if ($doDebug) {
+												echo "called wp_to_local with $advisor_timezone_id, 0, 14 which returned FALSE<br />";
+											} else {
+												sendErrorEmail("$jobname calling wp_to_local with $advisor_timezone_id, 0, 14 returned FALSE");
+											}
+											$effective_date		= date('Y-m-d 00:00:00');
+											$closeStr			= strtotime("+ 14 days");
+											$close_date			= date('Y-m-d 00:00:00',$closeStr);
+										} else {
+											$effective_date		= $returnArray['effective'];
+											$close_date			= $returnArray['expiration'];
+										}
 
-										$thisTimestamp			= date('Y-m-d H:i:s');
-										$thisTimestamp			= strtotime($thisTimestamp);
-										$newOffset				= $student_timezone_offset * 3600;
-										$newTimestamp			= $thisTimestamp + $newOffset;
-										$effective_date			= date('Y-m-d H:i:s',$newTimestamp);
-										$closeStr				= strtotime("+5 days");
-										$close_date				= date('Y-m-d H:i:s', $closeStr);
 										$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$inp_callsign&token=$token");
 										$reminder_text		= "<b>Morse Code Assessment Result</b> Your student 
 $student_last_name, $student_first_name ($inp_callsign) has completed the Morse code assessment you requested. 
