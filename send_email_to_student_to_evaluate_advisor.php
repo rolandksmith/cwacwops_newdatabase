@@ -506,8 +506,25 @@ function send_email_to_student_to_evaluate_advisor_func() {
 															$my_to		= $student_email;
 															$mailCode	= 15;
 														}
+														$returnArray		= wp_to_local($student_timezone_id , 0, 14);
+														if ($returnArray === FALSE) {
+															if ($doDebug) {
+																echo "called wp_to_local with $student_timezone_id , 0, 14 which returned FALSE<br />";
+															} else {
+																sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+															}
+															$effective_date		= date('Y-m-d 00:00:00');
+															$closeStr			= strtotime("+ 14 days");
+															$close_date			= date('Y-m-d 00:00:00',$closeStr);
+														} else {
+															$effective_date		= $returnArray['effective'];
+															$close_date			= $returnArray['expiration'];
+														}
+
+														
+														
 														$currentDate	= date('Y-m-d H:i:s');
-														$expireDate		= date('M d, Y', strtotime($currentDate . ' +14 days'));
+														$expireDate		= $close_date;
 														$my_message 	.= "<p>To: $student_last_name, $student_first_name ($student_call_sign):</p>
 <p>Thank you for your participating in the $advisorClass_level CW Acadamy class with advisor $advisorName ($advisorClass_call_sign). As the semester is concluding, 
 the CW Academy would like your opinion on the class, curriculum, and your advisor.</p>
@@ -535,9 +552,6 @@ CW Academy</p>";
 															$myInt--;
 															
 															// set up the reminder
-															$effective_date		 	= date('Y-m-d H:i:s');
-															$closeStr				= strtotime("+14 days");
-															$close_date				= date('Y-m-d H:i:s', $closeStr);
 															$token					= mt_rand();
 															$email_text				= "<p></p>";
 															$reminder_text			= "<b>Evaluate Class, Curriculum, and Advisor:</b> CW Academy is asking you to 
