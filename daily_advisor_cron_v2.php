@@ -961,20 +961,9 @@ $runTheJob	= TRUE;
 			$reportid	= $storeResult[2];
 		}
 		// store the reminder
-		$returnArray		= wp_to_local($advisor_timezone_id, 0, 2);
-		if ($returnArray === FALSE) {
-			if ($doDebug) {
-				echo "called wp_to_local with $advisor_timezone_id 0, 2 which returned FALSE<br />";
-			} else {
-				sendErrorEmail("$jobname calling wp_to_local with $advisor_timezone_id, 0, 2 returned FALSE");
-			}
-			$effective_date		= date('Y-m-d 00:00:00');
-			$closeStr			= strtotime("+ 2 days");
-			$close_date			= date('Y-m-d 00:00:00',$closeStr);
-		} else {
-			$effective_date		= $returnArray['effective'];
-			$close_date			= $returnArray['expiration'];
-		}
+		$effective_date		= date('Y-m-d 00:00:00');
+		$closeStr			= strtotime("+ 2 days");
+		$close_date			= date('Y-m-d 00:00:00',$closeStr);
 
 		$token			= mt_rand();
 		$reminder_text	= "<b>Daily Advisor Cron</b> To view the Daily Advisor Cron report for $nowDate $nowTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=XXXXX&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
