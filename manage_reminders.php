@@ -418,11 +418,12 @@ function manage_reminders_func() {
 	 			}
 			}
 		} elseif ($inp_method == 'modify') {
-			echo "hah!";
+			if ($doDebug) {
+	 			echo "<br />doing modify<br />";
+	 		}
 
 			$sql			= "select * from wpw1_cwa_reminders 
 								where record_id = $inp_id"; 
-			}
 			$reminderResult	= $wpdb->get_results($sql);
 			if ($reminderResult === FALSE) {
 				$lastError	= $wpdb->last_error;
@@ -470,11 +471,9 @@ function manage_reminders_func() {
 													<td style='vertical-align:top;'>$token</td>
 													<td style='vertical-align:top;'>$date_created</td>
 													<td style='vertical-align:top;'>$date_modified</td></tr>";
-
-
-
-
-
+					}
+				}
+			}
 
 		}
 	} elseif ("5" == $strPass) {
@@ -494,7 +493,7 @@ function manage_reminders_func() {
 		}
 		
 		if ($effective_date == '') {
-			$effective_date		= date('Y-m-d H:i:s');
+			$effective_date		= date('Y-m-d 00:00:00');
 		}
 		if ($close_date != '') {
 			$close_date = date('Y-m-d H:i:s', strtotime($effective_date . " + $close_date days"));
@@ -513,7 +512,7 @@ function manage_reminders_func() {
 									"reminder_text|$reminder_text|s",
 									"resolved|$resolved|s",
 									"token||s");
-		$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+		$insertResult		= s($inputParams,$testMode,$doDebug);
 		if ($insertResult[0] === FALSE) {
 			if ($doDebug) {
 				echo "inserting reminder failed: $insertResult[1]<br />";
