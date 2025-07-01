@@ -316,11 +316,12 @@ function daily_temp_data_cleanup_func() {
 			$reportid	= $storeResult[2];
 		}
 		// store the reminder
-		$closeStr		= strtotime("+2 days");
-		$close_date		= date('Y-m-d H:i:s', $closeStr);
+		$effective_date		= date('Y-m-d 00:00:00');
+		$closeStr			= strtotime("+ 2 days");
+		$close_date			= date('Y-m-d 00:00:00',$closeStr);
 		$token			= mt_rand();
 		$reminder_text	= "<b>$jobname</b> To view the Daily Temp Data Cleanup report for $nowDate $nowTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=K7OJL&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
-		$inputParams		= array("effective_date|$nowDate $nowTime|s",
+		$inputParams		= array("effective_date|$effective_date|s",
 									"close_date|$close_date|s",
 									"resolved_date||s",
 									"send_reminder|N|s",
