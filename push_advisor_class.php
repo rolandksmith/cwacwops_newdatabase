@@ -394,7 +394,8 @@ function push_advisor_class_func() {
 
 			$sql						 	= "select user_email,
 													user_first_name,
-													user_last_name  
+													user_last_name,
+													user_timezone_id   
 												from $userMasterTableName 
 												where user_call_sign = '$advisorCallSign'";
 			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
@@ -410,6 +411,7 @@ function push_advisor_class_func() {
 						$advisor_email		= $advisorRow->user_email;
 						$advisor_first_name	= $advisorRow->user_first_name;
 						$advisor_last_name	= $advisorRow->user_last_name;
+						$advisor_timezone_id = $advisorRow->user_timezone_id;
 						
 						$email_to_advisor 	= "To: $advisor_last_name, $advisor_first_name ($advisorCallSign):
 $inp_msg
@@ -464,9 +466,20 @@ Resolution</a> for assistance.</b></span><br /></p>";
 								echo "ran $reminderSQL<br />and retrieved $numRRows rows<br />";
 							} 
 							if ($numRRows == 0) {
-								$effective_date		 	= date('Y-m-d H:i:s');
-								$closeStr				= strtotime("+5 days");
-								$close_date				= date('Y-m-d H:i:s', $closeStr);
+								$returnArray		= wp_to_local($advisor_timezone_id, 0, 5);
+								if ($returnArray === FALSE) {
+									if ($doDebug) {
+										echo "called wp_to_local with $advisor_timezone_id 0, 5 which returned FALSE<br />";
+									} else {
+										sendErrorEmail("$jobname calling wp_to_local with $advisor_timezone_id, 0, 5 returned FALSE");
+									}
+									$effective_date		= date('Y-m-d 00:00:00');
+									$closeStr			= strtotime("+5 days");
+									$close_date			= date('Y-m-d 00:00:00',$closeStr);
+								} else {
+									$effective_date		= $returnArray['effective'];
+									$close_date			= $returnArray['expiration'];
+								}
 								$token					= 'studentConfirmation';
 								$email_text				= "<p></p>";
 								$reminder_text		= "<b>Student Participation Confirmation:</b> The makeup of your 
@@ -539,9 +552,24 @@ to perform this task.";
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|$thisStr|Time|$strPass: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
