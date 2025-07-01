@@ -538,9 +538,8 @@ function frequently_asked_questions_func() {
 will answer your question in the next day or so. When the sysadmin has answered your 
 question, the system will notify you by email.</p>";
 
-					$effectiveTimestamp	= strtotime("-1 days");
-					$effective_date		= date('Y-m-d 00:00:00',$effectiveTimestamp);
-					$closeStr			= strtotime("+ 5 days");
+					$effective_date		= date('Y-m-d 00:00:00');
+					$closeStr			= strtotime("+ 2 days");
 					$close_date			= date('Y-m-d 00:00:00',$closeStr);
 				
 					$token					= mt_rand();
