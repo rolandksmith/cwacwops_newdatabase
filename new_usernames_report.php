@@ -765,11 +765,12 @@ to the CW Academy website and sign up for a class.</p>
 		/// if run thru cron, set up reminders otherwise display the report
 		if ($runByCron) {
 			// store the reminder
-			$closeStr		= strtotime("+2 days");
-			$close_date		= date('Y-m-d H:i:s', $closeStr);
+			$effective_date		= date('Y-m-d 00:00:00');
+			$closeStr			= strtotime("+ 14 days");
+			$close_date			= date('Y-m-d 00:00:00',$closeStr);
 			$token			= mt_rand();
 			$reminder_text	= "<b>New Registrations</b> To view the New Registrations report for $nowDate $nowTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=XXXXX&inp_id=$reportid_1&token=$token' target='_blank'>Display Report</a>";
-			$inputParams		= array("effective_date|$nowDate $nowTime|s",
+			$inputParams		= array("effective_date|$effective_date|s",
 										"close_date|$close_date|s",
 										"resolved_date||s",
 										"send_reminder|N|s",
