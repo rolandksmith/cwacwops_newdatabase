@@ -536,7 +536,7 @@ function frequently_asked_questions_func() {
 				} else {
 					$content	.= "<p>The question was successfully added. A system administrator 
 will answer your question in the next day or so. When the sysadmin has answered your 
-question, the system will notify you by email.</p>";
+question, the system will notify you by email. Note that the sysadmin may reword your question.</p>";
 
 					$effective_date		= date('Y-m-d 00:00:00');
 					$closeStr			= strtotime("+ 2 days");
