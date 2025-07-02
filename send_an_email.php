@@ -51,6 +51,7 @@ function send_an_email_func() {
 	$inp_who					= '';
 	$inp_where					= '';
 	$increment					= 0;
+	$whoList					= "";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -243,39 +244,30 @@ function send_an_email_func() {
 		if ($inp_where != '') {
 			$thisWhere	= "where $inp_where ";
 		}
-		$content		.= "<h3>$jobname</h3>
-							<p>Unselect any below who should not get an email. Enter the 
-							email message to be sent. Finally indicate the attachment 
-							(if any) to be included.</p>\n
-							<form method='post' action='$theURL' 
-							name='selection_form' ENCTYPE='multipart/form-data'>
-							<input type='hidden' name='strpass' value='3'>
-							<input type='hidden' name=inp_who' value='$inp_who'> 
-							<input type='hidden' name='inp_mode' value='$inp_mode'>
-							<input type='hidden' name='inp_verbose' value='$inp_verbose'>
-							<table style='border-collapse:collapse;width:auto;'>
-							<tr><td style='vertical-align:top;'>Email Subject:</td>
-								<td><input type='text' class='formInputText' name='inp_subject' 
-										size='50' maxlength='100'>
-							<tr><td style='vertical-align:top;'>Email</td>
-								<td><textarea class='formInputButton' name='inp_email' 
-									rows='5' cols='50'></textarea></td></tr>\n
-							<tr><td style='vertical-align:top;'>Attachment (if any)</td>
-								<td><input type='text' class='formInputText' size='50' 
-									maxlength='100' name='inp_attachment'></td></tr>
-							<tr><th style='vertical-align:top;width:150px;'>Potential Recipients</th>
-								<th>Name and Callsign</th></tr>
-							<tr><td></td><td>";
-		
+
 		if ($inp_who == 'students') {
 			$sql		= "select * from $studentTableName 
 							left join $userMasterTableName on user_call_sign = student_call_sign 
 							$thisWhere 
 							order by student_call_sign ";
-			$wpw1_cwa_student	= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
+			$doContinue	= TRUE;
+			try {
+				$wpw1_cwa_student	= $wpdb->get_results($sql);
+				if ($wpw1_cwa_student === FALSE) {
+					handleWPDBError($jobname,$doDebug);
+					$content	.= "Attempting to run $sql failed";
+					$doContinue	= FALSE;
+				}
+				$lastError		= $wpdb->last_error;
+				if ($lastError != '') {
+					$content	.= "$lastError";
+					$doContinue	= FALSE;
+				}
+			} catch (Exception $e) {
+			  $content	.= "An error occurred: " . $e->getMessage();
+			  $doContinue	= FALSE;
+			}
+			if ($doContinue) {
 				$numSRows									= $wpdb->num_rows;
 				if ($doDebug) {
 					echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
@@ -287,11 +279,13 @@ function send_an_email_func() {
 						$student_first_name 				= $studentRow->user_first_name;
 						$student_last_name 					= $studentRow->user_last_name;
 						$student_email 						= $studentRow->user_email;
+						$student_ph_code					= $studentRow->user_ph_code;
 						$student_phone 						= $studentRow->user_phone;
 						$student_city 						= $studentRow->user_city;
 						$student_state 						= $studentRow->user_state;
 						$student_zip_code 					= $studentRow->user_zip_code;
 						$student_country_code 				= $studentRow->user_country_code;
+						$student_country					= $studentRow->user_country;
 						$student_whatsapp 					= $studentRow->user_whatsapp;
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
@@ -311,7 +305,7 @@ function send_an_email_func() {
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
@@ -352,34 +346,14 @@ function send_an_email_func() {
 						$student_flexible						= $studentRow->student_flexible;
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
-						$content			.= "<input type='checkbox' class='formInputButton'
+
+						$whoList			.= "<input type='checkbox' class='formInputButton'
 												 name='inp_names[]' 
 												 value='$student_email|$student_last_name, $student_first_name ($student_call_sign)' 
 												 checked>$student_last_name, $student_first_name ($student_call_sign)<br />\n";
+						if ($doDebug) {
+							echo "added $student_call_sign to potential recipients list<br />";
+						}
 					}
 				} else {
 					$content			.= "<p>No students match the criteria</p>";
@@ -390,10 +364,24 @@ function send_an_email_func() {
 							left join $userMasterTableName on user_call_sign = advisor_call_sign 
 							$thisWhere 
 							order by advisor_call_sign";
-			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisor === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
+			$doContinue	= TRUE;
+			try {
+				$wpw1_cwa_advisor	= $wpdb->get_results($sql);
+				if ($wpw1_cwa_advisor === FALSE) {
+					handleWPDBError($jobname,$doDebug);
+					$content	.= "Attempting to run $sql failed";
+					$doContinue	= FALSE;
+				}
+				$lastError		= $wpdb->last_error;
+				if ($lastError != '') {
+					$content	.= "$lastError";
+					$doContinue	= FALSE;
+				}
+			} catch (Exception $e) {
+			  $content	.= "An error occurred: " . $e->getMessage();
+			  $doContinue	= FALSE;
+			}
+			if ($doContinue) {
 				$numARows			= $wpdb->num_rows;
 				if ($doDebug) {
 					echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
@@ -405,11 +393,13 @@ function send_an_email_func() {
 						$advisor_first_name 				= $advisorRow->user_first_name;
 						$advisor_last_name 					= $advisorRow->user_last_name;
 						$advisor_email 						= $advisorRow->user_email;
+						$advisor_ph_code					= $advisorRow->user_ph_code;
 						$advisor_phone 						= $advisorRow->user_phone;
 						$advisor_city 						= $advisorRow->user_city;
 						$advisor_state 						= $advisorRow->user_state;
 						$advisor_zip_code 					= $advisorRow->user_zip_code;
 						$advisor_country_code 				= $advisorRow->user_country_code;
+						$advisor_country					= $advisorRow->user_country;
 						$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 						$advisor_telegram 					= $advisorRow->user_telegram;
 						$advisor_signal 					= $advisorRow->user_signal;
@@ -436,34 +426,10 @@ function send_an_email_func() {
 						$advisor_date_created 				= $advisorRow->advisor_date_created;
 						$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 						$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$advisor_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$advisor_country		= "UNKNOWN";
-							$advisor_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$advisor_country		= $countryRow->country_name;
-									$advisor_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$advisor_country			= "Unknown";
-								$advisor_ph_code			= "";
-							}
-						}
 
-						$content			.= "<input type='checkbox' class='formInputButton'
+						$whoList			.= "<input type='checkbox' class='formInputButton'
 												 name='inp_names[]' 
-												 value='$advisor_email|$advisor_last_name, $advisor_first_name ($advisor_call_sig)' 
+												 value='$advisor_email|$advisor_last_name, $advisor_first_name ($advisor_call_sign)' 
 												 checked>$advisor_last_name, $advisor_first_name ($advisor_call_sign)<br />\n";
 					}
 					
@@ -472,10 +438,35 @@ function send_an_email_func() {
 				}
 			}
 		}
-		$content				.= "</td></tr>
-									<tr><td colspan='2'><input type='submit' class='formINputButton' 
-											name='submit' value='submit'></td></tr>
-									</table></form>";	
+
+
+
+		if ($whoList != '') {
+			$content		.= "<h3>$jobname</h3>
+								<p>SQL: $sql</p>
+								<p>Enter the subject line and
+								email message to be sent. 
+								Then unselect any who should not get an email. </p>\n
+								<form method='post' action='$theURL' 
+								name='selection_form' ENCTYPE='multipart/form-data'>
+								<input type='hidden' name='strpass' value='3'>
+								<input type='hidden' name=inp_who' value='$inp_who'> 
+								<input type='hidden' name='inp_mode' value='$inp_mode'>
+								<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+								<table style='border-collapse:collapse;width:auto;'>
+								<tr><td style='vertical-align:top;'><b>Email Subject:</b></td>
+									<td><input type='text' class='formInputText' name='inp_subject' 
+											size='50' maxlength='100'>
+								<tr><td style='vertical-align:top;'><b>Email</b></td>
+									<td><textarea class='formInputButton' name='inp_email' 
+										rows='5' cols='50'></textarea></td></tr>\n
+								<tr><th style='vertical-align:top;width:150px;'>Potential Recipients</th>
+									<th>Name and Callsign</th></tr>
+								<tr><td colspan='2'>$whoList</td></tr>
+								<tr><td colspan='2'><input type='submit' class='formINputButton' 
+										name='submit' value='submit'></td></tr>
+								</table></form>";
+		}								
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
 			echo "<br />Arrived at pass $strPass<br />";
