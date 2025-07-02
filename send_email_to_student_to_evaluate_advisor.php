@@ -12,7 +12,7 @@ function send_email_to_student_to_evaluate_advisor_func() {
  * The function will send an email to each student in the semester which can be anywhere 
  * from 300 - 800 emails. The function will time out trying to send that many emails, so 
  * the function writes a date/time to the past_student.student_survey_completion_date for 
- * each email sent and will send up to 150 emails per execution. It will skip any students 
+ * each email sent and will send up to 100 emails per execution. It will skip any students 
  * that have a student_survey_completion_date. Run the function over again until no emails
  * are sent
  *
@@ -72,7 +72,7 @@ function send_email_to_student_to_evaluate_advisor_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$strPass					= "1";
+	$strPass					= "0";
 	$requestType				= '';
 	$advisorsProcessed			= 0;
 	$emailsSent					= 0;
@@ -100,6 +100,14 @@ function send_email_to_student_to_evaluate_advisor_func() {
 				if ($inp_mode == 'TESTMODE') {
 					$testMode = TRUE;
 				}
+			}
+			if ($str_key 		== "inp_selected") {
+				$inp_selected	 = $str_value;
+				$inp_selected	 = filter_var($inp_selected,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "strpass") {
+				$strPass	 = $str_value;
+				$strPass	 = filter_var($strPass,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -195,26 +203,62 @@ function send_email_to_student_to_evaluate_advisor_func() {
 		$userMasterTableName	= 'wpw1_cwa_user_master';
 	}
 
+	if ("0" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 0<br />";
+		}
+		$content		.= "<h3>$jobname</h3>
+							<p>Options:
+							<ol>
+							<li>To prepare the student table to send the evaluation request 
+								click <a href='$theURL/?strpass=200'>HERE</a>
+							<ul><li>This will clear out the student_survey_completion_date 
+									so that all qualified students will receive the evaluation 
+									request when option 2 is run
+								<li><em>NOTE:</em> Run this option only when you intend to send 
+									evaluation messages to all qualified students
+							</ul>
+							<br />
+							<li>To send the evaluation request emails to qualified students, click 
+							<a href='$theURL/?strpass=1'>HERE</a>
+							<ul><li>This will send the evaluation request to each qualified student 
+									with a blank student_survey_completion_date
+							</ul>
+							<br />
+							<li>To select specific students to get the evaluation email, click 
+							<a href='$theURL/?strpass=100'>HERE</a>
+							<ul><li>This will clear out the student_survey_completion_date in the 
+									specified student records and then will allow you to send the 
+									evaluation request emails
+								<li><em>NOTE</em> Emails will be sent to any qualified student with 
+									a blank student_survey_completion_date
+							</ul>
+							</ul>
+							<br />
+							<p>Qualified students are those assigned to a class, have 
+							a student_status of 'Y' and a student_promotable of either 'P' 
+							or 'W'</p>";
+	}
 
 	if ("1" == $strPass) {
 		if ($doDebug) {
-			echo "Function starting.<br />";
+			echo "<br />Function starting.<br />";
 		}
 
-		$content 		.= "<h3>Send Email to Student to Evaluate Advisor Setup</h3>
+		$content 		.= "<h3>$jobname Setup</h3>
 							<p>Reads advisorClass table for the recent semester and formulates an email 
 							to each student in the class asking the student to do an evaluation 
 							of the class advisor and the curriculum.</p>
 							<p>The email contains a link to the CW Academy web page Student Portal which will have 
-							the reminder giving the student the link to do the actual evaluation.</p>
-							$siteURL/cw-academy-student-evaluation-of-advisor/
-							which has the evaluation form.</p>
+							the reminder giving the student the link to do the actual evaluation form.</p>
 							<p>The function will send an email to each student in the semester which can be anywhere 
 							from 300 - 800 emails. The function will time out trying to send that many emails, so 
 							the function writes a date/time to the student.student_survey_completion_date for 
-							each email sent and will send up to 500 emails per execution. It will skip any students 
-							that have a student_survey_completion_date. Run the function over again until no emails 
-							are sent.</p>
+							each email sent and will send up to 100 emails per execution. It will skip any students 
+							that have a student_survey_completion_date.</p>
+							<p>If after sending up to 100 emails there are still students that have not been 
+							sent the evaluation request, there will be a link to run the process again 
+							and send up to another 100 emails.</p>
 							<p><form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data''>
 							<input type='hidden' name='strpass' value='2'>
@@ -232,6 +276,7 @@ function send_email_to_student_to_evaluate_advisor_func() {
 		}
 		
 		$content			.= "<h3>$jobname</h3>";
+		$thisErrors			= 0;
 
 // Read the advisorClass table and process each student in the pod
 
@@ -254,11 +299,13 @@ function send_email_to_student_to_evaluate_advisor_func() {
 					$advisorClass_first_name 				= $advisorClassRow->user_first_name;
 					$advisorClass_last_name 				= $advisorClassRow->user_last_name;
 					$advisorClass_email 					= $advisorClassRow->user_email;
+					$advisorClass_ph_code					= $advisorClassRow->user_ph_code;
 					$advisorClass_phone 					= $advisorClassRow->user_phone;
 					$advisorClass_city 						= $advisorClassRow->user_city;
 					$advisorClass_state 					= $advisorClassRow->user_state;
 					$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
 					$advisorClass_country_code 				= $advisorClassRow->user_country_code;
+					$advisorClass_country					= $advisorClassRow->user_country;
 					$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
 					$advisorClass_telegram 					= $advisorClassRow->user_telegram;
 					$advisorClass_signal 					= $advisorClassRow->user_signal;
@@ -322,32 +369,6 @@ function send_email_to_student_to_evaluate_advisor_func() {
 					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
 					$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisorClass_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisorClass_country		= "UNKNOWN";
-						$advisorClass_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisorClass_country		= $countryRow->country_name;
-								$advisorClass_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisorClass_country			= "Unknown";
-							$advisorClass_ph_code			= "";
-						}
-					}
-
-
 					if ($doDebug) {
 						echo "<br />Processing $advisorClassTableName $advisorClass_call_sign<br />";
 					}
@@ -388,11 +409,13 @@ function send_email_to_student_to_evaluate_advisor_func() {
 										$student_first_name 				= $studentRow->user_first_name;
 										$student_last_name 					= $studentRow->user_last_name;
 										$student_email 						= $studentRow->user_email;
+										$student_ph_code					= $studentRow->user_ph_code;
 										$student_phone 						= $studentRow->user_phone;
 										$student_city 						= $studentRow->user_city;
 										$student_state 						= $studentRow->user_state;
 										$student_zip_code 					= $studentRow->user_zip_code;
 										$student_country_code 				= $studentRow->user_country_code;
+										$student_country					= $studentRow->user_country;
 										$student_whatsapp 					= $studentRow->user_whatsapp;
 										$student_telegram 					= $studentRow->user_telegram;
 										$student_signal 					= $studentRow->user_signal;
@@ -453,30 +476,7 @@ function send_email_to_student_to_evaluate_advisor_func() {
 										$student_flexible						= $studentRow->student_flexible;
 										$student_date_created 					= $studentRow->student_date_created;
 										$student_date_updated			  		= $studentRow->student_date_updated;
-					
-										// if you need the country name and phone code, include the following
-										$countrySQL		= "select * from wpw1_cwa_country_codes  
-															where country_code = '$student_country_code'";
-										$countrySQLResult	= $wpdb->get_results($countrySQL);
-										if ($countrySQLResult === FALSE) {
-											handleWPDBError($jobname,$doDebug);
-											$student_country		= "UNKNOWN";
-											$student_ph_code		= "";
-										} else {
-											$numCRows		= $wpdb->num_rows;
-											if ($doDebug) {
-												echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-											}
-											if($numCRows > 0) {
-												foreach($countrySQLResult as $countryRow) {
-													$student_country		= $countryRow->country_name;
-													$student_ph_code		= $countryRow->ph_code;
-												}
-											} else {
-												$student_country			= "Unknown";
-												$student_ph_code			= "";
-											}
-										}
+
 										$studentQualifies			= FALSE;
 										if ($student_status == 'Y') {			// status must be y
 											if ($student_promotable == 'P' || $student_promotable == 'N') {
@@ -484,7 +484,7 @@ function send_email_to_student_to_evaluate_advisor_func() {
 													if ($myInt > 0) {
 														$studentQualifies	= TRUE;
 														// formulate and send the email to the student
-														$theURL	= "click <a href='$evaluateAdvisorURL?inp_student=$student_call_sign&strpass=2&extMode=$extMode' target='_blank'>Student Evaluation Survey</a>";
+//														$theURL	= "click <a href='$evaluateAdvisorURL?inp_student=$student_call_sign&strpass=2&extMode=$extMode' target='_blank'>Student Evaluation Survey</a>";
 														if ($doDebug) {
 															echo "Have all the data to formulate and send an email to<br />
 																  Student: $student_last_name, $student_first_name ($student_call_sign)<br />
@@ -629,17 +629,152 @@ CW Academy</p>";
 								} else {
 								
 									$content	.= "<p>No record for student $studentCallSign in $studentTableName. Advisor: $advisorClass_call_sign $advisorClass_sequence</p>";
+									$thisErrors++;
 								}
 							}
 						}
 					}
 				}		// end of foreach loop
-				$content		.= "<p>$totalStudents Total Students<br />$emailsSent Emails sent</p><br />";
+				$content		.= "<p>$emailsSent Emails sent<br />
+									$thisErrors Errors found</p><br />";
+				// see if there are any students left
+				$studentsLeft	= $wpdb->get_var("select count(*) 
+												from $studentTableName 
+												where student_semester = '$theSemester' 
+												and (student_promotable = 'P' 
+												or student_promotable = 'N')  
+												and student_survey_completion_date = '' ");
+				if ($studentsLeft === FALSE) {
+					handleWPDBError($joblog,$doDebug,"trying to get count of students still to get the email");
+				} else {
+					$studentsLeft		= $studentsLeft - $thisErrors;
+					if ($studentsLeft > 0) {
+						$content	.= "There are $studentsLeft emails to send. 
+										Click <a href='$theURL/?strpass=2&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>HERE</a> to 
+										send the next batch of emails";
+					} else {
+						$content	.= "All emails have been sent";
+					}
+				}
 			} else {
-				$content	.= "<p>No records found in $advisorClassTableName pod</p>";
+				$content	.= "<p>No records found in $advisorClassTableName table</p>";
 			}			// end of numberRecords section
 		}
+	} elseif ("100" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 100<br />";
+		}
+		$content		.= "<h3>$jobname</h3>
+							<form method='post' action='$theURL' 
+							name='selection_form' ENCTYPE='multipart/form-data''>
+							<input type='hidden' name='strpass' value='110'>
+							<table style='border-collapse:collapse;'>
+							<tr><td style='vertical-align:top;width:200px;'>Enter a comma-separated list
+							of student call signs to be sent the class evaluation email (<em>no 
+							spaces and no trailing comma</em>)</td>
+							<td><textarea class='formInputText' name='inp_selected' rows='5' cols = '50'></textarea></td></tr>
+							$testModeOption
+							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr></table>
+							</form></p>";
+		
+	} elseif ("110" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 110 with inp_selected of $inp_selected<br />";
+		}
+		$content		.= "<h3>$jobname</h3>";
+		// figure out which requested students are qualified
+		$myArray		= explode(",",$inp_selected);
+		foreach($myArray as $thisCallsign) {
+			$sql		= "select * from $studentTableName 
+							where student_call_sign like '$thisCallsign' 
+							and student_semester = '$theSemester'";
+			$studentResult	= $wpdb->get_results($sql);
+			if ($studentResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,"attempting to qualify $thisCallsign");
+				$content	.= "Unable to retrieve data for student $thisCallsign<br />";
+			} else {
+				$numSRows	= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $sql<br />and retrieved $numSRows rows<br />";
+				}
+				if ($numSRows > 0) {
+					foreach($studentResult as $studentRow) {
+						$student_ID			= $studentRow->student_id;
+						$student_status		= $studentRow->student_status;
+						$student_promotable	= $studentRow->student_promotable;
+						
+						if ($doDebug) {
+							echo "<br />Student: $thisCallsign<br />
+									student_status: $student_status<br />
+									promotable: $student_promotable<br />";
+						}
+						if ($student_status == 'Y') {
+							if ($student_promotable == 'P' || $student_promotable == 'N') {
+								$content	.= "Student $thisCallsign qualifies to receive an email<br />";
+								
+								$updateParams	= array('student_survey_completion_date'=>'');
+								$updateFormat	= array('%s');
+								
+								$studentUpdateData		= array('tableName'=>$studentTableName,
+																'inp_method'=>'update',
+																'inp_data'=>$updateParams,
+																'inp_format'=>$updateFormat,
+																'jobname'=>$jobname,
+																'inp_id'=>$student_ID,
+																'inp_callsign'=>$thisCallsign,
+																'inp_semester'=>$theSemester,
+																'inp_who'=>$userName,
+																'testMode'=>$testMode,
+																'doDebug'=>$doDebug);
+								$updateResult	= updateStudent($studentUpdateData);
+								if ($updateResult[0] === FALSE) {
+									$myError	= $wpdb->last_error;
+									$mySql		= $wpdb->last_query;
+									$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+									if ($doDebug) {
+										echo $errorMsg;
+									}
+									sendErrorEmail($errorMsg);
+									$content		.= "Unable to update content in $studentTableName<br />";
+								} else {
+									$content		.= "Student $thisCallsign is staged<br />";
+								}
+							} else {
+								$content			.= "Student $thisCallsign does not qualify for an email<br />";
+							}
+						} else {
+							$content			.= "Student $thisCallsign does not qualify for an email<br />";
+						}
+					}
+				} else {
+					$content	.= "No record found in $studentTableName for $thisCallsign<br />";
+				}
+			}
+		}
+		$content	.= "<p>All requested students processed</p>
+						<p>Click <a href='$theURL/?strpass=2&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>HERE</a> to send the emails</p>";	
+
+	} elseif ("200" == $strPass) {
+		if ($doDebug) {
+			echo "<br />at pass 200 ready to clear out all student_survey_completion_date fields<br />";
+		}
+		$content	.= "<h3>$jobname</h3>";
+		$sql		= "update $studentTableName 
+						set student_survey_completion_date = '' 
+						where student_semester = '$theSemester' 
+						and student_status = 'Y' 
+						and (student_promotable = 'P' or student_promotable = 'N')";
+		$result		= $wpdb->get_results($sql);
+		if ($result === FALSE) {
+			handleWPDBError($jobname,$doDebug,"attempting to clear out student_survey_completion_date");
+			$content	.= "Attempt to clear student-survey_completion_date failed";
+		} else {
+			$content	.= "All qualified student records cleared. Click 
+							<a href='$theURL/?strpass=0'>HERE</a> to continue<br />";
+		}
 	}
+		
+	
 
 	$thisTime 		= date('Y-m-d H:i:s');
 	$endingMicroTime = microtime(TRUE);
