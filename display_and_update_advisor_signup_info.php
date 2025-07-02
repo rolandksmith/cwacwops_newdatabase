@@ -1626,7 +1626,7 @@ function display_and_update_advisor_info_func() {
 											<input type='text' class='formInputText' name='inp_advisorclass_student13' size='20' maxlenth='20' value='$advisorClass_student13'></td>
 										<td>Student14<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student14' size='20' maxlenth='20' value='$advisorClass_student14'></td>
-										<td>Student15<br /
+										<td>Student15<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student15' size='20' maxlenth='20' value='$advisorClass_student15'></td></tr>
 									<tr><td>Student16<br />
 											<input type='text' class='formInputText' name='inp_advisorclass_student16' size='20' maxlenth='20' value='$advisorClass_student16'></td>
