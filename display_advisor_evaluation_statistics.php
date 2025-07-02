@@ -7,7 +7,7 @@ function display_advisor_evaluation_statistics_func() {
 */
 	global $wpdb, $evaluateAdvisorTableName, $doDebug, $testMode, $jobname;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -199,7 +199,7 @@ function display_advisor_evaluation_statistics_func() {
 							<input type='hidden' name='strpass' value='2'>
 							<table>
 							<tr><td style='vertical-align:top;'>Which Semester?</td>
-								<td><input type='radio' name='theSemester' value='$theSemester' class='formInputButton'> $theSemester<br />
+								<td><input type='radio' name='theSemester' value='$theSemester' class='formInputButton' checked> $theSemester<br />
 									<input type='radio' name='theSemester' value='specified' class='formInputButton'> Specify semester:<br />
 									<input type='text' name='newSemester' class='formInputText' size='15' maxlength='15'></td></tr>
 							<tr><td colspan='2'><input class='formInputButton' type='submit' value='Submit' /></td></tr>
