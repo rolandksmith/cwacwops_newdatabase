@@ -942,13 +942,24 @@ $runTheJob	= TRUE;
 		if ($testMode) {
 			$thisStr		= 'Testmode';
 		}
-		$jobresult				= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|0: $elapsedTime");
-		if ($jobresult[0] == 'FALSE') {
-			$content		.= "<p>writing to joblog failed: $jobresult[1]</p>";
-		} else {
-			if ($doDebug) {
-				echo "writing to joblog was successful<br />";
-			}
+		$ipAddr			= get_the_user_ip();
+		$theTitle		= esc_html(get_the_title());
+		$jobmonth		= date('F Y');
+		$updateData		= array('jobname' 		=> $jobname,
+								'jobdate' 		=> $nowDate,
+								'jobtime'		=> $nowTime,
+								'jobwho' 		=> $userName,
+								'jobmode'		=> 'Time',
+								'jobdatatype' 	=> $thisStr,
+								'jobaddlinfo'	=> "$strPass: $elapsedTime",
+								'jobip' 		=> $ipAddr,
+								'jobmonth' 		=> $jobmonth,
+								'jobcomments' 	=> '',
+								'jobtitle' 		=> $theTitle,
+								'doDebug'		=> $doDebug);
+		$result			= write_joblog2_func($updateData);
+		if ($result === FALSE){
+			$content	.= "<p>writing to joblog failed</p>";
 		}
 		// store the report in the reports table
 		$storeResult	= storeReportData_v2('Daily Advisor Cron',$content,$testMode,$doDebug);
