@@ -387,6 +387,8 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-cron-process/' target='_blank'>Daily Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
+								<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
+								<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Clenup</a>
 								<li><a href='$siteURL/cwa-decline-student-reassignment/' target='_blank'>Decline Student Reassignment</a>
 								<li><a href='$siteURL/cwa-detailed-history-for-an-advisor/' target='_blank'>Detailed History for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-advisor-evaluation-statistics/' target='_blank'>Display Advisor Evaluation Statistics</a>
@@ -410,7 +412,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-student-evaluation-of-advisors/' target='_blank'>Display Student Evaluation of Advisors</a>
 								<li><a href='$siteURL/cwa-display-student-history/' target='_blank'>Display Student History</a>
 								<li><a href='$siteURL/cwa-evaluate-student/' target='_blank'>Evaluate Student</a>
-								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions (UNDER DEVELOPMENT)</a>
+								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions</a>
 								<li><a href='$siteURL/cwa-gather-and-display-student-statistics/' target='_blank'>Gather and Display Student Statistics</a>
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
@@ -635,7 +637,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-setup-survey/' target='_blank'>Setup Survey</a>
 								<li><a href='$siteURL/cwa-display-survey/' target='_blank'>Display Survey</a>
 								<li><a href='$siteURL/cwa-display-survey-results/' target='_blank'>Display Survey Results</a>
-								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions (UNDER DEVELOPMENT)</a>
 								</ul>
 									
 								<td style='vertical-align:top;'>
@@ -659,6 +660,7 @@ function program_list_func() {
 								<li><a href='$siteURL/wp-admin/index.php' target='_blank'>Dashboard<br /><br />
 								<li><a href='$siteURL/cwa-display-saved-report/' target='_blank'>Display Saved Report</a>
 								<li><a href='$siteURL/program-list/' target='_blank'>Program List</a>
+								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions</a>
 								<li><a href='$siteURL/wp-login.php/?action=logout'>Logout<br ><br />
 								</ul>
 				
@@ -672,7 +674,10 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
-								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a><br /><br />
+								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a>
+								<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
+								<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Clenup</a>
+								<br /><br />
 								</ul>
 								<li><a href='$siteURL/cwa-assign-students-to-advisors-sequence/' target='_blank'>Assign Students to Advisors Sequence (TestMode)</a>
 								<ul>
@@ -842,6 +847,8 @@ function program_list_func() {
 								which students are to take the assessment.</p>
 							<p><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a><br />
 								This program will change your callsign to your new callsign in the CW Academy database.</p>
+							<p><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions</a><br />
+								This program allows you to ask a question, display the questions and answers, and search questions.</p>
 							<p><a href='https://cwops.org/cw-academy/cwa-advisor-resources/' target='_blank'>Advisor Resources</a><br />
 								Use this link to access the advisor resources hosted on cwops.org</p>";
 		}
@@ -949,6 +956,8 @@ function program_list_func() {
 								The program displays the current status of your CW Academy class request.</p>
 							<p><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a><br />
 								This program will change your callsign to your new callsign in the CW Academy database.</p>
+							<p><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions</a><br />
+								This program allows you to ask a question, display the questions and answers, and search questions.</p>
 							<p><a href='https://cwops.org/cw-academy/cw-academy-student-resources/' target='_blank'>Student Resources</a><br />
 								Use this link to access the curriculum and various practice files. This information is hosted on cwops.org.</p>";
 		}	
