@@ -85,11 +85,11 @@ function update_callsign_func() {
 				}
 			}
 			if ($str_key 		== "inp_old_callsign") {
-				$inp_old_callsign	 = strtoupper($str_value);
+				$inp_old_callsign	 = trim(strtoupper($str_value));
 				$inp_old_callsign	 = filter_var($inp_old_callsign,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_new_callsign") {
-				$inp_new_callsign	 = strtoupper($str_value);
+				$inp_new_callsign	 = trim(strtoupper($str_value));
 				$inp_new_callsign	 = filter_var($inp_new_callsign,FILTER_UNSAFE_RAW);
 			}
 		}
@@ -544,8 +544,17 @@ student$strSnum call sign changed from $inp_old_callsign to $inp_new_callsign ";
 				}	
 			}
 
-
-		
+			// fix up any reminder_text that has the old call sign
+			$sql		= "UPDATE wpw1_cwa_reminders 
+							SET reminder_text = REPLACE(reminder_text, '$inp_old_callsign', '$inp_new_callsign') 
+							where resolved = 'N'";
+			$remindersResult	= $wpdb->get_results($sql);
+			if ($remindersResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,"attempting to update reminder_text");
+				$content	.= "Attempting to update reminder_text failed<br />";
+			} else {
+				$content	.= "Any old callsigns in reminders_text have been updated<br />";
+			}
 
 			// Fix up excluded advisors
 			if ($doDebug) {
