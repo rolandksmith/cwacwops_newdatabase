@@ -36,7 +36,87 @@ function getTimeZone($inp_data) {
 		$this_timezone_id 	= '??';
 		goto bypass;
 	}
-	
+	// fill in the timezone ID for specific countries
+	$specificCountryArray	= array('Afghanistan'=>'Asia/Kabul',
+									'Albania'=>'America/Los_Angeles',
+									'Andorra'=>'America/Chicago',
+									'Andorra'=>'Europe/Andorra',
+									'Argentina'=>'America/Argentina/Buenos_Aires',
+									'Austria'=>'Europe/Vienna',
+									'Bahamas'=>'America/Nassau',
+									'Bahrain'=>'Asia/Bahrain',
+									'Belarus'=>'Europe/Minsk',
+									'Belgium'=>'Europe/Brussels',
+									'Bosnia and Herzegovina'=>'Europe/Sarajevo',
+									'Brunei'=>'Asia/Brunei',
+									'Bulgaria'=>'Europe/Sofia',
+									'Cayman Islands'=>'America/Cayman',
+									'Colombia'=>'America/Bogota',
+									'Costa Rica'=>'America/Costa_Rica',
+									'Croatia'=>'Europe/Zagreb',
+									'Cyprus'=>'Asia/Nicosia',
+									'Czech Republic'=>'Europe/Prague',
+									'Denmark'=>'Europe/Copenhagen',
+									'El Salvador'=>'America/El_Salvador',
+									'Estonia'=>'Europe/Tallinn',
+									'Fiji'=>'Pacific/Fiji',
+									'Finland'=>'Europe/Helsinki',
+									'France'=>'Europe/Paris',
+									'Germany'=>'Europe/Berlin',
+									'Greece'=>'Europe/Athens',
+									'Guam'=>'Pacific/Guam',
+									'Honduras'=>'America/Tegucigalpa',
+									'Hong Kong'=>'Asia/Hong_Kong',
+									'India'=>'Asia/Kolkata',
+									'Iran'=>'Asia/Tehran',
+									'Ireland'=>'Europe/Dublin',
+									'Isle of Man'=>'Europe/Isle_of_Man',
+									'Israel'=>'Asia/Jerusalem',
+									'Italy'=>'Europe/Rome',
+									'Japan'=>'Asia/Tokyo',
+									'Jordan'=>'Asia/Amman',
+									'Kazakhstan'=>'Asia/Almaty',
+									'Kenya'=>'Africa/Nairobi',
+									'Latvia'=>'Europe/Riga',
+									'Lithuania'=>'Europe/Vilnius',
+									'Macedonia'=>'Europe/Skopje',
+									'Malawi'=>'Africa/Blantyre',
+									'Malaysia'=>'Asia/Kuala_Lumpur',
+									'Mauritius'=>'Indian/Mauritius',
+									'Moldova'=>'Asia/Macau',
+									'Morocco'=>'Africa/Casablanca',
+									'Nepal'=>'Asia/Kathmandu',
+									'Netherlands'=>'Europe/Amsterdam',
+									'Nigeria'=>'Africa/Lagos',
+									'Norway'=>'Europe/Oslo',
+									'Pakistan'=>'Asia/Karachi',
+									'Peru'=>'America/Lima',
+									'Philippines'=>'Asia/Manila',
+									'Poland'=>'Europe/Warsaw',
+									'Puerto Rico'=>'America/Puerto_Rico',
+									'Romania'=>'Europe/Bucharest',
+									'Saudi Arabia'=>'Asia/Riyadh',
+									'Serbia'=>'Europe/Belgrade',
+									'Singapore'=>'Asia/Singapore',
+									'Slovakia'=>'Europe/Bratislava',
+									'Slovenia'=>'Europe/Ljubljana',
+									'South Africa'=>'Africa/Johannesburg',
+									'South Korea'=>'Asia/Seoul',
+									'Sweden'=>'Europe/Stockholm',
+									'Switzerland'=>'Europe/Zurich',
+									'Taiwan'=>'Asia/Taipei',
+									'Thailand'=>'Asia/Bangkok',
+									'Trinidad and Tobago'=>'America/Port_of_Spain',
+									'Turkey'=>'Europe/Istanbul',
+									'U.S. Virgin Islands'=>'America/St_Thomas',
+									'Ukraine'=>'Europe/Kiev',
+									'United Kingdom'=>'Europe/London',
+									'Vietnam'=>'Asia/Ho_Chi_Minh',
+									'Zambia'=>'Africa/Harare');	
+	if (array_key_exists($country,$specificCountryArray)) {
+		$this_timezone_id	= $specificCountryArray[$country];
+		goto bypass;
+	}
 	if ($zip == '') {
 		if ($city == '') {
 			if ($doDebug) {
@@ -93,6 +173,12 @@ function getTimeZone($inp_data) {
 				print_r($geocodeData);
 				echo "</pre><br />";
 			}
+			if ($status === 'REQUEST_DENIED') {
+				$thisErrorStuff	= print_r($geocodeData,TRUE);
+				$errorMessage	= "function_getTimeZone returned $status<br /><pre>$thisErrorStuff</pre><br />
+getting geocorrdinates for $address";
+				sendErrorEmail($errorMessage);
+			}
 			$this_timezone_id	= '??';
 		} else {
 		
@@ -116,6 +202,12 @@ function getTimeZone($inp_data) {
 					echo "timezoneData:<br /><pre>";
 					print_r($timezoneData);
 					echo "</pre><br />";
+				}
+				if ($status === 'REQUEST_DENIED') {
+					$thisErrorStuff	= print_r($timezoneData,TRUE);
+					$errorMessage	= "function_getTimeZone returned $status<br /><pre>$thisErrorStuff</pre><br />
+getting geocorrdinates for $address";
+					sendErrorEmail($errorMessage);
 				}
 				$this_timezone_id	= '??';
 			} else {
