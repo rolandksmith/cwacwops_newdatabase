@@ -281,8 +281,8 @@ function user_admin_func() {
 							$content		.= "$inp_callsign eligible to take over<br />";	
 							
 							// setup reminder to restore account
-							$effective_date		 	= date('Y-m-d H:i:s');
-							$closeStr				= strtotime("+30 days");
+							$effective_date		 	= date('Y-m-d 00:00:00');
+							$closeStr				= strtotime("+10 days");
 							$close_date				= date('Y-m-d H:i:s', $closeStr);
 							$email_text				= "<p></p>";
 							$reminderToken			= mt_rand();
