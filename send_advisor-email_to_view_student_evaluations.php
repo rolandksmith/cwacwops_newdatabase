@@ -1,6 +1,6 @@
 function send_advisor_email_to_view_student_evaluations_func() {
 
-/*	The function reads the class pod and gathers a list of all advisors 
+/*	The function reads the class table, gathers a list of all advisors 
  *	and sends an email to each of the advisors with a link to a web page 
  *	where they can see all of their student's evaluations and comments.
  *
@@ -52,7 +52,7 @@ function send_advisor_email_to_view_student_evaluations_func() {
 	$emailsSent					= 0;
 	$advisorArray				= array();
 	$increment					= 0;
-	$jobname					= 'Send Advisor Email to View Student Evaluations V$versionNumber';
+	$jobname					= 'Send Advisor Email to View Student Evaluations';
 	$inp_list					= '';
 	
 // get the input information
@@ -444,8 +444,8 @@ logging into <a href='$siteURL/program-list/'>CW Academy</a> and following the l
 Reminders and Actions Requested.
 <table style='border:4px solid red;'><tr><td>
 <p><span style='color:red;font-size:14pt;'><b>Do not reply to this email as the address is not monitored.</b> 
-<br />Please refer to the appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Class 
-Resolution</a> for assistance.</span></p></td></tr></table><p>Thanks and 73,<br />
+<br />Please refer to the appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Contact 
+List</a> for assistance.</span></p></td></tr></table><p>Thanks and 73,<br />
 CW Academy</p>";
 				if ($myInt > 0) {
 					
@@ -467,16 +467,28 @@ CW Academy</p>";
 						$emailsSent++;
 	
 						// add the reminder
-						$effective_date		 	= date('Y-m-d H:i:s');
-						$closeStr				= strtotime("+5 days");
-						$close_date				= date('Y-m-d H:i:s', $closeStr);
+						$returnArray		= wp_to_local($advisorClass_timezone_id, 0, 7);
+						if ($returnArray === FALSE) {
+							if ($doDebug) {
+								echo "called wp_to_local with $advisorClass_timezone_id 0, 7 which returned FALSE<br />";
+							} else {
+								sendErrorEmail("$jobname calling wp_to_local with $advisorClass_timezone_id, 0, 14 returned FALSE");
+							}
+							$effective_date		= date('Y-m-d 00:00:00');
+							$closeStr			= strtotime("+ 14 days");
+							$close_date			= date('Y-m-d 00:00:00',$closeStr);
+						} else {
+							$effective_date		= $returnArray['effective'];
+							$close_date			= $returnArray['expiration'];
+						}
 						$token					= mt_rand();
 						$email_text				= "<p></p>";
 						$reminder_text			= "<b>View Student Evaluations:</b> To see your student 
 evaluations, click 
 <a href='$viewURL?strpass=2&inp_advisor=$key&inp_id=$theID&mode=1&token=$token' target='_blank'>Display Student Evaluations</a>. 
 Note that some students may have entered more that one evaluation. Also, you might want to check back 
-after a few days as more students may have responded by then.";
+after a few days as more students may have responded by then. The link to view your evaluations will 
+remain on your portal for a week and will automatically expire at that time.";
 						$inputParams		= array("effective_date|$effective_date|s",
 													"close_date|$close_date|s",
 													"resolved_date||s",
@@ -522,9 +534,23 @@ after a few days as more students may have responded by then.";
 		$thisStr	= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
