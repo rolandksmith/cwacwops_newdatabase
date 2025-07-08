@@ -16,7 +16,7 @@ function program_list_func() {
 	$siteURL			= $initializationArray['siteurl'];
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
-		$content		.= "You must be logged in to access this information<br />
+		$content		= "You must be logged in to access this information<br />
 							Click <a href='$siteURL/login/'>HERE</a> to log into CW Academy<br /><br />
 							Click <a href='$siteURL/register/'>HERE</a> to register";
 		return $content;
