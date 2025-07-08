@@ -26,7 +26,7 @@ function display_evaluations_for_an_advisor_func() {
 
 	global $wpdb, $pastAdvisorTableName, $doDebug;
 	
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -457,10 +457,10 @@ function display_evaluations_for_an_advisor_func() {
 					}
 				}
 			}
-			// remove the reminder if applicable
-			if ($token != '') {
-				$result		= resolve_reminder($inp_advisor,$token,$testMode,$doDebug);			
-			}
+//			// remove the reminder if applicable
+//			if ($token != '') {
+//				$result		= resolve_reminder($inp_advisor,$token,$testMode,$doDebug);			
+//			}
 		} else {
 			$content		.= "Invalid Request";
 			if ($doDebug) {
