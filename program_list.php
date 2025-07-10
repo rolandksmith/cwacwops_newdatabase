@@ -372,7 +372,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-advisor-registration/' target='_blank'>Advisor Registration</a>
 								<li><a href='$siteURL/cwa-advisor-report-generator/' target='_blank'>Advisor Report Generator</a>
 								<li><a href='$siteURL/cwa-advisor-request-student-assessment/?strpass=15' target='_blank'>Advisor Request Student Assessment</a>
-								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
 								<li><a href='$siteURL/cwa-advisor-statistics/' target='_blank'>Advisor Statistics</a>
 								<li><a href='$siteURL/cwa-advisorclass-report-generator/' target='_blank'>AdvisorClass Report Generator</a>
 								<li><a href='$siteURL/cwa-advisors-with-unconfirmed-students/' target='_blank'>Advisors With Unconfirmed Students</a>
@@ -381,7 +380,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-automatic-student-backfill-v1/' target='_blank'>Automatic Student Backfill V1</a>
 								<li><a href='$siteURL/bad-actors/' target='_blank'>Bad Actors</a>
 								<li><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a>
-								<li><a href='$siteURL/cwa-cross-check-student-assignments/' target='_blank'>Cross Check Student Assignments</a>
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-backups-cron/' target='_blank'>Daily Backups Cron</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
@@ -402,7 +400,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-chronological-action-log/' target='_blank'>Display Chronological Action Log</a>
 								<li><a href='$siteURL/cwa-display-current-and-future-students-and-errors/' target='_blank'>Display Current and Future Students and Errors</a>
 								<li><a href='$siteURL/cwa-display-cw-assessment-for-a-callsign/' target='_blank'>Display CW Assessment for a Callsign</a>
-								<li><a href='$siteURL/cwa-display-debug-reports/' target='_blank'>Display Debug Reports</a>
 								<li><a href='$siteURL/cwa-display-evaluations-for-an-advisor/' target='_blank'>Display Evaluations for an Advisor</a>
 								<li><a href='$siteURL/cwa-display-initialization-array/' target='_blank'>Display Initialization Array</a>
 								<li><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
@@ -415,12 +412,10 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-frequently-asked-questions/' target='_blank'>Frequently Asked Questions</a>
 								<li><a href='$siteURL/cwa-gather-and-display-student-statistics/' target='_blank'>Gather and Display Student Statistics</a>
 								<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
-								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
 								<li><a href='$siteURL/cwa-how-students-progressed-report/' target='_blank'>How Students Progressed Report</a>
 								<li><a href='$siteURL/cwa-legends-codes-and-things/' target='_blank'>Legends Codes and Things</a>
 								<li><a href='$siteURL/cwa-list-advisors-with-incomplete-evaluations/' target='_blank'>List Advisors With Incomplete Evaluations</a>
 								<li><a href='$siteURL/cwa-list-advisors-with-s-students/' target='_blank'>List Advisors With S Students</a>
-								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
 								<li><a href='$siteURL/cwa-list-all-students/' target='_blank'>List All Students</a>
 								<li><a href='$siteURL/cwa-list-past-advisors-registration-info/' target='_blank'>List Past Advisors Registration Info</a>
 								<li><a href='$siteURL/cwa-list-student-responders/' target='_blank'>List Student Responders</a>
@@ -430,7 +425,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-maintenance-mode/' target='_blank'>Maintenance Mode</a>
 								<li><a href='$siteURL/cwa-make-or-restore-backups/' target='_blank'>Make or Restore Backups</a>
 								<li><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a>
-								<li><a href='$siteURL/cwa-manage-directory/' target='_blank'>Manage Directory</a>
 								<li><a href='$siteURL/cwa-manage-temp-data/' target='_blank'>Manage Temp Data</a>
 								<li><a href='$siteURL/cwa-move-student-to-different-semester/' target='_blank'>Move Student to Different Semester</a>
 								<li><a href='$siteURL/cwa-move-unassigned-students-to-next-semester/' target='_blank'>Move Unassigned Students to Next Semester</a>
@@ -444,7 +438,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-recover-deleted-record/' target='_blank'>Recover Deleted Record</a>
 								<li><a href='$siteURL/cwa-remove-item/' target='_blank'>Remove Item</a>
 								<li><a href='$siteURL/cwa-repeating-student-statistics/' target='_blank'>Repeating Student Statistics</a>
-								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
 								<li><a href='$siteURL/cwa-search-audit-log/' target='_blank'>Search Audit Log</a>
 								<li><a href='$siteURL/cwa-search-joblog/' target='_blank'>Search Joblog</a>
 								<li><a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/' target='_blank'>Search Sent Email by Callsign or Email</a>
@@ -452,7 +445,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-semester-raw-comparison-statistics/' target='_blank'>Semester Raw Comparison Statistics</a>
 								<li><a href='$siteURL/cwa-send-advisor-email-to-view-student-evaluations/' target='_blank'>Send Advisor Email to View Student Evaluations</a>
 								<li><a href='$siteURL/cwa-send-an-email/' target='_blank'>Send an Email</a>
-								<li><a href='$siteURL/cwa-send-an-email-to-a-list/' target='_blank'>Send an Email to a List</a>
 								<li><a href='$siteURL/cwa-send-congratulations-email-to-students/' target='_blank'>Send Congratulations Email to Students</a>
 								<li><a href='$siteURL/cwa-send-email-to-student-to-evaluate-advisor/' target='_blank'>Send Email to Student to Evaluate Advisor</a>
 								<li><a href='$siteURL/cwa-send-end-of-semester-assessment-email-to-advisors/' target='_blank'>Send End of Semester Assessment Email to Advisors</a>
@@ -471,7 +463,6 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-student-report-generator/' target='_blank'>Student Report Generator</a>
 								<li><a href='$siteURL/cwa-thank-you-remove/' target='_blank'>Thank You Remove</a>
 								<li><a href='$siteURL/cwa-thank-you-yes/' target='_blank'>Thank You Yes</a>
-								<li><a href='$siteURL/cwa-update-advisor-service/' target='_blank'>Update Advisor Service</a>
 								<li><a href='$siteURL/cwa-update-callsign/' target='_blank'>Update Callsign</a>
 								<li><a href='$siteURL/cwa-update-unassigned-student-information/' target='_blank'>Update Unassigned Student Information</a>
 								<li><a href='$siteURL/cwa-user-administration/' target='_blank'>User Administration</a>
@@ -621,6 +612,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
 								<li><a href='$siteURL/cwa-cross-check-student-assignments/' target='_blank'>Cross Check Student Assignments</a>
 								<li><a href='$siteURL/cwa-display-debug-reports/' target='_blank'>Display Debug Reports</a>
+								<li><a href='$siteURL/cwa-dump-user-info/' target='_blank'>Dump User Info</a>
 								<li><a href='$siteURL/cwa-generic-updater/' target='_blank'>Generic Updater</a>
 								<li><a href='$siteURL/cwa-list-all-pages/' target='_blank'>List All Pages</a>
 								<li><a href='$siteURL/cwa-run-saved-report-generator/' target='_blank'>Run Saved Report Generator</a>
@@ -674,7 +666,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 								<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
-								<li><a href='$siteURL/cwa-list-new-usernames/' target='_blank'>List New Usernames</a>
+								<li><a href='$siteURL/cwa-new-usernames-report/' target='_blank'>New Usernames Report</a>
 								<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
 								<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Clenup</a>
 								<br /><br />
