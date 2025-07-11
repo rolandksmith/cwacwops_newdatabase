@@ -1973,6 +1973,85 @@ Three situations are being handled:
 											} else {
 												$studentR++;
 											}
+											if ($student_response == 'Y' and $student_first_class_choice == 'None') {
+												// student has responded but not made a class choice. Send an email!
+												// set up the reminder and send the email
+												$returnArray		= wp_to_local($student_timezone_id, 0, 5);
+												if ($returnArray === FALSE) {
+													if ($doDebug) {
+														echo "called wp_to_local with $student_timezone_id, 0, 5 which returned FALSE<br />";
+													} else {
+														sendErrorEmail("$jobname calling wp_to_local with $student_timezone_id, 0, 5 returned FALSE");
+													}
+													$effective_date		= date('Y-m-d 00:00:00');
+													$closeStr			= strtotime("+ 5 days");
+													$close_date			= date('Y-m-d 00:00:00',$closeStr);
+												} else {
+													$effective_date		= $returnArray['effective'];
+													$close_date			= $returnArray['expiration'];
+												}
+											
+												$token				= mt_rand();
+												$reminder_text		= "<b>Select Class Schedule Preferences:</b> You have responded 
+that you are available to take a class in the $student_semester semester. HOWEVER, you 
+have not made any class schedule preference choices. Unless you make a class schedule 
+choice, you will not be assigned to a class. To make class schedule preference choices, 
+click on 'Student Signup' below and then click on 'Update Registration'.";
+												$inputParams		= array("effective_date|$effective_date|s",
+																			"close_date|$close_date|s",
+																			"resolved_date||s",
+																			"send_reminder|N|s",
+																			"send_once|Y|s",
+																			"call_sign|$student_call_sign|s",
+																			"role||s",
+																			"email_text||s",
+																			"reminder_text|$reminder_text|s",
+																			"resolved|N|s",
+																			"token|$token|s");
+												$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+												if ($insertResult[0] === FALSE) {
+													if ($doDebug) {
+														echo "inserting class choice update reminder failed: $insertResult[1]<br />";
+													}
+													$content		.= "Inserting class choice reminder failed: $insertResult[1]<br />";
+												}
+											
+											
+												$theSubject				= "CW Academy -- Missing Class Schedule Preferences";
+												$emailContent			= "You have responded 
+that you are available to take a class in the $student_semester semester. HOWEVER, you 
+have not made any class schedule preference choices. Unless you make a class schedule 
+choice, you will not be assigned to a class. To make class schedule preference choices, 
+go to <a href='$siteURL/program-list/'>CW Academy</a> and follow the instructions 
+under 'Reminders and Actions Requested'.";
+												if ($testMode) {
+													$theRecipient		= 'rolandksmith@gmail.com';
+													$theSubject			= "TESTMODE $theSubject";
+													$mailCode			= 2;
+													$increment++;
+												} else {
+													$theRecipient		= $student_email;
+													$mailCode			= 13;
+												}
+												$mailResult			= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
+																							'theSubject'=>$theSubject,
+																							'jobname'=>$jobname,
+																							'theContent'=>$emailContent,
+																							'mailCode'=>$mailCode,
+																							'testMode'=>$testMode,
+																							'increment'=>$increment,
+																							'doDebug'=>TRUE));
+												// $mailResult = TRUE;
+												if ($mailResult[0] === TRUE) {
+													if ($doDebug) {
+														echo "&nbsp;&nbsp;&nbsp;A class choice missing email was sent to $theRecipient ($student_level)<br />";
+													}
+												} else {
+													if ($doDebug) {
+														echo "&nbsp;&nbsp;&nbsp;Sending class choice missing email failed to $theRecipient<br />";
+													}
+												}
+											}
 										} 
 										if ($student_email_number == 4 && $student_response == '') {
 											$prevDropped++;
