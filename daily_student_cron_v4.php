@@ -2286,7 +2286,7 @@ set email_number to 4, and send the no Response email.
 															$emailContent		.= "<br /><table style='border:4px solid red;'><tr><td>
 																				   <p><b>IMPORTANT!</b> The current catalog of CW Academy classes 
 																				   for the $theSemester semester is now available. You <span style='color:red;'><b>MUST</b></span> 
-																				   review your sign up information and update your class choice preferences or <u><b>you will 
+																				   review your sign up information and select your preferred schedule preferences or <u><b>you will 
 																				   not be eligible to be assigned to a class</b></u>.</p>
 																				   <p>Please log into <a href='$siteURL/login'>CW Academy</a> and follow the instructions there. You 
 																				   will have the options to select class choices, to change to a future semester, or cancel your 
@@ -2315,8 +2315,9 @@ set email_number to 4, and send the no Response email.
 																					
 															$token				= mt_rand();
 															$reminder_text		= "<b>Select Class Schedule Preferences:</b> It is time to verify your availability to take a class in the upcoming semester 
-and to select your class preferences. The class catalog is now available. Your options are:<br />
-1. To verify your availability and select class choices click <a href='$studentRegistrationURL?inp_verify=Y&strpass=2&inp_verify=Y&token=$token&enstr=$encstr'>Select Class Choices</a><br />
+and to select your class preferences. The class catalog is now available. Select one of the following:<br />
+1. To verify your availability and indicate your desired class schedule click <a href='$studentRegistrationURL?inp_verify=Y&strpass=2&inp_verify=Y&token=$token&enstr=$encstr'>Select Class Preferences</a>. 
+Students will be assigned to advisor classes in about three weeks<br />
 2. You can move your registration to the $semesterTwo semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=1&token=$token'>HERE</a><br />
 3. You can move your registration to the $semesterThree semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=2&token=$token'>HERE</a><br /> 
 4. Finally, you can set your registration aside and sign up again in the future when your circumstances allow by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=3&token=$token'>Cancel  
