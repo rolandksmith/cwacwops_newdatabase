@@ -57,6 +57,7 @@ function display_and_update_user_master_func() {
 	$actionLogDate				= date('dMy H:i');
 	$callSignMethod				= FALSE;
 	$runByUser					= FALSE;
+  	$inp_action_log				= "";
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -152,6 +153,10 @@ function display_and_update_user_master_func() {
 			if ($str_key == "inp_zip_code") {
 				$inp_zip_code = $str_value;
 				$inp_zip_code = filter_var($inp_zip_code,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key == "inp_date_created") {
+				$inp_date_created = $str_value;
+				$inp_date_created = filter_var($inp_date_created,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "inp_country_data") {
 				$inp_country_data 	= $str_value;
@@ -921,7 +926,7 @@ function display_and_update_user_master_func() {
 											<tr><td style='vertical-align:top;'>Action Log</td>
 												<td><textarea class='formInputText' name='inp_action_log' rows='5' cols='50'>$user_action_log</textarea></td></tr>
 										<tr><td>Date Created</td>
-											<td>$user_date_created</td></tr>
+											<td><input type='text' class='formInputText' name='inp_date_created' size='20' maxlength='20' value='$user_date_created'</td></tr>
 										<tr><td>Date Updated</td>
 											<td>$user_date_updated</td></tr>";
 					}
@@ -1144,6 +1149,9 @@ function display_and_update_user_master_func() {
 							$updateLog					.= " / timezone_id updated to $inp_timezone_id";
 							$user_timezone_id			= $inp_timezone_id;
 							$changeTimezoneID			= TRUE;
+							if ($significantChange) {
+								$significantChange		= FALSE;
+							}
 						}
 						if ($inp_is_admin != $user_is_admin) {
 							$updateParams['user_is_admin']	= $inp_is_admin;
@@ -1166,6 +1174,12 @@ function display_and_update_user_master_func() {
 							$updateFormat[]				= '%s';
 							$updateContent				.= "prev_callsign updated to $inp_prev_callsign<br />";
 							$updateLog					.= " / prev_callsign updated to $inp_prev_callsign";
+						}
+						if ($inp_date_created != $user_date_created) {
+							$updateLog					.= " / date_created was updated";
+							$updateContent				.= "date_created was updated<br />";
+							$updateParams['user_date_created']	= $inp_date_created;
+							$updateFormat[]				= '%s';
 						}
 						
 					} else {
@@ -1261,18 +1275,21 @@ function display_and_update_user_master_func() {
 												timezone identifier. No updates can be made 
 												until the data is correct and the timezone 
 												identifier can be determined.</p>
-												<p>Click the 'Back' button and make certain 
+												<p>First, click the 'Back' button and make certain 
 												that the following fields are correct and valid:<br />
 												<ul><li>Country: the value in this field must 
 														be a valid country name
 													<li>Zip / Postal Code: the code must valid 
 														or, if Postal Codes are not used in 
-														$user_country, this field must be 
-														'N/A'
+														$user_country, this field must be empty
 													<li>City: the value in this field must be 
 														a valid city name
 													<li>State / Province: Again, a valid name
-												</ul>";
+												</ul>
+												<p>If all that information is valid, the please email the 
+													appropriate person at <a href='https://cwops.org/cwa-class-resolution/' 
+													target='_blank'>Contact Information</a>. The process to figure out 
+													a timezone identifier is quite complex and may need to be updated.";
 								goto bypass;
 							} else {
 								$updateParams['user_timezone_id']	= $user_timezone_id;
