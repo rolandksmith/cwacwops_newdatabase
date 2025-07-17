@@ -711,3 +711,45 @@ SET your_column_name = REPLACE(your_column_name, '\|', '&');
 	if ($result === FALSE){
 		$content	.= "<p>writing to joblog failed</p>";
 	}
+
+
+// how to add a reminder
+
+		$returnArray		= wp_to_local($advisor_tz_id, 0, 5);
+		if ($returnArray === FALSE) {
+			if ($doDebug) {
+				echo "called wp_to_local with $advisor_tz_id, 0, 5 which returned FALSE<br />";
+			} else {
+				sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+			}
+			$effective_date		= date('Y-m-d 00:00:00');
+			$closeStr			= strtotime("+ 5 days");
+			$close_date			= date('Y-m-d 00:00:00',$closeStr);
+		} else {
+			$effective_date		= $returnArray['effective'];
+			$close_date			= $returnArray['expiration'];
+		}
+		
+		$token					= mt_rand();
+		$email_text				= "<p></p>";
+		$reminder_text			= "<p><b>:</b> </p>";"
+		$inputParams		= array("effective_date|$effective_date|s",
+									"close_date|$close_date|s",
+									"resolved_date|$resolved_date|s",
+									"send_reminder|$send_reminder|s",
+									"send_once|$send_once|s",
+									"call_sign|$call_sign|s",
+									"role|$role|s",
+									"email_text|$email_text|s",
+									"reminder_text|$reminder_text|s",
+									"resolved|$resolved|s",
+									"token||s");
+		$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+		if ($insertResult[0] === FALSE) {
+			if ($doDebug) {
+				echo "inserting reminder failed: $insertResult[1]<br />";
+			}
+			$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+		} else {
+			$content		.= "Reminder successfully added<br />";
+		}
