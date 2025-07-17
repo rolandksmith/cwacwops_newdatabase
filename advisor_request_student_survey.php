@@ -932,14 +932,25 @@ will be displayed there.</p>";
 							}
 			
 							// format and store the reminder for the student
-							$closeStr				= strtotime("$inp_duration days");
-							$close_date				= date('Y-m-d H:i:s', $closeStr);
+							$returnArray		= wp_to_local($student_timezone_id, 0, 14);
+							if ($returnArray === FALSE) {
+								if ($doDebug) {
+									echo "called wp_to_local with $student_timezone_id 0, 14 which returned FALSE<br />";
+								} else {
+									sendErrorEmail("$jobname calling wp_to_local with $student_timezone_id, 0, 14 returned FALSE");
+								}
+								$effective_date		= date('Y-m-d 00:00:00');
+								$closeStr			= strtotime("+ 14 days");
+								$close_date			= date('Y-m-d 00:00:00',$closeStr);
+							} else {
+								$effective_date		= $returnArray['effective'];
+								$close_date			= $returnArray['expiration'];
+							}
 							$token					= mt_rand();
 							$url					= "<a href='$siteURL/cwa-display-survey/?strpass=2&inp_survey_id=$inp_survey_id&token=$token&inp_callsign=$student_call_sign' target='_blank'>HERE</a>";
 							$reminder_text			= "<b>Complete a Questionnaire</b> Your advisor $inp_callsign 
 requests that you fill out a questionnaire. The questionnaire will be available for the 
 next $inp_duration days. To start the questionnaire, please click $url.";
-							$effective_date		 	= date('Y-m-d H:i:s');
 							$inputParams			= array("effective_date|$effective_date|s",
 															"close_date|$close_date|s",
 															"resolved_date||s",
