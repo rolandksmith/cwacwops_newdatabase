@@ -15,7 +15,7 @@ function daily_uploads_cleanup_func() {
 
 	global $wpdb, $testMode, $doDebug, $printArray;
 
-	$doDebug				= FALSE;
+	$doDebug				= TRUE;
 	$testMode				= FALSE;
 	
 	$versionNumber			= '1';
@@ -131,7 +131,7 @@ function daily_uploads_cleanup_func() {
 		$content			.= "<h3>$jobname</h3>";
 		
 		// get the directory content
-		if (preg_match('/localhost/',$siteURL)) {
+		if (str_contains($siteURL,"localhost") {
 			$filePath	= "/Users/rksmih/cwa-docker/www/wp-content/uploads/";
 		} else {
 			$filePath	= "/home/cwacwops/public_html/wp-content/uploads/";
@@ -230,6 +230,10 @@ function daily_uploads_cleanup_func() {
 		$result			= write_joblog2_func($updateData);
 		if ($result === FALSE){
 			$content	.= "<p>writing to joblog failed</p>";
+		}
+		// store the report in the reports table
+		$storeResult	= storeReportData_v2($jobname,$content,$testMode,$doDebug);
+		if ($storeResult[0] === FALSE) {
 			if ($doDebug) {
 				echo "storing report failed. $storeResult[1]<br />";
 			}
@@ -243,7 +247,7 @@ function daily_uploads_cleanup_func() {
 		$close_date			= date('Y-m-d 00:00:00',$closeStr);
 
 		$token			= mt_rand();
-		$reminder_text	= "<b>$jobname</b> To view the Daily Temp Data Cleanup report for $nowDate $nowTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=K7OJL&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
+		$reminder_text	= "<b>$jobname</b> To view the Daily Uploads Cleanup report for $effective_date, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=K7OJL&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
 		$inputParams		= array("effective_date|$effective_date|s",
 									"close_date|$close_date|s",
 									"resolved_date||s",
