@@ -55,7 +55,7 @@ function daily_catalog_cron_process_v3_func() {
 
 	global $wpdb, $testMode, $doDebug, $printArray;
 
-	$doDebug				= TRUE;
+	$doDebug				= FALSE;
 	$testMode				= FALSE;
 	
 	$versionNumber			= '5';
