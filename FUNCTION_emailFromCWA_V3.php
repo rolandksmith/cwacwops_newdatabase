@@ -15,7 +15,7 @@ function emailFromCWA_v3($mailParameters) {
 		doDebug			default: FALSE
 		
 	Parameters can be in any order but must have these names. for example:
-			$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
+			$mailResult		= emailFromCWA_v4(array('theRecipient'=>$theRecipient,
 													    'theContent'=>$theContent,
 													    'theSubject'=>$theSubject,
 													    'theCc'=>$theCc,
