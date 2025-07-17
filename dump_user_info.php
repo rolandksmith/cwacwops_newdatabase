@@ -322,7 +322,7 @@ function dump_user_info_func() {
 										} else {
 											$user_messenger		= '';
 										}
-										$content	.= "<tr><td colspan='2'>Submitted</td></tr>
+										$content	.= "<tr><td colspan='2'>Extracted <u>Submitted</u> Data</td></tr>
 														<tr><td>User First Name</td>
 															<td>$user_first_name</td></tr>
 														<tr><td>User Last Name</td>
