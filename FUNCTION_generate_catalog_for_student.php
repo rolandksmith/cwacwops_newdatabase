@@ -341,9 +341,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 					} else {
 						$flexNChecked		= 'checked';
 					}
-					$returnCatalog			.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='None' $none1></td>\n
-													<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='None' $none2></td>\n
-													<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='None' $none3></td>\n
+					$returnCatalog			.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='None|None' $none1></td>\n
+													<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='None|None' $none2></td>\n
+													<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='None|None' $none3></td>\n
 													<td>None of the above</td>\n
 													<td></td></tr>\n
 												<tr><td colspan='5'><hr></td></tr>\n
