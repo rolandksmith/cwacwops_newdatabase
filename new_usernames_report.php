@@ -3,31 +3,18 @@ function new_usernames_report_func(){
 /*	List new registrations and any issues with user_logins
 
  	Issues:
-	if the user has not verified, see if three days or more have passed. 
-	If so, log the error to be displayed
-	
-	If the user has verified but does not have a registration
-	if more than 90 days have passed, delete the user
-	If fifteen days or more have passed,
-	log the error
-	if not more than sixteen days hve passed, 
-	add information to the text messages to be sent array
-	
-	If the user has verified, does not have a registration
-	if thirty or more days have passed
-	log the error
-	if not more than 31 days have passed,
-	add information to the records to be deleted array
-
-
-
-	modified 26Dec23 by Roland to remove user_logins that never create a sign up record
-	Modified 8Jan24 by Roland to add ability to ignore errors and no longer automatically 
-		some users
-	Modified 20Jan24 by Roland to record tracking data in temp_data
-	Modified 2Mar24 by Roland to only send missing signup email if no past or future studeht/advisor record found
-	Modified 22Sep24 by Roland to use new database
-	Forked from list_new_registrations_v4 on 1Nov24 by Roland
+ 	If the user does not have a user_master record
+ 	
+	If the user does not have a signup record
+		If three days have passed
+			send a signup reminder
+		If six or more days and ten or less days have passed
+			note 6 Day Rule violation on the error report
+		If ten days have passed
+			send a signup reminder
+		If fifteen days or more and twenty-five days or less have passed
+			Note 15 Day Rule violation on the error report
+		if more than 90 days have passed, delete the user
 	Forked from list_new_registrations on 13Mar25 by Roland
 	
 */
@@ -102,6 +89,7 @@ function new_usernames_report_func(){
 	$last_name				= '';
 	$user_role				= '';
 	$userUnverifiedList		= '';
+	$fifteenDayList			= array();
 	$bypassArray			= array('ROLAND',
 									'KCGATOR', 
 									'N7AST', 
@@ -195,6 +183,48 @@ function new_usernames_report_func(){
 		$endDateTime = new DateTime($endDate);
 		$interval = $startDateTime->diff($endDateTime);
 		return $interval->days;
+	}
+
+	function updateActionLog($username,$whichRule) {
+	
+		global $wpdb,$doDebug;
+	
+		if ($doDebug) {
+			echo "<br /><b>updateActionLog</b><br />
+					Username: $username<br />
+					Rule: $whichRule<br />";
+		}
+		$actionDate		= date('Y-m-d H:i:s');
+		$thisActionLog	= $wpdb->get_var("select user_action_log 
+										from wpw1_cwa_user_master 
+										where user_call_sign like '$username'");
+		if ($thisActionLog === FALSE) {
+			handleWPDBError("New Usernames Report",$doDebug,"in function $updateActionLog with username $username and rule $rule");
+		} else {
+			if ($doDebug) {
+				echo "got the action log for $username<br />";
+			}
+			$thisActionLog	.= " / $actionDate New Usernames Report $whichRule day signup email sent ";
+			$updateResult	= $wpdb->update('wpw1_cwa_user_master',
+											array('user_action_log'=>$thisActionLog),
+											array('user_call_sign'=>$username),
+											array('%s'),
+											array('%s'));
+			$lastError		= $wpdb->last_error;
+			$lastQuery		= $wpdb->last_query;
+			if ($lastError != '') {
+				if ($doDebug) {
+					echo "attempted to run $wpdb_last_query<br />Error: $lastError<br />";
+				}
+			} else {
+				if ($doDebug) {
+					echo "action log for $username updated<br />";
+				}
+			}
+		}
+		if ($doDebug) {
+			echo "Returning from updateActionLog<br /><br />";
+		}
 	}
 
 
@@ -307,13 +337,13 @@ function new_usernames_report_func(){
 										$user_role	= 'advisor';
 									}
 								}
-								if ($meta_key == 'wpumuv_needs_verification') {
-									$verifiedUser				= FALSE;
-									$userUnverifiedCount++;
-									$userUnverifiedList			.= "$user_login&$user_email"; 
-								} else {
+//								if ($meta_key == 'wpumuv_needs_verification') {
+//									$verifiedUser				= FALSE;
+//									$userUnverifiedCount++;
+//									$userUnverifiedList			.= "$user_login&$user_email"; 
+//								} else {
 									$verifiedUser				= TRUE;
-								}
+//								}
 							}
 						}
 						if ($doProceed) {
@@ -332,6 +362,7 @@ function new_usernames_report_func(){
 							$debugData .= "added $user_login to allUsersArray<br /><br />";
 
 							// does the user have a user_master record? 
+							$hasUserMaster				= FALSE;
 							// if not, display and go onto the next login record
 							$sql						= "select count(user_call_sign) 
 															from wpw1_cwa_user_master 
@@ -347,6 +378,7 @@ function new_usernames_report_func(){
 							} else {
 								$allUsersArray[$user_uppercase]['hasUserMaster']	= 'Y';
 								$allUsersArray[$user_uppercase]['theError']	.= 'Has a user_master record<br />';
+								$hasUserMaster			= TRUE;
 							}
 								
 							if ($doProceed) {
@@ -446,11 +478,11 @@ function new_usernames_report_func(){
 
 								// check the dates
 								$threeDays				= FALSE;
-								$threeDaysPlus			= FALSE;
+								$sixDays			 	= FALSE;
+								$tenDays				= FALSE;
 								$fifteenDays			= FALSE;
 								$fifteenDaysPlus		= FALSE;
 								$thirtyDays				= FALSE;
-								$thirtyDaysPlus			= FALSE;
 								$ninetyDaysPlus			= FALSE;
 								$sendVerifyEmail		= FALSE;
 								$sendSignupEmail		= FALSE;
@@ -458,55 +490,60 @@ function new_usernames_report_func(){
 								$daysElapsed			= calculateDaysBetweenDates($user_registered,$nowDate);
 								if ($daysElapsed == 3) {
 									$threeDays			= TRUE;
-								} elseif ($daysElapsed > 3) {
-									$threeDaysPlus		= TRUE;
+								}
+								if ($daysElapsed >= 6 && $daysElapsed <= 10) {
+									$sixDays			= TRUE;
+								}
+								if ($daysElapsed == 10) {
+									$tenDays			= TRUE;
 								}
 								if ($daysElapsed == 15) {
 									$fifteenDays		= TRUE;
-								} elseif ($daysElapsed > 15) {
+								} elseif ($daysElapsed >= 15 && $daysElapsed <= 25) {
 									$fifteenDaysPlus	= TRUE;
 								}
 								if ($daysElapsed == 30) {
 									$thirtyDays			= TRUE;
-								} elseif ($daysElapsed > 30) {
-									$thirtyDaysPlus		= TRUE;
 								}
 								if ($daysElapsed > 90) {
 									$ninetyDaysPlus		= TRUE;
 								}
 								
-								if (!$verifiedUser) {
-									if ($threeDays) {	// three days have passed. Send email
-										$sendVerifyEmail	= TRUE;
-									}
-									if ($threeDaysPlus) {	// set error
-										$allUsersArray[$user_uppercase]['theError']	.= "Unverified for $daysElapsed days<br />";
-										$allUsersArray[$user_uppercase]['hasError']	= "Y";
-									}
-								}
 								if (!$registrationRecord) {
 									if ($ninetyDaysPlus){
 										$deleteUser			= TRUE;
-										$allUsersArray[$user_uppercase]['theError']	.= "No signup record for $daysElapsed days. Recommend deleting<br />";
+										$allUsersArray[$user_uppercase]['theError']	.= "<b>90 Day Rule</b> No signup record for $daysElapsed days. <b>User Deleted<br />";
 										$allUsersArray[$user_uppercase]['hasError']	= "Y";
-									} elseif ($thirtyDaysPlus) {
-										$allUsersArray[$user_uppercase]['theError']	.= "No signup record for $daysElapsed days. Added to text message queue<br />";
-										$allUsersArray[$user_uppercase]['hasError']	= "Y";
-										$recordsToBeDeleted	.= "$user_uppercase\t$user_last_name, $user_first_name\t$user_role\t$user_registered\n";
-									} elseif ($fifteenDaysPlus) {
-										$allUsersArray[$user_uppercase]['theError']	.= "No signup record for $daysElapsed days<br />";
-										$allUsersArray[$user_uppercase]['hasError']	= "Y";	
-									} elseif ($fifteenDays) {		// send signup email
+									} elseif ($tenDays) {			// send signup email
 										$sendSignupEmail	= TRUE;
+										$allUsersArray[$user_uppercase]['theError']	.= "<b>10 Day Rule</b> Sending 10-day Signup Email<br />";
+										$allUsersArray[$user_uppercase]['hasError']	= "Y";	
+									} elseif ($sixDays) {
+										$allUsersArray[$user_uppercase]['theError']	.= "<b>6 Day Rule</b> No signup record for $daysElapsed days<br />";
+										$allUsersArray[$user_uppercase]['hasError']	= "Y";	
+									} elseif ($threeDays) {			// send signup email
+										$sendSignupEmail	= TRUE;
+										$allUsersArray[$user_uppercase]['theError']	.= "<b>3 Day Rule</b> Sending 3-day Signup Email<br />";
+										$allUsersArray[$user_uppercase]['hasError']	= "Y";	
+									}
+									if ($fifteenDaysPlus) {
+										$allUsersArray[$user_uppercase]['theError']	.= "<b>15 Day Rule</b> No signup record for $daysElapsed days<br />";
+										$allUsersArray[$user_uppercase]['hasError']	= "Y";	
+//										$fifteenDayList[]	= $user_login;
 									}
 								}
 								
 								// send emails
-								if ($sendVerifyEmail) {
-									$sendRegisterEmailArray[]	= "$user_email&$user_uppercase&$user_last_name, $user_first_name&$user_role";
-								}
 								if ($sendSignupEmail) {
 									$sendSignupEmailArray[]	= "$user_email&$user_uppercase&$user_last_name, $user_first_name&$user_role";
+									if ($hasUserMaster) {
+										if ($threeDays) {
+											updateActionLog($user_uppercase,3);
+										}
+										if ($tenDays) {
+											updateActionLog($user_uppercase,10);
+										}
+									}
 								}
 								if ($deleteUser) {
 									wp_delete_user( $user_id, null );
@@ -597,18 +634,21 @@ function new_usernames_report_func(){
 						$myCount++;
 					}
 				}
-				$content			.= "</table>$myCount Errors Displayed<br />Clicking on the email address will start a new email<br /><br /><br />
+				$content			.= "</table>$myCount Errors Displayed<br />
+										<b>Action Items Listed Above:</b><br>
+										3 Day Rule: a signup reminder was sent by the program<br />
+										6 Day Rule: 6-9 days have passed. Manually send a signup request<br />
+										10 Day Rule: Another signup reminder was sent by the program<br />
+										15 Day Rule: 15-25 days have passed. Manually send a signup request<br />
+										90 Day Rule: the user is automatically deleted<br /><br />
+										Clicking on the Username will open the user_master record in a new tab<br />
+										Clicking on the email address will start a new email<br />
+										Clicking on the Delete User link will delete the user and the user_master records<br />
 										<p>User Login records displayed above have obtained 
 										a user name and a password. Whether or not they have a user_master 
 										record or a signup record is indicated above</p>
-										<p>If there is a user_master record, then clicking 
-										on the User Login will open the User Master Information where 
-										you can update or delete the user master record. Clicking 
-										on the email address will open up a new email message 
-										to the user.</p>";
+										</p>";
 			}
-
-		
 		
 			// send signup and verify emails
 			if (count($sendSignupEmailArray) > 0) {
@@ -650,56 +690,7 @@ Academy</a>, enter your usename and password, and sign up by clicking on the 'Si
 					$content		.= "Signup Reminder sent to $thisLastName, $thisFirstName ($thisUser) at $thisEmail<br />";
 				}
 			}
-			
-			if (count($sendVerifyEmailArray) > 0) {
-				$content			.= "<h4>Verification Reminder Emails Sent</h4>";
-				foreach($sendVerifyEmailArray as $thisValue) {
-					$myArray		= explode("&",$thisValue);
-					$thisEmail		= $myArray[0];
-					$thisUser		= $myArray[1];
-					$thisLastName	= $allUsersArray[$thisUser]['last_name'];
-					$thisFirstName	= $allUsersArray[$thisUser]['first_name'];
-					$thisRole		= $allUsersArray[$thisUser]['user_role'];
-						$debugData .= "Sending email to $thisEmail<br />";
-					$thisRole		= ucfirst($thisRole);
-					if ($thisRole == 'Student') {
-						$article	= 'a';
-						$textStr	= "take a class";
-					} else {
-						$article	= 'an';
-						$textStr	= "be an advisor";
-					}	
-					$theSubject	 	= "CW Academy -- Please Verify your Username and Password for CW Academy";
-					$theContent		= "<p>To: $thisLastName, $thisFirstName:</p>
-<p>You have obtained a username and password for the CW Academy 
-website, however, you have not verified that information. After
-creating yourusername and password, CW Academy has sent you 
-an email with a link to verify that you were the person that 
-created the username and password.</p>
-<p>Please find that email and click on the link. If you can't 
-find the email, go to < href='https://cwa.cwops.org/program-list/'>CW Academy</a> 
-and enter your username and password. The program will send 
-you another email with a link to verify your username and password.</p>
-<p><b>NOTE: </b>Setting up your username and password DOES NOT automatically 
-sign you up for a class. After verifying your username, you will need to log in 
-to the CW Academy website and sign up for a class.</p>
-<br />73,<br />CW Academy";
-		
-					$mailResult		= emailFromCWA_v2(array('theRecipient'=>$thisEmail,
-																'theSubject'=>$theSubject,
-																'theContent'=>$theContent,
-																'theCc'=>'',
-																'theAttachment'=>'',
-																'mailCode'=>13,
-																'jobname'=>$jobname,
-																'increment'=>0,
-																'testMode'=>$testMode,
-																'doDebug'=>$doDebug));
-					$verifyEmailCount++;
-					$content		.= "Verification Reminder sent to $thisLastName, $thisFirstName ($thisUser) at $thisEmail<br />";
-				}
-			}		
-	
+				
 			$content	.= "<br /><h4>Counts</h4>
 							$userLoginCount User Login Records<br />
 							$newRegistrations New User Registrations in Past 36 Hours<br /><br />
@@ -734,7 +725,7 @@ to the CW Academy website and sign up for a class.</p>
 								'jobwho' 		=> $userName,
 								'jobmode'		=> 'Time',
 								'jobdatatype' 	=> $thisStr,
-								'jobaddlinfo'	=> "$strPass: $elapsedTime",
+								'jobaddlinfo'	=> "0: $elapsedTime",
 								'jobip' 		=> $ipAddr,
 								'jobmonth' 		=> $jobmonth,
 								'jobcomments' 	=> '',
