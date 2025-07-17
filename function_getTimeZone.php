@@ -158,7 +158,7 @@ function getTimeZone($inp_data) {
 				echo "getting geocoordinates for $address <br />";
 			}
 		}
-		$apiKey = "AIzaSyBWoxQBzlt9ITgrhOkDe8yrxGlEYQ01wgI";
+		$apiKey = "AIzaSyCGzRL0ROuiIxTaN8oOEZlP6yLsgtRYh-4";
 		
 		// Geocoding request
 		$geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=" . $apiKey;
