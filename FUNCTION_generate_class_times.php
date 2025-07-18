@@ -1,4 +1,4 @@
-function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_display='all',$doDebug=FALSE,$catalogMode='Production') {
+function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_display='all',$doDebug,$catalogMode='Production') {
 
 /* generateClassTimes runs in two modes
 		If inp_level is 'all', the program returns a complete list in table
@@ -14,7 +14,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 			displayed
 			
 	Returned array (if not FAIL):
-		[level][sequence] = localtime|localdays|nmbr classes|utctime|utcdays|advisors
+		[level][sequence] = language|localtime|localdays|nmbr classes|utctime|utcdays|advisors
 
  	read the class catalog and generate the available classes array
 	Catalog record format: level|time UTC|days|number of classes|advisors comma separated
@@ -29,29 +29,18 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 
 	global $wpdb;
 
-//	$doDebug					= TRUE;
-	$doDebug					= FALSE;
+	$doDebug					= TRUE;
+//	$doDebug					= FALSE;
 	if ($doDebug) {
-		 echo "<br />In Function generateClassTimes with $inp_tz,$inp_level,$inp_semester,$catalogMode<br />";
+		 echo "<br />In Function generateClassTimes with <br />
+		 		inp_tz: $inp_tz<br />
+		 		inp_level: $inp_level<br />
+		 		inp_semester: $inp_semester<br />
+		 		catalogMode: $catalogMode<br />";
 	}
 
 	$increment					= 0;	
 	$initializationArray		= data_initialization_func();
-	$moveForwardDays			= array('Monday,Thursday'=>'Tuesday,Friday',
-										'Tuesday,Friday'=>'Wednesday,Saturday',
-										'Wednesday,Friday'=>'Thursday,Saturday',
-										'Sunday,Wednesday'=>'Monday,Thursday',
-										'Tuesday,Thursday'=>'Wednesday,Friday',
-										'Wednesday,Saturday'=>'Thursday,Sunday',
-										'Sunday,Thursday'=>'Monday,Friday');
-
-	$moveBackwardDays			= array('Monday,Thursday'=>'Sunday,Wednesday',
-										'Tuesday,Friday'=>'Monday,Thursday',
-										'Wednesday,Friday'=>'Tuesday,Thursday',
-										'Sunday,Wednesday'=>'Saturday,Tuesday',
-										'Tuesday,Thursday'=>'Monday,Wednesday',
-										'Wednesday,Saturday'=>'Tuesday,Friday',
-										'Monday,Friday'=>'Sunday,Thursday');
 
 	$validLevelArray			= array('Beginner',
 										'Fundamental',
@@ -73,8 +62,10 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 	
 	if ($catalogMode == 'Production') {
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass';
+		$catalogTableName		= 'wpw1_cwa_current_catalog';
 	} else {
 		$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
+		$catalogTableName		= 'wpw1_cwa_current_catalog2';
 	}
 	
 	// validate the input data
@@ -93,7 +84,6 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 
 	// get the catalog
 	$gotCatalog					= FALSE;
-	$catalogTableName			= 'wpw1_cwa_current_catalog';
 	$sql 						= "select * from $catalogTableName 
 									where mode='$catalogMode' 
 									and semester='$inp_semester'";
@@ -114,8 +104,10 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 		}
 		if ($numRows > 0) {
 			foreach ($result as $catalogRow) {
-				$theCatalog		= $catalogRow->catalog;
+				$jsonCatalog	= $catalogRow->catalog;
 				$gotCatalog		= TRUE;
+				
+				$theCatalog		= json_decode($jsonCatalog,TRUE);
 			}
 		} else {
 			$rolandError		.= "No catalog record found in $catalogTableName table for semester: $inp_semester, mode: $catalogMode<br />";
@@ -128,262 +120,124 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 
 	if ($gotCatalog) {
 		if ($doDebug) {
-			echo "Have a catalog record:<br />$theCatalog<br />";
+			echo "Have a catalog record:<br /><pre>";
+			print_r($theCatalog);
+			echo "</pre>=<br />";
 		}
-		$thisArray						= explode("&",$theCatalog);
-		if ($doDebug) {
-			echo "Exploded the theCatalog<br /><pre>";
-			print_r($thisArray);
-			echo "</pre><br />";
-		}
-		foreach($thisArray as $buffer) {
+		
+		$arraySequence			= 0;	
+		foreach($theCatalog as $thisLevel => $levelData) {
 			if ($doDebug) {
-				echo "buffer: $buffer<br />";
-			}	
-			$myArray				= explode("|",$buffer);
-			$myInt					= count($myArray);
-			if ($doDebug) {
-				echo "Exploded an entry in buffer and got $myInt entries<br />";
+				echo "thisLevel: $thisLevel<br />";
 			}
-			if ($myInt > 1) {
-				$thisLevel			= $myArray[0];
-				$thisTime			= $myArray[1];
-				$thisDays			= $myArray[2];
-				$thisCount			= $myArray[3];
-				$thisAdvisors		= $myArray[4];
-				$skipLine			= FALSE;
-				
-				if ($inp_display == 'seats') {						// K7OJL-2,WR7Q-1
-					if ($doDebug) {
-						echo "<br />checking seats for each $thisAdvisors<br />";
-					}
-					$newAdvisorList	= "";
-					$firstTimeHere	= TRUE;
- 					$myAdvisors		= explode(",",$thisAdvisors);	// array('K7OJL-2','WR7Q-1')
-					foreach($myAdvisors as $advisorParts) {			// K7OJL-2
-						$keepAdvisor	= TRUE;
-						$myAdvisorParts	= explode('-',$advisorParts);	// array('K7OJL','2')
-						$part1			= $myAdvisorParts[0];
-						$part2			= $myAdvisorParts[1];
-						if ($doDebug){
-							echo "looking for seats available for advisor $part1 class $part2<br />";
+			$doContinue			= FALSE;
+			if ($inp_level == 'all') {
+				$doContinue		= TRUE;
+			} elseif ($inp_level == 'Beginner' && $thisLevel == 'Beginner') {
+				$doContinue		= TRUE;
+			} elseif ($inp_level == 'Fundamental' && $thisLevel == 'Fundamental') {
+				$doContinue		= TRUE;
+			} elseif ($inp_level == 'Intermediate' && $thisLevel == 'Intermediate') {
+				$doContinue		= TRUE;
+			} elseif ($inp_level == 'Advanced' && $thisLevel == 'Advanced') {
+				$doContinue		= TRUE;
+			}
+			if ($doContinue) {
+				foreach($levelData as $thisLanguage => $languageData) {
+					foreach($languageData as $thisSched => $schedData) {
+						if ($doDebug) {
+							echo "processing $thisSched<br />";
 						}
-						$classSQL		= "select * from $advisorClassTableName 
-											where advisorclass_semester = '$inp_semester' 
-											and advisorclass_call_sign = '$part1' 
-											and advisorclass_sequence = $part2";
-						$classResult	= $wpdb->get_results($classSQL);
-						if ($classResult === FALSE) {
-							handleWPDBError("FUNCTION_generate_class_times",$doDebug,"attempting to get advisorclass record for $part1 class $part2");
-							if ($doDebug) {
-								$myStr	= $wpdb->last_error;
-								echo "ran $classSQL which failed<br />Error: $myStr<br />";
-							}
+						$skedArray		= explode(" ",$thisSched);
+						$thisTime		= $skedArray[0];
+						$thisDays		= $skedArray[1];
+						$convertResult	= utcConvert('tolocal',$inp_tz,$thisTime,$thisDays,$doDebug);
+						if ($doDebug) {
+							echo "local convertResult:<br /><pre>";
+							print_r($convertResult);
+							echo "</pre><br />";
+						}
+						$thisResult		= $convertResult[0];
+						if ($thisResult != 'OK') {
+							$reason		= $convertResult[3];
+							sendErrorEmail('FUNCTION_generate_class_times converting $thisTIme $thisDays to local failed');
+							$localTimes	= "9999";
+							$localDays	= "unknown";
 						} else {
-							$numRows 	= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $classSQL<br />and retrieved $numRows rows<br />";
-							}
-							if ($numRows > 0) {
-								foreach($classResult as $classResultRow) {
-									$advisorClass_class_size 				= $classResultRow->advisorclass_class_size;
-									$advisorClass_number_students			= $classResultRow->advisorclass_number_students;
-									
-									if ($part1 == 'K1BG') {
-										$advisorClass_class_size			= 0;
+							$localTimes	= $convertResult[1];
+							$localDays	= $convertResult[2];						
+						}
+						$classesCount	= 0;
+						$advisorStr		= '';
+						$firstTime		= TRUE;
+						foreach($schedData as $thisSeq => $thisClass) {
+							// decide if we can keep this advisor
+							$keepAdvisor			= TRUE;
+							if ($inp_display == 'seats') {
+								$advisorArray		= explode('-',$thisClass);
+								$thisAdvisor		= $advisorArray[0];
+								$thisSequence		= $advisorArray[1];
+								$seatsSQL			= "select * from $advisorClassTableName 
+														where advisorclass_semester = '$inp_semester' 
+														and advisorclass_call_sign = '$thisAdvisor' 
+														and advisorclass_sequence = $thisSequence";
+								$seatsResult		= $wpdb->get_results($seatsSQL);
+								if ($seatsResult === FALSE) {
+									handleWPDBError("FUNCTION_generate_class_times",$doDebug,'attempting to get seats information');
+									$keepAdvisor	= FALSE;
+								} else {
+									$numSRows		= $wpdb->num_rows;
+									if ($doDebug) {
+										echo "ran $seatsSQL<br />and retrieved $numSRows rows<br />";
 									}
-									if ($advisorClass_class_size > 0) {
-										$myInt		= $advisorClass_class_size - $advisorClass_number_students;
-										if ($doDebug) {
-											echo "$part1 has size $advisorClass_class_size, students: $advisorClass_number_students, Available: $myInt<br />";
-										}
-										if ($myInt <= 0) {
-											$keepAdvisor	= FALSE;
+									if ($numSRows > 0) {
+										foreach($seatsResult as $seatsRow) {
+											$advisorClass_class_size 				= $classResultRow->advisorclass_class_size;
+											$advisorClass_number_students			= $classResultRow->advisorclass_number_students;
+											
+											$seatsAvail			= $advisorClass_class_size - $advisorClass_number_students;
 											if ($doDebug) {
-												echo "seats avail: $myInt. Set keepAdvisor to FALSE<br />";
-											} else {
+												echo "for advisor $thisAdvisor sequence $thisSequence<br />
+														advisorClass_clss_size: $advisorClass_class_size<br >
+														advisorClass_number_students: $advisorClass_number_students<br />
+														seatsAvail: $seatsAvail<br />";
+											}
+											if ($seatsAvail < 1) {
+												$keepAdvisor 	= FALSE;
 												if ($doDebug) {
-													echo "advisor $part1 class $part2 has $myInt seats available<br />";
+													echo "keepAdvisor is FALSE<br />";
 												}
 											}
-										}							
-									} else {
-										if ($doDebug) {
-											echo "adivisor $part1 class $part2 has class size of $advisorClass_class_size<br />";
 										}
-										$keepAdvisor		= FALSE;
 									}
-	
 								}
 							}
-						}
-						if ($keepAdvisor) {
-							if ($firstTimeHere) {
-								$newAdvisorList	= $advisorParts;
-								$firstTimeHere	= FALSE;
-							} else {
-								$newAdvisorList	.= ",$advisorParts";
-							}
-						}
-					}
-					$thisAdvisors	= $newAdvisorList;
-					if ($doDebug) {
-						echo "thisAdvisors set to $newAdvisorList<br />";
-					}
-				}
-				if ($thisAdvisors != '') {
-					$printArray[$thisLevel][$thisIncrement] = "$thisTime|$thisDays|$thisCount|$thisAdvisors";
-					$thisIncrement++;
-					if ($doDebug) {
-						echo "buffer added to printArray<br /><br />";
-					}
-				} else {
-					if ($doDebug) {
-						echo "buffer NOT added to printArray<br /><br />";
-					}
-				}
-			}
-		}
-		$noErrors					= TRUE;	
-		if ($thisIncrement < 1) {
-			$rolandError			= "Catalog has no entries<br />";
-			$emailRoland			= TRUE;
-			$outputArray			= array('FAIL - Missing Catalog');
-			$noErrors				= FALSE;
-		}
-
-		if ($doDebug) {
-			echo "printArray:<br /><pre>";
-			print_r($printArray);
-			echo "</pre><br />";
-		}
-
-		if ($noErrors) {
-			// if we get here the request is either for 'all' or for a specific level	
-			$tzKey			= intval($inp_tz);
-			$tempArray		= array();
-			foreach($validLevelArray as $thisLevel) {
-				$doProceed		= TRUE;
-				if ($doDebug) {
-					echo "<br />Doing the validLevelArray of $thisLevel<br />";
-				}
-				if ($inp_level != 'All') {
-					if ($thisLevel != $inp_level) {
-						$doProceed	= FALSE;
-						if ($doDebug) {
-							echo "$thisLevel is not requested<br />";
-						}				
-					}
-				}
-				if ($doProceed) {
-					foreach($printArray[$thisLevel] as $thisSeq=>$classData) {
-						if ($doDebug) {
-							echo "<br />Doing printArray $thisLevel, $thisSeq, $classData<br />";
-						}
-						$skipLine			= FALSE;
-						$thisArray			= explode("|",$classData);
-						$classStartUTC		= $thisArray[0];
-						$classDaysUTC		= $thisArray[1];
-						$classCount			= $thisArray[2];
-						$classAdvisors		= $thisArray[3];
-						$origDays			= $thisArray[1];
-						if ($doDebug) {
-							echo "Processing $thisLevel $classStartUTC | $classDaysUTC | $classCount<br />";
-						}
-						// prepare the local time information
-						$classStart	= intval($classStartUTC) + ($tzKey * 100);
-						if ($doDebug) {
-							echo "classStartUTC $classStartUTC adjusted for tzKey of $tzKey is $classStart<br />";
-						}
-						if ($classStart >= 2400) {			// next day
-							$classStart	= $classStart - 2400;
-							if (array_key_exists($classDaysUTC,$moveForwardDays)) {
-								$classDays	= $moveForwardDays[$classDaysUTC];
+							if ($keepAdvisor) {
 								if ($doDebug) {
-									echo "$classStart $classStart adjusted for next day and days changed from $origDays to $classDays<br />";
+									echo "keeping advisor<br />";
 								}
-							} else {
-								if ($doDebug) {
-									echo "<b>$classDaysUTC not found in moveForwardDays</b><br />";
+								$classesCount++;
+								if ($firstTime) {
+									$firstTime	= FALSE;
+									$advisorStr	.= "$thisClass";
+								} else {
+									$advisorStr	.= ",$thisClass";
 								}
-								$rolandError	.= "$classDaysUTC not found in moveForwardDays<br />";
-								$emailRoland	= TRUE;	
-								$skipLine		= TRUE;
-							}
-						} elseif ($classStart < 0) {
-							$classStart	= $classStart + 2400;
-							if (array_key_exists($classDaysUTC,$moveBackwardDays)) {
-								$classDays	= $moveBackwardDays[$classDaysUTC];
-								if ($doDebug) {
-									echo "$classStart $classStart adjusted for previous day and days changed from $origDays to $classDays<br />";
-								}
-							} else {
-								if ($doDebug) {
-									echo "<b>$classDaysUTC not found in moveBackwardDays</b><br />";
-								}
-								$rolandError	.= "$classDaysUTC not found in moveBackwardDays<br />";
-								$emailRoland	= TRUE;	
-								$skipLine		= TRUE;
-							}
-						} else {
-							$classDays			= $classDaysUTC;
-						}
-						if (!$skipLine) {
-							$classStart			= str_pad($classStart,4,'0',STR_PAD_LEFT);
-							$tempArray[]		= "$classStart|$classDays|$classCount|$classStartUTC|$classDaysUTC|$classAdvisors";
-							if ($doDebug) {
-								echo "added $classStart|$classDays|$classCount|$classStartUTC|$classDaysUTC|$classAdvisors to tempArray<br />";
-							}
-						} else {
-							if ($doDebug) {
-								echo "skipping $thisLevel $classData as info is invalid<br />";
 							}
 						}
-					}
-					if ($doDebug) {
-						echo "Got the tempArray:<br /><pre>";
-						print_r($tempArray);
-						echo "</pre><br />";
-					}
-					sort($tempArray);
-					/// now build the output array
-					if ($doDebug) {
-						echo "<br />tempArray:<br />";
-					}
-					$jj			= 0;
-					foreach($tempArray as $tempValue) {
-						$outputArray[$thisLevel][$jj]	= $tempValue;
 						if ($doDebug) {
-							echo "added $tempValue to outputArray at $thisLevel and sequence $jj<br />";
+							echo "should have all the classes. classesCount: $classesCount; advisorStr: $advisorStr<br />";
 						}
-						$jj++;			
-					}
-					$tempArray			= array();
-				} else {
-					if ($doDebug) {
-						echo "bypassed $thisLevel as doProceed was false<br />";
+						if ($classesCount > 0) {
+							$arraySequence++;
+							$outputArray[$thisLevel][$arraySequence] = "$thisLanguage|$localTimes|$localDays|$classesCount|$advisorStr";
+						}
 					}
 				}
 			}
 		}
 	}
-	if ($emailRoland) {
-		if ($doDebug) {
-			echo "Emailing the following to Roland:<br />$rolandError<br />";
-		}
-		$theRecipient		= '';
-		$theContent			= "Generate Class Times encountered the following errors:<br />$rolandError";
-		$theSubject 		= "CWA.CWOPS Error in Generate Class Times";
-		$mailCode			= 1;
-		$mailResult		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-													'theSubject'=>$theSubject,
-													'jobname'=>'FUNCTION Generate Class Times',
-													'theContent'=>$theContent,
-													'mailCode'=>$mailCode,
-													'increment'=>$increment,
-													'testMode'=>$catalogMode,
-													'doDebug'=>$doDebug));
-	}
+		
 	if ($doDebug) {
 		echo "<br />This is what will be returned:<br /><pre>";
 		print_r($outputArray);
