@@ -138,6 +138,13 @@ function display_and_update_advisor_info_func() {
     $inp_advisorclass_class_comments = '';
     $inp_advisorclass_copy_control = '';
     $inp_advisorclass_action_log = '';
+    $inp_advisorclass_language = '';
+    
+    $languageArray 	= array('English',
+    						'Ελληνικά (Greek)',
+    						'Catalan',
+    						'język polski (Polish)',
+    						'Deutsch (German)');
 
 	
 // get the input information
@@ -260,6 +267,10 @@ function display_and_update_advisor_info_func() {
 			if ($str_key == 'inp_advisorclass_level') {
 				$inp_advisorclass_level = $str_value;
 				$inp_advisorclass_level = filter_var($inp_advisorclass_level,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key == 'inp_advisorclass_language') {
+				$inp_advisorclass_language = $str_value;
+				$inp_advisorclass_language = filter_var($inp_advisorclass_language,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == 'inp_advisorclass_class_size') {
 				$inp_advisorclass_class_size = $str_value;
@@ -948,7 +959,7 @@ function display_and_update_advisor_info_func() {
 										<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
 											<td><b>Languages/b><br />$user_languages</td>
 											<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
-											<td></td></tr>
+											<td><b>Survey Score</b><br />$user_survey_score</td></tr>
 										<tr><td><b>Date Created</b><br />user_$user_date_created</td>
 											<td><b>Date Updated</b><br />user_$user_date_updated</td>
 											<td></td>
@@ -1056,6 +1067,7 @@ function display_and_update_advisor_info_func() {
 											$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 											$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 											$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+											$advisorClass_language					= $advisorClassRow->advisorclass_language;
 											$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 											$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 											$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -1119,8 +1131,8 @@ function display_and_update_advisor_info_func() {
 															<td style='vertical-align:top;'><b>semester</b><br />$advisorClass_semester</td></tr>
 														<tr><td style='vertical-align:top;'><b>timezone_offset</b><br />$advisorClass_timezone_offset</td>
 															<td style='vertical-align:top;'><b>level</b><br />$advisorClass_level</td>
-															<td style='vertical-align:top;'><b>class_size</b><br />$advisorClass_class_size</td>
-															<td></td></tr>
+															<td style='vertical-align:top;'><b>Language</b><br />$advisorClass_language</td>
+															<td style='vertical-align:top;'><b>class_size</b><br />$advisorClass_class_size</td></tr>
 														<tr><td style='vertical-align:top;'><b>class_schedule_Local</b><br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days</td>
 															<td style='vertical-align:top;'><b>class_schedule_utc</b><br />$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc</td>
 															<td style='vertical-align:top;'><b>class_incomplete</b><br />$advisorClass_class_incomplete</td>
@@ -1513,6 +1525,7 @@ function display_and_update_advisor_info_func() {
 					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+					$advisorClass_language					= $advisorClassRow->advisorclass_language;
 					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -1556,6 +1569,22 @@ function display_and_update_advisor_info_func() {
 					$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
 					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
 					$advisorClass_copy_control				= $advisorClassRow->advisorclass_copy_control;
+					
+					//Build language selection
+					$languageOptions			= '';
+					$firstTime					= TRUE;
+					foreach($languageArray as $thisLanguage) {
+						$thisChecked			= '';
+						if ($advisorClass_language == $thisLanguage) {
+							$thisChecked		= ' checked ';
+						}
+						if ($firstTime) {
+							$firstTime			= FALSE;
+							$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $thisChecked>$thisLanguage";
+						} else {
+							$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $thisChecked>$thisLanguage";
+						}
+					}
 
 					$content	.= "<h3>Update the Advisor Class $advisorClass_sequence for $advisorClass_call_sign</h3>
 									<p>Table: $advisorClassTableName</p>
@@ -1580,6 +1609,8 @@ function display_and_update_advisor_info_func() {
 										<td><input type='text' class='formInputText' name='inp_advisorclass_timezone_offset' size='8' maxlenth='8' value='$advisorClass_timezone_offset'></td></tr>
 									<tr><td>Level</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_level' size='15' maxlenth='15' value='$advisorClass_level'></td></tr>
+									<tr><td style='vertical-align:top;'>Language</td>
+										<td>$languageOptions</td></tr>
 									<tr><td>Class Size</td>
 										<td><input type='text' class='formInputText' name='inp_advisorclass_class_size' size='5' maxlenth='5' value='$advisorClass_class_size'></td></tr>
 									<tr><td>Class Schedule Days</td>
@@ -1709,6 +1740,7 @@ function display_and_update_advisor_info_func() {
 					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+					$advisorClass_language					= $advisorClassRow->advisorclass_language;
 					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -1772,6 +1804,12 @@ function display_and_update_advisor_info_func() {
 						$updateParams['advisorclass_level'] = $inp_advisorclass_level;
 						$updateFormat[] = "%s";
 						$actionContent .= "Updated advisorclass_level of $advisorClass_level to $inp_advisorclass_level. ";
+					}
+					if ($inp_advisorclass_language != $advisorClass_language) {
+						$doTheUpdate = TRUE;
+						$updateParams['advisorclass_language'] = $inp_advisorclass_language;
+						$updateFormat[] = "%s";
+						$actionContent .= "Updated advisorclass_language of $advisorClass_language to $inp_advisorclass_language. ";
 					}
 					if ($inp_advisorclass_class_size != $advisorClass_class_size) {
 						$doTheUpdate = TRUE;
@@ -2167,6 +2205,18 @@ function display_and_update_advisor_info_func() {
 						echo "preping to add sequence $inp_sequence to $advisorClass_call_sign $advisorClass_semester semester<br />";
 					}
 
+					//Build language selection
+					$languageOptions			= '';
+					$firstTime					= TRUE;
+					foreach($languageArray as $thisLanguage) {
+						if ($firstTime) {
+							$firstTime			= FALSE;
+							$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage'>$thisLanguage";
+						} else {
+							$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' >$thisLanguage";
+						}
+					}
+
 					$content	.= "<form method='post' name='selection_form' action='$theURL' 
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='11'>
@@ -2192,6 +2242,8 @@ function display_and_update_advisor_info_func() {
 											<input type='radio' class='formInputButton' name='inp_advisorclass_level' value='Fundamental'> Fundamental<br />
 											<input type='radio' class='formInputButton' name='inp_advisorclass_level' value='Intermediate'> Intermediate<br />
 											<input type='radio' class='formInputButton' name='inp_advisorclass_level' value='Advanced'> Advanced<br /></td></tr>
+									<tr><td style='vertical-align:top;'>Language</td>
+										<td>$languageOptions</td></tr>
 									<tr><td style='vertical-align:top;'>Class Size</td>
 										<td><input class='formInputText' type='text' name='inp_advisorclass_class_size' size='5' maxlenth='5' value='6'></td></tr>
 									<tr><td style='vertical-align:top;'>Class Schedule Days</td>
@@ -2285,15 +2337,16 @@ Error: $result[3]<br />";
 										   "advisorclass_semester|$inp_advisorclass_semester|s",							// 5
 										   "advisorclass_timezone_offset|$inp_advisorclass_timezone_offset|f",			// 7
 										   "advisorclass_level|$inp_advisorclass_level|s",								// 8
-										   "advisorclass_action_log|$advisorclass_action_log|s",							// 9
-										   "advisorclass_class_size|$inp_advisorclass_class_size|d",						// 10
-										   "advisorclass_class_schedule_days|$inp_advisorclass_class_schedule_days|s",	// 11
-										   "advisorclass_class_schedule_times|$inp_times|s",					// 12
-										   "advisorclass_class_schedule_days_utc|$displayDays|s",			// 13
-										   "advisorclass_class_schedule_times_utc|$displayTimes|s",			// 14
-											"advisorclass_number_students|$inp_advisorclass_number_students|d",			// 45
-											"advisorclass_evaluation_complete|N|s",	// 46
-											"advisorclass_class_comments|$inp_advisorclass_class_comments|s");				// 47
+										   "advisorclass_language|inp_advisorclass_language|s",							// 9
+										   "advisorclass_action_log|$advisorclass_action_log|s",							// 10
+										   "advisorclass_class_size|$inp_advisorclass_class_size|d",						// 11
+										   "advisorclass_class_schedule_days|$inp_advisorclass_class_schedule_days|s",	// 12
+										   "advisorclass_class_schedule_times|$inp_times|s",					// 13
+										   "advisorclass_class_schedule_days_utc|$displayDays|s",			// 14
+										   "advisorclass_class_schedule_times_utc|$displayTimes|s",			// 15
+											"advisorclass_number_students|$inp_advisorclass_number_students|d",			// 46
+											"advisorclass_evaluation_complete|N|s",	// 47
+											"advisorclass_class_comments|$inp_advisorclass_class_comments|s");				// 48
 		$classUpdateData		= array('tableName'=>$advisorClassTableName,
 										'inp_method'=>'add',
 										'inp_data'=>$insertParams,
@@ -2321,6 +2374,7 @@ Error: $result[3]<br />";
 			$advisorClass_semester					= $inp_advisorclass_semester;
 			$advisorClass_timezone_offset			= $inp_advisorclass_timezone_offset;
 			$advisorClass_level						= $inp_advisorclass_level;
+			$advisorCLass_language					= $inp_advisorclass_language;
 			$advisorClass_class_size				= $inp_advisorclass_class_size;
 			$advisorClass_class_schedule_days		= $inp_class_schedule_days;
 			$advisorClass_class_schedule_times		= $inp_times;
@@ -2337,6 +2391,8 @@ Error: $result[3]<br />";
 							<table style='width:600px;'>
 							<tr><td style='width:250px;'><b>Level</b></td>
 								<td>$advisorClass_level</td></tr>
+							<tr><td>Language</td>
+								<td>$advisorClass_language</td></tr>
 							<tr><td><b>Class Size</b></td>
 								<td>$advisorClass_class_size</td></tr>
 							<tr><td><b>Class Schedule Days</b></td>
@@ -2436,6 +2492,7 @@ Error: $result[3]<br />";
 									$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 									$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 									$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+									$advisorClass_language					= $advisorClassRow->advisorclass_language;
 									$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -2619,6 +2676,7 @@ Error: $result[3]<br />";
 						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+						$advisorClass_language					= $advisorClassRow->advisorclass_language;
 						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
