@@ -453,6 +453,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-show-advisor-class-assignments/' target='_blank'>Show Advisor Class Assignments</a>
 								<li><a href='$siteURL/cwa-show-callsign-audit-log-for-a-semester/' target='_blank'>Show Callsign Audit Log for a Semester</a>
 								<li><a href='$siteURL/cwa-show-detailed-history-for-student/' target='_blank'>Show Detailed History for Student</a>
+								<li><a href='$siteURL/cwa-show-timezone-information-for-a-location/' target='_blank'>Show Timezone Information for a Location</a>
 								<li><a href='$siteURL/cwa-show-saved-email/' target='_blank'>Show Saved Email</a>
 								<li><a href='$siteURL/cwa-student-and-advisor-assignments/' target='_blank'>Student and Advisor Assignments (#1 Report)</a>
 								<li><a href='$siteURL/cwa-student-and-advisor-color-chart-v2/' target='_blank'>Student and Advisor Color Chart V2</a>
@@ -739,6 +740,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-send-an-email/' target='_blank'>Send an Email</a>
 								<li><a href='$siteURL/cwa-show-callsign-audit-log-for-a-semester/' target='_blank'>Show Callsign Audit Log for a Semester</a>
 								<li><a href='$siteURL/cwa-show-saved-email/' target='_blank'>Show Saved Email</a>
+								<li><a href='$siteURL/cwa-show-timezone-information-for-a-location/' target='_blank'>Show Timezone Information for a Location</a>
 								<li><a href='$siteURL/cwa-update-unassigned-student-information/' target='_blank'>Update Unassigned Student Information</a>
 								<li><a href='$siteURL/utility-calculate-utc/' target='_blank'>UTILITY: Calculate UTC</a>
 								<li><a href='$siteURL/utility-list-available-shortcodes/' target='_blank'>UTILITY - List Available Shortcodes</a>
