@@ -10,10 +10,13 @@ function getTimeZone($inp_data) {
 	Modified 8Jan25 by Roland to use array input
 */
 
+	global				$wpdb;
+	
 	$city				= '';
 	$state				= '';
 	$zip				= '';
 	$country			= '';
+	$special			= '';
 	$doDebug			= FALSE;
 	$address			= '';
 	$this_timezone_id	= '';
@@ -158,53 +161,31 @@ function getTimeZone($inp_data) {
 				echo "getting geocoordinates for $address <br />";
 			}
 		}
-		$apiKey = "AIzaSyCGzRL0ROuiIxTaN8oOEZlP6yLsgtRYh-4";
 		
-		// Geocoding request
-		$geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=" . $apiKey;
-		$geocodeResponse = file_get_contents($geocodeUrl);
-		$geocodeData = json_decode($geocodeResponse, true);
-		
-		$status		= $geocodeData['status'];
-		if ($status != 'OK') {
-			if ($doDebug) {
-				echo "geocoding returned $status<br />";
-				echo "geocodeData:<br /><pre>";
-				print_r($geocodeData);
-				echo "</pre><br />";
-			}
-			if ($status === 'REQUEST_DENIED') {
-				$thisErrorStuff	= print_r($geocodeData,TRUE);
-				$errorMessage	= "function_getTimeZone returned $status<br /><pre>$thisErrorStuff</pre><br />
-getting geocorrdinates for $address";
-				sendErrorEmail($errorMessage);
-			}
+		// get the apiKey
+		$apiKey		= $wpdb->get_var("select settings from wpw1_cwa_program_settings 
+									where program_name='getTimeZone'");
+		if ($apiKey === FALSE) {
+			handleWPDBError('FUNCTION_getTimeZone',$doDebug,'trying to get apikey');
 			$this_timezone_id	= '??';
+			goto bypass;
 		} else {
 		
-			// Extract latitude and longitude
-			$lat = $geocodeData['results'][0]['geometry']['location']['lat'];
-			$lng = $geocodeData['results'][0]['geometry']['location']['lng'];
+			// Geocoding request
+			$geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($address) . "&key=" . $apiKey;
+			$geocodeResponse = file_get_contents($geocodeUrl);
+			$geocodeData = json_decode($geocodeResponse, true);
 			
-			if ($doDebug) {
-				echo "extracted lat: $lat lng: $lng<br />";
-			}
-			
-			// Timezone request
-			$timezoneUrl = "https://maps.googleapis.com/maps/api/timezone/json?location=" . $lat . "," . $lng . "&timestamp=" . time() . "&key=" . $apiKey;
-			$timezoneResponse = file_get_contents($timezoneUrl);
-			$timezoneData = json_decode($timezoneResponse, true);
-			
-			$status		= $timezoneData['status'];
+			$status		= $geocodeData['status'];
 			if ($status != 'OK') {
 				if ($doDebug) {
-					echo "timezoneData returned $status<br />";
-					echo "timezoneData:<br /><pre>";
-					print_r($timezoneData);
+					echo "geocoding returned $status<br />";
+					echo "geocodeData:<br /><pre>";
+					print_r($geocodeData);
 					echo "</pre><br />";
 				}
 				if ($status === 'REQUEST_DENIED') {
-					$thisErrorStuff	= print_r($timezoneData,TRUE);
+					$thisErrorStuff	= print_r($geocodeData,TRUE);
 					$errorMessage	= "function_getTimeZone returned $status<br /><pre>$thisErrorStuff</pre><br />
 getting geocorrdinates for $address";
 					sendErrorEmail($errorMessage);
@@ -212,11 +193,42 @@ getting geocorrdinates for $address";
 				$this_timezone_id	= '??';
 			} else {
 			
-				// Extract IANA timezone ID
-				$this_timezone_id = $timezoneData['timeZoneId'];
-			
-				if ($doDebug) {		
-					echo "this_timezone_id: $this_timezone_id<br />"; 
+				// Extract latitude and longitude
+				$lat = $geocodeData['results'][0]['geometry']['location']['lat'];
+				$lng = $geocodeData['results'][0]['geometry']['location']['lng'];
+				
+				if ($doDebug) {
+					echo "extracted lat: $lat lng: $lng<br />";
+				}
+				
+				// Timezone request
+				$timezoneUrl = "https://maps.googleapis.com/maps/api/timezone/json?location=" . $lat . "," . $lng . "&timestamp=" . time() . "&key=" . $apiKey;
+				$timezoneResponse = file_get_contents($timezoneUrl);
+				$timezoneData = json_decode($timezoneResponse, true);
+				
+				$status		= $timezoneData['status'];
+				if ($status != 'OK') {
+					if ($doDebug) {
+						echo "timezoneData returned $status<br />";
+						echo "timezoneData:<br /><pre>";
+						print_r($timezoneData);
+						echo "</pre><br />";
+					}
+					if ($status === 'REQUEST_DENIED') {
+						$thisErrorStuff	= print_r($timezoneData,TRUE);
+						$errorMessage	= "function_getTimeZone returned $status<br /><pre>$thisErrorStuff</pre><br />
+getting geocorrdinates for $address";
+						sendErrorEmail($errorMessage);
+					}
+					$this_timezone_id	= '??';
+				} else {
+				
+					// Extract IANA timezone ID
+					$this_timezone_id = $timezoneData['timeZoneId'];
+				
+					if ($doDebug) {		
+						echo "this_timezone_id: $this_timezone_id<br />"; 
+					}
 				}
 			}
 		}
