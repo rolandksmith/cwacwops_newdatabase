@@ -260,32 +260,33 @@ function display_catalog_for_a_timezone_func() {
 					echo "<br />Getting catalog for $myLevel<br />";
 				}
 				$returnArray	= generateClassTimes($inp_timezone_offset,$myLevel,$inp_semester,$inp_display,$doDebug,$catalogMode);
-				//	[level][sequence] = localtime|localdays|nmbr classes|utctime|utcdays|advisors
+				if ($doDebug) {
+					echo "data from generateClassTimes<br /><pre>";
+					print_r($returnArray);
+					echo "</pre><br/>";
+				}
+
+ 				//	[level][sequence] = language|localtime|localdays|nmbr classes|advisors
 
 				$content		.= "<h3>CW Academy Course Catalog for $myLevel in $tzString for Semster $inp_semester</h3>
-									<table style='width:1000px;'>
-									<tr><th>$tzString</th>
-										<th>UTC</th>
-										<th>&nbsp;</th>
-										<th>&nbsp;</tr>
-									<tr><th>Local Time</th>
-										<th>UTC Time</th>
-										<th style='text-align:center;'>Classes</th>
-										<th>Advisors</th></tr>";
+									<table>
+									<tr><th style='width:200px;'>$tzString<br />Local Time</th>
+										<th style='text-align:center;width:80px;'><br />Classes</th>
+										<th style='width:200px;'>Class<br />Language</th>
+										<th style='vertical-align:top;width:700px;'><br />Advisors</th></tr>";
 				$totalClasses				= 0;
 				foreach($returnArray as $thisLevel=>$myValue) {
 					foreach($myValue as $thisSequence=>$thisInfo) {
 						$myArray				= explode("|",$thisInfo);
-						$thisLocalStart			= $myArray[0];
-						$thisLocalDays			= $myArray[1];
-						$thisClassCount			= $myArray[2];
-						$thisClassStartUTC		= $myArray[3];
-						$thisClassDaysUTC		= $myArray[4];
-						$thisClassAdvisors		= $myArray[5];
+						$thisLanguage			= $myArray[0];
+						$thisLocalStart			= $myArray[1];
+						$thisLocalDays			= $myArray[2];
+						$thisClassCount			= $myArray[3];
+						$thisClassAdvisors		= $myArray[4];
 						$thisClassAdvisors		= str_replace(",",", ",$thisClassAdvisors);
 						$content					.= "<tr><td style='vertical-align:top;'>$thisLocalStart $thisLocalDays</td>
-															<td style='vertical-align:top;'>$thisClassStartUTC $thisClassDaysUTC</td>
 															<td style='vertical-align:top;text-align:center;'>$thisClassCount</td>
+															<td style='vertical-align:top;'>$thisLanguage</td>
 															<td style='vertical-align:top;'>$thisClassAdvisors</td></tr>";
 						$totalClasses			= $totalClasses + $thisClassCount;
 						$finalTotal				= $finalTotal + $thisClassCount;
