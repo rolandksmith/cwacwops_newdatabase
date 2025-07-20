@@ -525,6 +525,7 @@ function daily_student_cron_v4_func() {
 		$validSemesters[]			= $semesterThree;
 		$validSemesters[]			= $semesterFour;
 
+/*
 		//// get the class catalog and make it ready to check class choices
 		if ($doDebug) {
 			echo "<br /><b>Catalog</b> Loading the catalog<br />";
@@ -537,11 +538,12 @@ function daily_student_cron_v4_func() {
 			foreach($catalogArray as $thisValue) {
 				$myArray		= explode("|",$thisValue);
 				$thisLevel		= $myArray[0];
-				$thisTime		= $myArray[1];
-				$thisDays		= $myArray[2];
-				$thisCount		= $myArray[3];
-				$thisAdvisors	= $myArray[4];
-				$classesArray["$thisLevel|$thisTime|$thisDays"]	= "$thisCount|$thisAdvisors";
+				$thisLanguage	= $myArray[1];
+				$thisTime		= $myArray[2];
+				$thisDays		= $myArray[3];
+				$thisCount		= $myArray[4];
+				$thisAdvisors	= $myArray[5];
+				$classesArray["$thisLevel|$thisLanguage|$thisTime|$thisDays"]	= "$thisCount|$thisAdvisors";
 			}
 		}
 		if ($doDebug) {
@@ -554,7 +556,7 @@ function daily_student_cron_v4_func() {
 			echo "Catalog ... catalog loaded<br >";
 		}
 		//// classesArray loaded
-
+*/
 		if ($validReplacementPeriod == 'Y') {
 			if ($doDebug) {
 				echo "<br /><b>REPLACE Array</b> In the replacement period<br />Building the array of 
