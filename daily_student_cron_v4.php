@@ -1973,6 +1973,7 @@ Three situations are being handled:
 											} else {
 												$studentR++;
 											}
+/*											
 											if ($student_response == 'Y' and $student_first_class_choice == 'None') {
 												// student has responded but not made a class choice. Send an email!
 												// set up the reminder and send the email
@@ -2052,6 +2053,7 @@ under 'Reminders and Actions Requested'.";
 													}
 												}
 											}
+*/
 										} 
 										if ($student_email_number == 4 && $student_response == '') {
 											$prevDropped++;
