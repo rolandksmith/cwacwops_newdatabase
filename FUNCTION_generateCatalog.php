@@ -3,7 +3,7 @@ function generateCatalog($semester='', $testMode=FALSE, $doDebug=FALSE) {
 /*	reads the catalog file and builds the catalog array
 	returns the catalog array or array(FALSE);
 	
-	catalogArray 	= level|time|days|count|advisors
+	catalogArray 	= level|language|time|days|count|advisors
 	
 	semester must be provided
 */
@@ -22,7 +22,9 @@ function generateCatalog($semester='', $testMode=FALSE, $doDebug=FALSE) {
 		$catalogMode		= "Production";
 	}
 
-	$sql 						= "select * from $catalogTableName where mode='$catalogMode' and semester='$semester'";
+	$sql 						= "select * from $catalogTableName 
+									where mode='$catalogMode' 
+									and semester='$semester'";
 	$result						= $wpdb->get_results($sql);
 	if ($result === FALSE) {
 		if ($doDebug) {
@@ -41,8 +43,10 @@ function generateCatalog($semester='', $testMode=FALSE, $doDebug=FALSE) {
 		}
 		if ($numRows > 0) {
 			foreach ($result as $catalogRow) {
-				$theCatalog		= $catalogRow->catalog;
+				$jsonCatalog	= $catalogRow->catalog;
 				$gotCatalog		= TRUE;
+				
+				$theCatalog		= json_decode($jsonCatalog,TRUE);
 			}
 		} else {
 			$rolandError		.= "No catalog record found in $catalogTableName table for semester: $inp_semester, mode: $catalogMode<br />";
@@ -56,36 +60,26 @@ function generateCatalog($semester='', $testMode=FALSE, $doDebug=FALSE) {
 
 	if ($gotCatalog) {
 		if ($doDebug) {
-			echo "Have a catalog record:<br />$theCatalog<br />";
+			echo "Have a catalog record<br />";
 		}
-		$thisArray						= explode("&",$theCatalog);
-		if ($doDebug) {
-			echo "Exploded the theCatalog<br /><pre>";
-			print_r($thisArray);
-			echo "</pre><br />";
-		}
-		foreach($thisArray as $buffer) {
-			if ($doDebug) {
-				echo "buffer: $buffer<br />";
-			}	
-			$myArray				= explode("|",$buffer);
-			$myInt					= count($myArray);
-			if ($doDebug) {
-				echo "Exploded an entry in buffer and got $myInt entries<br />";
-			}
-			if ($myInt > 1) {
-				$thisLevel			= $myArray[0];
-				$thisTime			= $myArray[1];
-				$thisDays			= $myArray[2];
-				$thisCount			= $myArray[3];
-				$thisAdvisors		= $myArray[4];
-				$skipLine			= FALSE;
-	
-				$classesArray[]		= "$thisLevel|$thisTime|$thisDays|$thisCount|$thisAdvisors";
-			} else {
-				$rolandError			= "Catalog has no entries<br />";
-				sendErrorEmail($rolandError);
-				return array(FALSE,"No catalog entries");
+		foreach($theCatalog as $thisLevel => $levelData) {
+			foreach($levelData as $thisLanguage => $languageData) {
+				foreach($languageData as $thisSched => $scheduleData) {
+					$ii = 0;
+					$classStr = '';
+					$firstTime = TRUE;
+					foreach($scheduleData as $classSeq => $thisClass) {
+						$ii++;
+						if ($firstTime) {
+							$firstTime = FALSE;
+							$classStr .= $thisClass;
+						} else {
+							$classStr .= ",$thisClass";
+						}
+					}
+				$schedArray = explode(" ",$thisSched);
+				$classesArray[] = "$thisLevel|$thisLanguage|$schedArray[0]|$schedArray[1]|$ii|$classStr";
+				}
 			}
 		}
 		if ($doDebug) {
