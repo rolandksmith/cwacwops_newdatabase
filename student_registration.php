@@ -2496,7 +2496,7 @@ function student_registration_func() {
 								<tr><td colspan='2'><b>Level: </b>$student_level</td>
 									<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
 		if ($result_option == 'option') {
-			$content	.= "<tr><td colspan='4'><b>Class Preferences</b><br />";
+			$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
 			if ($student_flexible == 'Y') {
 				$content	.= "My time is flexible</td></tr>";
 			} else {
@@ -3484,7 +3484,7 @@ function student_registration_func() {
 												<tr><td colspan='2'><b>Level: </b>$student_level</td>
 													<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
 						if ($student_no_catalog == 'Y') {
-							$content	.= "<tr><td colspan='4'><b>Class Preferences</b><br />";
+							$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
 							if ($student_flexible == 'Y') {
 								$content	.= "My time is flexible</td></tr>";
 							} else {
@@ -3653,7 +3653,7 @@ function student_registration_func() {
 										<tr><td colspan='2'><b>Level: </b>$student_level</td>
 											<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
 				if ($student_no_catalog == 'Y') {
-					$content	.= "<tr><td colspan='4'><b>Class Preferences</b><br />";
+					$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
 					if ($student_flexible == 'Y') {
 						$content	.= "My time is flexible</td></tr>";
 					} else {
