@@ -277,20 +277,21 @@ function generate_catalog_for_student($inp_data = array('')) {
 				$result					= generateClassTimes($student_timezone_offset,$student_level,$student_semester,'all',$doDebug,$catalogMode);
 				if ($result != 'FALSE') {
 					if ($doDebug) {
-						echo "gemerateClassTimes:<br /><pre>";
+						echo "generateClassTimes:<br /><pre>";
 						print_r($result);
 						echo "</pre><br />";
 					}
-					// [level][sequence] = localtime|localdays|nmbr classes|utctime|utcdays|advisors
+					// [level][sequence] = language|localtime|localdays|nmbr classes|utctime|utcdays|advisors
 					// parse the catalog
 					$returnCatalog		= "<p><b>Available Classes (all times are your local time)</b></p>\n
 											<table style='width:auto;'>
-											<tr><th colspan='5'>Class Preference</th></tr>\n
+											<tr><th colspan='6'>Class Preference</th></tr>\n
 											<tr><th style='width:35px;'>First<br />Preference</th>\n
 												<th style='width:35px;'>Second<br />Preference</th>\n
 												<th style='width:35px;'>Third<br />Preference</th>\n
 												<th style='vertical-align;bottom;width:250px'>Class Time and Days</th>\n
-												<th style='vertical-align;bottom;'>Classes</th></tr>\n";
+												<th style='vertical-align;bottom;'>Classes</th>
+												<th style='vertical-align;bottom;'>Language</th></tr>\n";
 					$none1			= 'checked';
 					$none2			= 'checked';
 					$none3			= 'checked';
@@ -300,12 +301,13 @@ function generate_catalog_for_student($inp_data = array('')) {
 								echo "processing $catalogData<br />";
 							}
 							$myArray	= explode("|",$catalogData);
-							$localTime	= $myArray[0];
-							$localDays	= $myArray[1];
-							$numClasses	= $myArray[2];
-							$utcTime	= $myArray[3];
-							$utcDays	= $myArray[4];
-							$advisors	= $myArray[5];
+							$clanguage	= $myArray[0];
+							$utcTime	= $myArray[1];
+							$utcDays	= $myArray[2];
+							$localTime	= $myArray[3];
+							$localDays	= $myArray[4];
+							$numClasses	= $myArray[5];
+							$advisors	= $myArray[6];
 
 
 							$myStr			= str_replace(","," and ",$localDays);
@@ -331,7 +333,8 @@ function generate_catalog_for_student($inp_data = array('')) {
 													<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendValue' $thisChoice2></td>\n
 													<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='$sendValue' $thisChoice3></td>\n
 													<td>$convertedTime $myStr</td>\n
-													<td style='text-align:center;'>$numClasses</tr>\n";
+													<td style='text-align:center;'>$numClasses</td>
+													<td>$clanguage</td></tr>\n";
 						}
 					}
 					$flexYChecked			= '';
@@ -345,9 +348,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 													<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='None|None' $none2></td>\n
 													<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='None|None' $none3></td>\n
 													<td>None of the above</td>\n
-													<td></td></tr>\n
-												<tr><td colspan='5'><hr></td></tr>\n
-												<tr><td colspan='5' style='vertical-align:top;'><i>Indicate if you are  
+													<td></td><td></td></tr>\n
+												<tr><td colspan='6'><hr></td></tr>\n
+												<tr><td colspan='6' style='vertical-align:top;'><i>Indicate if you are  
 														flexible and can be assigned to any of the classes listed above</i><br />\n
 														<input type='radio' class='formInputText' name='inp_flex' value='Y' $flexYChecked>Yes, I'm flexible<br />
 														<input type='radio' class='formInputText' name='inp_flex' value='N' $flexNChecked>No</td></tr>\n
