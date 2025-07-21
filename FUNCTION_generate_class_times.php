@@ -14,7 +14,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 			displayed
 			
 	Returned array (if not FAIL):
-		[level][sequence] = language|localtime|localdays|nmbr classes|utctime|utcdays|advisors
+		[level][sequence] = language|UTCtime|UTCdays|localtime|localdays|nmbr classes|utctime|utcdays|advisors
 
  	read the class catalog and generate the available classes array
 	Catalog record format: level|time UTC|days|number of classes|advisors comma separated
@@ -122,7 +122,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 		if ($doDebug) {
 			echo "Have a catalog record:<br /><pre>";
 			print_r($theCatalog);
-			echo "</pre>=<br />";
+			echo "</pre><br />";
 		}
 		
 		$arraySequence			= 0;	
@@ -149,9 +149,9 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 							echo "processing $thisSched<br />";
 						}
 						$skedArray		= explode(" ",$thisSched);
-						$thisTime		= $skedArray[0];
-						$thisDays		= $skedArray[1];
-						$convertResult	= utcConvert('tolocal',$inp_tz,$thisTime,$thisDays,$doDebug);
+						$thisUTCTime	= $skedArray[0];
+						$thisUTCDays	= $skedArray[1];
+						$convertResult	= utcConvert('tolocal',$inp_tz,$thisUTCTime,$thisUTCDays,$doDebug);
 						if ($doDebug) {
 							echo "local convertResult:<br /><pre>";
 							print_r($convertResult);
@@ -160,7 +160,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 						$thisResult		= $convertResult[0];
 						if ($thisResult != 'OK') {
 							$reason		= $convertResult[3];
-							sendErrorEmail('FUNCTION_generate_class_times converting $thisTIme $thisDays to local failed');
+							sendErrorEmail('FUNCTION_generate_class_times converting $thisUTCTme $thisUTCDays to local failed');
 							$localTimes	= "9999";
 							$localDays	= "unknown";
 						} else {
@@ -230,7 +230,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 						}
 						if ($classesCount > 0) {
 							$arraySequence++;
-							$outputArray[$thisLevel][$arraySequence] = "$thisLanguage|$localTimes|$localDays|$classesCount|$advisorStr";
+							$outputArray[$thisLevel][$arraySequence] = "$thisLanguage|$thisUTCTime|$thisUTCDays|$localTimes|$localDays|$classesCount|$advisorStr";
 						}
 					}
 				}
