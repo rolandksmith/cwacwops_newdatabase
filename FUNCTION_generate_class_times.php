@@ -29,8 +29,8 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 
 	global $wpdb;
 
-	$doDebug					= TRUE;
-//	$doDebug					= FALSE;
+//	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	if ($doDebug) {
 		 echo "<br />In Function generateClassTimes with <br />
 		 		inp_tz: $inp_tz<br />
@@ -192,8 +192,8 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 									}
 									if ($numSRows > 0) {
 										foreach($seatsResult as $seatsRow) {
-											$advisorClass_class_size 				= $classResultRow->advisorclass_class_size;
-											$advisorClass_number_students			= $classResultRow->advisorclass_number_students;
+											$advisorClass_class_size 				= $seatsRow->advisorclass_class_size;
+											$advisorClass_number_students			= $seatsRow->advisorclass_number_students;
 											
 											$seatsAvail			= $advisorClass_class_size - $advisorClass_number_students;
 											if ($doDebug) {
