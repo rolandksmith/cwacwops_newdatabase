@@ -1359,7 +1359,7 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_timezone_offset' length='20' 
 													maxlength='20' value='$student_timezone_offset'></td></tr>
 												<tr><td style='vertical-align:top;'>student_youth</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_youth' value='' $youthBlank>Not Specified<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_youth' value='' $youthBlank>Blank: Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_youth' value='No' $youthNo>No<br />
 														<input type='radio' class='formInputButton' name='inp_student_youth' value='Yes' $youthYes>Yes</td></tr>
 												<tr><td>student_age</td>
@@ -1377,7 +1377,7 @@ function display_and_update_student_signup_func() {
 														<input type='radio' class='formInputButton' name='inp_student_level' value='Intermediate' $levelInt>Intermediate<br />
 														<input type='radio' class='formInputButton' name='inp_student_level' value='Advanced' $levelAdv>Advanced</td></tr>
 												<tr><td style='vertical-align:top;'>student_waiting_list</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_waiting_list' value='' $waitingBlank>Not Specified (same as not on the waiting list)<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_waiting_list' value='' $waitingBlank>Blank: Not Specified (same as not on the waiting list)<br />
 														<input type='radio' class='formInputButton' name='inp_student_waiting_list' value='N' $waitingN>N: Not on waiting list<br />
 														<input type='radio' class='formInputButton' name='inp_student_waiting_list' value='Y' $waitingY>Y: On waiting list</td></tr>
 												<tr><td>student_request_date</td>
@@ -1398,18 +1398,18 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_email_number' length='20' 
 													maxlength='20' value='$student_email_number'></td></tr>
 												<tr><td style='vertical-align:top;'>student_response</td>
-													<td ><input type='radio' class='formInputButton' name='inp_student_response' value='' $responseBlank>Not Specified<br />
+													<td ><input type='radio' class='formInputButton' name='inp_student_response' value='' $responseBlank>Blank: Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_response' value='Y' $responseY>Y: Available<br />
 														<input type='radio' class='formInputButton' name='inp_student_response' value='R' $responseR>R: Declined<br />
 												<tr><td>student_response_date</td>
 													<td><input type='text' class='formInputText' name='inp_student_response_date' length='20' 
 													maxlength='20' value='$student_response_date'></td></tr>
 												<tr><td style='vertical-align:top;'>student_abandoned</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_abandoned' value='' $abandonedBlank>Did not abandon<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_abandoned' value='' $abandonedBlank>Blank: Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_abandoned' value='Y' $abandonedY>Y: Student abandoned registration process<br />
 														<input type='radio' class='formInputButton' name='inp_student_abandoned' value='N' $abandonedN>N: Student completed registration</td></tr>
 												<tr><td style='vertical-align:top;'>student_status</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_status' value='' $statusBlank>Not Specified<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_status' value='' $statusBlank>Blank: Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='C' $statusC>C: Student has been replaced<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='R' $statusR>R: Advisor has requested a replacement<br />
 														<input type='radio' class='formInputButton' name='inp_student_status' value='S' $statusS>S: Advisor has not verified the student<br />
@@ -1425,9 +1425,9 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_selected_date' length='20' 
 													maxlength='20' value='$student_selected_date'></td></tr>
 												<tr><td style='vertical-align:top;'>student_no_catalog</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogBlank>Not Specified<br />
-														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogN>N: Signed up with full catalog<br />
-														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogY>Y: Signed up before full catalog</td></tr>
+													<td><input type='radio' class='formInputButton' name='inp_student_no_catalog' value='' $catalogBlank>Blank - Not Specified<br />
+														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='N' $catalogN>N: Signed up with full catalog<br />
+														<input type='radio' class='formInputButton' name='inp_student_no_catalog' value='Y' $catalogY>Y: Signed up before full catalog</td></tr>
 												<tr><td>student_hold_override</td>
 													<td><input type='text' class='formInputText' name='inp_student_hold_override' length='1' 
 													maxlength='1' value='$student_hold_override'></td></tr>
@@ -1441,7 +1441,7 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_advisor_class_timezone' length='10' 
 													maxlength='10' value='$student_advisor_class_timezone'></td></tr>
 												<tr><td style='vertical-align:top;'>student_hold_reason_code</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='' $reasonBlank>Not specified<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='' $reasonBlank>Blank: Not specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='X' $reasonX>X: Do not assign to same advisor<br />
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='E' $reasonE>Student not evaluated but signed up for next level<br />
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='H' $reasonH>H: Student not promotable but signed up for next level<br />
@@ -1455,7 +1455,7 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_assigned_advisor_class' length='1' 
 													maxlength='1' value='$student_assigned_advisor_class'></td></tr>
 												<tr><td style='vertical-align:top;'>student_promotable</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_promotable' value='' $promBlank>Not Specified<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_promotable' value='' $promBlank>Blank: Not Specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promPromoted'>Promotable<br />
 														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promNotPromoted'>Not Promotable<br />
 														<input type='radio' class='formInputButton' name='inp_student_promotable' value='W' $promWithdrew'>Withdrew<br />
@@ -1496,7 +1496,7 @@ function display_and_update_student_signup_func() {
 													<td><input type='text' class='formInputText' name='inp_student_catalog_options' length='100' 
 													maxlength='100' value='$student_catalog_options'></td></tr>
 												<tr><td style='vertical-align:top;'>student_flexible</td>
-													<td><input type='radio' class='formInputButton' name='inp_student_flexible' value='' $flexibleBlank>Not specified<br />
+													<td><input type='radio' class='formInputButton' name='inp_student_flexible' value='' $flexibleBlank>Blank: Not specified<br />
 														<input type='radio' class='formInputButton' name='inp_student_flexible' value='Y' $flexibleY>Y: Schedule is flexible<br />
 														<input type='radio' class='formInputButton' name='inp_student_flexible' value='N' $flexibleN>N: Schedule is not flexible</td></tr>
 												<tr><td>student_date_created</td>
