@@ -19,7 +19,7 @@ function update_unassigned_student_info_func() {
 
 	global 	$wpdb, $testMode, $doDebug;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
@@ -63,6 +63,7 @@ function update_unassigned_student_info_func() {
 	$haveInpCallsign			= FALSE;
 	$haveInpID					= FALSE;
 	$jobname					= 'Update Unassigned Student Info';
+	$inp_class_priority			= '';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -245,11 +246,13 @@ function update_unassigned_student_info_func() {
 						$student_first_name 				= $studentRow->user_first_name;
 						$student_last_name 					= $studentRow->user_last_name;
 						$student_email 						= $studentRow->user_email;
+						$student_ph_code 					= $studentRow->user_ph_code;
 						$student_phone 						= $studentRow->user_phone;
 						$student_city 						= $studentRow->user_city;
 						$student_state 						= $studentRow->user_state;
 						$student_zip_code 					= $studentRow->user_zip_code;
 						$student_country_code 				= $studentRow->user_country_code;
+						$student_country 					= $studentRow->user_country;
 						$student_whatsapp 					= $studentRow->user_whatsapp;
 						$student_telegram 					= $studentRow->user_telegram;
 						$student_signal 					= $studentRow->user_signal;
@@ -310,30 +313,6 @@ function update_unassigned_student_info_func() {
 						$student_flexible						= $studentRow->student_flexible;
 						$student_date_created 					= $studentRow->student_date_created;
 						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
 					}
 				} else {
 					$haveStudentData		= FALSE;
@@ -345,7 +324,7 @@ function update_unassigned_student_info_func() {
 
 	if ("1" == $strPass) {
 		if ($doDebug) {
-			echo "Function starting.<br />";
+			echo "<br />Function starting.<br />";
 		}
 		$content 		.= "<h3>$jobname</h3>
 							<p>This function allows you to update an unassigned student's class priority and/or the student's class choices.</p>
@@ -366,7 +345,7 @@ function update_unassigned_student_info_func() {
 
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
-			echo  "Arrived at pass 2 with $inp_callsign<br />";
+			echo  "<br />Arrived at pass 2 with $inp_callsign<br />";
 		}
 		
 		$content			.= "<h3>$jobname</h3>";
@@ -391,14 +370,14 @@ function update_unassigned_student_info_func() {
 					$student_third_class_choice_utc = 'None';
 				}
 				if ($doDebug) {
-					echo "Retrieved $student_call_sign.<br />
-							Level: $student_level;<br />
-							Class Priority: $student_class_priority;
+					echo "<br />Retrieved $student_call_sign<br />
+							Level: $student_level<br />
+							Class Priority: $student_class_priority<br />
 							Student Status: $student_status<br />
 							First Class Choice: $student_first_class_choice<br />
 							First Class Choice UTC: $student_first_class_choice_utc<br />
-							Second Class Choice: $student_first_class_choice<br />
-							Second Class Choice UTC: $student_first_class_choice_utc<br />
+							Second Class Choice: $student_second_class_choice<br />
+							Second Class Choice UTC: $student_second_class_choice_utc<br />
 							Third Class Choice: $student_third_class_choice<br />
 							Third Class Choice UTC: $student_third_class_choice_utc<br />";
 				}
@@ -442,9 +421,7 @@ function update_unassigned_student_info_func() {
 							$advChecked = "checked='checked'";
 							break;
 					}
-					$classArray	= generateClassTimes($student_time_zone,$student_level,$student_semester,$doDebug,$catalogMode);
-
-
+					$classArray	= generateClassTimes($student_timezone_offset,$student_level,$student_semester,'all',$doDebug,$catalogMode);
 
 					$content			.= "<p>Enter the desired changes and press 'Submit'.</p>
 											<p><form method='post' action='$theURL' 
@@ -514,18 +491,20 @@ function update_unassigned_student_info_func() {
 								Second Choice UTC: $student_second_class_choice_utc<br />
 								Third Choice UTC: $student_third_class_choice_utc<br />";
 					}
+	
 					foreach ($classArray[$student_level] as $myValue) {
 						if ($doDebug) {
 							echo "<br />Schedule line: $myValue<br />";
 						}
 						$classSked			= explode("|",$myValue);
-						$newStart			= $classSked[0];
-						$newDays			= $classSked[1];
-						$classCount			= intval($classSked[2]);
-						$classStartUTC		= $classSked[3];
-						$classDaysUTC		= $classSked[4];
+						$classLanguage		= $classSked[0];
+						$classStartUTC		= $classSked[1];
+						$classDaysUTC		= $classSked[2];
+						$newStart			= $classSked[3];
+						$newDays			= $classSked[4];
+						$classCount			= intval($classSked[5]);
 					
-						$schedule		 	= "$classStartUTC $classDaysUTC";
+						$schedule		 	= "$newStart $newDays|$classStartUTC $classDaysUTC";
 						$classStartUTC		= intval($classStartUTC);
 						$classEndUTC		= $classStartUTC + 159;
 					
@@ -558,7 +537,7 @@ function update_unassigned_student_info_func() {
 						}					
 						//// check third class choice
 						$thirdChecked		= '';
-						if ($doDebug) {
+					if ($doDebug) {
 							echo "checking $classStartUTC $classDaysUTC against $student_third_class_choice_utc<br />";
 						}
 						if ($thirdChoiceDays == $classDaysUTC) {
@@ -586,7 +565,7 @@ function update_unassigned_student_info_func() {
 						$content				.= "<tr><td><input type='radio' class='formInputButton' name='inp_sked1' value='$schedule' $firstChecked></td>
 														<td><input type='radio' class='formInputButton' name='inp_sked2' value='$schedule' $secondChecked></td>
 														<td><input type='radio' class='formInputButton' name='inp_sked3' value='$schedule' $thirdChecked></td>
-														<td>$timeBlock</td></tr>";
+														<td>$timeBlock $classLanguage</td></tr>";
 					}
 					$secondNoneChecked			= "";
 					if (!$secondCheckedYes) {
@@ -615,6 +594,7 @@ function update_unassigned_student_info_func() {
 		if ($doDebug) {
 			echo "<br />At pass 3 with $inp_callsign ($inp_id), $inp_class_priority, $inp_sked1, $inp_sked2, $inp_sked3<br />";
 		}
+
 		$content			.= "<h3>$jobname</h3>";
 		// get the student record so we can see what needs to be updated
 		if ($haveStudentData) {	
@@ -623,39 +603,67 @@ function update_unassigned_student_info_func() {
 			}
 			if ($student_call_sign == $inp_callsign) {
 				if ($student_class_priority == '') {
-					$student_class_priority = '0';
+					if ($inp_class_priority == '') {
+						$inp_class_priority = '0';
+					}
 				}
 				$doUpdate						= FALSE;
 				$logData						= '';
 				$updateFormat					= array();
+				
+				if ($inp_sked1 != 'None') {
+					$sked1array		= explode('|',$inp_sked1);   
+					$sked1Local		= $sked1array[0];
+					$sked1UTC		= $sked1array[1];
+				}
+				if ($inp_sked2 != 'None') {
+					$sked2array		= explode('|',$inp_sked2);   
+					$sked2Local		= $sked2array[0];
+					$sked2UTC		= $sked2array[1];
+				}
+				if ($inp_sked3 != 'None') {
+					$sked3array		= explode('|',$inp_sked3);   
+					$sked3Local		= $sked3array[0];
+					$sked3UTC		= $sked3array[1];
+				}
 				if ($inp_class_priority != $student_class_priority) {
 					$doUpdate	= TRUE;
-					$updateParams['student_class_priority'] = $inp_class_priority;
 					$updateArray[]				= "student_class_priority|$inp_class_priority|d";
-					$logData					.= "student_class priority changed from $student_class_priority to $inp_class_priority&nbsp;&nbsp;&nbsp;";
+					$logData					.= "student_class priority changed from $student_class_priority to $inp_class_priority ";
 				}
-				if ($student_first_class_choice != $inp_sked1) {
+				if ($student_first_class_choice != $sked1Local) {
 					$doUpdate	= TRUE;
-					$updateParams['student_first_class_choice']	= $inp_sked1;
-					$updateArray[]				= "student_first_class_choice|$inp_sked1|s";
-					$logData					.= "student_first_class_choice changed from $student_first_class_choice to $inp_sked1&nbsp;&nbsp;&nbsp; ";
+					$updateArray[]				= "student_first_class_choice|$sked1Local|s";
+					$logData					.= "student_first_class_choice changed from $student_first_class_choice to $inp_sked1 ";
 				}
-				if ($student_second_class_choice != $inp_sked2) {
+				if ($student_first_class_choice_utc != $sked1UTC) {
 					$doUpdate	= TRUE;
-					$updateParams['student_second_class_choice']	= $inp_sked2;
-					$updateArray[]				= "student_second_class_choice|$inp_sked2|s";
-					$logData					.= "student_second_class_choice changed from $student_second_class_choice to $inp_sked2&nbsp;&nbsp;&nbsp; ";
+					$updateArray[]				= "student_first_class_choice_utc|$sked1UTC|s";
+					$logData					.= "student_first_class_choice changed from $student_first_class_choice to $inp_sked1 ";
 				}
-				if ($student_third_class_choice != $inp_sked3) {
+				if ($student_second_class_choice != $sked2Local) {
 					$doUpdate	= TRUE;
-					$updateParams['student_third_class_choice']	= $inp_sked3;
-					$updateArray[]				= "student_third_class_choice|$inp_sked3|s";
-					$logData					.= "student_third_class_choice changed from $student_third_class_choice to $inp_sked3&nbsp;&nbsp;&nbsp; ";
+					$updateArray[]				= "student_second_class_choice|$sked2Local|s";
+					$logData					.= "student_second_class_choice changed from $student_second_class_choice to $sked2Local ";
+				}
+				if ($student_second_class_choice_utc != $sked2UTC) {
+					$doUpdate	= TRUE;
+					$updateArray[]				= "student_second_class_choice_utc|$sked2UTC|s";
+					$logData					.= "student_second_class_choice changed from $student_second_class_choice to $sked2UTC ";
+				}
+				if ($student_third_class_choice != $sked3Local) {
+					$doUpdate	= TRUE;
+					$updateArray[]				= "student_third_class_choice|$sked3Local|s";
+					$logData					.= "student_third_class_choice changed from $student_third_class_choice to $sked3Local ";
+				}
+				if ($student_third_class_choice_utc != $sked3UTC) {
+					$doUpdate	= TRUE;
+					$updateArray[]				= "student_third_class_choice_utc|$sked3UTC|s";
+					$logData					.= "student_third_class_choice changed from $student_third_class_choice to $sked3UTC ";
 				}
 				if ($doUpdate) {
-					$student_action_log			= "$student_action_log / $actionDate MGMTINFO $logData ";
-					$updateParams['student_action_log']	= $student_action_log;
-					$updateArray[]				= "student_third_class_choice|$inp_sked3|s";
+					$student_action_log			.= " / $actionDate MGMTINFO $logData ";
+					$updateArray[]				= "student_action_log|$student_action_log|s";
 					$studentUpdateData		= array('tableName'=>$studentTableName,
 													'inp_method'=>'update',
 													'inp_data'=>$updateArray,
