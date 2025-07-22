@@ -59,7 +59,7 @@ function student_registration_func() {
 
 	global $wpdb,$doDebug,$testMode,$demoMode,$inp_verbose,$daysToGo;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$demoMode						= FALSE;
 	$doAssessment					= FALSE;
@@ -2522,8 +2522,7 @@ function student_registration_func() {
 		$content		.= "</table></p>
 							<p>If circumstances or your information changes, you can update this information up to 
 								three weeks before the start of the $inp_semester semester by returning to the 
-								<a href='$theURL'>CW Academy Student Registration</a> page and 
-								entering your call sign, email address, and phone number.</p>
+								<a href='$theURL'>CW Academy Student Registration</a> page.</p>
 								<p>Please print this page for your reference.<br /><br />
 								73,<br />
 								CW Academy</p>
@@ -4100,7 +4099,6 @@ function student_registration_func() {
 				echo "enstr encoded from: $stringToPass<br />";
 			}
 			
-			
 			$levelDown					= array('Advanced' => 'Intermediate', 
 												'Intermediate' => 'Fundamental', 
 												'Fundamental' => 'Beginner', 
@@ -4108,7 +4106,7 @@ function student_registration_func() {
 			$lookLevel					= $levelDown[$inp_level];
 
 			$needsAssessment			= TRUE;
-
+/*
 			// see if student has previous class in the last semester
 			if ($doDebug) {
 				echo "checking to see if needs assessment<br />
@@ -4181,7 +4179,7 @@ function student_registration_func() {
 			if ($skipAssessment) {
 				$needsAssessment 	= FALSE;
 			}
-
+*/
 			// if needs assessment and beginner allow skipping the assessment
 			if ($needsAssessment and $inp_level == 'Beginner') {
 				$content			.= "<h3>$jobname</h3>
