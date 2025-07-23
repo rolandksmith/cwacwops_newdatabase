@@ -84,10 +84,10 @@ function student_registration_func() {
 		$content				= "Your are not authorized";
 		return $content;
 	}
-//	if ($userRole != 'administrator') {				// turn off debug and testmode
-//		$doDebug					= FALSE;
-//		$testMode					= FALSE;
-//	}
+	if ($userRole != 'administrator') {				// turn off debug and testmode
+		$doDebug					= FALSE;
+		$testMode					= FALSE;
+	}
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
