@@ -282,7 +282,7 @@ function updateStudent($inpArray) {
 			echo "Ready to do the update.<br />updateParams:<br /><pre>";
 			print_r($updateParams);
 			echo "</pre><br />UpdateFormat:<br /><Pre>";
-			var_dump($updateFormat);
+			print_r($updateFormat);
 			echo "</pre>br />";
 		}
 		$result		= $wpdb->update($tableName, 
@@ -362,7 +362,7 @@ function updateStudent($inpArray) {
 												array('%d'));
 				if ($doDebug) {
 					echo "deleted $inp_id record from $deleteTable. Result:<br /><pre>";
-					var_dump($thisDelete);
+					print_r($thisDelete);
 					echo "</pre><br />";
 				}
 				
