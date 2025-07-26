@@ -2,57 +2,6 @@ function student_registration_func() {
 
 /*
 
-	Modified 11Apr21 by Roland to add student_parent and parent_email for 
-	students 17 years of age or younger
-	Modified 18June21 by Roland to add maintenanceMode and v2 of the audit log process
-	Modified 24July21 by Roland to add ability to check registration status
-	Modified 2Aug21 by Roland to require parent name and email for a youth
-	Modified 20Aug21 by Roland to validate the student before showing student info
-	Modified 24Aug21 by Roland to interrupt the Fundamental signup if student has already 
-		taken the class and was promotable
-	Modified 29Aug21 by Roland to save class selections in both local time and utc. 
-		changed the version to V7
-	Modified 1Sep21 by Roland to move to 2-hour class block. Changed version to V8
-	Modified 7Nov21 by Roland to add an encoded string to the welcome email and the verify email 
-		links so they can come straight in. Moved the version to v9
-	Modified 9Dec21 by Roland to allow registrations for the upcoming semester until the 
-		semester starts. Students will be put on the waiting list. Move the version to v10
-	Modified 11Jan2022 by Roland to move to tables rather than pods
-	Modified 13Mar2022 by Roland to add the self assessment process
-	odified 18Jun2022 by Roland to bypass the self assessment process if the student has 
-		done an end-of-semester assessment within 45 days
-	Modified 8Aug2022 by Roland to only do class selections 45 days before start of the 
-		semester
-	Modified 24Aug22 by Roland to use a standard catalog if more than 45 days to the start 
-		of the semester
-	Modified 25Aug22 by Roland to use timezone IDs rather than having the student enter their
-		timezone
-	Modified 21Mar23 by Roland to properly handle a bad zip code
-	Modified 12Apr23 by Roland to remove student from an advisor class if the student 
-		deletes the registration record
-	Modified 17Apr23 by Roland to fix action_log
-	Modified 16June23 by Roland to correct typos
-	Modified 21June23 by Roland to allow signup for next semester
-	Modified 1July23 by Roland to refactor the assessment process
-	Modified 17Jul23 by Roland to use consolidated tables
-	Modified 15Aug23 by Roland to handle situations where a student had previously refused 
-		the verification request. Upgraded the version to V7
-	Modified 24Aug23 by Roland to not delete the student record but change response to R 
-		and remove from a class if assigned
-	Modified 28Aug23 by Roland to change input pages display of country selection
-	Modified 31Aug23 by Roland to turn off debug and testmode if the user is not signed in
-	Modified 1Sep23 by Roland to use new scheme for the class catalog
-	Modified 7Oct23 by Roland to use the new assessment process
-	Modified 15oct23 by Roland to take the version number out of the url
-	Modified 23Oct23 by Roland to fully incorporate the new assessment and make a number of 
-		other updates and corrections. Version updated to V10
-	Modified 12Nov23 by Roland in an attempt to prevent duplicate registrations
-	Modified 20Nov23 by Roland for the portal process
-	Modified 30Jan24 by Roland to allow Beginners to skip the assessment
-	Modified 15Mar24 by Roland to fix changing the semester
-	Modified 19July24 by Roland to fix the check for needing assessment in pass 101
-	Modified 27Aug24 by Roland to use user_master table
-	Modified 27Oct24 by Roland for new database
 		
 */
     
@@ -84,10 +33,10 @@ function student_registration_func() {
 		$content				= "Your are not authorized";
 		return $content;
 	}
-	if ($userRole != 'administrator') {				// turn off debug and testmode
-		$doDebug					= FALSE;
-		$testMode					= FALSE;
-	}
+//	if ($userRole != 'administrator') {				// turn off debug and testmode
+//		$doDebug					= FALSE;
+//		$testMode					= FALSE;
+//	}
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
@@ -731,6 +680,10 @@ function student_registration_func() {
 				$inp_available	 = $str_value;
 				$inp_available	 = filter_var($inp_available,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "insertDataJson") {
+				$insertDataJson	 = $str_value;
+				$insertDataJson	 = filter_var($insertDataJson,FILTER_UNSAFE_RAW);
+			}
 		}
 	}
 	
@@ -1237,7 +1190,7 @@ function student_registration_func() {
 										Display and Update User Master Information</a> and click on 
 										'Update This Information'. Then verify that your 
 										address information, particularly your ZipCode if you live in the US is correct. If not, 
-										please correct it). Then click on 'Submit Updates'. The 
+										please correct it. Then click on 'Submit Updates'. The 
 										list of possible timezones will be displayed. Please select 
 										the appropriate information. Then start the 'Student Signup' 
 										again.<br ><br />";
@@ -1280,7 +1233,8 @@ function student_registration_func() {
 					$content		.= "<table style='width:800px;border:4px solid green;'>";
 					if ($showSignup) {
 						$content		.= "<tr><td style='vertical-align:top;'><b>Sign-up</b><br />You should now 
-													sign up as a student for an upcoming semester<br />
+													sign up as a student for an upcoming semester. There are 4 steps 
+													to sign up for a class.<br />
 													<form method='post' action='$theURL' 
 													name='option1_form' ENCTYPE='multipart/form-data'>
 													<input type='hidden' name='strpass' value='100'>
@@ -1696,7 +1650,7 @@ function student_registration_func() {
 				if ($daysToGo > 0 && $daysToGo <= 22) {
 					$waitListMsg	= "<br /><table style='border:4px solid red;'><tr><td>
 										<span style='font-size:12pt;'>Student assignment to classes has already occurred for the $nextSemester semester. 
-										You have been placed on a waiting list. Students do drop 
+										You will be placed on a waiting list. Students do drop 
 										out and CW Academy pulls replacement students from the waiting list. If you aren't selected 
 										from the waiting list, your registration will be automatically moved to the $semesterTwo 
 										semester and you will be given heightened priority for assignment to a class.</span></td></tr></table>";
@@ -1710,8 +1664,12 @@ function student_registration_func() {
 										available at that time.";
 
 				}
-										
-				$content	.= "<form method='post' action='$theURL' 
+				$content	.= "<h4>Step 2 of 3 Steps</h4>
+								<p>You have have requested the $inp_level Level class to be held in the $inp_semester Semester. 
+								In this step, students 20 years of age or younger are requested to provide parent / guardian 
+								information. If you are older than 20 years of age, click 'Submit to go to Step 3. If you are 
+								20 years old or younger, please fill out the information below and click 'Submit' to go to Step 3.</p>
+								<form method='post' action='$theURL' 
 								name='newregistrationform' ENCTYPE='multipart/form-data'>
 								<input type='hidden' name='strpass' value='3'>
 								<input type='hidden' name='demonstration' value='$demonstration'>
@@ -1725,31 +1683,6 @@ function student_registration_func() {
 								<input type='hidden' id='browser_timezone_id' name='browser_timezone_id' value='$browser_timezone_id' />
 								<input type='hidden' name='student_id' value='$student_ID'>
 								<h4>Student Master Data</h4><p>
-								<table style='width:900px;'>
-								<tr><td><b>Callsign<br />$inp_callsign</b></td>
-									<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-									<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-									<td><b>Email</b><br />$student_email</td></tr>
-								<tr><td><b>City</b><br />$student_city</td>
-									<td><b>State</b><br />$student_state</td>
-									<td><b>Zip Code</b><br />$student_zip_code</td>
-									<td><b>Country</b><br />$student_country</td></tr>
-								<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-									<td><b>Telegram</b><br />$student_telegram</td>
-									<td><b>Signal</b><br />$student_signal</td>
-									<td><b>Messenger</b><br />$student_messenger</td></tr>
-								</table>
-								<p><b>NOTE: </b>If any of the above information needs to 
-									be updated, please close this tab, go back to your 
-									Student Portal, update the information, and start
-									the sign-up process again. If you were required to 
-									do a Morse code assessment, that information has 
-									been saved and you will not be asked to do another assessment.</p>
-								<h4>Class Sign-up:</h4>
-								<p>You are signing up for a <em>$inp_level</em> CW Academy class 
-								in the <em>$inp_semester</em> semester. $waitListMsg</p>
-								<p>if you are a youth 20 years of age or younger, please fill out the 
-								following information:</p>
 								<table style='width:1000px;'>											
 								<tr><td style='vertical-align:top;'>
 										Select 'Yes' if <b>20 years of age or younger</b><br />
@@ -1764,6 +1697,8 @@ function student_registration_func() {
 										<input type='text' name='inp_student_parent' id='chk_student_parent' size='30' class='formInputText' maxlength='30' value='$student_student_parent' ><br />
 										<b>Parent or Guardian email</b><br />
 										<input type='text' name='inp_student_parent_email' id='chk_student_parent_email' size='40' class='formInputText' maxlength='40' value='$student_student_parent_email' ></td></tr></table>
+								Parent or Guardian name and email address are required for students 20 years of age or younger. Providing 
+								that information indicates their agreement for you to be in a Morse code class with other adults.
 								<table style='border:4px solid green;'><tr><td>Please click <span style='color:red;'><b>Submit</b></span> to continue with the sign-up process and make your class prefence choices:<br />
 								<input class='formInputButton' type='submit' value='Submit' />
 								</td></tr></table></form></p>";
@@ -1796,8 +1731,11 @@ function student_registration_func() {
 			echo "<br />Arrived at pass 3<br />
 				  inp_callsign = $inp_callsign<br />
 				  inp_semester = $inp_semester<br />
-				  inp_level = $inp_level<br/>br />";
+				  inp_level = $inp_level<br/><br />";
 		}
+		$content	.= "<h3>$jobname</h3>
+						<h4>Step 3 of 3 Steps</h4>";
+
 		if ($doDebug) {
 			if ($haveStudentData) {
 				echo "haveStudentData is TRUE<br />";
@@ -1824,261 +1762,203 @@ function student_registration_func() {
 		$doProceed			= TRUE;
 		$getOut				= FALSE;
 		
-		$doProceed			= TRUE;
-		/* if the student refreshes the page a duplicate record would be written.
-			Checking to see if there is already a record, if so bail out
-		*/
-		$recordCount		= $wpdb->get_var("select count(student_call_sign)
-												from $studentTableName 
-												where student_call_sign = '$inp_callsign' 
-												and (student_semester = '$nextSemester' or 
-													 student_semester = '$semesterTwo' or 
-													 student_semester = '$semesterThree' or 
-													 student_semester = '$semesterFour')");
-		if ($recordCount > 0) {
-			$content		.= "There is a signup record in the database for $inp_callsign. If you 
-								need to modify this record or make or change class preferences, 
-								please restart this program and select the option to modify an 
-								existing signup record.<br />";
-			$doProceed		= FALSE;
-		} else {
-			if ($doProceed) {
-				$strPass			= "3B";
-				
-				// calculate the utc offset from the master records timezone_id
-				$myArray				= explode(" ",$inp_semester);
-				$thisYear				= $myArray[0];
-				$thisMonDay				= $myArray[1];
-				$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
-				$myMonDay				= $myConvertArray[$thisMonDay];
-				$thisNewDate			= "$thisYear$myMonDay 00:00:00";
-				if ($doDebug) {
-					echo "converted $inp_semester to $thisNewDate<br />";
-				}
-				$dateTimeZoneLocal 		= new DateTimeZone($student_timezone_id);
-				$dateTimeZoneUTC 		= new DateTimeZone("UTC");
-				$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
-				$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
-				$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
-				$inp_timezone_offset 	= $php2/3600;
-				if ($doDebug) {
-					echo "used timezone_id of $student_timezone_id to calculate offset of $inp_timezone_offset<br />";
-				}
-
-
-
-				if ($waitingList) {
-					$inp_waiting_list 	= 'Y';
-				} else {
-					$inp_waiting_list	= 'N';
-				}
 		
-				$inp_action_log		= "STDREG $currentDateTime $inp_callsign sign-up record stored ";
-				if ($inp_semester == '') {
-					sendErrorEmail("$jobname pass 3 inp_semeter is empty. Assuming nextSemster, inp_bypass: $inp_bypass; inp_doAgain: $inp_doAgain");
-					$inp_semester	= $nextSemester;
-					$inp_action_log = "$inp_action_log / MISSING SEMESTER. Arbitrarily assigned $nextSemester, inp_bypass: $inp_bypass; inp_doAgain: $inp_doAgain ";
-				}
-				/// insert the registration data into the database
-				if ($doDebug) {
-					echo "writing the registration data to the database<br />";
-				}
-		
-				$inp_lastname		= addslashes($inp_lastname);
-				$nowDate			= date('Y-m-d H:i:s');
-		
-				$insertParams		= array('student_call_sign'=>$inp_callsign,
-											 'student_time_zone'=>$student_timezone_id,
-											 'student_timezone_offset'=>$inp_timezone_offset,
-											 'student_youth'=>$inp_youth,
-											 'student_age'=>$inp_age,
-											 'student_parent'=>$inp_student_parent,
-											 'student_parent_email'=>$inp_student_parent_email,
-											 'student_waiting_list'=>$inp_waiting_list,
-											 'student_level'=>$inp_level,
-											 'student_semester'=>$inp_semester,
-											 'student_request_date'=>$nowDate,
-											 'student_abandoned'=>'Y',
-											 'student_action_log'=>$inp_action_log,
-											 'student_first_class_choice'=>'None',
-											 'student_second_class_choice'=>'None',
-											 'student_third_class_choice'=>'None',
-											 'student_first_class_choice_utc'=>'None',
-											 'student_second_class_choice_utc'=>'None',
-											 'student_third_class_choice_utc'=>'None');
-				$insertFormat		= array('%s','%s','%f','%s','%s','%s','%s','%s','%s',
-											  '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');
-				$studentUpdateData		= array('tableName'=>$studentTableName,
-												'inp_method'=>'add',
-												'inp_data'=>$insertParams,
-												'inp_format'=>$insertFormat,
-												'jobname'=>$jobname,
-												'inp_id'=>'',
-												'inp_callsign'=>$inp_callsign,
-												'inp_semester'=>$inp_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-				$updateResult	= updateStudent($studentUpdateData);
-				if ($updateResult[0] === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-				} else {
-					$student_ID			= $updateResult[1];
-					if ($doDebug) {
-						echo "student $inp_callsign record inserted at id $student_ID<br />";
-					}
-		
-					$student_level			= $inp_level;
-					$student_semester		= $inp_semester;
-				}
-			}
+		// calculate the utc offset from the master records timezone_id
+		$myArray				= explode(" ",$inp_semester);
+		$thisYear				= $myArray[0];
+		$thisMonDay				= $myArray[1];
+		$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
+		$myMonDay				= $myConvertArray[$thisMonDay];
+		$thisNewDate			= "$thisYear$myMonDay 00:00:00";
+		if ($doDebug) {
+			echo "converted $inp_semester to $thisNewDate<br />";
 		}
-		if ($doProceed) {
-			// get the student record
-			$sql				= "select * from $studentTableName 
-									where student_call_sign='$inp_callsign' 
-									and student_semester='$inp_semester'";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and found $numSRows rows<br />";
-				}
-				if ($numSRows > 0) {
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
+		$dateTimeZoneLocal 		= new DateTimeZone($student_timezone_id);
+		$dateTimeZoneUTC 		= new DateTimeZone("UTC");
+		$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
+		$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
+		$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
+		$inp_timezone_offset 	= $php2/3600;
+		if ($doDebug) {
+			echo "used timezone_id of $student_timezone_id to calculate offset of $inp_timezone_offset<br />";
+		}
 
-						/// get the catalog information and display it
-						$inp_data			= array('student_semester'=>$student_semester, 
-													'student_level'=>$student_level, 
-													'student_no_catalog'=>$student_no_catalog, 
-													'student_catalog_options'=>$student_catalog_options,
-													'student_flexible'=>$student_flexible,  
-													'student_first_class_choice_utc'=>$student_first_class_choice_utc, 
-													'student_second_class_choice_utc'=>$student_second_class_choice_utc, 
-													'student_third_class_choice_utc'=>$student_third_class_choice_utc, 
-													'student_timezone_offset'=>$student_timezone_offset,
-													'doDebug'=>$doDebug,
-													'testMode'=>$testMode);
-						if ($doDebug) {
-							echo "sending inp_data:<br /><pre>";
-							print_r($inp_data);
-							echo "</pre><br />";
-						}
-						$result				= generate_catalog_for_student($inp_data);
-						if ($doDebug) {
-							echo "returned from generate_catalog_for_student<br /><br />";
-						}
-						if ($result[0] === FALSE) {
-							echo "generate_catalog_for_student returned FALSE. Reason: $result[1]<br />";
-						} else {
-							$result_option	= $result[0];
-							$result_catalog	= $result[1];
-							$date1			= $result[2];
-							$date2			= $result[3];
-							$date3			= $result[4];
-							$schedAvail		= $result[5];
-							$option_message	= "";
-							if ($result_option == 'option') {
-								$option_message	= "<p>You are signing up for a $student_level Level class in 
-													the $student_semester semester. The catalog of available 
-													classes will not be available until about 50 days before 
-													the start of the semester. Please indicate when you will be 
-													available to take a $student_level Level class by 
-													selecting from the list below.</p>
-													<p>Classes are an hour in length. The advisor decides when 
-													the class will actually be held. Your indication of which part 
-													of the day and which days of the week would work best for you 
-													will help guide the advisor's schedule decision.<p>";
-							} elseif ($result_option == 'catalog') {
-								$result_option		= $result[0];
-								$option_message		= "<p>The Class Catalog for $student_level Level classes is now available. 
-														Select up to three class schedule options from the table below and 
-														number them 1, 2, and 3.
-														CW Acadamy will try to assign you to one of the class options in the order you 
-														specify. Whether or not you are assigned to a class will depend on the 
-														number of students selecting that class schedule and the number of 
-														available seats in the classes held at that time.</p>";
-							} elseif ($result_option == 'avail') {
-								$result_option		= $result[0];
-								if ($doDebug) {
-									echo "result_option of $result_option<br />";
-								}
-								$option_message 	= "<p>Students have already been assigned to advisor classes. There may possibly 
-														be classes with available seats. If so, they are listed below. If a class 
-														schedule listed below will work for you, select the class and submit the 
-														selection</p>";
-							}
-							$content		.= "<h3>$jobname</h3>
-												$option_message
-												<form method='post' action='$theURL' 
-												name='classselection' ENCTYPE='multipart/form-data'>
-												<input type='hidden' name='strpass' value='4'>
-												<input type='hidden' name='result_option' value='$result_option'>
-												<input type='hidden' name='student_ID' value='$student_ID'>
-												<input type='hidden' name='inp_callsign' value='$student_call_sign'>
-												<input type='hidden' name='token' value='$token'>
-												<input type='hidden' name='inp_semester' value='$student_semester'>
-												<input type='hidden' name='schedAvail' value='$schedAvail'>
-												$result[1]<br clear='all' />";
-							if ($result_option == 'option') {
-								$content	.= "<input class='formInputButton' type='submit' onclick=\"return validate_checkboxes(this.form);\" value='Submit' />";
-							} else {			
-								$content	.= "<input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" value='Submit' />";
-							}
-							$content	.= "</form></p>";
-						}
+		$inp_action_log		= "STDREG $currentDateTime $inp_callsign sign-up record prepared ";
+		if ($inp_semester == '') {
+			sendErrorEmail("$jobname pass 3 inp_semeter is empty. Assuming nextSemster, inp_bypass: $inp_bypass; inp_doAgain: $inp_doAgain");
+			$inp_semester	= $nextSemester;
+			$inp_action_log = "$inp_action_log / MISSING SEMESTER. Arbitrarily assigned $nextSemester, inp_bypass: $inp_bypass; inp_doAgain: $inp_doAgain ";
+		}
+
+///		$inp_lastname		= addslashes($inp_lastname);
+		$nowDate			= date('Y-m-d H:i:s');
+
+		$ageError					= "";
+		if ($inp_youth == 'Yes') {
+			if ($doDebug) {
+				echo "student_youth set to $inp_youth<br />
+						Age: $inp_age<br />
+						Parent: $inp_student_parent<br />
+						Parent Email: $inp_student_parent_email<br />";
+			}
+			$ageStr					= $inp_age;
+			$parentStr				= $inp_student_parent;
+			if ($inp_student_parent == '') {
+				$parentStr			= "<em>Not Provided</em>";
+			}
+			$parentEmailStr			= $inp_student_parent_email;
+			if ($inp_student_parent_email == '') {
+				$parentEmailStr		= "<em>Not Provided</em>";
+			}
+			if ($inp_age == '') {
+				$ageError			.= "You indicated that you are 20 years old or younger 
+										but did not give your age. Please click the 'Back' button 
+										and enter your age.<br />";
+				$doProceed			= FALSE;
+			} elseif ($inp_age > 20) {
+				$ageError			.= "You entered your age as $inp_age years old. 
+										Because you are older than 20 years old, your age 
+										has been deleted.<br />";
+				$inp_youth		= '';
+				$inp_age		= '';
+				$inp_student_parent		= '';
+				$inp_student_parent_email	= '';
+			}
+			if ($inp_youth == 'Yes' && ($inp_student_parent	== '' || $inp_student_parent_email == '')) {
+				$ageError			.= "The name of a parent or guardian as well as an email 
+										address for the parent or guardian is required. Please 
+										click the 'Back' button and enter that information.<br />";
+				$doProceed			= FALSE; 
+			}
+			
+			$content		.= "<p>You indicated that you are 20 years old or younger 
+								and have given your age as $ageStr years old. Your 
+								parent / guardian is $parentStr whose email address 
+								is $parentEmailStr<p>";
+			if ($ageError != '') {
+				$content	.= $ageError;
+			} 
+		} else {
+			$content		.= "<p>You have indicated that you are older than 20 years old.</p>";
+		}
+		
+		if ($doProceed) {
+			/// save the registration data to be entered into the database after class selection
+			if ($doDebug) {
+				echo "saving the registration data in a json object<br />";
+			}
+
+			$student_call_sign			= $inp_callsign;
+			 $student_time_zone			= $student_timezone_id;
+			 $student_timezone_offset	= $inp_timezone_offset;
+			 $student_youth				= $inp_youth;
+			 $student_age				= $inp_age;
+			 $student_parent			= $inp_student_parent;
+			 $student_parent_email		= $inp_student_parent_email;
+			 $student_waiting_list		= $inp_waiting_list;
+			 $student_level				= $inp_level;
+			 $student_semester			= $inp_semester;
+			 $student_request_date		= $nowDate;
+			 $student_action_log		= $inp_action_log;
+	
+
+			$insertParams		= array('student_call_sign'=>$inp_callsign,
+										 'student_time_zone'=>$student_timezone_id,
+										 'student_timezone_offset'=>$inp_timezone_offset,
+										 'student_youth'=>$inp_youth,
+										 'student_age'=>$inp_age,
+										 'student_parent'=>$inp_student_parent,
+										 'student_parent_email'=>$inp_student_parent_email,
+										 'student_waiting_list'=>$inp_waiting_list,
+										 'student_level'=>$inp_level,
+										 'student_semester'=>$inp_semester,
+										 'student_request_date'=>$nowDate,
+										 'student_action_log'=>$inp_action_log);
+			$insertFormat		= array('%s','%s','%f','%s','%s','%s','%s','%s','%s',
+										  '%s','%s','%s');
+										  
+			$insertData			= array('params'=>$insertParams,'format'=>$insertFormat);
+			$insertDataJson		= json_encode($insertData);
+	
+
+
+			/// get the catalog information and display it
+			$inp_data			= array('student_semester'=>$student_semester, 
+										'student_level'=>$student_level, 
+										'student_no_catalog'=>'', 
+										'student_catalog_options'=>'',
+										'student_flexible'=>'',  
+										'student_first_class_choice_utc'=>'None', 
+										'student_second_class_choice_utc'=>'None', 
+										'student_third_class_choice_utc'=>'None', 
+										'student_timezone_offset'=>$inp_timezone_offset,
+										'doDebug'=>$doDebug,
+										'testMode'=>$testMode);
+			if ($doDebug) {
+				echo "sending inp_data:<br /><pre>";
+				print_r($inp_data);
+				echo "</pre><br />";
+			}
+			$result				= generate_catalog_for_student($inp_data);
+			if ($doDebug) {
+				echo "returned from generate_catalog_for_student<br /><br />";
+			}
+			if ($result[0] === FALSE) {
+				echo "generate_catalog_for_student returned FALSE. Reason: $result[1]<br />";
+			} else {
+				$result_option	= $result[0];
+				$result_catalog	= $result[1];
+				$date1			= $result[2];			// semester start date
+				$date2			= $result[3];			// catalog available date
+				$date3			= $result[4];			// student assigned date
+				$schedAvail		= $result[5];
+				
+				$catAvailDate	= date('d M Y', $date2);
+				$assignedDate	= date('d M Y',$date3);
+				$option_message	= "";
+				if ($result_option == 'option') {
+					$option_message	= "<p>You are signing up for a $student_level Level class in 
+										the $student_semester semester. The catalog of available 
+										classes will not be available until $catAvailDate. 
+										Please indicate when you will be 
+										available to take a $student_level Level class by 
+										selecting from the list below.</p>
+										<p>Classes are an hour in length. The advisor decides when 
+										the class will actually be held. Your indication of which part 
+										of the day and which days of the week would work best for you 
+										will help guide the advisor's schedule decision.<p>";
+				} elseif ($result_option == 'catalog') {
+					$result_option		= $result[0];
+					$option_message		= "<p>The Class Catalog for $student_level Level classes is now available. 
+											Select up to three class schedule options from the table below, 
+											selecting one from each column. 
+											CW Acadamy will try to assign you to one of the class options in the order you 
+											specify. Whether or not you are assigned to a class will depend on the 
+											number of students selecting that class schedule and the number of 
+											available seats in the classes held at that time.</p>";
+				} elseif ($result_option == 'avail') {
+					$result_option		= $result[0];
+					if ($doDebug) {
+						echo "result_option of $result_option<br />";
 					}
+					$option_message 	= "<p>Students have already been assigned to advisor classes. There may possibly 
+											be classes with available seats. If so, they are listed below. If a class 
+											schedule listed below will work for you, select the class and submit the 
+											selection</p>";
 				}
+				$content		.= "$option_message
+									<form method='post' action='$theURL' 
+									name='classselection' ENCTYPE='multipart/form-data'>
+									<input type='hidden' name='strpass' value='4'>
+									<input type='hidden' name='result_option' value='$result_option'>
+									<input type='hidden' name='inp_callsign' value='$student_call_sign'>
+									<input type='hidden' name='token' value='$token'>
+									<input type='hidden' name='inp_semester' value='$student_semester'>
+									<input type='hidden' name='schedAvail' value='$schedAvail'>
+									<input type='hidden' name='insertDataJson' value='$insertDataJson'>
+									$result[1]<br clear='all' />
+									<input class='formInputButton' type='submit' value='Submit' />
+									</form></p>";
 			}
 		}
 
@@ -2116,23 +1996,29 @@ function student_registration_func() {
 			echo "Have the following information:
 					inp_callsign: $inp_callsign<br />
 					inp_semester: $inp_semester<br />
-					student_ID: $student_ID<br />
 					result_option: $result_option<br />";
 		}
+
+		$insertDataJson1 	= stripslashes($insertDataJson);
+		$jsonArray 			= json_decode($insertDataJson1,TRUE);		
 		
-		$updateParams		= array();
+		$updateParams		= $jsonArray['params'];
+		$updateFormat		= $jsonArray['format'];
 		$doUpdateStudent	= FALSE;
 		$actionLogUpdates	= "";
 		$badActorResult		= FALSE;
 
 		if ($result_option == 'option') {
 			$student_no_catalog						= 'Y';
-			$updateParams[]							= "student_no_catalog|Y|s";
+			$updateParams['student_no_catalog']		= 'Y';
+			$updateFormat[]							= '%s';
 			$student_abandoned						= 'N';
-			$updateParams[]							= "student_abandoned|N|s";
+			$updateParams['student_abandoned']		= 'N';
+			$updateFormat[]							= '%s';
 			$actionLogUpdates						.= "Set no_catalog to Y, Set abandoned to N, ";
 			$actionLogUpdates						.= "Set abandoned to N ";
 			$doUpdateStudent						= TRUE;
+		
 			if (count($inp_sked_times) > 0) {
 				$student_catalog_options 			= "";
 				$haveAny							= FALSE;
@@ -2151,12 +2037,14 @@ function student_registration_func() {
 				}
 				if ($haveAny) {
 					$student_flexible				= 'Y';
-					$updateParams[]					= 'student_flexible|Y|s';
+					$updateParams['student_flexible']	= 'Y';
+					$updateFormat[]					= '%s';
 					$actionLogUpdates				.= "Set flexible to Y, ";
 					$doUpdateStudent				= TRUE;
 					$student_catalog_options		= "";
 				}
-				$updateParams[]						= "student_catalog_options|$student_catalog_options|s";
+				$updateParams['student_catalog_options']	= $student_catalog_options;
+				$updateFormat[]								= '%s';
 				$actionLogUpdates					.= "set catalog_options to $student_catalog_options, ";
 				$doUpdateStudent					= TRUE;
 			}
@@ -2168,171 +2056,220 @@ function student_registration_func() {
 				inp_sked3: $inp_sked3<br />";
 			}
 			$student_no_catalog 				= 'N';
-			$updateParams[]						= 'student_no_catalog|N|s';
+			$updateParams['student_no_catalog']	= 'N';
+			$updateFormat[]						= '%s';
 			$student_abandoned					= 'N';
-			$updateParams[]					 	= 'student_abandoned|N|s';
+			$updateParams['student_abandoned']	= 'N';
+			$updateFormat[]						= '%s';
 			$actionLogUpdates					.= "Set no_catalog to Y, ";
 			$actionLogUpdates					.= "Set abandoned to N ";
 			
-			$myInt								= strpos($inp_sked1,"|");
+			$myInt												= strpos($inp_sked1,"|");
 			if ($myInt !== FALSE) {
-				$myArray						= explode("|",$inp_sked1);						
-				$student_first_class_choice		= $myArray[0];
-				$student_first_class_choice_utc	= $myArray[1];
-				$updateParams[]					= "student_first_class_choice|$student_first_class_choice|s";
-				$updateParams[]					= "student_first_class_choice_utc|$student_first_class_choice_utc|s";
-				$doUpdateStudent				= TRUE;
-				$actionLogUpdates				.= "Set first_class_choices, ";
-				$firstChoice					= $student_first_class_choice;
+				$myArray										= explode("|",$inp_sked1);						
+				$student_first_class_choice						= $myArray[0];
+				$student_first_class_choice_utc					= $myArray[1];
+				$updateParams['student_first_class_choice']		= $student_first_class_choice;
+				$updateFormat[]									= '%s';
+				$updateParams['student_first_class_choice_utc']	= $student_first_class_choice_utc;
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set first_class_choices, ";
+				$firstChoice									= $student_first_class_choice;
 			} else {
 				sendErrorEmail("$jobname pass $strPass inp_sked1 of $inp_sked1 is invalid for $student_call_sign");
-				$student_first_class_choice		= "None";
-				$student_first_class_choice_utc	= "None";
-				$updateParams[]					= "student_first_class_choice|None|s";
-				$updateParams[]					= "student_first_class_choice_utc|None|s";
-				$doUpdateStudent				= TRUE;
-				$actionLogUpdates				.= "Set first_class_choices to NONE, ";
-				$firstChoice					= 'None';
+				$student_first_class_choice						= "None";
+				$student_first_class_choice_utc					= "None";
+				$updateParams['student_first_class_choice']		= 'None';
+				$updateFormat[]									= '%s';
+				$updateParams['student_first_class_choice_utc']	= 'None';
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set first_class_choices to NONE, ";
+				$firstChoice									= 'None';
 			}
 
-			if ($inp_sked2 == 'None') {
-				$inp_sked2						= "None|None";
-			}
-			$myArray							= explode("|",$inp_sked2);						
-			$student_second_class_choice		= $myArray[0];
-			$student_second_class_choice_utc	= $myArray[1];
-			$updateParams[]						= "student_second_class_choice|$student_second_class_choice|s";
-			$updateParams[]						= "student_second_class_choice_utc|$student_second_class_choice_utc|s";
-			$doUpdateStudent					= TRUE;
-			$actionLogUpdates					.= "Set second_class_choices, ";
-			if ($student_second_class_choice != 'None') {
-				$secondChoice					= $student_second_class_choice;
+			$myInt												= strpos($inp_sked2,"|");
+			if ($myInt !== FALSE) {
+				$myArray										= explode("|",$inp_sked2);						
+				$student_second_class_choice					= $myArray[0];
+				$student_second_class_choice_utc				= $myArray[1];
+				$updateParams['student_second_class_choice']		= $student_second_class_choice;
+				$updateFormat[]									= '%s';
+				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set second_class_choices, ";
+				$secondChoice									= $student_second_class_choice;
 			} else {
-				$secondChoice					= '';
+				sendErrorEmail("$jobname pass $strPass inp_sked2 of $inp_sked2 is invalid for $student_call_sign");
+				$student_second_class_choice					= "None";
+				$student_second_class_choice_utc				= "None";
+				$updateParams['student_second_class_choice']	= 'None';
+				$updateFormat[]									= '%s';
+				$updateParams['student_second_class_choice_utc']	= 'None';
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set second_class_choices to NONE, ";
+				$secondChoice									= 'None';
 			}
 
-			if ($inp_sked3 == 'None') {
-				$inp_sked3						= "None|None";
-			}
-			$myArray							= explode("|",$inp_sked3);						
-			$student_third_class_choice			= $myArray[0];
-			$student_third_class_choice_utc		= $myArray[1];
-			$updateParams[]						= "student_third_class_choice|$student_third_class_choice|s";
-			$updateParams[]						= "student_third_class_choice_utc|$student_third_class_choice_utc|s";
-			$doUpdateStudent					= TRUE;
-			$actionLogUpdates					.= "Set third_class_choices, ";
-			if ($student_third_class_choice != 'None') {
-				$thirdChoice					= $student_third_class_choice;
+			$myInt												= strpos($inp_sked3,"|");
+			if ($myInt !== FALSE) {
+				$myArray										= explode("|",$inp_sked3);						
+				$student_third_class_choice						= $myArray[0];
+				$student_third_class_choice_utc					= $myArray[1];
+				$updateParams['student_third_class_choice']		= $student_third_class_choice;
+				$updateFormat[]									= '%s';
+				$updateParams['student_third_class_choice_utc']	= $student_third_class_choice_utc;
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set third_class_choices, ";
+				$thirdChoice									= $student_third_class_choice;
 			} else {
-				$thirdChoice					= '';
+				sendErrorEmail("$jobname pass $strPass inp_sked3 of $inp_sked3 is invalid for $student_call_sign");
+				$student_third_class_choice						= "None";
+				$student_third_class_choice_utc					= "None";
+				$updateParams['student_third_class_choice']		= 'None';
+				$updateFormat[]									= '%s';
+				$updateParams['student_third_class_choice_utc']	= 'None';
+				$updateFormat[]									= '%s';
+				$doUpdateStudent								= TRUE;
+				$actionLogUpdates								.= "Set third_class_choices to NONE, ";
+				$thirdChoice									= 'None';
 			}
+
 
 
 		} elseif ($result_option == 'avail') {
 			if ($doDebug) {
 				echo "<br />handling result_option avail<br />";
 			}
-			$updateParams[]							= 'student_abandoned|N|s';
-			$actionLogUpdates						.= "Set abandoned to N ";
-			$student_abandoned						= 'N';
+			$updateParams['student_abandoned']						= 'N';
+			$updateFormat[]											= '%s';
+			$actionLogUpdates										.= "Set abandoned to N ";
+			$student_abandoned										= 'N';
 			if ($inp_available == 'None') {
-				$student_first_class_choice			= '';
-				$student_first_class_choice_utc		= '';
-				$updateParams[]						= "student_first_class_choice|$student_first_class_choice|s";
-				$updateParams[]						= "student_first_class_choice_utc|$student_first_class_choice_utc|s";
-				$doUpdateStudent					= TRUE;
-				$firstChoice						= 'None';
+				$student_first_class_choice							= '';
+				$student_first_class_choice_utc						= '';
+				$updateParams['student_first_class_choice']			= $student_first_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_first_class_choice_utc']		= $student_first_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$doUpdateStudent									= TRUE;
+				$firstChoice										= 'None';
 
-				$student_second_class_choice		= '';
-				$student_second_class_choice_utc	= '';
-				$updateParams[]						= "student_second_class_choice|$student_second_class_choice|s";
-				$updateParams[]						= "student_second_class_choice_utc|$student_second_class_choice_utc|s";
-				$secondChoice						= 'None';
+				$student_second_class_choice						= '';
+				$student_second_class_choice_utc					= '';
+				$updateParams['student_second_class_choice']		= $student_second_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$doUpdateStudent									= TRUE;
+				$secondChoice										= 'None';
 
-				$student_third_class_choice			= '';
-				$student_third_class_choice_utc		= '';
-				$updateParams[]						= "student_third_class_choice|$student_third_class_choice|s";
-				$updateParams[]						= "student_third_class_choice_utc|$student_third_class_choice_utc|s";
-				$thirdChoice						= 'None';
+				$student_third_class_choice							= '';
+				$student_third_class_choice_utc						= '';
+				$updateParams['student_third_class_choice']			= $student_third_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_third_class_choice_utc']		= $student_third_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$doUpdateStudent									= TRUE;
+				$thirdChoice										= 'None';
 
-				$student_flexible					= "N";
-				$updateParams[]						= 'student_flexible|N|s';
+				$student_flexible									= "N";
+				$updateParams['student_flexible']					= 'N';
+				$updateFormat[]										= '%s';
 
-				$student_no_catalog					= 'N';
-				$updateParams[]						= 'student_no_catalog|N|s';
+				$student_no_catalog									= 'N';
+				$updateParams['student_no_catalog']					= 'N';
+				$updateFormat[]										= '%s';
 				
-				$student_waiting_list				= 'Y';
-				$updateParams[]						= 'student_waiting_list|Y|s';
+				$student_waiting_list								= 'Y';
+				$updateParams['student_waiting_list']				= 'Y';
+				$updateFormat[]										= '%s';
 
-				$actionLogUpdates					.= "Removed class choices, set flexible to N, set no_catalog to N, set waiting_list to Y, ";
+				$actionLogUpdates									.= "Removed class choices, set flexible to N, set no_catalog to N, set waiting_list to Y, ";
 			} else {
-				$myArray							= explode("|",$inp_available);
-				$student_first_class_choice			= $myArray[0];
-				$student_first_class_choice_utc		= $myArray[1];
-				$updateParams[]						= "student_first_class_choice|$student_first_class_choice|s";
-				$updateParams[]						= "student_first_class_choice_utc|$student_first_class_choice_utc|s";
-				$firstChoice						= $student_first_class_choice;
-				$doUpdateStudent					= TRUE;
+				$myArray											= explode("|",$inp_available);
+				$student_first_class_choice							= $myArray[0];
+				$student_first_class_choice_utc						= $myArray[1];
+				$updateParams['student_first_class_choice']			= $student_first_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_first_class_choice_utc']		= $student_first_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$firstChoice										= $student_first_class_choice;
+				$doUpdateStudent									= TRUE;
 
-				$student_second_class_choice		= 'None';
-				$student_second_class_choice_utc	= 'None';
-				$updateParams[]						= "student_second_class_choice|$student_second_class_choice|s";
-				$updateParams[]						= "student_second_class_choice_utc|$student_second_class_choice_utc|s";
-				$secondChoice						= 'None';
+				$student_second_class_choice						= 'None';
+				$student_second_class_choice_utc					= 'None';
+				$updateParams['student_second_class_choice']		= $student_second_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$secondChoice										= 'None';
 
-				$student_third_class_choice			= 'None';
-				$student_third_class_choice_utc		= 'None';
-				$updateParams[]						= "student_third_class_choice|$student_third_class_choice|s";
-				$updateParams[]						= "student_third_class_choice_utc|$student_third_class_choice_utc|s";
-				$thirdChoice						= 'None';
+				$student_third_class_choice							= 'None';
+				$student_third_class_choice_utc						= 'None';
+				$updateParams['student_third_class_choice']			= $student_third_class_choice;
+				$updateFormat[]										= '%s';
+				$updateParams['student_third_class_choice_utc']		= $student_third_class_choice_utc;
+				$updateFormat[]										= '%s';
+				$thirdChoice										= 'None';
 
-				$student_flexible					= "N";
-				$updateParams[]						= 'student_flexible|N|s';
+				$student_flexible									= "N";
+				$updateParams['student_flexible']					= 'N';
+				$updateFormat[]										= '%s';
 
-				$student_no_catalog					= 'N';
-				$updateParams[]						= 'student_no_catalog|N|s';
+				$student_no_catalog									= 'N';
+				$updateParams['student_no_catalog']					= 'N';
+				$updateFormat[]										= '%s';
 
-				$actionLogUpdates					.= "Set first_class choices, removed second and third class choices, set flexible to N, set no_catalog to N, ";
+				$actionLogUpdates									.= "Set first_class choices, removed second and third class choices, set flexible to N, set no_catalog to N, ";
 
 			}
-			$updateParams[]							= 'student_response|Y|s';
-			$student_response						= 'Y';
-			$myStr									= date('Y-m-d H:i:s');
-			$updateParams[]							= "student_response_date|$myStr|s";
-			$actionLogUpdates						.= "set response to Y and set response_date, ";
-			$doUpdateStudent						= TRUE;
+			$updateParams['student_response']						= 'Y';
+			$updateFormat[]											= '%s';
+			$student_response										= 'Y';
+			$myStr													= date('Y-m-d H:i:s');
+			$updateParams['student_response_date']					= $myStr;
+			$updateFormat[]											= '%s';
+			$actionLogUpdates										.= "set response to Y and set response_date, ";
+			$doUpdateStudent										= TRUE;
 		}
 
 		// check to see if the student is in the bad actors table
-		$badActorResult			= checkForBadActor($student_call_sign,$doDebug);
+		$badActorResult			= checkForBadActor($inp_callsign,$doDebug);
 		if ($badActorResult) {					/// is a bad actor
 			$actionLogUpdates	.= "Student is in the bad actor table, ";
-			$updateParams[]		= "student_intervention_required|H|s";
-			$updateParams[]		= "student_hold_reason_code|B|s";
-			$doUpdateStudent	= TRUE;
+			$updateParams['student_intervention_required']			= 'H';
+			$updateFormat[]											= '%s';
+			$updateParams['student_hold_reason_code']				= 'B';
+			$updateFormat[]											= '%s';
+			$doUpdateStudent										= TRUE;
 		}
 		if ($doUpdateStudent) {
-			$myInt					= strlen($actionLogUpdates) -2;
-			$actionLogUpdates		= substr($actionLogUpdates,0,$myInt);
-			$student_action_log		= "$student_action_log / $actionDate $userName STDREG $actionLogUpdates";
-			$updateParams[]			= "student_action_log|$student_action_log|s";
-			$studentUpdateData		= array('tableName'=>$studentTableName,
-											'inp_method'=>'update',
-											'inp_data'=>$updateParams,
-											'inp_format'=>array(''),
-											'jobname'=>$jobname,
-											'inp_id'=>$student_ID,
-											'inp_callsign'=>$student_call_sign,
-											'inp_semester'=>$student_semester,
-											'inp_who'=>$userName,
-											'testMode'=>$testMode,
-											'doDebug'=>$doDebug);
-			$updateResult	= updateStudent($studentUpdateData);
-			if ($updateResult[0] === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to update content in $studentTableName<br />";
+			$myInt								= strlen($actionLogUpdates) -2;
+			$actionLogUpdates					= substr($actionLogUpdates,0,$myInt);
+			$updateParams['student_action_log']	.= " / $actionDate $userName STDREG $actionLogUpdates";
+
+			$insertResult			= $wpdb->insert($studentTableName,
+													$updateParams,
+													$updateFormat);
+			if ($insertResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,'attempting to insert a record');
+				if ($doDebug) {
+					$lastQuery 		= $wpdb->last_query;
+					$lastError		= $wpdb->last_error;
+					echo "Inserting record failed<br />
+							$lastQuery<br />
+							$lastError<br />";
+				}
 			} else {
-		
+				$insertID			= $wpdb->insert_id;
+				if ($doDebug) {
+					echo "successfully inserted record $insertID<br />";
+				}
 				/// Now check to see if the student 
 				/// is also signed up as an advisor. If so, set the advisor survey_score 
 				/// to 13 and send an email about it to Roland and Bob
@@ -3841,34 +3778,44 @@ function student_registration_func() {
 				}		
 			}
 			if ($haveMasterData) {
-				$content				.= "<p>CW Academy offers four levels of classes based upon operator CW proficiency: 
-											Beginner, Fundamental, Intermediate or Advanced. 
-											<ul><li>The Beginner level, as the name implies, is for people who have little or no 
-													Morse code knowledge. Choose the Beginner class if that is your situation</li>
-												<li>The Fundamental class is for people who have learned the Morse code characters and are capable of 
-													sending and receiving CW at about 6 words per minute and wish to increase that capability 
-													to about 12 words per minute</li>
-												<li>The Intermediate class is for people who are capable of sending and receiving 
-													Morse code at a minimum of 10 words per minute and wish to increase that capability to about 
-													20 words per minute</li>
-												<li>The Advanced class is for people who are capable of sending and receiving Morse 
-													code at a minimum of 20 words per minute and wish to increase that capability to about 30 
-													words per minute</li></ul></p>
-											<p><b>Classes at the CW Academy are free of charge.</b> The advisors and staff are a volunteers who 
-											have a passion for CW. Classes are eight weeks long and held in January - February, May - June, 
-											and September - October. Classes meet twice a week for about an hour. Between classes the 
-											students have daily homework assignments which will take about an hour to complete.</p>
-											<p><b>Minimum essentials:</b>
-											<ul><li>High speed broadband internet access
-												<li>Computing device (desktop, laptop)
-												<li>Webcam (camera, microphone) either built-in or USB add-on
-												<li>Key paddle (single lever or dual lever. Straight keys or Bugs are not allowed)
-												<li>Keyer with sidetone or radio with built-in keyer and sidetone
-												<li>Dedication to 60 minutes of daily practice
-												<li>Comfortable understanding and speaking the English language unless previous arrangements have been made
+				$content				.= "<h4>Sign Up for a Class at CW Academy</h4>
+											<p>Ready to boost your Morse Code proficiency? CW Academy offers free, volunteer-led classes to help you achieve your goals.</p>
+											<h4>How to Sign Up (3 Easy Steps)</h4>
+											<p>The sign-up process is straightforward. You'll need to complete all three steps to secure your spot in a class:
+											<ol>
+											<li><b>Choose Your Class & Semester:</b> Select the specific class you want to attend and the semester that works best for you.
+											<li><b>Provide Parent/Guardian Information (if applicable):</b> If you're under 21, you'll need to provide information for a parent or guardian.
+											<li><b>Select Your Availability:</b> Finally, you'll pick your preferred class times and days from a list of available options.
+											</ol></p>
+											<h4>CW Academy Class Levels</h4>
+											<p>We offer four levels of classes, tailored to your current Morse Code (CW) proficiency. Please select the level that best matches your skills:
+											<ul>
+											<li><b>Beginner:</b> Perfect for those with little to no prior Morse code knowledge.
+											<li><b>Fundamental:</b> For students who have learned the Morse code characters, can send and receive at about 6 words per minute (WPM), and aim to reach 12 WPM.
+											<li><b>Intermediate:</b> Designed for those capable of sending and receiving at a minimum of 10 WPM, looking to increase their speed to about 20 WPM.
+											<li><b>Advanced:</b> For experienced operators who can send and receive at a minimum of 20 WPM and aspire to reach 30 WPM.
 											</ul></p>
-											<p>Students are limited to one registration at a time in the system. When you have 
-											completed a class you may register for a future class.</p>
+											<h4>Important Class Information</h4>
+											<ul>
+											<li><b>Free of Charge:</b> All CW Academy classes are completely free, taught by passionate volunteer advisors and staff.
+											<li><b>Class Schedule:</b> Classes run for eight weeks during three main periods: January-February, May-June, and September-October.
+											<li><b>Time Commitment:</b> Classes meet twice a week for approximately one hour. You'll also have daily homework assignments, taking up to an hour to complete between sessions.
+											<li><b>Language Options:</b> Most classes are taught in English, but some are available in other languages. Be sure to check the class language when making your time selections.
+											<li><b>One Registration at a Time:</b> Students can only be registered for one class at a time. Once you've completed a class, you're welcome to register for another!
+											</ul>
+											<h4>Minimum Essentials for Participation</h4>
+											<p>To ensure a successful learning experience, please make sure you have the following:
+											<ul>
+											<li><b>High-speed broadband internet access</b>
+											<li><b>Computing device</b> (desktop or laptop)
+											<li><b>Webcam</b> (built-in or USB add-on, with camera and microphone)
+											<li><b>Key paddle</b> (single or dual lever; straight keys or bugs are not permitted)
+											<li><b>Keyer with sidetone</b> or a radio with a built-in keyer and sidetone
+											<li><b>Dedication:</b> Be prepared for up to 60 minutes of daily practice!
+											</ul></p>
+											<h4>Step One of Three Steps</h4>
+											<p>Select the specific class you want to attend and the semester that works best for you 
+											and click 'Next'.</p> 
 											<form method='post' action='$theURL' 
 											name='pass01form' ENCTYPE='multipart/form-data'>
 											<input type='hidden' name='strpass' value='101'>
