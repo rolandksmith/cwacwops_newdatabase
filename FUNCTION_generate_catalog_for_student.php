@@ -157,11 +157,14 @@ function generate_catalog_for_student($inp_data = array('')) {
 	$myInt							= count($inp_data);
 	if ($myInt < 9) {
 		$error				= "inp_data should have 9 elements. Only $myInt elements given";
+		if ($doDebug) {
+			echo "inp_data should have 9 elements. Only $myInt elements given<br />";
+		}
 		$doProceed			= FALSE;
 	}
 
 	foreach($inp_data as $thisKey=>$thisValue) {
-		$$thisKey					= $thisValue;
+		${$thisKey}					= $thisValue;
 		if ($doDebug) {
 			echo "setting $thisKey to $thisValue<br />";
 		}
@@ -171,6 +174,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 	// student_semester must be in the semester array
 	if (!in_array($student_semester,$semesterArray)) {
 		$error						= "Input semester of $student_semester not a valid semester";
+		if ($doDebug) {
+			echo "Input semester of $student_semester not a valid semester<br />";
+		}
 		$doProceed					= FALSE;
 	}
 	
@@ -199,6 +205,12 @@ function generate_catalog_for_student($inp_data = array('')) {
 		$date1					= strtotime($myArray[0]);		// semester start
 		$date2					= strtotime($myArray[1]);		// catalog available
 		$date3					= strtotime($myArray[2]);		// students assigned
+		if ($doDebug) {
+			echo "have calculated dates:<br />
+					date1: $date1<br />
+					date2: $date2<br />
+					date3: $date3<br />";
+		}
 		
 		// determine which info to display
 		$currentTime			= strtotime($run_date);
@@ -213,6 +225,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 			$show13Options		= TRUE;
 		} else {
 			$error				= "$run_date of $currentTime doesn't compare to $date1, $date2, or $date3";
+			if ($doDebug) {
+				echo "$run_date of $currentTime doesn't compare to $date1, $date2, or $date3<br />";
+			}
 			$doProceed			= FALSE;
 		}
 		
@@ -361,19 +376,8 @@ function generate_catalog_for_student($inp_data = array('')) {
 				if ($doDebug) {
 					echo "doing showAvail<br />";
 				}
+
 				// get list of classes with open seats
-
-
-/*
-echo "what are we passing in for testMode ($testMode):<br />";
-if ($testMode) {
-	echo "testMode is TRUE<br />";
-} else {
-	echo "testMode is FALSE<br />";
-}
-*/
-
-
 				$result					= build_list_of_available_classes($student_semester,$testMode,$doDebug);
 				if ($doDebug) {
 					echo "got list of available classes:<br /><pre>";
@@ -440,6 +444,10 @@ if ($testMode) {
 	if (!$doProceed) {
 		$returnOption	= FALSE;
 		$returnCatalog	= $error;
+		$date1			= '';
+		$date2			= '';
+		$date3			= '';
+		$schedAvail 	= '';
 	}
 	return array($returnOption,$returnCatalog,$date1,$date2,$date3,$schedAvail);
 }
