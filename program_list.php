@@ -809,7 +809,8 @@ function program_list_func() {
 			}
 		}
 		if ($doProceed) {
-			$content	.= "<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
+			$content	.= "<p><b>Is Your Advisor Master Data Correct?</b><br />
+							Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
 							target='_blank'>HERE</a> to update the advisor Master Data</p>";
 			if (!$userRole == 'advisor') {
 				// see if the advisor has a advisor record. If not, indicate that they must sign up
@@ -907,7 +908,8 @@ function program_list_func() {
 			}
 		}
 		if ($doProceed) {
-			$content	.= "<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
+			$content	.= "<p><b>Is Your Student Master Data Correct?</b><br />
+							Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
 							target='_blank'>HERE</a> to update the advisor Master Data</p>";
 			if ($userRole == 'student') {
 				if ($doDebug) {
