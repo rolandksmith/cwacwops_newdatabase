@@ -8,7 +8,7 @@ function student_registration_func() {
 
 	global $wpdb,$doDebug,$testMode,$demoMode,$inp_verbose,$daysToGo;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$demoMode						= FALSE;
 	$doAssessment					= FALSE;
@@ -33,10 +33,22 @@ function student_registration_func() {
 		$content				= "Your are not authorized";
 		return $content;
 	}
-//	if ($userRole != 'administrator') {				// turn off debug and testmode
-//		$doDebug					= FALSE;
-//		$testMode					= FALSE;
-//	}
+
+	// see if we're running in Docker
+	$dockerMode						= FALSE;
+	if (is_file("/.dockerenv")) {
+		// running in docker
+		$dockerMode					= TRUE;
+		if ($doDebug) {
+			echo "running in dockerMode<br />";
+		}
+	}
+	if (!$dockerMode) {
+		if ($userRole != 'administrator') {				// turn off debug and testmode
+			$doDebug					= FALSE;
+			$testMode					= FALSE;
+		}
+	}
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
@@ -1664,7 +1676,7 @@ function student_registration_func() {
 										available at that time.";
 
 				}
-				$content	.= "<h4>Step 2 of 3 Steps</h4>
+				$content	.= "<h4>Step 3 of 4 Steps</h4>
 								<p>You have have requested the $inp_level Level class to be held in the $inp_semester Semester. 
 								In this step, students 20 years of age or younger are requested to provide parent / guardian 
 								information. If you are older than 20 years of age, click 'Submit to go to Step 3. If you are 
@@ -1734,7 +1746,7 @@ function student_registration_func() {
 				  inp_level = $inp_level<br/><br />";
 		}
 		$content	.= "<h3>$jobname</h3>
-						<h4>Step 3 of 3 Steps</h4>";
+						<h4>Step 4 of 4 Steps</h4>";
 
 		if ($doDebug) {
 			if ($haveStudentData) {
@@ -3636,10 +3648,11 @@ function student_registration_func() {
 									appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Class Resolution</a>.</p>";
 			}
 		}
+	}
 
 ///////////////// pass 100
 
-	} elseif ("100" == $strPass) {
+	if ("100" == $strPass) {
 
 		if ($doDebug) {
 			echo "<br />Arrived at pass 100<br />";
@@ -3780,10 +3793,11 @@ function student_registration_func() {
 			if ($haveMasterData) {
 				$content				.= "<h4>Sign Up for a Class at CW Academy</h4>
 											<p>Ready to boost your Morse Code proficiency? CW Academy offers free, volunteer-led classes to help you achieve your goals.</p>
-											<h4>How to Sign Up (3 Easy Steps)</h4>
-											<p>The sign-up process is straightforward. You'll need to complete all three steps to secure your spot in a class:
+											<h4>How to Sign Up (4 Easy Steps)</h4>
+											<p>The sign-up process is straightforward. You'll need to complete all four steps to secure your spot in a class:
 											<ol>
 											<li><b>Choose Your Class & Semester:</b> Select the specific class you want to attend and the semester that works best for you.
+											<li><b>Take a Morse Code Proficiency Assessment:</b> This short process will help verify which of the four class levels you should take.
 											<li><b>Provide Parent/Guardian Information (if applicable):</b> If you're under 21, you'll need to provide information for a parent or guardian.
 											<li><b>Select Your Availability:</b> Finally, you'll pick your preferred class times and days from a list of available options.
 											</ol></p>
@@ -3813,7 +3827,7 @@ function student_registration_func() {
 											<li><b>Keyer with sidetone</b> or a radio with a built-in keyer and sidetone
 											<li><b>Dedication:</b> Be prepared for up to 60 minutes of daily practice!
 											</ul></p>
-											<h4>Step One of Three Steps</h4>
+											<h4>Step 1 of 4 Steps</h4>
 											<p>Select the specific class you want to attend and the semester that works best for you 
 											and click 'Next'.</p> 
 											<form method='post' action='$theURL' 
@@ -3851,11 +3865,11 @@ function student_registration_func() {
 //								has been notified.</p>";
 //			sendErrorEmail("$jobname pass100 no user master data found for $userName. Should not happen");
 		}
-
+	}
 		
 /////////////////////////	PASS 101
 
-	} elseif ("101" == $strPass) {
+	if ("101" == $strPass) {
 		if ($doDebug) {
 			echo "<br />Arrived at pass 101 with inp_callsign of $inp_callsign<br />
 				inp_level of $inp_level<br />
@@ -4130,6 +4144,7 @@ function student_registration_func() {
 			// if needs assessment and beginner allow skipping the assessment
 			if ($needsAssessment and $inp_level == 'Beginner') {
 				$content			.= "<h3>$jobname</h3>
+										<h4>Step 2 of 4 Steps</h4>
 										<p>At this point in the signup process you will be asked 
 										to take a Morse code proficiency assessment to help 
 										you get into the right class based on your knowledge 
@@ -4176,73 +4191,73 @@ function student_registration_func() {
 				$strPass			= "101a";
 			}
 		}
-		if ("101a" == $strPass) {
+	}
+	if ("101a" == $strPass) {
 
-			if ($needsAssessment) {	
-				$token			= mt_rand();			
-				if ($doDebug) {
-					echo "Doing the assessment.<br />
-							doProceed is TRUE<br />
-							allowSignup: $allowSignup<br />";
+		if ($needsAssessment) {	
+			$token			= mt_rand();			
+			if ($doDebug) {
+				echo "Doing the assessment.<br />
+						doProceed is TRUE<br />
+						allowSignup: $allowSignup<br />";
+			}
+			$needsAssessment = FALSE;
+			$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
+			$enstr			= base64_encode($stringToPass);
+			$thisDate		= date('Y-m-d H:i:s');
+			// save the enstr info in the temporary table
+			$insertResult	= $wpdb->insert('wpw1_cwa_temp_data',
+											array('callsign'=>$inp_callsign,
+												  'token'=>$token,
+												  'temp_data'=>$enstr,
+												  'date_written'=>$thisDate),
+											array('%s','%s','%s','%s'));
+			if ($insertResult === FALSE) {
+				handleWPDBError($jobname,$doDebug);
+			}
+				$lastError			= $wpdb->last_error;
+			if ($lastError != '') {
+				handleWPDBError($jobname,$doDebug);
+				$content		.= "Fatal program error. System Admin has been notified";
+				if (!$doDebug) {
+					return $content;
 				}
-				$needsAssessment = FALSE;
-				$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
-				$enstr			= base64_encode($stringToPass);
-				$thisDate		= date('Y-m-d H:i:s');
-				// save the enstr info in the temporary table
-				$insertResult	= $wpdb->insert('wpw1_cwa_temp_data',
-												array('callsign'=>$inp_callsign,
-													  'token'=>$token,
-													  'temp_data'=>$enstr,
-													  'date_written'=>$thisDate),
-												array('%s','%s','%s','%s'));
-				if ($insertResult === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-				}
-					$lastError			= $wpdb->last_error;
-				if ($lastError != '') {
-					handleWPDBError($jobname,$doDebug);
-					$content		.= "Fatal program error. System Admin has been notified";
-					if (!$doDebug) {
-						return $content;
-					}
-				}
+			}
 
-				
-				$doProceed		= FALSE;
-				$myStr			= "$theURL?strpass=104&inp_callsign=$inp_callsign&token=$token";
-				$returnurl		= urlencode($myStr);
-				$content		.= "<h3>$jobname</h3>
-									<h4>Morse Code Proficiency Self-assessment</h4>
-									<p>The next step in the sign-up process is to do a Morse Code 
-									Proficiency Assessment. The purpose is to assist you to sign up 
-									for the class most suitable for you. You have indicated that your are 
-									interested in a $inp_level Level CW Academy Class. The assessment will 
-									begin at that level and, depending on your result, may ask you to take 
-									a higher-level or lower-level assessment. </p>
-									<p>Upon completion, you will come back to the sign-up program, which 
-									will show you your sign-up options.</p>
-									<p><table style='border:4px solid green;width:auto;'><tr><td>
-									Click <a href='https://cw-assessment.vercel.app?mode=$inp_level&callsign=$inp_callsign&token=$token&infor=Registration&returnurl=$returnurl'>HERE</a> 
-									to start the assessment.</p></td></tr></table>"; 
+			
+			$doProceed		= FALSE;
+			$myStr			= "$theURL?strpass=104&inp_callsign=$inp_callsign&token=$token";
+			$returnurl		= urlencode($myStr);
+			$content		.= "<h3>$jobname</h3>
+								<h4>Step 2 of 4 Steps: Morse Code Proficiency Self-assessment</h4>
+								<p>The next step in the sign-up process is to do a Morse Code 
+								Proficiency Assessment. The purpose is to assist you to sign up 
+								for the class most suitable for you. You have indicated that your are 
+								interested in a $inp_level Level CW Academy Class. The assessment will 
+								begin at that level and, depending on your result, may ask you to take 
+								a higher-level or lower-level assessment. </p>
+								<p>Upon completion, you will come back to the sign-up program, which 
+								will show you your sign-up options.</p>
+								<p><table style='border:4px solid green;width:auto;'><tr><td>
+								Click <a href='https://cw-assessment.vercel.app?mode=$inp_level&callsign=$inp_callsign&token=$token&infor=Registration&returnurl=$returnurl'>HERE</a> 
+								to start the assessment.</p></td></tr></table>"; 
 
-			} else {
-				if ($doProceed) {
-					if (!$needsAssessment) {			/// doesn't need assessment. Continue to signup
-						$stringToPass 	= "inp_callsign=$inp_callsign&inp_phone=$inp_phone&inp_ph_code=$inp_ph_code&inp_email=$inp_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
-						$enstr			= base64_encode($stringToPass);
-						$content		.= "<h3>$jobname</h3>
-											<p><table style='border:4px solid green;width:auto;'><tr><td>You have recently successfly met the Morse code proficiency requirements 
-											to take the CW Academy $inp_level level class.<br /><br />
-											Click <a href='$theURL?strpass=2&enstr=$enstr'>HERE</a> to continue the sign-up process.</p></td></tr></table>";			
-					}
+		} else {
+			if ($doProceed) {
+				if (!$needsAssessment) {			/// doesn't need assessment. Continue to signup
+					$stringToPass 	= "inp_callsign=$inp_callsign&inp_phone=$inp_phone&inp_ph_code=$inp_ph_code&inp_email=$inp_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
+					$enstr			= base64_encode($stringToPass);
+					$content		.= "<h3>$jobname</h3>
+										<p><table style='border:4px solid green;width:auto;'><tr><td>You have recently successfly met the Morse code proficiency requirements 
+										to take the CW Academy $inp_level level class.<br /><br />
+										Click <a href='$theURL?strpass=2&enstr=$enstr'>HERE</a> to continue the sign-up process.</p></td></tr></table>";			
 				}
-			}			
-		}
-
+			}
+		}			
+	}
 ////////// Pass 104
 
-	} elseif ("104" == $strPass) {
+	if ("104" == $strPass) {
 		if ($doDebug) {
 			echo "<br />At pass 104 with<br />
 			  inp_callsign: $inp_callsign<br />
@@ -4354,341 +4369,350 @@ function student_registration_func() {
 			$didIntermediate		= FALSE;
 			$bestResultAdvanced		= 0;
 			$didAdvanced			= FALSE;
-			$sql					= "select * from $newAssessmentTableName 
-										where callsign = '$inp_callsign' 
-										and token = '$token'";
-			$assessmentResult		= $wpdb->get_results($sql);
-			if ($assessmentResult === FALSE) {
-				handleWPDBError("$jobname pass 104",$doDebug);
-			} else {
-				$numASRows		= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numASRows rows<br />";
+			if (!$dockerMode) {			// if running in docker, no results will be available
+				$sql					= "select * from $newAssessmentTableName 
+											where callsign = '$inp_callsign' 
+											and token = '$token'";
+				$assessmentResult		= $wpdb->get_results($sql);
+				if ($assessmentResult === FALSE) {
+					handleWPDBError("$jobname pass 104",$doDebug);
+				} else {
+					$numASRows		= $wpdb->num_rows;
+					if ($doDebug) {
+						echo "ran $sql<br />and retrieved $numASRows rows<br />";
+					}
+					if ($numASRows > 0) {
+						foreach($assessmentResult as $assessmentRow) {
+							$assessment_id		 	= $assessmentRow->record_id;
+							$assessment_callsign	= $assessmentRow->callsign;
+							$assessment_level		= $assessmentRow->level;
+							$assessment_score		= $assessmentRow->score;
+							$assessment_date		= $assessmentRow->date_written;
+						}
+					} else {
+						if ($doDebug) {
+							echo "no assessment records found for token $token<br />";
+						}
+						$content		.= "<p>Thank you for your interest in CW Academy. If you 
+											wish to start a new sign-up, please click 
+											<a href='$theURL'>Sign Up</a>. Otherwise you can 
+											close this window.</p>";
+						$doProceed		= FALSE;
+					}
 				}
-				if ($numASRows > 0) {
-					foreach($assessmentResult as $assessmentRow) {
-						$assessment_id		 	= $assessmentRow->record_id;
-						$assessment_callsign	= $assessmentRow->callsign;
-						$assessment_level		= $assessmentRow->level;
-						$assessment_score		= $assessmentRow->score;
-						$assessment_date		= $assessmentRow->date_written;
-					
-						if ($assessment_level == 'Beginner') {
-							$didBeginner		= TRUE;
-							if ($assessment_score > $bestResultBeginner) {
-								$bestResultBeginner 	= $assessment_score;
-							}
-						}
-						if ($assessment_level == 'Fundamental') {
-							$didFundamental		= TRUE;
-							if ($assessment_score > $bestResultFundamental) {
-								$bestResultFundamental 	= $assessment_score;
-							}
-						}
-						if ($assessment_level == 'Intermediate') {
-							$didIntermediate	= TRUE;
-							if ($assessment_score > $bestResultIntermediate) {
-								$bestResultIntermediate 	= $assessment_score;
-							}
-						}
-						if ($assessment_level == 'Advanced') {
-							$didAdvanced		= TRUE;
-							if ($assessment_score > $bestResultAdvanced) {
-								$bestResultAdvanced 	= $assessment_score;
-							}
-						}
-			 		}
-			 		if ($doDebug) {
-			 			echo "have assessment data:<br />";
-			 			if ($didBeginner) {
-			 				echo "bestResultBeginner; $bestResultBeginner<br />";
-			 			} else {
-			 				echo "no Beginner assessment<br />";
-			 			}
-			 			if ($didFundamental) {
-			 				echo "bestResultFundamental: $bestResultFundamental<br />";
-			 			} else {
-			 				echo "no Fundamental assessment<br />";
-			 			}
-			 			if ($didIntermediate) {
-			 				echo "bestResultIntermediate: $bestResultIntermediate<br />";
-			 			} else {
-			 				echo "no Intermediate assessment<br />";
-			 			}
-			 			if ($didAdvanced) {
-			 				echo "bestResultAdvanced: $bestResultAdvanced<br />";
-			 			} else {
-			 				echo "no Advanced assessment<br />";
-			 			}
-			 		}
-			 		$content		.= "<p>You have completed the Morse Code Proficiency 
-			 							assessment.<br />";
-			 		if ($didBeginner) {
-			 			$content	.= "Your Beginner Level assessment score was $bestResultBeginner<br />";
-			 		}
-			 		if ($didFundamental) {
-			 			$content	.= "Your Fundamental Level assessment score was $bestResultFundamental<br />";
-			 		}
-			 		if ($didIntermediate) {
-			 			$content	.= "Your Intermediate Level assessment score was $bestResultIntermediate<br />";
-			 		}
-			 		if ($didAdvanced) {
-			 			$content	.= "Your Advanced Level assessment score was $bestResultAdvanced<br />";
-			 		}
-			 		$content		.= "</p>";
-			 	} else {
-			 		if ($doDebug) {
-			 			echo "no assessment records found for token $token<br />";
-			 		}
-			 		$content		.= "<p>Thank you for your interest in CW Academy. If you 
-			 							wish to start a new sign-up, please click 
-			 							<a href='$theURL'>Sign Up</a>. Otherwise you can 
-			 							close this window.</p>";
-			 		$doProceed		= FALSE;
-			 	}
+			} else {					// in dockerMode. fake the data
+				$assessment_level		= $inp_level;
+				$assessment_score		= 100;
+				$bestResultBeginner		= 0;
+				$bestResultFundamental	= 0;
+				$bestResultIntermediate	= 0;
+				$bestResultAdvanced		= 0;
 			}
-		}
-		
-		$stringToPass 	= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&$inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&allowSignup=$allowSignup";
-		$enstr			= base64_encode($stringToPass);
-		if ($doDebug) {
-			echo "set up enstr using $stringToPass<br />";
-		}
-
-		$registerAsBeginner				= "<p><table style='border:4px solid green;width:auto;'><tr><td>
-											To continue signing up for a Beginner Level class please click 
-											<a href='$theURL?strpass=2&inp_level=Beginner&enstr=$enstr'>Sign-Up for a Beginner Class</a>
-											</td></tr></table></p>";
-
-		$registerAsFundamental		 	= "<p><table style='border:4px solid green;width:auto;'><tr><td>
-											To continue signing up for a Fundamental Level class please click
-											<a href='$theURL?strpass=2&inp_level=Fundamental&enstr=$enstr'>Sign-Up for a Fundamental Level class</a>
-											</td></tr></table></p>";
-
-		$registerAsIntermediate			= "<p><table style='border:4px solid green;width:auto;'><tr><td>
-											To continue signing up for an Intermediate Level class please click
-											<a href='$theURL?strpass=2&inp_level=Intermediate&enstr=$enstr'>Sign-Up for an Intermediate Level class</a>
-											</td></tr></table></p>";
-
-		$registerAsAdvanced				= "<p><table style='border:4px solid green;width:auto;'><tr><td>
-											To continue signing up for an Advanced Level class please click
-											<a href='$theURL?strpass=2&inp_level=Advanced&enstr=$enstr'>Sign-Up for an Advanced Level class</a>
-											</td></tr></table></p>";
-
-		if ($doProceed) {
-			if ($doDebug) {
-				echo "ready to evaluate the assessment<br />";
-			}
-			
-			if ($inp_level == 'Beginner') {
-				if (!$didBeginner) {
-					if ($doDebug) {
-						echo "No beginner assessment found<br />";
+			if ($doProceed) {	
+				if ($assessment_level == 'Beginner') {
+					$didBeginner		= TRUE;
+					if ($assessment_score > $bestResultBeginner) {
+						$bestResultBeginner 	= $assessment_score;
 					}
-					$content			.= "<p>You have requested a Beginner Level CW Academy class. However, 
-											no Beginner Morse Code Proficiency Assessment results were recorded 
-											in the database.</p>
-											<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
-											<a href='$theURL?strpass=101&inp_Level=Beginner&enstr=$enstr'>Perform 
-											Morse Code Assessment</a></td></tr></table>";
-				} elseif ($bestResultBeginner <= 40) {
-					if ($doDebug) {
-						echo "beginner result <= 40<br />";
+				}
+				if ($assessment_level == 'Fundamental') {
+					$didFundamental		= TRUE;
+					if ($assessment_score > $bestResultFundamental) {
+						$bestResultFundamental 	= $assessment_score;
 					}
-					$content			.= "<p>You have requested a Beginner Level CW Academy 
-											class. Your Morse Code Proficiency Assessment confirms 
-											yourchoice.</p>
-											$registerAsBeginner";
-				} elseif ($bestResultBeginner > 40 && $bestResultBeginner <= 60) {
-					if ($doDebug) {
-						echo "beginner result between 40 and 60<br />";
+				}
+				if ($assessment_level == 'Intermediate') {
+					$didIntermediate	= TRUE;
+					if ($assessment_score > $bestResultIntermediate) {
+						$bestResultIntermediate 	= $assessment_score;
 					}
-					$content		.= "<p>You have requested a Beginner Level CW Academy class. Based on your 
-										Morse Code Proficiency Assessment results, a Beginner class is 
-										recommended. However,   
-										you may switch to a Fundamental Level class if you wish.</p>
-										$registerAsBeginner
-										$registerAsFundamental";
-					
-				} elseif ($bestResultBeginner >= 60) {
-					if ($doDebug) {
-						echo "beginner result > 60<br />";
+				}
+				if ($assessment_level == 'Advanced') {
+					$didAdvanced		= TRUE;
+					if ($assessment_score > $bestResultAdvanced) {
+						$bestResultAdvanced 	= $assessment_score;
 					}
-					if (!$didFundamental) { 
-						$content			.= "<p>You have requested a Beginner Level CW Academy 
-												class. Your Morse Code Proficiency Assessment confirms 
-												you rchoice.</p>
-												$registerAsBeginner";
+				}
+				if ($doDebug) {
+					echo "have assessment data:<br />";
+					if ($didBeginner) {
+						echo "bestResultBeginner; $bestResultBeginner<br />";
+					} else {
+						echo "no Beginner assessment<br />";
 					}
 					if ($didFundamental) {
-						if ($bestFundamentalScore < 60) {
-							$content		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
-												your Morse Code Proficiency Assessment result,  
-												CW Academy recommends that you switch to a Fundamental Level class. However, 
-												you also have the option to sigh up for a Beginner level class, if you wish.</p>
-												$registerAsFundamental
-												$registerAsBeginner";
-						
-						} elseif ($didIntermediate) {
-							if ($bestIntermediateScore < 60) {
-								$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
-													your Morse Code Proficiency Assessment result,  
-													CW Academy recommends that you switch to a Fundamental Level class. However, 
-													you also have the option to sigh up for a Beginner Level class, if you wish.</p>
-													$registerAsFundamental
+						echo "bestResultFundamental: $bestResultFundamental<br />";
+					} else {
+						echo "no Fundamental assessment<br />";
+					}
+					if ($didIntermediate) {
+						echo "bestResultIntermediate: $bestResultIntermediate<br />";
+					} else {
+						echo "no Intermediate assessment<br />";
+					}
+					if ($didAdvanced) {
+						echo "bestResultAdvanced: $bestResultAdvanced<br />";
+					} else {
+						echo "no Advanced assessment<br />";
+					}
+				}
+				$content		.= "<p>You have completed the Morse Code Proficiency 
+									assessment.<br />";
+				if ($didBeginner) {
+					$content	.= "Your Beginner Level assessment score was $bestResultBeginner<br />";
+				}
+				if ($didFundamental) {
+					$content	.= "Your Fundamental Level assessment score was $bestResultFundamental<br />";
+				}
+				if ($didIntermediate) {
+					$content	.= "Your Intermediate Level assessment score was $bestResultIntermediate<br />";
+				}
+				if ($didAdvanced) {
+					$content	.= "Your Advanced Level assessment score was $bestResultAdvanced<br />";
+				}
+				$content		.= "</p>";
+		
+				$stringToPass 	= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&$inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&allowSignup=$allowSignup";
+				$enstr			= base64_encode($stringToPass);
+				if ($doDebug) {
+					echo "set up enstr using $stringToPass<br />";
+				}
+		
+				$registerAsBeginner				= "<p><table style='border:4px solid green;width:auto;'><tr><td>
+													To continue signing up for a Beginner Level class please click 
+													<a href='$theURL?strpass=2&inp_level=Beginner&enstr=$enstr'>Sign-Up for a Beginner Class</a>
+													</td></tr></table></p>";
+		
+				$registerAsFundamental		 	= "<p><table style='border:4px solid green;width:auto;'><tr><td>
+													To continue signing up for a Fundamental Level class please click
+													<a href='$theURL?strpass=2&inp_level=Fundamental&enstr=$enstr'>Sign-Up for a Fundamental Level class</a>
+													</td></tr></table></p>";
+		
+				$registerAsIntermediate			= "<p><table style='border:4px solid green;width:auto;'><tr><td>
+													To continue signing up for an Intermediate Level class please click
+													<a href='$theURL?strpass=2&inp_level=Intermediate&enstr=$enstr'>Sign-Up for an Intermediate Level class</a>
+													</td></tr></table></p>";
+		
+				$registerAsAdvanced				= "<p><table style='border:4px solid green;width:auto;'><tr><td>
+													To continue signing up for an Advanced Level class please click
+													<a href='$theURL?strpass=2&inp_level=Advanced&enstr=$enstr'>Sign-Up for an Advanced Level class</a>
+													</td></tr></table></p>";
+		
+				if ($doProceed) {
+					if ($doDebug) {
+						echo "ready to evaluate the assessment<br />";
+					}
+					
+					if ($inp_level == 'Beginner') {
+						if (!$didBeginner) {
+							if ($doDebug) {
+								echo "No beginner assessment found<br />";
+							}
+							$content			.= "<p>You have requested a Beginner Level CW Academy class. However, 
+													no Beginner Morse Code Proficiency Assessment results were recorded 
+													in the database.</p>
+													<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
+													<a href='$theURL?strpass=101&inp_Level=Beginner&enstr=$enstr'>Perform 
+													Morse Code Assessment</a></td></tr></table>";
+						} elseif ($bestResultBeginner <= 40) {
+							if ($doDebug) {
+								echo "beginner result <= 40<br />";
+							}
+							$content			.= "<p>You have requested a Beginner Level CW Academy 
+													class. Your Morse Code Proficiency Assessment confirms 
+													yourchoice.</p>
 													$registerAsBeginner";
-							} else {
-								if ($didAdvanced) {
-									if ($bestAdvancedScore < 70) {
+						} elseif ($bestResultBeginner > 40 && $bestResultBeginner <= 60) {
+							if ($doDebug) {
+								echo "beginner result between 40 and 60<br />";
+							}
+							$content		.= "<p>You have requested a Beginner Level CW Academy class. Based on your 
+												Morse Code Proficiency Assessment results, a Beginner class is 
+												recommended. However,   
+												you may switch to a Fundamental Level class if you wish.</p>
+												$registerAsBeginner
+												$registerAsFundamental";
+							
+						} elseif ($bestResultBeginner >= 60) {
+							if ($doDebug) {
+								echo "beginner result > 60<br />";
+							}
+							if (!$didFundamental) { 
+								$content			.= "<p>You have requested a Beginner Level CW Academy 
+														class. Your Morse Code Proficiency Assessment confirms 
+														you rchoice.</p>
+														$registerAsBeginner";
+							}
+							if ($didFundamental) {
+								if ($bestFundamentalScore < 60) {
+									$content		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
+														your Morse Code Proficiency Assessment result,  
+														CW Academy recommends that you switch to a Fundamental Level class. However, 
+														you also have the option to sigh up for a Beginner level class, if you wish.</p>
+														$registerAsFundamental
+														$registerAsBeginner";
+								
+								} elseif ($didIntermediate) {
+									if ($bestIntermediateScore < 60) {
 										$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
 															your Morse Code Proficiency Assessment result,  
-															recommends that you, at minimum, switch to a Fundamental Level class. In addition, 
-															you should consider switching to an Intermediate Level class. Taking a Beginner 
-															Level class is highly discouraged.</p>
+															CW Academy recommends that you switch to a Fundamental Level class. However, 
+															you also have the option to sigh up for a Beginner Level class, if you wish.</p>
 															$registerAsFundamental
-															$registerAsIntermediate
 															$registerAsBeginner";
 									} else {
-										$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
-															your Morse Code Proficiency Assessment result,  
-															CW Academy recommends that you, at minimum, switch to 
-															an Intermediate Level class. You should also consider an Advanced Lvel 
-															class. Both the Beginner Level class and the Fundamental Level class 
-															are highly discouraged for you.</p>
-															$registerAsIntermediate
-															$regsiterAsAdvanced
-															$registerAsFundamental
-															$registerAsBeginner";
+										if ($didAdvanced) {
+											if ($bestAdvancedScore < 70) {
+												$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
+																	your Morse Code Proficiency Assessment result,  
+																	recommends that you, at minimum, switch to a Fundamental Level class. In addition, 
+																	you should consider switching to an Intermediate Level class. Taking a Beginner 
+																	Level class is highly discouraged.</p>
+																	$registerAsFundamental
+																	$registerAsIntermediate
+																	$registerAsBeginner";
+											} else {
+												$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
+																	your Morse Code Proficiency Assessment result,  
+																	CW Academy recommends that you, at minimum, switch to 
+																	an Intermediate Level class. You should also consider an Advanced Lvel 
+																	class. Both the Beginner Level class and the Fundamental Level class 
+																	are highly discouraged for you.</p>
+																	$registerAsIntermediate
+																	$regsiterAsAdvanced
+																	$registerAsFundamental
+																	$registerAsBeginner";
+											}
+										}
 									}
 								}
 							}
 						}
-					}
-				}
-			
-			} elseif ($inp_level == 'Fundamental') {
-				if (!$didFundamental) {
-					$content			.= "<p>You have requested a Fundamental Level CW Academy class. However, 
-											no Fundamental Morse Code Proficiency Assessment results were recorded 
-											in the database.</p>
-											<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
-											<a href='$theURL?strpass=101&inp_level=Fundamental&enstr=$enstr'>Perform 
-											Morse Code Assessment</a></td></tr></table>";
-				}
-				if ($bestResultFundamental <= 40) {
-					$content	.= "<p>You have requested a Fundamental Level class. Your Morse Code Proficiency 
-									Assessment results indicate that you may want to consider taking a 
-									Beginner Level class instead. You also continue signing up for a Fundamental Level class, if you wish.</p>
-									$registerAsBeginner
-									$registerAsFundamental";
-				} elseif ($bestResultFundamental > 40 && $bestResultFundamental < 60) {
-					$content	.= "<p>You requested a Fundamental Level class and your Morse Code Proficiency 
-									Assessment supports that request.</p>
-									$registerAsFundamental";
-				} else {				
-					if (!$didIntermediate) {
-						$content	.= "<p>You have requested a Fundamental Level CW Academy class and your 
-										Morse Code Proficiency Assessment supports that request.</p>
-										$registerAsFundamental";
-					} else {
-						if ($bestResultIntermediate < 60) {
-							$content	.= "<p>You have requested a Fundamental Level CW Academy class and your 
-											Morse Code Proficiency Assessment supports that request.</p>
+					
+					} elseif ($inp_level == 'Fundamental') {
+						if (!$didFundamental) {
+							$content			.= "<p>You have requested a Fundamental Level CW Academy class. However, 
+													no Fundamental Morse Code Proficiency Assessment results were recorded 
+													in the database.</p>
+													<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
+													<a href='$theURL?strpass=101&inp_level=Fundamental&enstr=$enstr'>Perform 
+													Morse Code Assessment</a></td></tr></table>";
+						}
+						if ($bestResultFundamental <= 40) {
+							$content	.= "<p>You have requested a Fundamental Level class. Your Morse Code Proficiency 
+											Assessment results indicate that you may want to consider taking a 
+											Beginner Level class instead. You also continue signing up for a Fundamental Level class, if you wish.</p>
+											$registerAsBeginner
 											$registerAsFundamental";
-						} else {
-							if (!$didAdvanced) {
+						} elseif ($bestResultFundamental > 40 && $bestResultFundamental < 60) {
+							$content	.= "<p>You requested a Fundamental Level class and your Morse Code Proficiency 
+											Assessment supports that request.</p>
+											$registerAsFundamental";
+						} else {				
+							if (!$didIntermediate) {
 								$content	.= "<p>You have requested a Fundamental Level CW Academy class and your 
 												Morse Code Proficiency Assessment supports that request.</p>
-												$registerAsFundamental";							
-							} elseif ($bestResultAdvanced < 70) {
-								$content	.= "<p>You have requested a Fundamental Level CW Academy class. Your 
-												Morse Code Proficiency Assessment results indicate that you should 
-												at minimum switch to an Intermediate Level class. However, you can also 
-												continue signing up for a Fundamental Level class if you wish.</p>
-												$registerAsIntermediate
 												$registerAsFundamental";
 							} else {
-								$content	.= "<p>You have requested a Fundamental Level CW Academy class. However, your 
-												Morse Code Proficiency Assessment results indicate that  
-												switching to an Intermediate Level class is a better option. You can also 
-												sign up for an Advanced class, based on your assessment score. 
-												Finally, signing up for a Fundamental Level class is highly discouraged.</p>
-												$registerAsIntermediate
-												$registerAsAdvanced
-												$registerAsFundamental";
+								if ($bestResultIntermediate < 60) {
+									$content	.= "<p>You have requested a Fundamental Level CW Academy class and your 
+													Morse Code Proficiency Assessment supports that request.</p>
+													$registerAsFundamental";
+								} else {
+									if (!$didAdvanced) {
+										$content	.= "<p>You have requested a Fundamental Level CW Academy class and your 
+														Morse Code Proficiency Assessment supports that request.</p>
+														$registerAsFundamental";							
+									} elseif ($bestResultAdvanced < 70) {
+										$content	.= "<p>You have requested a Fundamental Level CW Academy class. Your 
+														Morse Code Proficiency Assessment results indicate that you should 
+														at minimum switch to an Intermediate Level class. However, you can also 
+														continue signing up for a Fundamental Level class if you wish.</p>
+														$registerAsIntermediate
+														$registerAsFundamental";
+									} else {
+										$content	.= "<p>You have requested a Fundamental Level CW Academy class. However, your 
+														Morse Code Proficiency Assessment results indicate that  
+														switching to an Intermediate Level class is a better option. You can also 
+														sign up for an Advanced class, based on your assessment score. 
+														Finally, signing up for a Fundamental Level class is highly discouraged.</p>
+														$registerAsIntermediate
+														$registerAsAdvanced
+														$registerAsFundamental";
+									}
+								}
 							}
 						}
-					}
-				}
-			} elseif ($inp_level == 'Intermediate') {
-				if (!$didIntermediate) {
-					$content			.= "<p>You have requested an Intermediate Level CW Academy class. However, 
-											no Intermediate Morse Code Proficiency Assessment results were recorded 
-											in the database.</p>
-											<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
-											<a href='$theURL?strpass=101&inp_level=Intermediate&enstr=$enstr'>Perform 
-											Morse Code Assessment</a></td></tr></table>";				
-				} else {
-					if ($bestResultIntermediate <= 40) {
-						$content	.= "<p>You have requested an Intermediate Level CW Academy class. However, 
-										your Morse Code Proficiency Assessment result indicate that switching 
-										to a Fundamental Level class is more appropriate for you. Nevertheless, 
-										you can continue signing up for an Intermediate Level class if you wish, 
-										and will bring up your proficiency in the meantime.</p>
-										$registerAsFundamental
-										$registerAsIntermediate";
-					} elseif ($bestResultIntermediate > 40 && $bestResultIntermediate <= 60) {
-						$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
-										Morse Code Proficiency Assessment results support that option.</p>
-										$registerAsIntermediate";
-					} elseif ($bestResultIntermediate > 60) {
-						if (!$didAdvanced) {
-							$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
-											Morse Code Proficiency Assessment results support that option.</p>
-											$registerAsIntermediate";
+					} elseif ($inp_level == 'Intermediate') {
+						if (!$didIntermediate) {
+							$content			.= "<p>You have requested an Intermediate Level CW Academy class. However, 
+													no Intermediate Morse Code Proficiency Assessment results were recorded 
+													in the database.</p>
+													<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
+													<a href='$theURL?strpass=101&inp_level=Intermediate&enstr=$enstr'>Perform 
+													Morse Code Assessment</a></td></tr></table>";				
 						} else {
-							if ($bestResultAdvanced <= 70) {
+							if ($bestResultIntermediate <= 40) {
+								$content	.= "<p>You have requested an Intermediate Level CW Academy class. However, 
+												your Morse Code Proficiency Assessment result indicate that switching 
+												to a Fundamental Level class is more appropriate for you. Nevertheless, 
+												you can continue signing up for an Intermediate Level class if you wish, 
+												and will bring up your proficiency in the meantime.</p>
+												$registerAsFundamental
+												$registerAsIntermediate";
+							} elseif ($bestResultIntermediate > 40 && $bestResultIntermediate <= 60) {
 								$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
 												Morse Code Proficiency Assessment results support that option.</p>
 												$registerAsIntermediate";
+							} elseif ($bestResultIntermediate > 60) {
+								if (!$didAdvanced) {
+									$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
+													Morse Code Proficiency Assessment results support that option.</p>
+													$registerAsIntermediate";
+								} else {
+									if ($bestResultAdvanced <= 70) {
+										$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
+														Morse Code Proficiency Assessment results support that option.</p>
+														$registerAsIntermediate";
+									} else {
+										$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
+														Morse Code Proficiency Assessment results for both Intermediate and 
+														Advanced Levels indicate that you have the option to either 
+														continue signing up for an Intermediate Level class or switch to an 
+														Advanced Level class.</p>
+														$registerAsIntermediate
+														$registerAsAdvanced";
+									}
+								}
+							}
+						} 
+					
+					} elseif ($inp_level == 'Advanced') {
+						if (!$didAdvanced) {
+							$content			.= "<p>You have requested an Advanced Level CW Academy class. However, 
+													no Advanced Morse Code Proficiency Assessment results were recorded 
+													in the database.</p>
+													<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
+													<a href='$theURL?strpass=101&inp_level=Advamced&enstr=$enstr'>Perform 
+													Morse Code Assessment</a></td></tr></table>";
+						} else {
+							if ($bestResultAdvanced <= 70) {
+								$content		.= "<p>You have requested an Advanced Level CW Academy class. However, your Morse Code 
+													Proficiency Assessment results do not support that option. CW Academy strongly recommends that you 
+													switch to an Intermediate Level class.</p>
+													<p>If you disagree with switching to Intermediate, please contact the appropriate person 
+													at <a href='https://cwops.org/cwa-class-resolution/'>CW Academy Class Resolution</a></p>
+													$registerAsIntermediate";
 							} else {
-								$content	.= "<p>You have requested an Intermediate Level CW Academy class. Your 
-												Morse Code Proficiency Assessment results for both Intermediate and 
-												Advanced Levels indicate that you have the option to either 
-												continue signing up for an Intermediate Level class or switch to an 
-												Advanced Level class.</p>
-												$registerAsIntermediate
-												$registerAsAdvanced";
+								$content		.= "<p>You have requested an Advanced Level CW Academy Class and your 
+													Morse Code Proficiency Assessment supports that request.</p>
+													$registerAsAdvanced";
 							}
 						}
-					}
-				} 
-			
-			} elseif ($inp_level == 'Advanced') {
-				if (!$didAdvanced) {
-					$content			.= "<p>You have requested an Advanced Level CW Academy class. However, 
-											no Advanced Morse Code Proficiency Assessment results were recorded 
-											in the database.</p>
-											<p><table style='border:4px solid green;width:auto;'><tr><td>Please click 
-											<a href='$theURL?strpass=101&inp_level=Advamced&enstr=$enstr'>Perform 
-											Morse Code Assessment</a></td></tr></table>";
-				} else {
-					if ($bestResultAdvanced <= 70) {
-						$content		.= "<p>You have requested an Advanced Level CW Academy class. However, your Morse Code 
-											Proficiency Assessment results do not support that option. CW Academy strongly recommends that you 
-											switch to an Intermediate Level class.</p>
-											<p>If you disagree with switching to Intermediate, please contact the appropriate person 
-											at <a href='https://cwops.org/cwa-class-resolution/'>CW Academy Class Resolution</a></p>
-											$registerAsIntermediate";
-					} else {
-						$content		.= "<p>You have requested an Advanced Level CW Academy Class and your 
-											Morse Code Proficiency Assessment supports that request.</p>
-											$registerAsAdvanced";
 					}
 				}
 			}
 		}
-
 
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
