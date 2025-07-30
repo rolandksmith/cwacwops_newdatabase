@@ -24,7 +24,7 @@ function prepare_advisors_for_student_assignments_func() {
 
 	global $wpdb, $doDebug, $testMode, $saveChanges, $jobname;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$saveChanges					= FALSE;
 	$initializationArray 			= data_initialization_func();
@@ -577,6 +577,9 @@ and clarification please contact the appropriate person at
 									
 																$advisorArrayKey							= "$advisorClass_call_sign|$advisorClass_level";
 																$advisorArray[$advisorArrayKey]				= $advisorClass_sequence;
+																if ($doDebug) {
+																	echo "added $advisorArrayKey to advisorArray with value of $advisorClass_sequence<br />";
+																}
 	
 															}
 															$content					.= "<br />Processing $advisorUpdateLink who has a survey score of 7<br />";
@@ -648,7 +651,7 @@ and clarification please contact the appropriate person at
 																		$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 	
 																		if ($doDebug) {
-																			echo "Processing $advisorClass_callsign Semester: $advisorClass_semester sequence: $advisorClass_sequence<br />";
+																			echo "<br />Processing $advisorClass_call_sign Semester: $advisorClass_semester sequence: $advisorClass_sequence<br />";
 																		}
 																		for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
 																			if ($snum < 10) {
@@ -703,7 +706,7 @@ and clarification please contact the appropriate person at
 															}
 															$sql					= "select * from $studentTableName 
 																						where student_semester='$nextSemester' 
-																						and student_call_sign='$theStudent' 
+																						and student_call_sign like '$theStudent' 
 																						and student_response='Y'";
 															$wpw1_cwa_student		= $wpdb->get_results($sql);
 															if ($wpw1_cwa_student === FALSE) {
@@ -771,15 +774,20 @@ and clarification please contact the appropriate person at
 //																		if ($doDebug) {
 //																			echo "Looking at $student_call_sign response: $student_response; status: $student_status; excluded advisor: $student_excluded_advisor<br />";
 //																		}
-																		$thisNeedle		= "/$advisor_call_sign/";
-																		if (preg_match($thisNeedle,$student_excluded_advisor) === FALSE) {
+																		if (!str_contains($student_excluded_advisor,$advisor_call_sign)) {
 																			if ($student_pre_assigned_advisor == '' || $student_pre_assigned_advisor == $advisor_call_sign) { 		// must not already be pre-assigned
 																				// see if advisor has a class at the level the student is registered for.
 																				// if so, pre-assign the student
 										
-																				$advisorArrayKey							= "$advisor_call_sign|$student_level";
+																				$advisorArrayKey							= "$advisorClass_call_sign|$student_level";
+																				if ($doDebug) {
+																					echo "looking for $advisorArrayKey in advisorArray<br />";
+																				}
 																				if (array_key_exists($advisorArrayKey,$advisorArray)) {   /// have a match
 																					$theSequence							= $advisorArray[$advisorArrayKey];												
+																					if ($doDebug) {
+																						echo "have a match. Preassigning student to $advisorClass_call_sign class $theSequence<br />";
+																					}
 																					$updateParams['student_pre_assigned_advisor']	= $advisor_call_sign;
 																					$updateFormat[]							= '%s';
 																					$updateParams['student_assigned_advisor_class']	= $theSequence;
@@ -821,11 +829,19 @@ and clarification please contact the appropriate person at
 																							}
 																						}
 																					}
+																				} else {
+																					if ($doDebug) {
+																						echo "no match found<br />";
+																					}
 																				}
 																			} else {
 																				if ($doDebug) {
 																					echo "student already has a pre-assigned advisor of $student_pre_assigned_advisor<br />";
 																				}
+																			}
+																		} else {
+																			if ($doDebug) {
+																				echo "$advisorClass_call_sign is excluded<br />";
 																			}
 																		}
 																	}	// end of the while statement ... should only have one record
