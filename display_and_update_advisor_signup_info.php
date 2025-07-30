@@ -940,6 +940,7 @@ function display_and_update_advisor_info_func() {
 										<form method='post' action='$updateMaster' 
 										name='updateMaster_form' ENCTYPE='multipart/form-data''>
 										<input type='hidden' name='strpass' value='3'>
+										<input type='hidden' name='inp_depth' value='$inp_depth'>
 										<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 										<input type='hidden' name='inp_mode' value='$inp_mode'>
 										<input type='hidden' name='inp_callsign' value='$user_call_sign'>
@@ -1021,6 +1022,7 @@ function display_and_update_advisor_info_func() {
 								$content .= "<form method='post' action='$theURL' 
 											name='update_advisor_form' ENCTYPE='multipart/form-data'>
 											<input type='hidden' name='advisorid' value='$advisor_ID'>
+											<input type='hidden' name='inp_depth' value='$inp_depth'>
 											<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 											<input type='hidden' name='inp_mode' value='$inp_mode'>
 											<input type='hidden' name='inp_depth' value='$inp_depth'>
@@ -1120,6 +1122,7 @@ function display_and_update_advisor_info_func() {
 														<input type='hidden' name='inp_advisorclass_id' value='$advisorClass_ID'>
 														<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorClass_call_sign'>
 														<input type='hidden' name='inp_semester' value='$advisorClass_semester'>
+														<input type='hidden' name='inp_depth' value='$inp_depth'>
 														<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 														<input type='hidden' name='inp_mode' value='$inp_mode'>
 														<h4><b>$advisorClass_call_sign $advisorClass_semester $advisorClass_level Class $advisorClass_sequence</b> Table $advisorClassTableName</h4>
@@ -1309,6 +1312,7 @@ function display_and_update_advisor_info_func() {
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='4'>
 									<input type='hidden' name='advisorid' value='$advisor_ID'>
+									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<table style='border-collapse:collapse;'>
@@ -1592,6 +1596,7 @@ function display_and_update_advisor_info_func() {
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='6'>
 									<input type='hidden' name='inp_advisorclass_id' value='$advisorClass_ID'>
+									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<table style='border-collapse:collapse;'>
@@ -2051,7 +2056,7 @@ function display_and_update_advisor_info_func() {
 					}
 					if ($inp_advisorclass_class_evaluation_complete != $advisorClass_class_evaluation_complete) {
 						$doTheUpdate = TRUE;
-						$updateParams['advisorclass_class_evaluation_complete'] = $inp_advisorclass_class_evaluation_complete;
+						$updateParams['advisorclass_evaluation_complete'] = $inp_advisorclass_class_evaluation_complete;
 						$updateFormat[] = "%s";
 						$actionContent .= "Updated advisorclass_class_evaluation_complete of $advisorClass_class_evaluation_complete to $inp_advisorclass_class_evaluation_complete. ";
 					}
@@ -2161,7 +2166,7 @@ function display_and_update_advisor_info_func() {
 						$content .= "No updates were requested.<br />";
 					}
 				}
-				$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p><br />";
+				$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
 			} else {
 				if ($doDebug) {
 					echo "No record found in $advisorClassTableName pod for  id=$advisorid<br />";
@@ -2224,6 +2229,7 @@ function display_and_update_advisor_info_func() {
 									<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorClass_call_sign'>
 									<input type='hidden' name='inp_advisorclass_semester' value='$advisorClass_semester'>
 									<input type='hidden' name='inp_advisorclass_timezone_offset' value='$advisorClass_timezone_offset'>
+									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<table style='border-collapse:collapse;'>
@@ -2297,7 +2303,7 @@ function display_and_update_advisor_info_func() {
 									<tr><td>&nbsp;</td>
 										<td><input class='formInputButton' type='submit' value='Add AdvisorClass Record' /></td></tr>
 									</table></form>
-									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p><br />"; 
+									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />"; 
 				}			// end of the advisorClass while
 			} else {
 				$content	.= "<p>No record found in $advisorTableName for $inp_advisor_call_sign</p>";
@@ -2410,7 +2416,7 @@ Error: $result[3]<br />";
 							<tr><td><b>Class Comments</b></td>
 								<td>$advisorClass_class_comments</td></tr>
 							</table>
-							<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$inp_advisorclass_call_sign&strpass=2'>HERE</a></p><br />";
+							<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$inp_advisorclass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
 		}
 
 	} elseif ("15" == $strPass) {
