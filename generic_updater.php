@@ -192,15 +192,15 @@ function generic_updater_func() {
 			foreach($whereArray as $myValue) {
 				$thisArray			= explode("|",$myValue);
 				$whereField			= $thisArray[0];
-				$whereOperator		= $thisArray[1];
-				$whereValue			= $thisArray[2];
-				$whereFormat		= $thisArray[3];
+				$whereOperator		= trim($thisArray[1]);
+				$whereValue			= trim($thisArray[2]);
+				$whereFormat		= trim($thisArray[3]);
 				if ($needAnd) {
 					$thisWhere		.= " and ";
 				} else {
 					$needAnd		= TRUE;
 				}
-				if ($whereFormat == 's') {
+				if ('s' == $whereFormat) {
 					$thisWhere			.= "$whereField $whereOperator '$whereValue'";
 				} else {
 					$thisWhere			.= "$whereField $whereOperator $whereValue";
