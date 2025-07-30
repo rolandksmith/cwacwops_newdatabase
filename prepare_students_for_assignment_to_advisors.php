@@ -1237,7 +1237,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 									}
 									if (!$evalsDone) {
 										$advisorUpdateParams[]			= "user_survey_score|9|d";
-										$possContent					.= "&nbsp;&nbsp;&nbsp;Evaluations are incomplete. Setting survey score to 9<br />";
+										$possContent					.= "&nbsp;&nbsp;&nbsp;$advisorClass_master_call_sign: Evaluations are incomplete. Setting survey score to 9<br />";
 										$doContent						= TRUE;
 										$updateAdvisor					= TRUE;
 										$advisorEvalNOK++;
@@ -1246,7 +1246,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 										$advisorEvalOK++;
 										if ($alreadyNine) {			// set survey score back to blank
 											$advisorUpdateParams[]			= "user_survey_score|0|d";
-											$possContent					.= "&nbsp;&nbsp;&nbsp;Evaluations are complete. Setting survey score from 9 to 0<br />";
+											$possContent					.= "&nbsp;&nbsp;&nbsp;$advisorClass_master_call_sign: Evaluations are complete. Setting survey score from 9 to 0<br />";
 											$doContent						= TRUE;
 											$updateAdvisor					= TRUE;
 											$actionLogData					= "Evaluations complete. Set survey score to 0 ";
@@ -1263,9 +1263,9 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 										}
 										if ($updateMode) {
 											if ($doDebug) {
-												echo "&nbsp;&nbsp;&nbsp;updateMode is TRUE so updating advisor2 pod<br />";
+												echo "&nbsp;&nbsp;&nbsp;updateMode is TRUE so updating advisor<br />";
 											}
-											$advisor_action_log			= "$advisor_action_log / $actionDate ASSGNPREP $userName $actionLogData";
+											$advisorClass_master_action_log			.= " / $actionDate ASSGNPREP $userName $actionLogData";
 											$advisorUpdateParams[]		= "user_action_log|$advisor_action_log|s";
 											$advisorUpdateData		= array('tableName'=>$userMasterTableName,
 																			'inp_method'=>'update',
