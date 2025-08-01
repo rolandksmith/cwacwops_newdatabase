@@ -3,22 +3,29 @@ function data_initialization_func($attrib='') {
 // modified 23Feb20 by Roland to add prevSemester to the return array
 // modified and remodified 10Mar21 by Roland and Bob about semester Apr/May moving to May/Jun
 
-// Initialize fields
-$validUser						= "N";
-$userRole						= "";
-$myInterim						= 0;
-$myDate							= "0000-00-00";
-$nextSemester					= "";
-$semesterTwo					= "";
-$semesterThree					= "";
-$semesterFour					= "";
-$validEmailPeriod				= " ";
-$daysToSemester					= 0;
-$prevSemester					= "";
-$defaultClassSize				= 6;
+	// Initialize fields
+	$validUser						= "N";
+	$userRole						= "";
+	$myInterim						= 0;
+	$myDate							= "0000-00-00";
+	$nextSemester					= "";
+	$semesterTwo					= "";
+	$semesterThree					= "";
+	$semesterFour					= "";
+	$validEmailPeriod				= " ";
+	$daysToSemester					= 0;
+	$prevSemester					= "";
+	$defaultClassSize				= 6;
 $userName						= "";
 
-// determine if current user is a valid user
+    $languageArray 	= array('English',
+    						'Ελληνικά (Greek)',
+    						'Catalan',
+    						'język polski (Polish)',
+    						'Deutsch (German)');
+
+
+	// determine if current user is a valid user
 	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL','KF7WX','kf7wx'); 
 	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q','KF7WX','kf7wx');
 	$current_user 				= wp_get_current_user();
@@ -249,7 +256,8 @@ $userName						= "";
 											'flatFilePath'=>'/home/cwacwops/CWAT',
 											'siteurl'=>$siteURL,
 											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name
+											'userDisplayName'=>$user_display_name,
+											'languageArray'=>$languageArray
 											);
 	} else {
 		$result 					= array('validUser'=>$validUser,
@@ -278,7 +286,8 @@ $userName						= "";
 											'flatFilePath'=>'/home/cwacwops/CWAT',
 											'siteurl'=>$siteURL,
 											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name
+											'userDisplayName'=>$user_display_name,
+											'languageArray'=>$languageArray
 											);
 	}
 	return $result;
