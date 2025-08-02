@@ -323,7 +323,7 @@ function list_advisors_incomplete_evaluations_func() {
 					}
 
 					if ($doDebug) {
-						echo "<br />Processing advisorClass record $advisorClass_callsign sequence $advisorClass_sequence with evaluation complete = $advisorClass_class_evaluation_complete<br />";
+						echo "<br />Processing advisorClass record $advisorClass_call_sign sequence $advisorClass_sequence with evaluation complete = $advisorClass_class_evaluation_complete<br />";
 					}
 					if ($advisorClass_call_sign != $prevCallSign) {
 						$thisCallSign						= '';
