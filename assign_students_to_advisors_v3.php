@@ -1205,6 +1205,7 @@ function assign_students_to_advisors_v3_func() {
 											$advisorArray[$advisor_call_sign]['time zone']			= $advisorClass_timezone_offset;
 											$advisorArray[$advisor_call_sign]['fifo date'] 			= $advisor_date_created;
 											$advisorArray[$advisor_call_sign]['ID'] 				= $advisor_ID;
+											$advisorArray[$advisor_call_sign]['time zone id'] 		= $advisorClass_timezone_id;
 										}
 										debugReport("Processing advisorClass for $advisor_call_sign sequence $advisorClass_sequence<br />");
 										/// fix up the class schedule time
@@ -1223,6 +1224,7 @@ function assign_students_to_advisors_v3_func() {
 										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days utc']		= $advisorClass_class_schedule_days_utc;
 										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['time local']	= $advisorClass_class_schedule_times;
 										$advisorClassArray["$advisor_call_sign|$advisorClass_sequence"]['days local']	= $advisorClass_class_schedule_days;
+										
 										debugReport("added all other advisorClass info to advisorClassArray<br />");
 				
 				
@@ -2133,7 +2135,7 @@ function assign_students_to_advisors_v3_func() {
 					}
 					
 					// add the reminder to the advisor portal
-					$returnArray		= wp_to_local($advisor_time_zone, 0, 14);
+					$returnArray		= wp_to_local($advisorClass_timezone, 0, 14);
 					if ($returnArray === FALSE) {
 						if ($doDebug) {
 							echo "called wp_to_local with $advisor_time_zone 0, 14 which returned FALSE<br />";
