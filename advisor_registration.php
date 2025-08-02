@@ -27,6 +27,7 @@ function advisor_registration_func() {
 	$daysToSemester				= intval($initializationArray['daysToSemester']);
 	$userRole					= $initializationArray['userRole'];
 	$siteURL					= $initializationArray['siteurl'];
+	$languageArray				= $initializationArray['languageArray'];
 	$allowSignup				= FALSE;
 	
 	if ($userName == '') {
@@ -155,11 +156,6 @@ function advisor_registration_func() {
 	$inp_nbrClasses					= 0;
 	$classID						= 0;
 
-    $languageArray 	= array('English',
-    						'Ελληνικά (Greek)',
-    						'Catalan',
-    						'język polski (Polish)',
-    						'Deutsch (German)');
 
 
 	
@@ -994,11 +990,15 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 							}
 						} else {
 							// get the advisorclass records for the most recent semester
+							$checkSemester			= $currentSemester;
+							if ($currentSemester == 'Not in Session') {
+								$checkSemester		= $prevSemester;
+							}
 							$allComplete			= TRUE;
 							$sql					= "select advisorclass_evaluation_complete 
 														from $advisorClassTableName 
-														where advisorclass_semester = '$prevSemester' 
-														and advisorclass_call_sign = '$advisor_call_sign'";
+														where advisorclass_semester = '$checkSemester' 
+														and advisorclass_call_sign = '$inp_callsign'";
 							$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
 							if ($wpw1_cwa_advisorclass === FALSE) {
 								handleWPDBError($jobname,$doDebug);
@@ -1009,26 +1009,25 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 								}
 								if ($numACRows > 0) {
 									foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-										$advisorClass_evaluation_complete		= $advisorClassRow->evaluation_complete;
+										$advisorClass_evaluation_complete		= $advisorClassRow->advisorclass_evaluation_complete;
 									
 										if ($advisorClass_evaluation_complete != 'Y') {
 											$allComplete		= FALSE;
 											if ($doDebug) {
 												echo "evaluations not complete. allComplete set to FALSE<br />";
 											}
+											$content				.= "<h3>$jobname</h3>
+																		<p>You need to complete the promotability evaluations 
+																		for your students in the $checkSemester semester 
+																		before you can register for a future semester. The 
+																		instructions on how to do that should be on your 
+																		Advisor Portal. If that reminder has expired, please contact 
+																		the appropriate person at <a href='https://cwops.org/cwa-class-resolution/'>CWA Contact</a>.</p>";
+											$doProceed				= FALSE;
 										}
 									}
 								}
 							}
-							if (!$allComplete) {
-								$doProceed				= FALSE;
-								$content				.= "<h3>$jobname</h3>
-															<p>You need to complete the promotability evaluations 
-															for your students in the $advisor_semester semester 
-															before you can register for a future semester.</p>";
-							}
-					
-							
 							
 							if ($doProceed) {
 								// show the user_master info and the link to update it. Then show the advisor form
@@ -1508,11 +1507,11 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 												<input type='radio' class='formInputButton' id='chk_semester' name='inp_semester' value='$semesterThree'> $semesterThree</td></tr>
 										<tr><td style='vertical-align:top;width:330px;'><b>Level</b><br />
 												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Beginner' required> Beginner<br />
-												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental' required> Fundamental (formerly Basic)<br />
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Fundamental' required> Fundamental<br />
 												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Intermediate' required> Intermediate<br />
-												<input type='radio' class='<b>Language</b><br />
-												$languageOptions
-												
+												<input type='radio' class='formInputButton' id='chk_level' name='inp_level' value='Advanced' required> Advanced</td>
+											<td style='vertical-align:top;'><b>Language</b><br />
+												$languageOptions</td>												
 											<td style='vertical-align:top;'><b>Class Size</b><br />
 												<input type='text'class='formInputText' id='chk_class_size' name='inp_class_size' size='5' maxlength='5' value='6'><br />
 													(default class size is 6)</td></tr>
