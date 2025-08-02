@@ -37,6 +37,7 @@ function display_and_update_advisor_info_func() {
 		error_reporting(E_ALL);	
 
 	$siteURL			= $initializationArray['siteurl'];
+	$languageArray		= $initializationArray['languageArray'];
 	
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
@@ -140,12 +141,6 @@ function display_and_update_advisor_info_func() {
     $inp_advisorclass_action_log = '';
     $inp_advisorclass_language = '';
     
-    $languageArray 	= array('English',
-    						'Ελληνικά (Greek)',
-    						'Catalan',
-    						'język polski (Polish)',
-    						'Deutsch (German)');
-
 	
 // get the input information
 	if (isset($_REQUEST)) {
