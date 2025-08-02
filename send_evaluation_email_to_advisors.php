@@ -183,11 +183,13 @@ function send_evaluation_email_to_advisors_func() {
 		$advisorTableName			= "wpw1_cwa_advisor2";
 		$advisorClassTableName		= "wpw1_cwa_advisorclass2";
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
+		$remindersTablName			= 'wpw1_cwa_reminders2';
 		$inp_mode						= 'tm';
 	} else {
 		$advisorTableName			= "wpw1_cwa_advisor";
 		$advisorClassTableName		= "wpw1_cwa_advisorclass";
 		$userMasterTableName		= 'wpw1_cwa_user_master';
+		$remindersTablName			= 'wpw1_cwa_reminders';
 		$inp_mode						= 'pd';
 	}
 
@@ -512,12 +514,40 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 			} else {
 				echo "The mail send function failed.<br />";
 			}
-			// add reminder
-			if ($doDebug) {
-				echo "preparing to add reminder<br />";
+			
+			// determine if the reminder has already been set. If not, set it
+			$addTheReminder		= TRUE;
+			$checkSQL			= "select * from $remindersTableName 
+									where call_sign = '$advisor_call_sign' 
+									and reminder_text like '%Evaluate Student Promotability%' 
+									order by record_id DESC 
+									limit 1";
+			$checkResult		= $wpdb->get_results($checkSQL);
+			if ($checkResult === FALSE) {
+				handleWPDBError($jobname,$doDebug,'attempted to see if reminder has been set');
+			} else {
+				$checkNumRows	= $wpdb->num_rows;
+				if ($doDebug) {
+					echo "ran $checkSQL<br />and retrieved $checkNumRows rows<br />";
+				}
+				if ($checkNumRows > 0) {
+					foreach($checkResult as $checkResultRow) {
+						$thisCloseDate		= $checkResultRow->close_date;
+						
+						$thisDate			= date('Y-m-d H:i:s');
+						if ($thisCloseData > $thisDate) {		// reminder is already set
+							$addTheReminder	= FALSE;
+						}
+					}
+				}
 			}
-			$token			= mt_rand();
-			$reminder_text	= "<b>Evaluate Student Promotability</b> Please enter the promotability information for your students, that is,  
+			
+			if ($addTheReminder) {
+				// add reminder
+				if ($doDebug) {
+					echo "preparing to add reminder<br />";
+				}
+				$reminder_text	= "<b>Evaluate Student Promotability</b> Please enter the promotability information for your students, that is,  
 is the Beginner, Fundamental, or Intermediate student is ready to take the next higher level class, or 
 the Advanced student met the class objectives. 
 Please click 
@@ -526,43 +556,43 @@ Please click
 When all your evaluations are completed, you’ll be immediately able to register as an advisor for the next semester.";
 
 
-			$returnArray		= wp_to_local($advisor_tz_id, 0, 5);
-			if ($returnArray === FALSE) {
-				if ($doDebug) {
-					echo "called wp_to_local with $advisor_tz_id, 0, 5 which returned FALSE<br />";
+				$returnArray		= wp_to_local($advisor_tz_id, 0, 90);
+				if ($returnArray === FALSE) {
+					if ($doDebug) {
+						echo "called wp_to_local with $advisor_tz_id, 0, 5 which returned FALSE<br />";
+					} else {
+						sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+					}
+					$effective_date		= date('Y-m-d 00:00:00');
+					$closeStr			= strtotime("+ 5 days");
+					$close_date			= date('Y-m-d 00:00:00',$closeStr);
 				} else {
-					sendErrorEmail("$jobname calling wp_to_local with $advisor_tz_id, 0, 5 returned FALSE");
+					$effective_date		= $returnArray['effective'];
+					$close_date			= $returnArray['expiration'];
 				}
-				$effective_date		= date('Y-m-d 00:00:00');
-				$closeStr			= strtotime("+ 5 days");
-				$close_date			= date('Y-m-d 00:00:00',$closeStr);
-			} else {
-				$effective_date		= $returnArray['effective'];
-				$close_date			= $returnArray['expiration'];
-			}
-			$token				= mt_rand();
-			$inputParams		= array("effective_date|$effective_date|s",
-										"close_date|$close_date|s",
-										"resolved_date||s",
-										"send_reminder|3|s",
-										"send_once|N|s",
-										"call_sign|$advisor_call_sign|s",
-										"role||s",
-										"email_text|$emailContent|s",
-										"reminder_text|$reminder_text|s",
-										"resolved|N|s",
-										"token|$token|s");
-			$reminderResult	= add_reminder($inputParams,$testMode,$doDebug);
-			if ($reminderResult[0] === FALSE) {
-				if ($doDebug) {
-					echo "adding reminder failed. $reminderResult[1]<br />";
-				}
-			} else {
-				if ($doDebug) {
-					echo "adding reminder was successful<br />";
+				$token				= mt_rand();
+				$inputParams		= array("effective_date|$effective_date|s",
+											"close_date|$close_date|s",
+											"resolved_date||s",
+											"send_reminder|3|s",
+											"send_once|N|s",
+											"call_sign|$advisor_call_sign|s",
+											"role||s",
+											"email_text|$emailContent|s",
+											"reminder_text|$reminder_text|s",
+											"resolved|N|s",
+											"token|$token|s");
+				$reminderResult	= add_reminder($inputParams,$testMode,$doDebug);
+				if ($reminderResult[0] === FALSE) {
+					if ($doDebug) {
+						echo "adding reminder failed. $reminderResult[1]<br />";
+					}
+				} else {
+					if ($doDebug) {
+						echo "adding reminder was successful<br />";
+					}
 				}
 			}
-
 		}
 	}
 	if ($strPass == '2') {
