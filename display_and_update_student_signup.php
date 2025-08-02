@@ -1207,9 +1207,9 @@ function display_and_update_student_signup_func() {
 						$promPromoted		= 'checked';
 					} elseif ($student_promotable == 'N') {
 						$promNotPromoted 	= 'checked';
-					} elseif ($student_Promotable == 'W') {
+					} elseif ($student_promotable == 'W') {
 						$promWithdrew		= 'checked';
-					} elseif ($student_Promotable == 'Q') {
+					} elseif ($student_promotable == 'Q') {
 						$promQuit			= 'checked';
 					}
 					
@@ -1456,10 +1456,10 @@ function display_and_update_student_signup_func() {
 													maxlength='1' value='$student_assigned_advisor_class'></td></tr>
 												<tr><td style='vertical-align:top;'>student_promotable</td>
 													<td><input type='radio' class='formInputButton' name='inp_student_promotable' value='' $promBlank>Blank: Not Specified<br />
-														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promPromoted'>Promotable<br />
-														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promNotPromoted'>Not Promotable<br />
-														<input type='radio' class='formInputButton' name='inp_student_promotable' value='W' $promWithdrew'>Withdrew<br />
-														<input type='radio' class='formInputButton' name='inp_student_promotable' value='Q' $promQuit'>Advisor quit</td></tr>
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='P' $promPromoted>P: Promotable<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='N' $promNotPromoted>N: Not Promotable<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='W' $promWithdrew>W: Withdrew<br />
+														<input type='radio' class='formInputButton' name='inp_student_promotable' value='Q' $promQuit>Q: Advisor quit</td></tr>
 												<tr><td style='vertical-align:top;'>student_excluded_advisor</td>
 													<td><textarea class='formInputText' name='inp_student_excluded_advisor' rows='5' cols='50'>$student_excluded_advisor</textarea></td></tr>
 												<tr><td>student_survey_completion_date</td>
