@@ -16,7 +16,7 @@ function data_initialization_func($attrib='') {
 	$daysToSemester					= 0;
 	$prevSemester					= "";
 	$defaultClassSize				= 6;
-$userName						= "";
+	$userName						= "";
 
     $languageArray 	= array('English',
     						'Ελληνικά (Greek)',
