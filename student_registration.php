@@ -3797,7 +3797,8 @@ function student_registration_func() {
 											<p>The sign-up process is straightforward. You'll need to complete all four steps to secure your spot in a class:
 											<ol>
 											<li><b>Choose Your Class & Semester:</b> Select the specific class you want to attend and the semester that works best for you.
-											<li><b>Take a Morse Code Proficiency Assessment:</b> This short process will help verify which of the four class levels you should take.
+											<li><b>Take a Morse Code Proficiency Assessment:</b> This short process will help verify which of the four class levels you should take. Note: 
+													if you have taken a proficiency assessment in the previous 10 days and scored 60% or higher, you will not need to repeat the assessment.  
 											<li><b>Provide Parent/Guardian Information (if applicable):</b> If you're under 21, you'll need to provide information for a parent or guardian.
 											<li><b>Select Your Availability:</b> Finally, you'll pick your preferred class times and days from a list of available options.
 											</ol></p>
@@ -4098,6 +4099,8 @@ function student_registration_func() {
 					}
 				}				
 			}
+*/			
+			
 			if ($userRole == 'administrator') {
 				$needsAssessment = FALSE;
 			}
@@ -4105,13 +4108,13 @@ function student_registration_func() {
 				if ($doDebug) {
 					echo "needsAssessment is TRUE. Looking for previous assessments<br />";
 				}
-				$last60Days				= strtotime("-60 days");
-				$last60Date				= date('Y-m-d 00:00:00',$last60Days);
+				$last10Days				= strtotime("-10 days");
+				$last10Date				= date('Y-m-d 00:00:00',$last10Days);
 				
 				$sql					= "select score from wpw1_cwa_new_assessment_data 
 											where callsign = '$inp_callsign' 
 												and level = '$inp_level' 
-												and date_written > '$last60Date'";
+												and date_written >= '$last10Date'";
 				$thisScore				= $wpdb->get_results($sql);
 				if ($thisScore === FALSE) {
 					handleWPDBError($jobname,$doDebug);
@@ -4130,6 +4133,14 @@ function student_registration_func() {
 						}
 						if ($maxScore >= 60) {
 							$needsAssessment	= FALSE;
+							$doProceed			= TRUE;
+							if ($doDebug) {
+								echo "have recent assessment. Bypassing take assessment<br />";
+								$inp_verbose	= 'Y';
+							}
+							$token				= 99999;
+							goto bypassAssessment;
+
 						}
 						if ($inp_level == 'Beginner') {
 							$needsAssessment	= FALSE;
@@ -4140,7 +4151,7 @@ function student_registration_func() {
 			if ($skipAssessment) {
 				$needsAssessment 	= FALSE;
 			}
-*/
+
 			// if needs assessment and beginner allow skipping the assessment
 			if ($needsAssessment and $inp_level == 'Beginner') {
 				$content			.= "<h3>$jobname</h3>
@@ -4359,6 +4370,21 @@ function student_registration_func() {
 				$doProceed			= FALSE;
 			}
 		}
+////////////////// come here if didn't need to do an assessment
+		bypassAssessment:
+		if ($doDebug) {
+			echo "<br />at bypassAssessment:<br />
+				  inp_callsign: $inp_callsign<br />
+				  inp_semester: $inp_semester<br />
+				  inp_mode: $inp_mode<br />
+				  inp_verbose: $inp_verbose<br />
+				  thisOption: $thisOption<br />
+				  firsttime: $firsttime<br />
+				  timezone: $timezone<br />
+				  allowSignup: $allowSignup<br />
+				  inp_level: $inp_level<br />";
+		}
+		
 		if ($doProceed) {
 			// check to see what is in the new assessment table for this student
 			$bestResultBeginner		= 0;
@@ -4369,10 +4395,16 @@ function student_registration_func() {
 			$didIntermediate		= FALSE;
 			$bestResultAdvanced		= 0;
 			$didAdvanced			= FALSE;
-			if (!$dockerMode) {			// if running in docker, no results will be available
-				$sql					= "select * from $newAssessmentTableName 
-											where callsign = '$inp_callsign' 
-											and token = '$token'";
+//			if (!$dockerMode) {			// if running in docker, no results will be available
+				if ($token != '99999') {
+					$sql					= "select * from $newAssessmentTableName 
+												where callsign = '$inp_callsign' 
+												and token = '$token'";
+				} else {
+					$sql					= "select * from $newAssessmentTableName 
+												where callsign = '$inp_callsign' 
+												and date_written >= '$last10Date'";
+				}
 				$assessmentResult		= $wpdb->get_results($sql);
 				if ($assessmentResult === FALSE) {
 					handleWPDBError("$jobname pass 104",$doDebug);
@@ -4388,6 +4420,28 @@ function student_registration_func() {
 							$assessment_level		= $assessmentRow->level;
 							$assessment_score		= $assessmentRow->score;
 							$assessment_date		= $assessmentRow->date_written;
+							
+							if ($assessment_level == 'Beginner') {
+								$didBeginner		= TRUE;
+								if ($assessment_score > $bestResultBeginner) {
+									$bestResultBeginner = $assessment_score;
+								}
+							} elseif ($assessment_level == 'Fundamental') {
+								$didFundamental		= TRUE;
+								if ($assessment_score > $bestResultFundamental) {
+									$bestResultFundamental = $assessment_score;
+								}
+							} elseif ($assessment_level == 'Intermediate') {
+								$didIntermediate		= TRUE;
+								if ($assessment_score > $bestResultIntermediate) {
+									$bestResultIntermediate = $assessment_score;
+								}
+							} elseif ($assessment_level == 'Advanced') {
+								$didAdvanced		= TRUE;
+								if ($assessment_score > $bestResultAdvanced) {
+									$bestResultAdvanced = $assessment_score;
+								}
+							}
 						}
 					} else {
 						if ($doDebug) {
@@ -4400,39 +4454,15 @@ function student_registration_func() {
 						$doProceed		= FALSE;
 					}
 				}
-			} else {					// in dockerMode. fake the data
-				$assessment_level		= $inp_level;
-				$assessment_score		= 100;
-				$bestResultBeginner		= 0;
-				$bestResultFundamental	= 0;
-				$bestResultIntermediate	= 0;
-				$bestResultAdvanced		= 0;
-			}
+//			} else {					// in dockerMode. fake the data
+//				$assessment_level		= $inp_level;
+//				$assessment_score		= 100;
+//				$bestResultBeginner		= 0;
+//				$bestResultFundamental	= 0;
+//				$bestResultIntermediate	= 0;
+//				$bestResultAdvanced		= 0;
+//			}
 			if ($doProceed) {	
-				if ($assessment_level == 'Beginner') {
-					$didBeginner		= TRUE;
-					if ($assessment_score > $bestResultBeginner) {
-						$bestResultBeginner 	= $assessment_score;
-					}
-				}
-				if ($assessment_level == 'Fundamental') {
-					$didFundamental		= TRUE;
-					if ($assessment_score > $bestResultFundamental) {
-						$bestResultFundamental 	= $assessment_score;
-					}
-				}
-				if ($assessment_level == 'Intermediate') {
-					$didIntermediate	= TRUE;
-					if ($assessment_score > $bestResultIntermediate) {
-						$bestResultIntermediate 	= $assessment_score;
-					}
-				}
-				if ($assessment_level == 'Advanced') {
-					$didAdvanced		= TRUE;
-					if ($assessment_score > $bestResultAdvanced) {
-						$bestResultAdvanced 	= $assessment_score;
-					}
-				}
 				if ($doDebug) {
 					echo "have assessment data:<br />";
 					if ($didBeginner) {
