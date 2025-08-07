@@ -351,7 +351,7 @@ function emailFromCWA_v3($mailParameters) {
 					   			Headers:<br /><pre>";
 				$debugLog	.=	print_r($myHeaders,TRUE);
 				$debugLog	.= "</pre><br />";
-				$debugLog	.= "Mailer Error: " . $wp_error->get_error_message() ."<br />";
+//				$debugLog	.= "Mailer Error: " . $wp_error->get_error_message() ."<br />";
 
 			}
 			return array(FALSE,$debugLog);
