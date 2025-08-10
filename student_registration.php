@@ -2004,6 +2004,22 @@ function student_registration_func() {
 				echo "allowSignup is FALSE<br />";
 			}
 		}
+		
+		if ($haveStudentData) {		// has refreshed the page
+			if ($doDebug) {
+				echo "page has been refreshed. Bypassing to pass4Bypass<br />";
+			}
+			if ($student_hold_reason_code == 'B') {
+				$badActorResult	= TRUE;
+			} else {
+				$badActorResult = FALSE;
+			}
+			$firstChoice		= $student_first_class_choice;
+			$secondChoice		= $student_second_class_choice;
+			$thirdChoice		= $student_third_class_choice;
+			goto pass4Bypass;
+		}
+		
 		if ($doDebug) {
 			echo "Have the following information:
 					inp_callsign: $inp_callsign<br />
@@ -2360,6 +2376,8 @@ function student_registration_func() {
 			}			
 		}
 		
+		// come here if pass 4 being run a 2nd time
+		pass4Bypass:
 
 		
 		$waitListMsg				= "";
