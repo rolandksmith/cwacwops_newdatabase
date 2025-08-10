@@ -1058,7 +1058,7 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 								foreach($languageArray as $thisLanguage) {
 									if ($firstTime) {
 										$firstTime			= FALSE;
-										$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage'>$thisLanguage";
+										$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' required>$thisLanguage";
 									} else {
 										$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage'>$thisLanguage";
 									}
