@@ -63,7 +63,6 @@ function generate_catalog_for_student($inp_data = array('')) {
 												$semesterThree, 
 												$semesterFour);
 											
-	$error								= "";
 	$doProceed							= TRUE;
 	$show13Options						= FALSE;
 	$showCatalog						= FALSE;
@@ -81,6 +80,8 @@ function generate_catalog_for_student($inp_data = array('')) {
 	$doDebug							= FALSE;
 	$testMode							= FALSE;
 	$verifyMode							= FALSE;
+	$errorInfo							= "";
+	$returnCatalog						= "";
 	
 	$MTM								= '';
 	$MTA								= '';
@@ -156,7 +157,7 @@ function generate_catalog_for_student($inp_data = array('')) {
 	
 	$myInt							= count($inp_data);
 	if ($myInt < 9) {
-		$error				= "inp_data should have 9 elements. Only $myInt elements given";
+		$errorInfo			= "inp_data should have 9 elements. Only $myInt elements given";
 		if ($doDebug) {
 			echo "inp_data should have 9 elements. Only $myInt elements given<br />";
 		}
@@ -173,7 +174,7 @@ function generate_catalog_for_student($inp_data = array('')) {
 	
 	// student_semester must be in the semester array
 	if (!in_array($student_semester,$semesterArray)) {
-		$error						= "Input semester of $student_semester not a valid semester";
+		$errorInfo					= "Input semester of $student_semester not a valid semester";
 		if ($doDebug) {
 			echo "Input semester of $student_semester not a valid semester<br />";
 		}
@@ -192,9 +193,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 		$prevYear				= date('Y',$myInt);
 		
 		
-		$dateArray				= array('Jan/Feb'=>"$thisYear-01-01,$prevYear-11-10,$prevYear-12-10",
-										'May/Jun'=>"$thisYear-05-01,$thisYear-03-10,$thisYear-04-10", 
-										'Sep/Oct'=>"$thisYear-09-01,$thisYear-07-10,$thisYear-08-10");
+		$dateArray				= array('Jan/Feb'=>"$thisYear-01-01,$prevYear-11-10,$prevYear-12-11",
+										'May/Jun'=>"$thisYear-05-01,$thisYear-03-10,$thisYear-04-11", 
+										'Sep/Oct'=>"$thisYear-09-01,$thisYear-07-10,$thisYear-08-12");
 		$thisDates				= $dateArray[$thisSemester];
 		$myArray				= explode(',',$thisDates);
 		if ($doDebug) {
@@ -224,7 +225,7 @@ function generate_catalog_for_student($inp_data = array('')) {
 		} elseif ($currentTime > $date1) {		// after Semester Starts
 			$show13Options		= TRUE;
 		} else {
-			$error				= "$run_date of $currentTime doesn't compare to $date1, $date2, or $date3";
+			$errorInfo			= "run_date of $currentTime doesn't compare to $date1, $date2, or $date3";
 			if ($doDebug) {
 				echo "$run_date of $currentTime doesn't compare to $date1, $date2, or $date3<br />";
 			}
@@ -377,73 +378,172 @@ function generate_catalog_for_student($inp_data = array('')) {
 					echo "doing showAvail<br />";
 				}
 
-				// get list of classes with open seats
-				$result					= build_list_of_available_classes($student_semester,$testMode,$doDebug);
-				if ($doDebug) {
-					echo "got list of available classes:<br /><pre>";
-					print_r($result);
-					echo "</pre><br />";
-				}
-				if (count($result) < 1) {
+// keeping this code although it's not being used at present
+//
+//				// get list of classes with open seats
+//				$result					= build_list_of_available_classes($student_semester,$testMode,$doDebug);
+//				if ($doDebug) {
+//					echo "got list of available classes:<br /><pre>";
+//					print_r($result);
+//					echo "</pre><br />";
+//				}
+//				if (count($result) < 1) {
+//					if ($doDebug) {
+//						echo "no classes with available seats found<br />";
+//					}
+//					$doProceed			= FALSE;
+//				} else {
+//					// get the classes for the student_level
+//					$catalogEntries		= "";
+//					$myInt				= 0;
+//					foreach($result[$student_level] as $thisSched=>$thisAdvisorInfo) {
+//						$myArray		= explode(" ",$thisSched);
+//						$thisTimeUTC	= $myArray[0];
+//						$thisDaysUTC	= $myArray[1];
+//						if ($doDebug) {
+//							echo "have option $thisTimeUTC $thisDaysUTC utc<br />";
+//						}
+//						$timeConvert	= utcConvert('tolocal',$student_timezone_offset,$thisTimeUTC,$thisDaysUTC,$doDebug);
+//						if ($doDebug) {
+//							echo "result of utcConvert:<br /><pre>";
+//							print_r($timeConvert);
+//							echo "</pre><br />";
+//						}
+//						if ($timeConvert[0] == 'FAIL') {
+//							if ($doDebug) {
+//								echo "utcConvert failed. Reason: $timeConvert[3]<br />";
+//							}
+//							$doProceed		= FALSE;
+//							$errorInfo		= "utcConvert failed advisor . Reason: $timeConvert[3]";
+//						} else {
+//							$thisTimeLocal	= $timeConvert[1];
+//							$thisDaysLocal	= $timeConvert[2];
+//							$myStr			= $timeConversion[$thisTimeLocal];
+//							$strChecked		= '';
+//							if ($student_first_class_choice_utc == $thisSched) {
+//								$strChecked	= 'checked';
+//							}
+//							$catalogEntries	.= "<tr><td> <input type='radio' class='formInputButton' name='inp_available' value='$thisTimeLocal $thisDaysLocal|$thisTimeUTC $thisDaysUTC' $strChecked required> $myStr $thisDaysLocal</td></tr>";
+//							$myInt++;
+//						}
+//					}
+//					if ($myInt > 0) {
+//						$returnCatalog		= "<p><b>Available Classes (all times are your local time)</b></p>
+//												<table style='width:auto;'>
+//												$catalogEntries
+//												<tr><td><input type='radio' class='formInputButton' name='inp_available' value='None' required> No options will work</td></tr>
+//												</table>";
+//					} else {
+//						$returnCatalog		= "<p><b>Available Classes (all times are your local time)</b></p>
+//												<table style='width:auto;'>
+//												<tr><td>No available classes</td></tr>
+//												</table>";
+//					}
+//					$returnOption		= 'avail';
+//				}
+//
+// because there are no longer various classes with open seats after students have 
+// been assigned to advisors, at this point we'll only show the 13 options
+
+//				$myArray				= explode(",",$student_catalog_options);
+//				if (count($myArray) > 0) {
+//					foreach($myArray as $thisValue) {
+//						${$thisValue}	= 'checked';
+//					}
+//				}
+//				if ($student_flexible == 'Y') {
+//					$flexible			= 'checked';
+//				}
+				$returnCatalog	.= "<table style='width:auto;'>
+									<tr><th colspan='3'>Class Preference</th></tr>\n
+									<tr><th>First Preference</th>\n
+										<th>Second Preference</th>\n
+										<th>Third Preference</th>\n";
+				
+				
+				$switchCount = 0;
+				$optionsArray 	= array('Morning<br />(1000 &plusmn; 3 hours)|1000 Monday,Thursday',
+										'Afternoon<br />(1500 &plusmn; 3 hours)|1500 Monday,Thursday',
+										'Evening<br />(1900 &plusmn; 3 hours)|1900 Monday,Thursday',
+										'Morning<br />(1000 &plusmn; 3 hours)|1000 Tuesday,Friday',
+										'Afternoon<br />(1500 &plusmn; 3 hours)|1500 Tuesday,Friday',
+										'Evening<br />(1900 &plusmn; 3 hours)|1900 Tuesday,Friday',
+										'Morning<br />(1000 &plusmn; 3 hours)|1000 Sunday,Wednesday',
+										'Afternoon<br />(1500 &plusmn; 3 hours)|1500 Sunday,Wednesday',
+										'Evening<br />(1900 &plusmn; 3 hours)|1900 Sunday,Wednesday',
+										'Morning<br />(1000 &plusmn; 3 hours)|1000 Sunday,Thursday',
+										'Afternoon<br />(1500 &plusmn; 3 hours)|1500 Sunday,Thursday',
+										'Evening<br />(1900 &plusmn; 3 hours)|1900 Sunday,Thursday');
+				
+				foreach($optionsArray as $thisOption) {
+					$myArray = explode('|',$thisOption);
+					$localTimeDay = $myArray[0];
+					$sendLocalTimeDay = $myArray[1];
+					$myArray1 = explode(' ',$sendLocalTimeDay);
+					$sendLocalTime = $myArray1[0];
+					$sendLocalDays = $myArray1[1];
 					if ($doDebug) {
-						echo "no classes with available seats found<br />";
+						echo "<br />Have the following:<br />
+							  localTimeDay: $localTimeDay<br />
+							  sendLocalTimeDay: $sendLocalTimeDay<br />";
 					}
-					$doProceed			= FALSE;
-				} else {
-					// get the classes for the student_level
-					$catalogEntries		= "";
-					$myInt				= 0;
-					foreach($result[$student_level] as $thisSched=>$thisAdvisorInfo) {
-						$myArray		= explode(" ",$thisSched);
-						$thisTimeUTC	= $myArray[0];
-						$thisDaysUTC	= $myArray[1];
+					// convert to UTC
+					$convertResult = utcConvert('toutc',$student_timezone_offset,$sendLocalTime,$sendLocalDays);
+					if ($convertResult[0] != 'OK') {
+						// convert didn't work
+						$newUTCTime = '1900';
+						$newUTCDays = 'Monday,Thursday';
 						if ($doDebug) {
-							echo "have option $thisTimeUTC $thisDaysUTC utc<br />";
+							echo "convert didn't work. Error: $convertResult[3]. Assuming 1900 Monday,Thursday<br />";
 						}
-						$timeConvert	= utcConvert('tolocal',$student_timezone_offset,$thisTimeUTC,$thisDaysUTC,$doDebug);
-						if ($doDebug) {
-							echo "result of utcConvert:<br /><pre>";
-							print_r($timeConvert);
-							echo "</pre><br />";
-						}
-						if ($timeConvert[0] == 'FAIL') {
-							if ($doDebug) {
-								echo "utcConvert failed. Reason: $timeConvert[3]<br />";
-							}
-							$doProceed		= FALSE;
-							$error			= "utcConvert failed advisor . Reason: $timeConvert[3]";
-						} else {
-							$thisTimeLocal	= $timeConvert[1];
-							$thisDaysLocal	= $timeConvert[2];
-							$myStr			= $timeConversion[$thisTimeLocal];
-							$strChecked		= '';
-							if ($student_first_class_choice_utc == $thisSched) {
-								$strChecked	= 'checked';
-							}
-							$catalogEntries	.= "<tr><td> <input type='radio' class='formInputButton' name='inp_available' value='$thisTimeLocal $thisDaysLocal|$thisTimeUTC $thisDaysUTC' $strChecked required> $myStr $thisDaysLocal</td></tr>";
-							$myInt++;
-						}
-					}
-					if ($myInt > 0) {
-						$returnCatalog		= "<p><b>Available Classes (all times are your local time)</b></p>
-												<table style='width:auto;'>
-												$catalogEntries
-												<tr><td><input type='radio' class='formInputButton' name='inp_available' value='None' required> No options will work</td></tr>
-												</table>";
 					} else {
-						$returnCatalog		= "<p><b>Available Classes (all times are your local time)</b></p>
-												<table style='width:auto;'>
-												<tr><td>No available classes</td></tr>
-												</table>";
+						$newUTCTime = $convertResult[1];
+						$newUTCDays = $convertResult[2];
+				
+						$switchCount++;
+						if ($switchCount > 3) {
+							$switchCount = 1;
+						}
+						if ($doDebug) {
+							echo "have newUTCTime $newUTCTime and newUTCDays $newUTCDays. SwitchCount; $switchCount<br />";
+						}
+						switch($switchCount) {
+							case 1:
+								$returnCatalog	.= "<tr><td colspan='3'>Classes held on <b>$sendLocalDays local time</b></td></tr>
+													<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='$sendLocalTimeDay|$newUTCTime $newUTCDays' required>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked3' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n";
+								break;
+							case 2:
+								$returnCatalog	.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='$sendLocalTimeDay|$newUTCTime $newUTCDays' required>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n";
+								break;
+							case 3:
+								$returnCatalog	.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='$sendLocalTimeDay|$newUTCTime $newUTCDays' required>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='$sendLocalTimeDay|$newUTCTime $newUTCDays'>$localTimeDay</td>\n";
+						}
 					}
-					$returnOption		= 'avail';
 				}
+				$returnCatalog			.= "<tr><td></td>\n
+												<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='None|None' checked>None</td>\n
+												<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='None|None' checked>None</td>\n
+											<tr><td colspan='3'><hr></td></tr>\n
+											<tr><td colspan='3' style='vertical-align:top;'><i>Indicate if you are  
+													flexible and can be assigned to any of the classes listed above</i><br />\n
+													<input type='radio' class='formInputText' name='inp_flex' value='Y'>Yes, I'm flexible<br />
+													<input type='radio' class='formInputText' name='inp_flex' value='N' checked>No</td></tr>\n
+											</table>";
+				$returnOption			= 'avail';
+
+
 			}
 		}
 	}
 	if (!$doProceed) {
 		$returnOption	= FALSE;
-		$returnCatalog	= $error;
+		$returnCatalog	= $errorInfo;
 		$date1			= '';
 		$date2			= '';
 		$date3			= '';
