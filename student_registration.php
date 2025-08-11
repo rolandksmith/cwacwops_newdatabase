@@ -8,7 +8,7 @@ function student_registration_func() {
 
 	global $wpdb,$doDebug,$testMode,$demoMode,$inp_verbose,$daysToGo;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$demoMode						= FALSE;
 	$doAssessment					= FALSE;
@@ -1466,13 +1466,13 @@ function student_registration_func() {
 			if ($doDebug) {
 				echo "verifying what can be changed<br />daysToGo: $daysToGo<br />assigned advisor: $student_assigned_advisor<br />";
 			}
-			if ($daysToGo < 21) {								// student askign for upcoming semester
-				if ($student_assigned_advisor != '') {			// student is assigned to an advisor
+			if ($daysToGo < 21) {								// student asking for upcoming semester
+//				if ($student_assigned_advisor != '') {			// student is assigned to an advisor
 					$canChangeAnything	= FALSE;				// limited changes only
 					if ($doDebug) {
-						echo "daysToGo is less than 21 and student has an assigned advisor<br />canChangeAnything set to FALSE<br />";
+						echo "daysToGo is less than 21 <br />canChangeAnything set to FALSE<br />";
 					}
-				}
+//				}
 			} else {			// if assigned advisor, something is wrong
 				if ($student_assigned_advisor != '') {
 					if ($student_assigned_advisor != 'AC6AC') {
@@ -1507,18 +1507,24 @@ function student_registration_func() {
 				if ($doDebug) {
 					echo "putting out limited changes option<br />";
 				}
-				$content		.= "<p>Because you are signed up for the $student_semester semester and you have been 
-									assigned to a class, you may only make  
-									changes to your personal information. To do so, 
-									go to 
-									<a href='$siteURL/cwa-display-and-update-user-master-information/'>
-									Display and Update User Master Information</a> and make any 
-									needed updates. Pay particular attention to your address information 
-									as that is what the system uses to calculate your local time.<p>
-									<p>If you need to drop out of the 
-									class or move to a different semester, please contact your advisor, or a 
-									systems administrator at <a href='https://cwops.org/cwa-class-resolution/' target='_blank'>
-									Class Resolution</a></p>";
+				if ($student_waiting_list == 'Y') {
+					$content		.= "<p>Because you are signed up for the $student_semester semester and students 
+										have already been assigned to classes, you are on the waiting list.  
+										You may only make changes to your personal information.";
+				} else {
+					$content		.= "<p>Because you are signed up for the $student_semester semester and you have been 
+										assigned to a class, you may only make  
+										changes to your personal information.";
+				}
+				$content			.= "To do so, go to 
+										<a href='$siteURL/cwa-display-and-update-user-master-information/'>
+										Display and Update User Master Information</a> and make any 
+										needed updates. Pay particular attention to your address information 
+										as that is what the system uses to calculate your local time.<p>
+										<p>If you need to drop out of the 
+										class or move to a different semester, please contact your advisor, or a 
+										systems administrator at <a href='https://cwops.org/cwa-class-resolution/' target='_blank'>
+										CWA Contact Information</a></p>";
 								   
 			} else {
 				if ($currentSemester == 'Not in Session' && $daysToGo > 10) {
@@ -1953,10 +1959,15 @@ function student_registration_func() {
 					if ($doDebug) {
 						echo "result_option of $result_option<br />";
 					}
-					$option_message 	= "<p>Students have already been assigned to advisor classes. There may possibly 
-											be classes with available seats. If so, they are listed below. If a class 
-											schedule listed below will work for you, select the class and submit the 
-											selection</p>";
+					$option_message 	= "<p>Students have already been assigned to advisor classes for the 
+											$nextSemester semester. Consequently, 
+											you are being placed on a waiting list. Students do drop out and 
+											replacement students will be selected from the waiting list. 
+											if you are not selected for a class, you will automatically be 
+											moved to the next semester and given priority to be assigned 
+											to a class.</p>
+											<p>Select up to three preference options from the list below to indicate 
+											when you would be available to take a class:</p>";
 				}
 				$content		.= "$option_message
 									<form method='post' action='$theURL' 
@@ -2076,7 +2087,7 @@ function student_registration_func() {
 				$actionLogUpdates					.= "set catalog_options to $student_catalog_options, ";
 				$doUpdateStudent					= TRUE;
 			}
-		} elseif ($result_option == 'catalog') {
+		} elseif ($result_option == 'catalog' || $result_option == 'avail') {
 			if ($doDebug) {
 				echo "handling the catalog option<br />
 				inp_sked1: $inp_sked1<br />
@@ -2091,7 +2102,12 @@ function student_registration_func() {
 			$updateFormat[]						= '%s';
 			$actionLogUpdates					.= "Set no_catalog to Y, ";
 			$actionLogUpdates					.= "Set abandoned to N ";
-			
+			if ($result_option == 'avail') {
+				$updateParams['student_waiting_list']					= 'Y';
+				$updateFormat[]											= '%s';
+				$actionLogUpdates										.= "Set waiting_list to Y ";
+				$student_waiting_list									= 'Y';
+			}
 			$myInt												= strpos($inp_sked1,"|");
 			if ($myInt !== FALSE) {
 				$myArray										= explode("|",$inp_sked1);						
@@ -2166,96 +2182,15 @@ function student_registration_func() {
 				$actionLogUpdates								.= "Set third_class_choices to NONE, ";
 				$thirdChoice									= 'None';
 			}
-
-
-
-		} elseif ($result_option == 'avail') {
-			if ($doDebug) {
-				echo "<br />handling result_option avail<br />";
+			
+			if ($inp_flex == 'Y') {
+				$student_flexible								= 'Y';
+				$updateParams['student_flexible']				= 'Y';
+				$updateFormat[]									= '%s';
+				$actionLogUpdates								.= "Set flexible to Y, ";
+				$doUpdateStudent								= TRUE;
 			}
-			$updateParams['student_abandoned']						= 'N';
-			$updateFormat[]											= '%s';
-			$actionLogUpdates										.= "Set abandoned to N ";
-			$student_abandoned										= 'N';
-			if ($inp_available == 'None') {
-				$student_first_class_choice							= '';
-				$student_first_class_choice_utc						= '';
-				$updateParams['student_first_class_choice']			= $student_first_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_first_class_choice_utc']		= $student_first_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$doUpdateStudent									= TRUE;
-				$firstChoice										= 'None';
-
-				$student_second_class_choice						= '';
-				$student_second_class_choice_utc					= '';
-				$updateParams['student_second_class_choice']		= $student_second_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$doUpdateStudent									= TRUE;
-				$secondChoice										= 'None';
-
-				$student_third_class_choice							= '';
-				$student_third_class_choice_utc						= '';
-				$updateParams['student_third_class_choice']			= $student_third_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_third_class_choice_utc']		= $student_third_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$doUpdateStudent									= TRUE;
-				$thirdChoice										= 'None';
-
-				$student_flexible									= "N";
-				$updateParams['student_flexible']					= 'N';
-				$updateFormat[]										= '%s';
-
-				$student_no_catalog									= 'N';
-				$updateParams['student_no_catalog']					= 'N';
-				$updateFormat[]										= '%s';
-				
-				$student_waiting_list								= 'Y';
-				$updateParams['student_waiting_list']				= 'Y';
-				$updateFormat[]										= '%s';
-
-				$actionLogUpdates									.= "Removed class choices, set flexible to N, set no_catalog to N, set waiting_list to Y, ";
-			} else {
-				$myArray											= explode("|",$inp_available);
-				$student_first_class_choice							= $myArray[0];
-				$student_first_class_choice_utc						= $myArray[1];
-				$updateParams['student_first_class_choice']			= $student_first_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_first_class_choice_utc']		= $student_first_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$firstChoice										= $student_first_class_choice;
-				$doUpdateStudent									= TRUE;
-
-				$student_second_class_choice						= 'None';
-				$student_second_class_choice_utc					= 'None';
-				$updateParams['student_second_class_choice']		= $student_second_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$secondChoice										= 'None';
-
-				$student_third_class_choice							= 'None';
-				$student_third_class_choice_utc						= 'None';
-				$updateParams['student_third_class_choice']			= $student_third_class_choice;
-				$updateFormat[]										= '%s';
-				$updateParams['student_third_class_choice_utc']		= $student_third_class_choice_utc;
-				$updateFormat[]										= '%s';
-				$thirdChoice										= 'None';
-
-				$student_flexible									= "N";
-				$updateParams['student_flexible']					= 'N';
-				$updateFormat[]										= '%s';
-
-				$student_no_catalog									= 'N';
-				$updateParams['student_no_catalog']					= 'N';
-				$updateFormat[]										= '%s';
-
-				$actionLogUpdates									.= "Set first_class choices, removed second and third class choices, set flexible to N, set no_catalog to N, ";
-
-			}
+			
 			$updateParams['student_response']						= 'Y';
 			$updateFormat[]											= '%s';
 			$student_response										= 'Y';
@@ -2486,11 +2421,13 @@ function student_registration_func() {
 								<td>Parent / Guardian<br />$student_student_parent</td>
 								<td>Parent / Guardian Email<br />$student_student_parent_email</td></tr>";
 		}
-		$content		.= "</table></p>
-							<p>If circumstances or your information changes, you can update this information up to 
+		$content		.= "</table></p>";
+		if ($result_option != 'avail') {
+			$content	.= "<p>If circumstances or your information changes, you can update this information up to 
 								three weeks before the start of the $inp_semester semester by returning to the 
-								<a href='$theURL'>CW Academy Student Registration</a> page.</p>
-								<p>Please print this page for your reference.<br /><br />
+								<a href='$theURL'>CW Academy Student Registration</a> page.</p>";
+		}
+		$content		.= "<p>Please print this page for your reference.<br /><br />
 								73,<br />
 								CW Academy</p>
 								<br /><br />You may close this window";
