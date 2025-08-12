@@ -32,7 +32,7 @@ function student_management_func() {
 
 	global $wpdb, $studentTableName, $advisorTableName, $advisorClassTableName, $theSemester, $doDebug;
 
-	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$userName 					= $initializationArray['userName'];
@@ -1803,7 +1803,7 @@ function getTheReason($strReasonCode) {
 		if ($doDebug) {
 			echo "<br />at pass 35<br />";
 		}
-		$jobname		= "$student Management Move Student to a Different Level";
+		$jobname		= "Student Management Move Student to a Different Level";
 		$content 		.= "<h3>$jobname</h3>
 							<p>Enter the student call sign below and select the new level for the student. 
 							If the student is currently assigned to an advisor's class, the student will be 
@@ -3730,7 +3730,12 @@ function getTheReason($strReasonCode) {
 									}
 									$doProceed								= TRUE;
 									//////	make sure this isn't an excluded advisor
-									if (strPos($student_excluded_advisor,$advisorClass_call_sign) !== FALSE) {
+//									if ($doDebug) {
+//										echo "student_excluded_advisor: $student_excluded_advisor<br />
+//										      advisorClass_call_sign: $advisorClass_call_sign<br />";
+//									}
+//									if (strPos($student_excluded_advisor,$advisorClass_call_sign) !== FALSE) {
+									if (str_contains($student_excluded_advisor,$advisorClass_call_sign)) {
 										$doProceed							= FALSE;
 										if ($doDebug) {
 											echo "&nbsp;&nbsp;&nbsp;&nbsp;Advisor is excluded. Bypassing<br />";
