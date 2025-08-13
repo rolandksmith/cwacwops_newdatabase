@@ -1482,8 +1482,9 @@ function getTheReason($strReasonCode) {
 				$isExcluded		= FALSE;
 				if ($student_excluded_advisor != '') {
 					/// see if the advisor is already excluded
-					$myInt	= strpos($student_excluded_advisor,$inp_advisor_callsign);
-					if ($myInt !== FALSE) {
+					if (str_contains($student_excluded_advisor,$inp_advisor_callsign)) {
+//					$myInt	= strpos($student_excluded_advisor,$inp_advisor_callsign);
+//					if ($myInt !== FALSE) {
 						$content .= "<p>Student already has an excluded advisor. Process aborted.</p>";
 						$isExcluded	= TRUE;
 					}
@@ -2113,8 +2114,9 @@ function getTheReason($strReasonCode) {
 				$content			.= "<p>Student $inp_student_callsign responded 'refused' to the verification request. Assignement refused.</p>";
 				$gotError			= TRUE;
 			}
-			$myInt					= strpos($student_excluded_advisor,$inp_advisor_callsign);
-			if ($myInt !== FALSE) {
+			if (str_contains($student_excluded_advisor,$inp_advisor_callsign)) {
+//			$myInt					= strpos($student_excluded_advisor,$inp_advisor_callsign);
+//			if ($myInt !== FALSE) {
 				if ($doDebug) {
 					echo "$inp_advisor_callsign is an excluded advisor<br />";
 				}
@@ -4824,60 +4826,43 @@ function getTheReason($strReasonCode) {
 			}
 		}
 		if ($doProceed) {
-			$updateParams		= array();
-			$updateFormat		= array();
-			$doUpdate			= FALSE;
-			if ($student_excluded_advisor == '') {
-				// if excluded advisor is empty, add the advisor
-				$student_excluded_advisor	= $inp_callsign;
-				$updateParams['student_excluded_advisor']	= $student_excluded_advisor;
-				$updateFormat[]								= '%s';
-				$doUpdate									= TRUE;
+			$newExcludedAdvisorList	= updateExcludedAdvisor($student_excluded_advisor,$inp_callsign,'add',$doDebug);
+			if ($newExcludedAdvisorList === FALSE) {
+				$content		.= "<p>Attempt to add $inp_callsign as an excluded advisor for $student_call_sign failed</p>";
 			} else {
-				// if excluded advisor is not empty, see of advisor already excluded
-				$matchStr		= "/$inp_callsign/";
-				if (preg_match($matchStr,$student_excluded_advisor)) {
-					if ($doDebug) {
-						echo "advisor $inp_callsign already excluded<br />";
-						$content	.= "<p>Advsiro $inp_callsign already excluded</p>";
+				// update if excluded advisors has changed
+				if ($student_excluded_advisor != $newExcludedAdvisorList) {
+					$updateParams		= array('student_assigned_advisor'=>$newExcludedAdvisorList);
+					$updateFormat		= array('%s');
+					$studentUpdateData		= array('tableName'=>$studentTableName,
+													'inp_method'=>'update',
+													'inp_data'=>$updateParams,
+													'inp_format'=>$updateFormat,
+													'jobname'=>$jobname,
+													'inp_id'=>$student_ID,
+													'inp_callsign'=>$student_call_sign,
+													'inp_semester'=>$student_semester,
+													'inp_who'=>$userName,
+													'testMode'=>$testMode,
+													'doDebug'=>$doDebug);
+					$updateResult	= updateStudent($studentUpdateData);
+					if ($updateResult[0] === FALSE) {
+						$myError	= $wpdb->last_error;
+						$mySql		= $wpdb->last_query;
+						$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+						if ($doDebug) {
+							echo $errorMsg;
+						}
+						sendErrorEmail($errorMsg);
+						$content		.= "Unable to update content in $studentTableName<br />";
+					} else {
+						$content		.= "<p>Advisor $inp_callsign has been excluded for student $inp_student_callsign</p>";
 					}
 				} else {
-					// excluded advisor is not empty and can add the specified advisor
-					$student_excluded_advisor	.= "&$inp_callsign";
-					$updateParams['student_excluded_advisor']	= $student_excluded_advisor;
-					$updateFormat[]								= '%s';
-					$doUpdate									= TRUE;
+					$content	.= "<p>No change to student_excluded_advisor was needed</p>";
 				}
 			}
-			if ($doUpdate) {
-				$studentUpdateData		= array('tableName'=>$studentTableName,
-												'inp_method'=>'update',
-												'inp_data'=>$updateParams,
-												'inp_format'=>$updateFormat,
-												'jobname'=>$jobname,
-												'inp_id'=>$student_ID,
-												'inp_callsign'=>$student_call_sign,
-												'inp_semester'=>$student_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-				$updateResult	= updateStudent($studentUpdateData);
-				if ($updateResult[0] === FALSE) {
-					$myError	= $wpdb->last_error;
-					$mySql		= $wpdb->last_query;
-					$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-					if ($doDebug) {
-						echo $errorMsg;
-					}
-					sendErrorEmail($errorMsg);
-					$content		.= "Unable to update content in $studentTableName<br />";
-				} else {
-					$content		.= "<p>Advisor $inp_callsign has been excluded for student $inp_student_callsign</p>";
-				}
-			} 
-		}		
-
-
+		}
 
 /////// pass 120 -- remove excluded advisor		
 		
@@ -4931,7 +4916,6 @@ function getTheReason($strReasonCode) {
 				echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
 			}
 			if ($numSRows > 0) {
-				$matchStr					= "/$inp_callsign/";
 				foreach ($wpw1_cwa_student as $studentRow) {
 					$student_id					= $studentRow->student_id;
 					$student_call_sign			= $studentRow->student_call_sign;
@@ -4939,50 +4923,40 @@ function getTheReason($strReasonCode) {
 					$student_excluded_advisor	= $studentRow->student_excluded_advisor;
 
 					if ($doDebug) {
-						echo "<br />processing $student_call_sign<br />";
+						echo "<br />processing id $student_id ($student_call_sign)<br />";
 					}
-
-					$excluded_advisor_hold		= $student_excluded_advisor;
-					$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
-					$str1 = "$inp_callsign&";
-					$str2 = "&$inp_callsign";
-					$str3 = "$inp_callsign";
-					$str4 = "&&";
-					$student_excluded_advisor = str_replace($str1,'',$student_excluded_advisor);
-					$student_excluded_advisor = str_replace($str2,'',$student_excluded_advisor);
-					$student_excluded_advisor = str_replace($str3,'',$student_excluded_advisor);
-					$student_excluded_advisor = str_replace($str4,'',$student_excluded_advisor);
-
-					if ($excluded_advisor_hold != $student_excluded_advisor) {
-						if ($doDebug) {
-							echo "Something changed. Original: $excluded_advisor_hold. Result; $student_excluded_advisor<br />";
-						}
-						$studentUpdateData		= array('tableName'=>$studentTableName,
-														'inp_method'=>'update',
-														'inp_data'=>array('student_excluded_advisor'=>$student_excluded_advisor),
-														'inp_format'=>array('%s'),
-														'jobname'=>$jobname,
-														'inp_id'=>$student_id,
-														'inp_callsign'=>$student_call_sign,
-														'inp_semester'=>$student_semester,
-														'inp_who'=>$userName,
-														'testMode'=>$testMode,
-														'doDebug'=>$doDebug);
-						$updateResult	= updateStudent($studentUpdateData);
-						if ($updateResult[0] === FALSE) {
-							$myError	= $wpdb->last_error;
-							$mySql		= $wpdb->last_query;
-							$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-							if ($doDebug) {
-								echo $errorMsg;
-							}
-							sendErrorEmail($errorMsg);
-							$content		.= "Unable to update content in $studentTableName<br />";
-						} else {
-							$content		.= "<p>Advisor $inp_callsign has been excluded in student record for $student_semester semester</p>";
-						}
+					$newExcludedAdvisorList		= updateExcludedAdvisor($student_excluded_advisor,$inp_callsign,'delete',$doDebug);
+					if ($newExcludedAdvisorList === FALSE) {
+						$content				.= "<p>Attempt to delete $inp_callsign from excluded advisors $student_excluded_advisor failed for id $student_id</p>";
 					} else {
-						$content			.= "<p>No removal requred in student record for $student_semester semester</p>";
+						if ($student_excluded_advisor != $newExcludedAdvisorList) {
+							$studentUpdateData		= array('tableName'=>$studentTableName,
+															'inp_method'=>'update',
+															'inp_data'=>array('student_excluded_advisor'=>$newExcludedAdvisorList),
+															'inp_format'=>array('%s'),
+															'jobname'=>$jobname,
+															'inp_id'=>$student_id,
+															'inp_callsign'=>$student_call_sign,
+															'inp_semester'=>$student_semester,
+															'inp_who'=>$userName,
+															'testMode'=>$testMode,
+															'doDebug'=>$doDebug);
+							$updateResult	= updateStudent($studentUpdateData);
+							if ($updateResult[0] === FALSE) {
+								$myError	= $wpdb->last_error;
+								$mySql		= $wpdb->last_query;
+								$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
+								if ($doDebug) {
+									echo $errorMsg;
+								}
+								sendErrorEmail($errorMsg);
+								$content		.= "Unable to update content in $studentTableName<br />";
+							} else {
+								$content		.= "<p>Advisor $inp_callsign has been removed as an excluded advisor in student record for $student_semester semester</p>";
+							}							
+						} else {
+							$content			.= "<p>No changes needed for id $student_id ($student_call_sign) for semester $student_semester</p>";
+						}
 					}
 				}
 			} else {
