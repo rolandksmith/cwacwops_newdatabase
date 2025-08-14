@@ -135,6 +135,7 @@ function prepare_students_for_assignment_to_advisors_func() {
 	$studentUpdateURL	= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$advisorUpdateURL	= "$siteURL/cwa-display-and-update-advisor-signup-information/";
 	$errorArray			= array();
+	$carryForwardExcludedAdvisor	= '';
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -438,11 +439,13 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 					$student_first_name 				= $studentRow->user_first_name;
 					$student_last_name 					= $studentRow->user_last_name;
 					$student_email 						= $studentRow->user_email;
+					$student_ph_code					= $studentRow->user_ph_code;
 					$student_phone 						= $studentRow->user_phone;
 					$student_city 						= $studentRow->user_city;
 					$student_state 						= $studentRow->user_state;
 					$student_zip_code 					= $studentRow->user_zip_code;
 					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
 					$student_whatsapp 					= $studentRow->user_whatsapp;
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
@@ -503,30 +506,6 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 					$student_flexible						= $studentRow->student_flexible;
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$student_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$student_country		= "UNKNOWN";
-						$student_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$student_country		= $countryRow->country_name;
-								$student_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$student_country			= "Unknown";
-							$student_ph_code			= "";
-						}
-					}
 
 				
 					$studentUpdateData			= "<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>";
@@ -595,8 +574,12 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 								$possContent	.= "&nbsp;&nbsp;&nbsp;Student on hold. Not being processed<br />";
 								$doContent		= FALSE;
 							} else {
-
-							// See if student has past student records
+								// prepare excluded advisor array to add any past excluded advisors
+								$currentExcludedAdvisors	= array();
+								if ($student_excluded_advisor != '') {
+									$currentExcludedAdvisor	= explode('&',$student_excluded_advisor);
+								}
+								// See if student has past student records
 								if ($doDebug) {
 									echo "checking for previous semester records<br />";
 								}
@@ -620,7 +603,6 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 										echo "ran $sql<br />and found $numPSRows rows in $studentTableName table<br />";
 									}
 									if ($numPSRows > 0) {
-										$myExcludedAdvisors								= array();
 										foreach ($wpw1_cwa_student as $studentRow) {
 											$pastStudent_ID							= $studentRow->student_id;
 											$pastStudent_call_sign					= trim(strtoupper($studentRow->student_call_sign));
@@ -639,15 +621,10 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 												if ($doDebug) {
 													echo "student $student_call_sign has $pastStudent_excluded_advisor exlcuded advisors for semester $pastStudent_semester<br />";
 												}
-												$myArray								= explode("|",$pastStudent_excluded_advisor);
-												foreach($myArray as $thisAdvisor) {
-													if (!in_array($thisAdvisor,$myExcludedAdvisors)) {
-														$myExcludedAdvisors[]			= $thisAdvisor;
-														if ($doDebug) {
-															echo "added $thisAdvisor to myExcludedAdvisors<br />";
-														}
-													}
-												}
+												// merge the excluded advisors
+												$myArray					= explode('&',$pastStudent_excluded_advisor);
+												$combined					= array_merge($currentExcludedAdvisors,$nyArray);
+												$currentExcludedAdvisors	= array_unique($combined);
 											}
 											if ($pastStudent_status == 'Y') {
 												if ($pastStudent_call_sign != $student_call_sign) {
@@ -673,22 +650,13 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 											}
 										}				// have checked all past student records
 										// setup excluded advisors (if any)
-										if (count($myExcludedAdvisors) > 0) {
+										if (count($currentExcludedAdvisors) > 0) {
 											if ($doDebug) {
 												echo "have excluded advisors:<br /><pre>";
-												print_r($myExcludedAdvisors);
+												print_r($currentExcludedAdvisors);
 												echo "</pre><br />";
 											}
-											$carryForwardExclAdvisor							= '';
-											$myFirst						= TRUE;
-											foreach($myExcludedAdvisors as $thisAdvisor) {
-												if ($myFirst) {
-													$carryForwardExclAdvisor					.= "$thisAdvisor";
-													$myFirst				= FALSE;
-												} else {
-													$carryForwardExclAdvisor					.= "&$thisAdvisor";
-												}
-											}
+											$carryForwardExcludedAdvisor	= implode('&',$currentExcludedAdvisors);
 											if ($doDebug) {
 												echo "new excluded advisor: $carryForwardExclAdvisor<br />";
 											}
@@ -1032,48 +1000,8 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 					}
 					// if updateStudent, then something should be processed
 					if ($updateStudent) {
-						// fix up excluded_advisor
-						$exclArray					= array();
-						if ($student_excluded_advisor != '') {
-							$myArray				= explode("|",$student_excluded_advisor);
-							foreach($myArray as $thisAdvisor) {
-								if (!in_array($thisAdvisor,$exclArray)) {
-									$exclArray[]	= $thisAdvisor;
-								}
-							}
-						}
-						if ($carryForwardExclAdvisor != '') {
-							$myArray				= explode("|",$carryForwardExclAdvisor);
-							foreach($myArray as $thisAdvisor) {
-								if (!in_array($thisAdvisor,$exclArray)) {
-									$exclArray[]	= $thisAdvisor;
-								}
-							}
-							
-						}
-						if ($newExclAdvisor != '') {
-							if (!in_array($newExclAdvisor,$exclArray)) {
-								$exclArray[]	= $newExclAdvisor;
-							}
-						}
-						if (count($exclArray) > 0) {
-							if ($doDebug) {
-								echo "exclArray:<br /><pre>";
-								print_r($exclArray);
-								echo "</pre><br />";
-							}
-							$firstTime			= TRUE;
-							$myStr				= "";
-							foreach($exclArray as $thisAdvisor) {
-								if ($firstTime) {
-									$myStr		= $thisAdvisor;
-									$firstTime	= FALSE;
-								} else {
-									$myStr		.= "&$thisAdvisor";
-								}
-							}
-							$studentUpdateParams[]	= "student_excluded_advisor|$myStr|s";
-							
+						if ($carryForwardExcludedAdvisor != '') {					
+							$studentUpdateParams[]	= "student_excluded_advisor|$carryForwardExcludedAdvisor|s";
 						}
 							
 						/// fix up the action log
