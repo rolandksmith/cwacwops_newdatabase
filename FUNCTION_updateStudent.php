@@ -283,7 +283,7 @@ function updateStudent($inpArray) {
 			print_r($updateParams);
 			echo "</pre><br />UpdateFormat:<br /><Pre>";
 			print_r($updateFormat);
-			echo "</pre>br />";
+			echo "</pre><br />";
 		}
 		$result		= $wpdb->update($tableName, 
 									$updateParams, 
