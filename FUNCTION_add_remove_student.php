@@ -268,12 +268,13 @@ function add_remove_student($inp_data = array()) {
 									$updateFormat[]							= '%d';
 									$updateParams['student_advisor_select_date']	= '';
 									$updateFormat[]							= '%s';
-									if ($student_excluded_advisor == '') {
-										$student_excluded_advisor			.= "$student_assigned_advisor";
-									} else {
-										$student_excluded_advisor			.= "|$student_assigned_advisor";
+									$newStudentExcludedAdvisor		= updateExcludedAdvisor($student_excluded_advisor,$student_assigned_advisor,'add',$doDebug);
+									if ($newStudentExcludedAdvisor === FALSE) {
+										if ($doDebug) {
+											echo "adding $student_assigned_advisor to student_excluded_advisors of $student_excluded_advisors failed<br />";
+										}
 									}
-									$updateParams['student_excluded_advisor']		= $student_excluded_advisor;
+									$updateParams['student_excluded_advisor']		= $newStudentExcludedAdvisor;
 									$updateFormat[]							= '%s';
 									$updateParams['student_class_priority']			= 1;
 									$updateFormat[]							= '%d';
