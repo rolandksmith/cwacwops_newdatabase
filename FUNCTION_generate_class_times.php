@@ -30,7 +30,7 @@ function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_disp
 	global $wpdb;
 
 //	$doDebug					= TRUE;
-	$doDebug					= FALSE;
+//	$doDebug					= FALSE;
 	if ($doDebug) {
 		 echo "<br />In Function generateClassTimes with <br />
 		 		inp_tz: $inp_tz<br />
