@@ -268,26 +268,30 @@ function display_catalog_for_a_timezone_func() {
 
  				//	[level][sequence] = language|localtime|localdays|nmbr classes|advisors
 
-				$content		.= "<h3>CW Academy Course Catalog for $myLevel in $tzString for Semster $inp_semester</h3>
-									<table>
+				$content		.= "<h3>CW Academy Course Catalog for $myLevel in $tzString for Semster $inp_semester (offset: $inp_timezone_offset)</h3>
+									<table style='width:1000px;'>
 									<tr><th style='width:200px;'>$tzString<br />Local Time</th>
 										<th style='text-align:center;width:80px;'><br />Classes</th>
 										<th style='width:200px;'>Class<br />Language</th>
-										<th style='vertical-align:top;width:700px;'><br />Advisors</th></tr>";
+										<th style='vertical-align:top;width:300px;'><br />Advisors</th>
+										<th style='vertical-align:top;'>UTC Schedule</th></tr>";
 				$totalClasses				= 0;
 				foreach($returnArray as $thisLevel=>$myValue) {
 					foreach($myValue as $thisSequence=>$thisInfo) {
 						$myArray				= explode("|",$thisInfo);
 						$thisLanguage			= $myArray[0];
-						$thisLocalStart			= $myArray[1];
-						$thisLocalDays			= $myArray[2];
-						$thisClassCount			= $myArray[3];
-						$thisClassAdvisors		= $myArray[4];
+						$thisLocalStart			= $myArray[3];
+						$thisLocalDays			= $myArray[4];
+						$thisUTCStart			= $myArray[1];
+						$thisUTCDays			= $myArray[2];
+						$thisClassCount			= $myArray[5];
+						$thisClassAdvisors		= $myArray[6];
 						$thisClassAdvisors		= str_replace(",",", ",$thisClassAdvisors);
 						$content					.= "<tr><td style='vertical-align:top;'>$thisLocalStart $thisLocalDays</td>
 															<td style='vertical-align:top;text-align:center;'>$thisClassCount</td>
 															<td style='vertical-align:top;'>$thisLanguage</td>
-															<td style='vertical-align:top;'>$thisClassAdvisors</td></tr>";
+															<td style='vertical-align:top;'>$thisClassAdvisors</td>
+															<td style='vertical-align:top;'>$thisUTCStart $thisUTCDays</td></tr>";
 						$totalClasses			= $totalClasses + $thisClassCount;
 						$finalTotal				= $finalTotal + $thisClassCount;
 					}
