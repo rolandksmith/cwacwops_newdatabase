@@ -74,15 +74,17 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 				$user_first_name 					= $advisorRow->user_first_name;
 				$user_last_name 					= $advisorRow->user_last_name;
 				$user_email 						= $advisorRow->user_email;
+				$user_ph_code 						= $advisorRow->user_ph_code;
 				$user_phone 						= $advisorRow->user_phone;
 				$user_city 							= $advisorRow->user_city;
 				$user_state 						= $advisorRow->user_state;
 				$user_zip_code 						= $advisorRow->user_zip_code;
 				$user_country_code 					= $advisorRow->user_country_code;
-				$user_whatsapp 					= $advisorRow->user_whatsapp;
-				$user_telegram 					= $advisorRow->user_telegram;
-				$user_signal 					= $advisorRow->user_signal;
-				$user_messenger 				= $advisorRow->user_messenger;
+				$user_country 						= $advisorRow->user_country;
+				$user_whatsapp 						= $advisorRow->user_whatsapp;
+				$user_telegram 						= $advisorRow->user_telegram;
+				$user_signal 						= $advisorRow->user_signal;
+				$user_messenger 					= $advisorRow->user_messenger;
 				$user_action_log 					= $advisorRow->user_action_log;
 				$user_timezone_id 					= $advisorRow->user_timezone_id;
 				$user_languages 					= $advisorRow->user_languages;
@@ -106,29 +108,6 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 				$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 				$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 
-				// if you need the country name and phone code, include the following
-				$countrySQL		= "select * from wpw1_cwa_country_codes  
-									where country_code = '$user_country_code'";
-				$countrySQLResult	= $wpdb->get_results($countrySQL);
-				if ($countrySQLResult === FALSE) {
-					handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
-					$user_country		= "UNKNOWN";
-					$user_ph_code		= "";
-				} else {
-					$numCRows		= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-					}
-					if($numCRows > 0) {
-						foreach($countrySQLResult as $countryRow) {
-							$user_country		= $countryRow->country_name;
-							$user_ph_code		= $countryRow->ph_code;
-						}
-					} else {
-						$user_country			= "Unknown";
-						$user_ph_code			= "";
-					}
-				}
 
 				$verifyStr		= "";
 				if ($advisor_verify_response == '') {
@@ -279,15 +258,17 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 												$user_first_name 						= $studentRow->user_first_name;
 												$user_last_name 						= $studentRow->user_last_name;
 												$user_email 							= $studentRow->user_email;
+												$user_ph_code 							= $studentRow->user_ph_code;
 												$user_phone 							= $studentRow->user_phone;
 												$user_city 								= $studentRow->user_city;
 												$user_state 							= $studentRow->user_state;
 												$user_zip_code 							= $studentRow->user_zip_code;
 												$user_country_code 						= $studentRow->user_country_code;
-												$user_whatsapp 						= $studentRow->user_whatsapp;
-												$user_telegram 						= $studentRow->user_telegram;
-												$user_signal 						= $studentRow->user_signal;
-												$user_messenger 					= $studentRow->user_messenger;
+												$user_country 							= $studentRow->user_country;
+												$user_whatsapp 							= $studentRow->user_whatsapp;
+												$user_telegram 							= $studentRow->user_telegram;
+												$user_signal 							= $studentRow->user_signal;
+												$user_messenger 						= $studentRow->user_messenger;
 												$user_action_log 						= $studentRow->user_action_log;
 												$user_timezone_id 						= $studentRow->user_timezone_id;
 												$user_languages 						= $studentRow->user_languages;
@@ -345,30 +326,6 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 												$student_date_created 					= $studentRow->date_created;
 												$student_date_updated			  		= $studentRow->date_updated;
 							
-												// if you need the country name and phone code, include the following
-												$countrySQL		= "select * from wpw1_cwa_country_codes  
-																	where country_code = '$user_country_code'";
-												$countrySQLResult	= $wpdb->get_results($countrySQL);
-												if ($countrySQLResult === FALSE) {
-													handleWPDBError("FUNCTION_User_Master_Data",$doDebug);
-													$user_country		= "UNKNOWN";
-													$user_ph_code		= "";
-												} else {
-													$numCRows		= $wpdb->num_rows;
-													if ($doDebug) {
-														echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-													}
-													if($numCRows > 0) {
-														foreach($countrySQLResult as $countryRow) {
-															$user_country		= $countryRow->country_name;
-															$user_ph_code		= $countryRow->ph_code;
-														}
-													} else {
-														$user_country			= "Unknown";
-														$user_ph_code			= "";
-													}
-												}
-
 
 												if ($doDebug) {
 													echo "&nbsp;&nbsp;&nbsp;&nbsp;Level: $student_level<br />
@@ -461,12 +418,12 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 														$myStr						= $student_student_status;
 													}
 													$content						.= "<tr><td style='vertical-align:top;'>$student_call_sign</td>
-																								<td style='vertical-align:top;'>$user_last_name, $user_first_name</td>
-																								<td style='vertical-align:top;'>$user_email</td>
-																								<td style='vertical-align:top;'>+$user_ph_code $user_phone</td>
-																								<td style='vertical-align:top;'>$user_state</td>
-																								<td style='vertical-align:top;'>$user_country</td>
-																								<td style='vertical-align:top;'>$myStr</td></tr>";
+																							<td style='vertical-align:top;'>$user_last_name, $user_first_name</td>
+																							<td style='vertical-align:top;'>$user_email</td>
+																							<td style='vertical-align:top;'>+$user_ph_code $user_phone</td>
+																							<td style='vertical-align:top;'>$user_state</td>
+																							<td style='vertical-align:top;'>$user_country</td>
+																							<td style='vertical-align:top;'>$myStr</td></tr>";
 													if ($haveExtras) {
 														$content					.= "<tr><td colspan='8'>$extras</td></tr>";
 													}
@@ -501,10 +458,12 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 											}			/// end of the student foreach
 										} else {		/// no student record found ... send error message
 											$myStr		= $wpdb->last_query;
-											sendErrorEmail("Prepare Advisor Class Display: no $studentTableName table record found for student$strSnum $theInfo in advisor $advisorClass_advisor_call_sign class $advisorClass_sequence<br />SQL: $myStr");
+											sendErrorEmail("Prepare Advisor Class Display: ran $sql. No $studentTableName table record found for student$strSnum $theInfo in advisor $advisorClass_advisor_call_sign class $advisorClass_sequence<br />SQL: $myStr");
 											if ($doDebug) {
 												echo "no $studentTableName table record found for student$strSnum $theInfo in advisor $advisorClass_advisor_call_sign class $advisorClass_sequence<br />SQL: $myStr";
 											}
+											$content	.= "<tr><td>$theInfo</td>
+																<td colspan='6'>No matching student table record</td></tr>";
 										}
 									}
 								}
