@@ -635,9 +635,13 @@ try {
 
 
 /// SQL to change something within a field in a table
-UPDATE your_table_name
-SET your_column_name = REPLACE(your_column_name, '\|', '&');
-
+	UPDATE your_table_name
+	SET your_column_name = REPLACE(your_column_name, '\|', '&');
+	
+	
+	UPDATE wpw1_cwa_student 
+	SET student_excluded_advisor = REPLACE(student_excluded_advisor, '\|', '&') 
+	where student_excluded_advisor like '%|%';
 
 
 // prepare and download a file
@@ -753,3 +757,40 @@ SET your_column_name = REPLACE(your_column_name, '\|', '&');
 		} else {
 			$content		.= "Reminder successfully added<br />";
 		}
+
+
+
+// getting a yes/no response from the user in a php program
+
+	code:
+		// The message to be displayed in the JavaScript pop-up
+		$message = "Do you want to proceed? Cancel: No; OK: Yes";
+	
+		$content	.= "<p>Time to make a decision
+						<form id='advisor-assignment-form' method='post' 
+						action='$theURL'
+						onsubmit=\"return generic_yes_no_form('advisor-assignment-form', '$message');\">
+						<input type='hidden' name='strpass' value='3'>
+						<input type='hidden' name='decision' value='no'>
+						<button type='submit'>Yes or No</button>
+						</form></p>";
+	
+		
+		
+		} elseif ("3" == $strPass) {
+			echo "<br />at pass three decision = $decision<br />";
+
+	Important points:
+		message: that is what will appear in the popup box. There will 
+			be two buttons for the user to click: Cancel or OK
+			
+		Replace 'Time to make a decision' with the explanation of what 
+			is happening
+			
+		Set strpass to where the program should go after the user clicks the 
+		button. Regardless of the what the user clicks, the php program will 
+		go to that place
+		
+		Change the button name from 'Yes or No' as desired
+
+
