@@ -6,11 +6,12 @@ function wp_to_local($timeZoneId, $effectiveOffset, $expirationOffset) {
 		
 		Offsets are in days
 	
-	input: 	the local timezone ID
+	input: 	the local timezone ID or the offset in hours
 			the number of days to offset the effective date as an integer
 			the number of days from effective to expiration as an integer
 			
 	Example: $returnArray = wp_to_local('America/Chicago',0,5);
+			 $returnArray = wp_to_local(-6.0,0,5);
 			
 	returns:	array('effective'=> local date and time for the effective date,
 					  'expiration'=> local date and time for the expiration date)
@@ -40,13 +41,21 @@ function wp_to_local($timeZoneId, $effectiveOffset, $expirationOffset) {
 	if ($doDebug) {
 		echo "<br /><b>In wp_to_local</b> with timeZoneId = $timeZoneId, effectiveOffset = $effectiveOffset, and expirationOffset = $expirationOffset<br />";
 	}
-	try {
-		$localTimeZone 	= new DateTimeZone($timeZoneId);
-	} catch (Exception $e) {
-		return FALSE;
+	
+	if (is_string($timeZoneId)) {
+	
+		try {
+			$localTimeZone 	= new DateTimeZone($timeZoneId);
+		} catch (Exception $e) {
+			return FALSE;
+		}
+		$dateTimeLocal 	= new DateTime('now', $localTimeZone);
+		$nowDateTime 	= $dateTimeLocal->format('Y-m-d H:i:s');
+	} else {
+		$thisDate		= date('Y-m-d H:i:s');
+		$newDate		= strtotime("$thisData - $timeZoneId hours");
+		$nowDateTime	= date('Y-m-d H:i:s',$newDate);
 	}
-	$dateTimeLocal 	= new DateTime('now', $localTimeZone);
-	$nowDateTime 	= $dateTimeLocal->format('Y-m-d H:i:s');
 	$effectiveDateTime	= strtotime("$nowDateTime + $effectiveOffset days");
 	$effectiveDate	= date('Y-m-d H:i:s',$effectiveDateTime);
 	$expiration 	= strtotime("$effectiveDate + $expirationOffset days");
