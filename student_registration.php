@@ -374,6 +374,10 @@ function student_registration_func() {
 				$verifyMode	 = $str_value;
 				$verifyMode	 = filter_var($verifyMode,FILTER_UNSAFE_RAW);
 			}
+			if ($str_key 		== "needsAssessment") {
+				$needsAssessment	 = $str_value;
+				$needsAssessment	 = filter_var($needsAssessment,FILTER_UNSAFE_RAW);
+			}
 			if ($str_key 		== "allowSignup") {
 				$allowSignup	 = $str_value;
 				$allowSignup	 = filter_var($allowSignup,FILTER_UNSAFE_RAW);
@@ -4137,6 +4141,7 @@ function student_registration_func() {
 												<input type='hidden' name='timezone' value='$timezone'>
 												<input type='hidden' name='allowSignup' value='$allowSignup'>
 												<input type='hidden' name='inp_level' value='$inp_level'>
+												<input type='hidden' name='needsAssessment' value='1'>
 												<input type='submit' class='formInputButton' name='proficiency' value='Continue to Proficiency Assessment'>
 												</form></td>
 											<td><form method='post' action='$theURL' 
