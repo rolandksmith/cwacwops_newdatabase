@@ -3,7 +3,7 @@ function rkstest_func() {
 	global $wpdb;
 
 	$doDebug						= TRUE;
-	$testMode						= FALSE;
+	$testMode						= TRUE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
 /*
@@ -47,7 +47,8 @@ function rkstest_func() {
 	$theURL						= "$siteURL/rkstest/";
 	$inp_semester				= '';
 	$inp_rsave					= '';
-	$jobname					= "rkstest V$versionNumber";
+	$jobname					= "rkstest (Fix Student Excluded Advisor)";
+	$updated					= 0;
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -170,10 +171,10 @@ function rkstest_func() {
 			echo "<p><strong>Operating in Test Mode.</strong></p>";
 		}
 		$extMode					= 'tm';
-		$TableName					= "wpw1_cwa_";
+		$studentTableName			= "wpw1_cwa_student2";
 	} else {
 		$extMode					= 'pd';
-		$TableName					= "wpw1_cwa_";
+		$studentTableName			= "wpw1_cwa_student";
 	}
 
 
@@ -196,14 +197,57 @@ function rkstest_func() {
 
 
 	} elseif ("2" == $strPass) {
-		$result		= audit_student_record($inp_start,$doDebug);
-		if ($result[0] === TRUE) {
-			$myStr		= $result[1];
-			$content	.= "<h3>$jobname</h3>$myStr";
-		} else {
-			$myStr		= $result[1];
-			$content	.= "<h3>$jobname</h3>Fail<br />$myStr";
+		if ($doDebug) {
+			echo "<br />pass 2<br />";
 		}
+		$content	.= "<h3>$jobname</h3>";
+		// get the student records
+		$sql		= "select student_id, student_excluded_advisor 
+						from $studentTableName 
+						order by student_id
+						limit 10";
+		$result		= $wpdb->get_results($sql);
+		if ($result === FALSE) {
+			handleWPDBError($jobname,$doDebug,'attempting to read student table');
+			$content	.= "<p>Unable to read $studentTableName table</p>";
+		} else {
+			$numRows	= $wpdb->num_rows;
+			if ($doDebug) {
+				echo "ran $sql<br />and retrieved $numRows rows<br />";
+			}
+			$content	.= "<p>Processing $numRows from $studentTableName</p>";
+			if ($numRows > 0) {
+				foreach ($result as $resultRow) {
+					$student_id					= $resultRow->student_id;
+					$student_excluded_advisor	= $resultRow->student_excluded_advisor;
+					
+					$content			.= "<br />Processing id $student_id<br />";
+					if ($student_excluded_advisor != '') {
+						$myArray 					= explode('&',$student_excluded_advisor);
+						$newExcluded 				= array_unique($myArray);
+						$newStudentExcludedAdvisor 	= implode('&',$newExcluded);
+						if ($newStudentExcludedAdvisor != $student_excluded_advisor) {
+							$content		.= "updating $student_excluded_advisor to $newStudentExcludedAdvisor<br />";
+							$updateResult	= $wpdb->update($studentTableName, 
+															array('student_excluded_advisor'=>$newStudentExcludedAdvisor),
+															array('student_id'=>$student_id),
+															array('%s'),
+															array('%d'));
+							if ($updateResult === FALSE) {
+								handleWPDBError($jobname,$doDebug,'attempting to update record $student_id failed');
+							} else {
+								$content	.= "Update complete<br />";
+								$updated++;
+							}
+						}
+					}
+				}
+				$content	.= "<p>Updated $updated records</p>";
+			} else {
+				$content	.= "<p>No records found in $studentTableName table</p>";
+			}
+		}
+	
 	
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
