@@ -458,7 +458,7 @@ function show_advisor_class_assignments_func() {
 						
 											// if there are students, then show the student name list
 											if ($doDebug) {
-												echo "there are $class_number_students students in the class<br />";
+												echo "there are $advisorClass_number_students students in the class<br />";
 											}
 											$displayClass			= FALSE;										
 											if ($advisorClass_number_students > 0) {	
@@ -509,7 +509,7 @@ function show_advisor_class_assignments_func() {
 																										where student_semester='$advisorClass_semester' 
 																										and student_call_sign = '$theInfo'");
 															if ($wpw1_cwa_student === FALSE) {
-																handleWPDBError($jobname,$doDebug);
+																handleWPDBError($jobname,$doDebug,');
 															} else {
 																$numSRows									= $wpdb->num_rows;
 																if ($doDebug) {
