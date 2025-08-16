@@ -858,8 +858,8 @@ function manage_advisor_class_assignments_func() {
 														echo "Doing Schedule; Replacement No<br />";
 													}
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign 
-	student will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
-	No replacement requested.  ";
+student will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
+No replacement requested.  ";
 													if ($student_excluded_advisor == '') {
 														$student_excluded_advisor	= $advisor_call_sign;
 													} else {
@@ -874,8 +874,8 @@ function manage_advisor_class_assignments_func() {
 													$student_remove_status		= '';
 													$removeStudent				= TRUE;
 													$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM 
-	$student_call_sign will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
-	No replacement requested. ";
+$student_call_sign will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
+No replacement requested. ";
 													$advisorUpdateParams	= array("advisor_action_log|$advisor_action_log|s");
 				
 												} elseif ($inp_attend == 'class') {
