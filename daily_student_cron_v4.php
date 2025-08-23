@@ -2633,7 +2633,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 														$callSign3	= '';
 														$sequence3	= '';
 	
-														foreach(${'replaceArray' . $student_level} as $myKey=>$myValue) {
+														foreach(${'replaceArray' . $advisorClass_level} as $myKey=>$myValue) {
 															if ($doDebug) {
 																echo "<br />Checking possible replacement: $myKey - $myValue<br />";
 															}
