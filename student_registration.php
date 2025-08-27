@@ -8,7 +8,7 @@ function student_registration_func() {
 
 	global $wpdb,$doDebug,$testMode,$demoMode,$inp_verbose,$daysToGo;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$demoMode						= FALSE;
 	$doAssessment					= FALSE;
@@ -240,6 +240,7 @@ function student_registration_func() {
 		$inp_survey_completion_date 	= '';
 		$inp_available_class_days		= '';
 		$inp_intervention_required		= '';
+		$inp_sked_times					= array();
 		$inp_verify						= '';
 		$inp_delete						= '';
 		$nocatalog						= '';
@@ -348,6 +349,9 @@ function student_registration_func() {
 			if ($str_key 		== "strpass") {
 				$strPass		 = $str_value;
 				$strPass		 = filter_var($strPass,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set strPass to $strPass<br />";
+				}
 			}
 			if ($str_key 		== "demonstration") {
 				$demonstration		 = $str_value;
@@ -377,92 +381,158 @@ function student_registration_func() {
 			if ($str_key 		== "needsAssessment") {
 				$needsAssessment	 = $str_value;
 				$needsAssessment	 = filter_var($needsAssessment,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set needsAssessment to $needsAssessment<br />";
+				}
 			}
 			if ($str_key 		== "allowSignup") {
 				$allowSignup	 = $str_value;
 				$allowSignup	 = filter_var($allowSignup,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set allowSignup to $allowSignup<br />";
+				}
 			}
 			if ($str_key 		== "waitingList") {
 				$waitingList	 = $str_value;
 				$waitingList	 = filter_var($waitingList,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set waitingList to $waitingList<br />";
+				}
 			}
 			if ($str_key 		== "inp_semester") {
 				$inp_semester	 = $str_value;
 				$inp_semester	 = filter_var($inp_semester,FILTER_UNSAFE_RAW);
 				$haveInpSemester	= TRUE;
+				if ($doDebug) {
+					echo "set inp_semester to $inp_semester<br />";
+				}
 			}
 			if ($str_key 		== "new_semester") {
 				$new_semester	 = $str_value;
 				$new_semester	 = filter_var($new_semester,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set new_semester to $new_semester<br />";
+				}
 			}
 			if ($str_key 		== "submit") {
 				$submit	 = $str_value;
 				$submit	 = filter_var($submit,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set submit to $submit<br />";
+				}
 			}
 			if ($str_key == 'inp_email') {
 				$inp_email = trim($str_value);
 				$inp_email = strtolower(filter_var($inp_email,FILTER_UNSAFE_RAW));
+				if ($doDebug) {
+					echo "set inp_email to $inp_email<br />";
+				}
 			}
 			if ($str_key == 'inp_phone') {
 				$inp_phone = trim($str_value);
 				$inp_phone = filter_var($inp_phone,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_phone to $inp_phone<br />";
+				}
 			}
 			if ($str_key == 'inp_ph_code') {
 				$inp_ph_code = trim($str_value);
 				$inp_ph_code = filter_var($inp_ph_code,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_ph_code to $inp_ph_code<br />";
+				}
 			}
 			if ($str_key == 'inp_city') {
 				$inp_city = $str_value;
 				$inp_city = filter_var($inp_city,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_city to $inp_city<br />";
+				}
 			}
 			if ($str_key == 'inp_state') {
 				$inp_state = $str_value;
 				$inp_state = filter_var($inp_state,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_state to $inp_state<br />";
+				}
 			}
 			if ($str_key == 'inp_country') {
 				$inp_country = $str_value;
 				$inp_country = filter_var($inp_country,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_country to $inp_country<br />";
+				}
 			}
 			if ($str_key == 'inp_countrya') {
 				$inp_countrya = $str_value;
 				$inp_countrya = filter_var($inp_countrya,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_countrya to $inp_countrya<br />";
+				}
 			}
 			if ($str_key == 'inp_countryb') {
 				$inp_countryb	= $str_value;
 				$inp_countryb = filter_var($inp_countryb,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_countryb to $inp_countryb<br />";
+				}
 			}
 			if ($str_key == 'inp_age') {
 				$inp_age = $str_value;
 				$inp_age = filter_var($inp_age,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_age to $inp_age<br />";
+				}
 			}
 			if ($str_key == 'inp_student_parent') {
 				$inp_student_parent = $str_value;
 				$inp_student_parent = filter_var($inp_student_parent,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_student_parent to $inp_student_parent<br />";
+				}
 			}
 			if ($str_key == 'inp_student_parent_email') {
 				$inp_student_parent_email = $str_value;
 				$inp_student_parent_email = strtolower(filter_var($inp_student_parent_email,FILTER_UNSAFE_RAW));
+				if ($doDebug) {
+					echo "set inp_student_parent_email to $inp_student_parent_email<br />";
+				}
 			}
 			if ($str_key == 'inp_zip') {
 				$inp_zip = $str_value;
 				$inp_zip = filter_var($inp_zip,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_zip to $inp_zip<br />";
+				}
 			}
 			if ($str_key == 'inp_timezone') {
 				$inp_timezone = $str_value;
 				$inp_timezone = filter_var($inp_timezone,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_timezone to $inp_timezone<br />";
+				}
 			}
 			if ($str_key == 'inp_callsign') {
 				$inp_callsign = trim($str_value);
 				$inp_callsign = strtoupper(filter_var($inp_callsign,FILTER_UNSAFE_RAW));
 				$haveInpCallsign = TRUE;
+				if ($doDebug) {
+					echo "set inp_callsign to $inp_callsign<br />";
+				}
 			}
 			if ($str_key == 'old_callsign') {
 				$old_callsign = $str_value;
 				$old_callsign = strtoupper(filter_var($old_callsign,FILTER_UNSAFE_RAW));
+				if ($doDebug) {
+					echo "set old_callsign to $old_callsign<br />";
+				}
 			}
 			if ($str_key == 'inp_lastname') {
 				$inp_lastname = no_magic_quotes($str_value);
 //				$inp_lastname = filter_var($inp_lastname,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_lastname to $inp_lastname<br />";
+				}
 			}
 			if ($str_key == 'inp_firstname') {
 				$inp_firstname = $str_value;
@@ -471,234 +541,407 @@ function student_registration_func() {
 			if ($str_key == 'inp_youth') {
 				$inp_youth = $str_value;
 				$inp_youth = filter_var($inp_youth,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_youth to $inp_youth<br />";
+				}
 			}
 			if ($str_key == 'inp_level') {
 				$inp_level = $str_value;
 				$inp_level = filter_var($inp_level,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_level to $inp_level<br />";
+				}
 			}
 			if ($str_key == 'inp_sked1') {
 				$inp_sked1 = $str_value;
 				$inp_sked1 = filter_var($inp_sked1,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_sked1 to $inp_sked1<br />";
+				}
 			}
 			if ($str_key == 'inp_sked2') {
 				$inp_sked2 = $str_value;
 				$inp_sked2 = filter_var($inp_sked2,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_sked2 to $inp_sked2<br />";
+				}
 			}
 			if ($str_key == 'inp_sked3') {
 				$inp_sked3 = $str_value;
 				$inp_sked3 = filter_var($inp_sked3,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_sked3 to $inp_sked3<br />";
+				}
 			}
 			if ($str_key == 'inp_verify') {
 				$inp_verify = $str_value;
 				$inp_verify = filter_var($inp_verify,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_verify to $inp_verify<br />";
+				}
 			}
 			if ($str_key == 'student_timezone') {
 				$student_timezone = $str_value;
 				$student_timezone = filter_var($student_timezone,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set student_timezone to $student_timezone<br />";
+				}
 			}
 			if ($str_key == 'student_level') {
 				$student_level = $str_value;
 				$student_level = filter_var($student_level,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set student_level to $student_level<br />";
+				}
 			}
 			if ($str_key == 'cur_semester') {
 				$cur_semester = $str_value;
 				$cur_semester = filter_var($cur_semester,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set cur_semester to $cur_semester<br />";
+				}
 			}
 			if ($str_key == 'thisOption') {
 				$thisOption = $str_value;
 				$thisOption = filter_var($thisOption,FILTER_UNSAFE_RAW);
 				if ($thisOption == 'assessment') {
 					$doAssessment	= TRUE;
+				if ($doDebug) {
+					echo "set thisOption to $thisOption<br />";
+				}
 				}
 			}
 			if ($str_key == 'cur_level') {
 				$cur_level = $str_value;
 				$cur_level = filter_var($cur_level,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set cur_level to $cur_level<br />";
+				}
 			}
 			if ($str_key == 'inp_doAgain') {
 				$inp_doAgain = $str_value;
 				$inp_doAgain = filter_var($inp_doAgain,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_doAgain to $inp_doAgain<br />";
+				}
 			}
 			if ($str_key == 'newInput') {
 				$newInput = $str_value;
 				$newInput = filter_var($newInput,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set newInput to $newInput<br />";
+				}
 			}
 			if ($str_key == 'pass3FirstTime') {
 				$pass3FirstTime = $str_value;
 				$pass3FirstTime = filter_var($pass3FirstTime,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set pass3FirstTime to $pass3FirstTime<br />";
+				}
 			}
 			if ($str_key == 'inp_first_class_choice') {
 				$inp_first_class_choice = $str_value;
 				$inp_first_class_choice = filter_var($inp_first_class_choice,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_first_class_choice to $inp_first_class_choice<br />";
+				}
 			}
 			if ($str_key == 'inp_second_class_choice') {
 				$inp_second_class_choice = $str_value;
 				$inp_second_class_choice = filter_var($inp_second_class_choice,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_second_class_choice to $inp_second_class_choice<br />";
+				}
 			}
 			if ($str_key == 'inp_third_class_choice') {
 				$inp_third_class_choice = $str_value;
 				$inp_third_class_choice = filter_var($inp_third_class_choice,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_third_class_choice to $inp_third_class_choice<br />";
+				}
 			}
 			if ($str_key == 'inp_first_class_choice_utc') {
 				$inp_first_class_choice_utc = $str_value;
 				$inp_first_class_choice_utc = filter_var($inp_first_class_choice_utc,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_first_class_choice_utc to $inp_first_class_choice_utc<br />";
+				}
 			}
 			if ($str_key == 'inp_second_class_choice_utc') {
 				$inp_second_class_choice_utc = $str_value;
 				$inp_second_class_choice_utc = filter_var($inp_second_class_choice_utc,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_second_class_choice_utc to $inp_second_class_choice_utc<br />";
+				}
 			}
 			if ($str_key == 'inp_third_class_choice_utc') {
 				$inp_third_class_choice_utc = $str_value;
 				$inp_third_class_choice_utc = filter_var($inp_third_class_choice_utc,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_third_class_choice_utc to $inp_third_class_choice_utc<br />";
+				}
 			}
 			if ($str_key == 'errorString') {
 				$errorString = $str_value;
 //				$errorString = filter_var($errorString,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set errorString to $errorString<br />";
+				}
 			}
 			if ($str_key == 'inp_number') {
 				$inp_number = $str_value;
 				$inp_number = filter_var($inp_number,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_number to $inp_number<br />";
+				}
 			}
 			if ($str_key == 'nextLevel') {
 				$nextLevel = $str_value;
 				$nextLevel = filter_var($nextLevel,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set nextLevel to $nextLevel<br />";
+				}
 			}
 			if ($str_key == 'audioFileName') {
 				$audioFileName = $str_value;
 				$audioFileName = filter_var($audioFileName,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set audioFileName to $audioFileName<br />";
+				}
 			}
 			if ($str_key == 'audioFileNumber') {
 				$audioFileNumber = $str_value;
 				$audioFileNumber = filter_var($audioFileNumber,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set audioFileNumber to $audioFileNumber<br />";
+				}
 			}
 			if ($str_key == 'firsttime') {
 				$firsttime = $str_value;
 				$firsttime = filter_var($firsttime,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set firsttime to $firsttime<br />";
+				}
 			}
 			if ($str_key == 'nocatalog') {
 				$nocatalog = $str_value;
 				$nocatalog = filter_var($nocatalog,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set nocatalog to $nocatalog<br />";
+				}
 			}
 			if ($str_key == 'inp_delete') {
 				$inp_delete = $str_value;
 				$inp_delete = filter_var($inp_delete,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_delete to $inp_delete<br />";
+				}
 			}
 			if ($str_key == 'timezone') {
 				$timezone = $str_value;
 				$timezone = filter_var($timezone,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set timezone to $timezone<br />";
+				}
 			}
 			if ($str_key == 'browser_timezone_id') {
 				$browser_timezone_id = $str_value;
 				$browser_timezone_id = filter_var($browser_timezone_id,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set browser_timezone_id to $browser_timezone_id<br />";
+				}
 			}
 			if ($str_key == 'json_updateParams') {
 				$json_updateParams = $str_value;
 				$json_updateParams = stripslashes($json_updateParams);
+				if ($doDebug) {
+					echo "set json_updateParams to $json_updateParams<br />";
+				}
 			}
 			if ($str_key == 'inp_whatsapp') {
 				$inp_whatsapp = $str_value;
 				$inp_whatsapp = filter_var($inp_whatsapp,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_whatsapp to $inp_whatsapp<br />";
+				}
 			}
 			if ($str_key == 'inp_telegram') {
 				$inp_telegram = $str_value;
 				$inp_telegram = filter_var($inp_telegram,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_telegram to $inp_telegram<br />";
+				}
 			}
 			if ($str_key == 'inp_signal') {
 				$inp_signal = $str_value;
 				$inp_signal = filter_var($inp_signal,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_signal to $inp_signal<br />";
+				}
 			}
 			if ($str_key == 'inp_messenger') {
 				$inp_messenger = $str_value;
 				$inp_messenger = filter_var($inp_messenger,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_messenger to $inp_messenger<br />";
+				}
 			}
 			if ($str_key == 'inp_timezone_id') {
 				$inp_timezone_id = $str_value;
 				$inp_timezone_id = filter_var($inp_timezone_id,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_timezone_id to $inp_timezone_id<br />";
+				}
 			}
 			if ($str_key == 'inp_timezone_offset') {
 				$inp_timezone_offset = $str_value;
 				$inp_timezone_offset = filter_var($inp_timezone_offset,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_timezone_offset to $inp_timezone_offset<br />";
+				}
 			}
 			if ($str_key == 'inp_days1') {
 				$inp_days1 = $str_value;
 				$inp_days1 = filter_var($inp_days1,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_days1 to $inp_days1<br />";
+				}
 			}
 			if ($str_key == 'inp_days2') {
 				$inp_days2 = $str_value;
 				$inp_days2 = filter_var($inp_days2,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_days2 to $inp_days2<br />";
+				}
 			}
 			if ($str_key == 'inp_days3') {
 				$inp_days3 = $str_value;
 				$inp_days3 = filter_var($inp_days3,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_days3 to $inp_days3<br />";
+				}
 			}
 			if ($str_key == 'inp_times1') {
 				$inp_times1 = $str_value;
 				$inp_times1 = filter_var($inp_times1,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set strPass to $strPass<br />";
+				}
 			}
 			if ($str_key == 'inp_times2') {
 				$inp_times2 = $str_value;
 				$inp_times2 = filter_var($inp_times2,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_times2 to $inp_times2<br />";
+				}
 			}
 			if ($str_key == 'inp_times3') {
 				$inp_times3 = $str_value;
 				$inp_times3 = filter_var($inp_times3,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_times3 to $inp_times3<br />";
+				}
 			}
 			if ($str_key == 'student_ID') {
 				$student_ID = $str_value;
 				$student_ID = filter_var($student_ID,FILTER_UNSAFE_RAW);
 				$haveStudentID	= TRUE;
+				if ($doDebug) {
+					echo "set student_ID to $student_ID<br />";
+				}
 			}
 			if ($str_key == 'inp_bypass') {
 				$inp_bypass = $str_value;
 				$inp_bypass = filter_var($inp_bypass,FILTER_UNSAFE_RAW);
-			}
+					if ($doDebug) {
+					echo "set inp_bypass to $inp_bypass<br />";
+				}
+		}
 			if ($str_key == 'badTimezone') {
 				$badTimezone = $str_value;
 				$badTimezone = filter_var($badTimezone,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set badTimezone to $badTimezone<br />";
+				}
 			}
 			if ($str_key 		== "inp_student_catalog_options") {
 				$inp_student_catalog_options	 = $str_value;
 				$inp_student_catalog_options	 = filter_var($inp_student_catalog_options,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_student_catalog_options to $inp_student_catalog_options<br />";
+				}
 			}
 			if ($str_key 		== "inp_student_flexible") {
 				$inp_student_flexible	 = $str_value;
 				$inp_student_flexible	 = filter_var($inp_student_flexible,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_student_flexible to $inp_student_flexible<br />";
+				}
 			}
 			if ($str_key 		== "result_option") {
 				$result_option	 = $str_value;
 				$result_option	 = filter_var($result_option,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set result_option to $result_option<br />";
+				}
 			}
 			if ($str_key 		== "inp_sked_times") {
 				$inp_sked_times	 = $str_value;
 //				$inp_sked_times	 = filter_var($inp_sked_times,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_sked_times:<br /><pre>";
+					var_dump($inp_sked_times);
+					echo "</pre><br />";
+				}
 			}
 			if ($str_key 		== "doUpdate") {
 				$doUpdate	 = $str_value;
 //				$doUpdate	 = filter_var($doUpdate,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set doUpdate to $doUpdate<br />";
+				}
 			}
 			if ($str_key 		== "continuePass8A") {
 				$continuePass8A	 = $str_value;
 				$continuePass8A	 = filter_var($continuePass8A,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set continuePass8A to $continuePass8A<br />";
+				}
 			}
 			if ($str_key 		== "inp_flex") {
 				$inp_flex	 = $str_value;
 				$inp_flex	 = filter_var($inp_flex,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_flex to $inp_flex<br />";
+				}
 			}
 			if ($str_key 		== "token") {
 				$token	 = $str_value;
 				$token	 = filter_var($token,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set token to $token<br />";
+				}
 			}
 			if ($str_key 		== "fakeIt") {
 				$fakeIt	 = $str_value;
 				$fakeIt	 = filter_var($fakeIt,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set fakeIt to $fakeIt<br />";
+				}
 			}
 			if ($str_key 		== "inp_available") {
 				$inp_available	 = $str_value;
 				$inp_available	 = filter_var($inp_available,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_available to $inp_available<br />";
+				}
 			}
 			if ($str_key 		== "insertDataJson") {
 				$insertDataJson	 = $str_value;
 				$insertDataJson	 = filter_var($insertDataJson,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set insertDataJson to $insertDataJson<br />";
+				}
 			}
 		}
 	}
@@ -1981,6 +2224,7 @@ function student_registration_func() {
 									<input type='hidden' name='inp_callsign' value='$student_call_sign'>
 									<input type='hidden' name='token' value='$token'>
 									<input type='hidden' name='inp_semester' value='$student_semester'>
+									<input type='hidden' name='inp_level' value='$student_level'>
 									<input type='hidden' name='schedAvail' value='$schedAvail'>
 									<input type='hidden' name='insertDataJson' value='$insertDataJson'>
 									$result[1]<br clear='all' />
@@ -2067,30 +2311,26 @@ function student_registration_func() {
 				$haveAny							= FALSE;
 				$firstTime							= TRUE;
 				foreach($inp_sked_times as $thisValue) {
-					if ($thisValue != 'ANY') {
-						if ($firstTime) {
-							$firstTime				= FALSE;
-							$student_catalog_options	= $thisValue;
-						} else {
-							$student_catalog_options	= "$student_catalog_options,$thisValue";
-						}
+					if ($firstTime) {
+						$firstTime				= FALSE;
+						$student_catalog_options	= $thisValue;
 					} else {
-						$haveAny					= TRUE;
+						$student_catalog_options	= "$student_catalog_options,$thisValue";
 					}
 				}
-				if ($haveAny) {
-					$student_flexible				= 'Y';
-					$updateParams['student_flexible']	= 'Y';
-					$updateFormat[]					= '%s';
-					$actionLogUpdates				.= "Set flexible to Y, ";
-					$doUpdateStudent				= TRUE;
-					$student_catalog_options		= "";
-				}
-				$updateParams['student_catalog_options']	= $student_catalog_options;
-				$updateFormat[]								= '%s';
-				$actionLogUpdates					.= "set catalog_options to $student_catalog_options, ";
-				$doUpdateStudent					= TRUE;
 			}
+			if ($inp_flex == 'ANY') {
+				$student_flexible				= 'Y';
+				$updateParams['student_flexible']	= 'Y';
+				$updateFormat[]					= '%s';
+				$actionLogUpdates				.= "Set flexible to Y, ";
+				$doUpdateStudent				= TRUE;
+				$student_catalog_options		= "";
+			}
+			$updateParams['student_catalog_options']	= $student_catalog_options;
+			$updateFormat[]								= '%s';
+			$actionLogUpdates					.= "set catalog_options to $student_catalog_options, ";
+			$doUpdateStudent					= TRUE;
 		} elseif ($result_option == 'catalog' || $result_option == 'avail') {
 			if ($doDebug) {
 				echo "handling the catalog option<br />
@@ -2125,7 +2365,7 @@ function student_registration_func() {
 				$actionLogUpdates								.= "Set first_class_choices, ";
 				$firstChoice									= $student_first_class_choice;
 			} else {
-				sendErrorEmail("$jobname pass $strPass inp_sked1 of $inp_sked1 is invalid for $student_call_sign");
+				sendErrorEmail("$jobname pass $strPass inp_sked1 of $inp_sked1 is invalid for $inp_callsign");
 				$student_first_class_choice						= "None";
 				$student_first_class_choice_utc					= "None";
 				$updateParams['student_first_class_choice']		= 'None';
@@ -2150,7 +2390,7 @@ function student_registration_func() {
 				$actionLogUpdates								.= "Set second_class_choices, ";
 				$secondChoice									= $student_second_class_choice;
 			} else {
-				sendErrorEmail("$jobname pass $strPass inp_sked2 of $inp_sked2 is invalid for $student_call_sign");
+				sendErrorEmail("$jobname pass $strPass inp_sked2 of $inp_sked2 is invalid for $inp_callsign");
 				$student_second_class_choice					= "None";
 				$student_second_class_choice_utc				= "None";
 				$updateParams['student_second_class_choice']	= 'None';
@@ -2175,7 +2415,7 @@ function student_registration_func() {
 				$actionLogUpdates								.= "Set third_class_choices, ";
 				$thirdChoice									= $student_third_class_choice;
 			} else {
-				sendErrorEmail("$jobname pass $strPass inp_sked3 of $inp_sked3 is invalid for $student_call_sign");
+				sendErrorEmail("$jobname pass $strPass inp_sked3 of $inp_sked3 is invalid for $inp_callsign");
 				$student_third_class_choice						= "None";
 				$student_third_class_choice_utc					= "None";
 				$updateParams['student_third_class_choice']		= 'None';
@@ -2360,7 +2600,7 @@ function student_registration_func() {
 									<button onClick=\"window.print()\">Click to print this<br />page for your records</button>";
 		} else {
 			$theSubject		= "CWA Error Report -- Bad Actor Registration";
-			$theContent		= "Student $student_call_sign signed up for a $student_level class for the $stdent_semester semester. 
+			$theContent		= "Student $inp_callsign signed up for a $student_level class for the $stdent_semester semester. 
 								The student is in the Bad Actors table. The registration is on hold.";
 			$increment		= 0;
 			if ($testMode) {
@@ -2387,7 +2627,7 @@ function student_registration_func() {
 		}
 		$content			.= "<p>You are signed-up as follows:
 								<table style='width:900px;'>
-								<tr><td><b>Callsign<br />$student_call_sign</b></td>
+								<tr><td><b>Callsign<br />$inp_callsign</b></td>
 									<td><b>Name</b><br />$student_last_name, $student_first_name</td>
 									<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
 									<td><b>Email</b><br />$student_email</td></tr>
@@ -2399,8 +2639,8 @@ function student_registration_func() {
 									<td><b>Telegram</b><br />$student_telegram</td>
 									<td><b>Signal</b><br />$student_signal</td>
 									<td><b>Messenger</b><br />$student_messenger</td></tr>
-								<tr><td colspan='2'><b>Level: </b>$student_level</td>
-									<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
+								<tr><td><b>Level: </b>$inp_level</td>
+									<td colspan='3'><b>Semester: </b>$inp_semester</td></tr>";
 		if ($result_option == 'option') {
 			$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
 			if ($student_flexible == 'Y') {
