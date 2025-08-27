@@ -366,7 +366,7 @@ function manage_advisor_class_assignments_func() {
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
@@ -698,7 +698,7 @@ function manage_advisor_class_assignments_func() {
 										$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 										$student_promotable  					= $studentRow->student_promotable;
 										$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-										$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+										$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 										$student_available_class_days  			= $studentRow->student_available_class_days;
 										$student_intervention_required  		= $studentRow->student_intervention_required;
 										$student_copy_control  					= $studentRow->student_copy_control;
@@ -800,13 +800,13 @@ function manage_advisor_class_assignments_func() {
 													$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 													$studentUpdateParams[]	= "student_status|V|s";
 													$confirmationMsg		= "Student $student_call_sign confirmed as not attending and a replacement has been requested.<br />";
-													$removeStudent				= FALSE;
+													$removeStudent			= FALSE;
 												} elseif ($inp_attend == 'class') {
 													if ($doDebug) {
 														echo "Doing Class; Replacement Yes<br />";
 													}
 													if ($inp_comment1 != '') {
-														$myStr				= "Advisor comments: $inp_coment1 ";
+														$myStr				= "Advisor comments: $inp_comment1 ";
 													}
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student does not want the class. $myStr Replacement requested ";
 													$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign does not want the class. $myStr Replacement requested ";
@@ -819,19 +819,14 @@ function manage_advisor_class_assignments_func() {
 													if ($doDebug) {
 														echo "Doing advisor; Replacement Yes<br />";
 													}
-													if ($student_excluded_advisor == '') {
-														$student_excluded_advisor	= $advisor_call_sign;
-													} else {
-														$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
-													}
+													$newStudentExcludedAdvisor	= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
 													if ($inp_comment2 != '') {
-														$myStr				= "Advisor comments: $inp_coment2 ";
+														$myStr				= "Advisor comments: $inp_comment2 ";
 													}
-													$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr Replacement requested ";
 													$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM advisor does not want $student_call_sign. $myStr Replacement requested ";
 													$studentUpdateParams[]	= "student_action_log|$student_action_log|s";
-													$studentUpdateParams[]	= "advisor_excluded_advisor|$student_excluded_advisor|s";
+													$studentUpdateParams[]	= "student_excluded_advisor|$newStudentExcludedAdvisor|s";
 													$studentUpdateParams[]	= "student_hold_reason_code|X|s";
 													$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 													$studentUpdateParams[]	= "student_status|R|s";
@@ -860,16 +855,11 @@ function manage_advisor_class_assignments_func() {
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign 
 student will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
 No replacement requested.  ";
-													if ($student_excluded_advisor == '') {
-														$student_excluded_advisor	= $advisor_call_sign;
-													} else {
-														$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
-													}
-													$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
+													$newStudentExcludedAdvisor	= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
 													$studentUpdateParams[]		= "student_action_log|$student_action_log|s";
 													$studentUpdateParams[]		= "student_hold_reason_code|X|s";
 													$studentUpdateParams[]		= "student_class_priority|2|d";
-													$studentUpdateParams[]		= "student_excluded_advisor|$student_excluded_advisor|s";
+													$studentUpdateParams[]		= "student_excluded_advisor|$newStudentExcludedAdvisor|s";
 													$studentUpdateParams[]		= "student_intervention_required|H|s";
 													$student_remove_status		= '';
 													$removeStudent				= TRUE;
@@ -897,12 +887,7 @@ No replacement requested. ";
 													if ($doDebug) {
 														echo "Doing advisor; Replacement No<br />";
 													}
-													if ($student_excluded_advisor == '') {
-														$student_excluded_advisor	= $advisor_call_sign;
-													} else {
-														$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
-													}
-													$student_excluded_advisor	= str_replace("|","&",$student_excluded_advisor);
+													$newStudentExcludedAdvisor		= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
 													$myStr					= "";
 													if ($inp_comment2 != '') {
 														$myStr				= "Advisor comments: $inp_comment2 ";
@@ -910,7 +895,7 @@ No replacement requested. ";
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr No replacement requested. Student set to unassigned ";
 													$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM advisor does not want $student_call_sign. $myStr No replacement requested ";
 													$studentUpdateParams[]	= "student_action_log|$student_action_log|s";
-													$studentUpdateParams[]	= "student_excluded_advisor|$student_excluded_advisor|s";
+													$studentUpdateParams[]	= "student_excluded_advisor|$newStudentExcludedAdvisor|s";
 													$studentUpdateParams[]	= "student_hold_reason_code|X|s";
 													$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 													$student_remove_status	= '';
@@ -926,14 +911,10 @@ No replacement requested. ";
 													}
 													$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign student will not attend. $myStr No replacement requested ";
 													$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM $student_call_sign will not attend. $myStr No replacement requested ";
-													if ($student_excluded_advisor == '') {
-														$student_excluded_advisor	= $advisor_call_sign;
-													} else {
-														$student_excluded_advisor	= "$student_excluded_advisor|$advisor_call_sign";
-													}
+													$newStudentExcludedAdvisor		= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
 													$studentUpdateParams[]	= "student_hold_reason_code|X|s";
 													$studentUpdateParams[]	= "student_class_priority|2|d";
-													$studentUpdateParams[]	= "student_excluded_advisor|$student_assigned_advisor|s";
+													$studentUpdateParams[]	= "student_excluded_advisor|$newStudentExcludedAdvisor|s";
 													$studentUpdateParams[]	= "student_action_log|$student_action_log|s";
 													$advisorUpdateParams[]	= "advisor_action_log|$advisor_action_log|s";
 													$student_remove_status	= 'C';
@@ -1277,7 +1258,7 @@ No replacement requested. ";
 												$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 												$student_promotable  					= $studentRow->student_promotable;
 												$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-												$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+												$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 												$student_available_class_days  			= $studentRow->student_available_class_days;
 												$student_intervention_required  		= $studentRow->student_intervention_required;
 												$student_copy_control  					= $studentRow->student_copy_control;
@@ -1557,7 +1538,7 @@ No replacement requested. ";
 						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 						$student_promotable  					= $studentRow->student_promotable;
 						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+						$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 						$student_available_class_days  			= $studentRow->student_available_class_days;
 						$student_intervention_required  		= $studentRow->student_intervention_required;
 						$student_copy_control  					= $studentRow->student_copy_control;
@@ -1624,9 +1605,24 @@ No replacement requested. ";
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
