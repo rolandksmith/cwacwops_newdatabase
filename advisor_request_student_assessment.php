@@ -384,7 +384,12 @@ function advisor_request_student_assessment_func() {
 	}
 	$theSemester				= $currentSemester;
 	if ($currentSemester == 'Not in Session') {
-		$theSemester			= $prevSemester;
+		$myInt					= days_to_semester($nextSemester);
+		if ($myInt > 45) {
+			$theSemester			= $prevSemester;
+		} else {
+			$theSemester			= $nextSemester;
+		}
 	}
 
 
