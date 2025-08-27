@@ -194,7 +194,7 @@ function student_management_func() {
 			}
 			if ($str_key 			== "inp_prev_advisor_class") {
 				$inp_prev_advisor_class = $str_value;
-				$inp_prev_advisor_class = strtoupper(filter_var($inp_prev_advisor_class,FILTER_UNSAFE_RAW));
+				$inp_prev_advisor_class = filter_var($inp_prev_advisor_class,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 			== "inp_prev_advisor") {
 				$inp_prev_advisor = $str_value;
@@ -4983,9 +4983,23 @@ function getTheReason($strReasonCode) {
 		$thisStr		= 'Testmode';
 	}
 	$ipAddr			= get_the_user_ip();
-	$result			= write_joblog_func("$jobname|$nowDate|$nowTime|$userName|Time|$thisStr|$strPass: $elapsedTime|$ipAddr");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;
 }
