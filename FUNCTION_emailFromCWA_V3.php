@@ -45,7 +45,7 @@ function emailFromCWA_v3($mailParameters) {
 	13 to theRecipient bcc Roland, Bob, Tcc Andy
 	14 to theRecipient Tcc Roland, Bob, Andy
 	15 to theRecipient Tcc Roland, Bob, Andy	(same as 11)
-	16 to Roland
+	16 to Roland, Bob
 	17 to Bob, tcc Roland, Andy
 	18 to Bob, Roland, Andy, Chris
 	19 to Bob tcc Roland, Andy
@@ -232,7 +232,7 @@ function emailFromCWA_v3($mailParameters) {
 			if ($doDebug) {
 				$debugLog	.= "doing case 16<br />";
 			}
-			$thisTo			= $roland;
+			$thisTo			= "$roland,$bob";
 			$thisBcc		= "";
 			$thisTcc		= "";
 			break;
