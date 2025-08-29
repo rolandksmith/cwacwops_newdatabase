@@ -32,7 +32,7 @@ function daily_uploads_cleanup_func() {
 		echo "</pre><br />";
 	}
 	$userName				= $initializationArray['userName'];
-	$siteURL				= $initializationArray['siteURL'];
+	$siteURL				= $initializationArray['siteurl'];
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
 	ini_set('memory_limit','256M');
@@ -131,7 +131,7 @@ function daily_uploads_cleanup_func() {
 		$content			.= "<h3>$jobname</h3>";
 		
 		// get the directory content
-		if (str_contains($siteURL,"localhost") {
+		if (str_contains($siteURL,'localhost')) {
 			$filePath	= "/Users/rksmih/cwa-docker/www/wp-content/uploads/";
 		} else {
 			$filePath	= "/home/cwacwops/public_html/wp-content/uploads/";
@@ -266,30 +266,8 @@ function daily_uploads_cleanup_func() {
 			}
 		}
 
-//		$theSubject	= "$jobname";
-//		$theContent	= "$jobname was run at $nowDate $nowTime, Login to <a href='$siteURL/program-list'>CW Academy</a> to see the 
-//						report.";
-//		if ($testMode) {		
-//			$theRecipient	= '';
-//			$mailCode	= 1;
-//			$theSubject = "TESTMODE $theSubject";
-//		} else {
-//			$theRecipient	= '';
-//			$mailCode		= 16;
-//		}
-//		$result		= emailFromCWA_v2(array('theRecipient'=>$theRecipient,
-//										 		  'theSubject'=>$theSubject,
-//										 		  'jobname'=>$jobname,
-//										 		  'theContent'=>$theContent,
-//										 		  'mailCode'=>$mailCode,
-//										 		  'testMode'=>$testMode,
-//										 		  'doDebug'=>$doDebug));
-//		if ($result === TRUE) {
-			$content	.= "Process completed";
-//		} else {
-//			$content .= "<br />The final mail send function to $theRecipient failed.</p>";
-			return $content;
-//		}
+		$content	.= "Process completed";
+		return $content;
 	}
 }	
 add_shortcode ('daily_uploads_cleanup', 'daily_uploads_cleanup_func');
