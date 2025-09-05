@@ -268,6 +268,10 @@ function advisor_request_student_assessment_func() {
 				$class_offset		 = $str_value;
 				$class_offset		 = strtoupper(filter_var($class_offset,FILTER_UNSAFE_RAW));
 			}
+			if ($str_key 			== "timezone_id") {
+				$timezone_id		 = $str_value;
+				$timezone_id		 = strtoupper(filter_var($timezone_id,FILTER_UNSAFE_RAW));
+			}
 			if ($str_key 		== "inp_verbose") {
 				$inp_verbose	 = $str_value;
 				$inp_verbose	 = filter_var($inp_verbose,FILTER_UNSAFE_RAW);
@@ -761,6 +765,7 @@ function advisor_request_student_assessment_func() {
 									<input type='hidden' name='enstr' value='$enstr'>
 									<input type='hidden' name='class_level' value='$advisorClass_level'>
 									<input type='hidden' name='class_offset' value='$advisorClass_timezone_offset'>
+									<input type='hidden' name='timezone_id' value='$advisorClass_timezone_id'>
 									<input type='hidden' name='nextClass' value='$nextClass'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
@@ -846,6 +851,7 @@ function advisor_request_student_assessment_func() {
 					$student_level			= $class_level;
 					$student_email			= $advisorEmail;
 					$student_timezone_offset	= $class_offset;
+					$student_timezone_id	= $timezone_id;
 					$haveData				= TRUE;
 					$haveUsername			= TRUE;						
 				} else {
