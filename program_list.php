@@ -611,6 +611,7 @@ function program_list_func() {
 								<h4>Roland Programs</h4>
 								<ul>
 								<li><a href='$siteURL/cwa-advisor-service-report/' target='_blank'>Advisor Service Report</a>
+								<li><a href='$siteURL/cwa-advisor-session-info/' target='_blank'>Advisor Session Info</a>
 								<li><a href='$siteURL/cwa-cross-check-student-assignments/' target='_blank'>Cross Check Student Assignments</a>
 								<li><a href='$siteURL/cwa-daily-cron-debug/' target='_blank'>Daily Cron Debug</a>
 								<li><a href='$siteURL/cwa-dump-user-info/' target='_blank'>Dump User Info</a>
