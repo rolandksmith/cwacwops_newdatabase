@@ -1131,78 +1131,78 @@ function daily_student_cron_v4_func() {
 											}
 											if ($numRRows > 0) {
 												foreach ($wpw1_cwa_replace as $replaceRow) {
-													$replace_master_ID 					= $studentRow->user_ID;
-													$replace_master_call_sign 			= $studentRow->user_call_sign;
-													$replace_first_name 				= $studentRow->user_first_name;
-													$replace_last_name 					= $studentRow->user_last_name;
-													$replace_email 						= $studentRow->user_email;
-													$replace_ph_code 					= $studentRow->user_ph_code;
-													$replace_phone 						= $studentRow->user_phone;
-													$replace_city 						= $studentRow->user_city;
-													$replace_state 						= $studentRow->user_state;
-													$replace_zip_code 					= $studentRow->user_zip_code;
-													$replace_country_code 				= $studentRow->user_country_code;
-													$replace_country 					= $studentRow->user_country;
-													$replace_whatsapp 					= $studentRow->user_whatsapp;
-													$replace_telegram 					= $studentRow->user_telegram;
-													$replace_signal 					= $studentRow->user_signal;
-													$replace_messenger 					= $studentRow->user_messenger;
-													$replace_master_action_log 			= stripslashes($studentRow->user_action_log);
-													$replace_timezone_id 				= $studentRow->user_timezone_id;
-													$replace_languages 					= $studentRow->user_languages;
-													$replace_survey_score 				= $studentRow->user_survey_score;
-													$replace_is_admin					= $studentRow->user_is_admin;
-													$replace_role 						= $studentRow->user_role;
-													$replace_master_date_created 		= $studentRow->user_date_created;
-													$replace_master_date_updated 		= $studentRow->user_date_updated;
+													$replace_master_ID 					= $replaceRow->user_ID;
+													$replace_master_call_sign 			= $replaceRow->user_call_sign;
+													$replace_first_name 				= $replaceRow->user_first_name;
+													$replace_last_name 					= $replaceRow->user_last_name;
+													$replace_email 						= $replaceRow->user_email;
+													$replace_ph_code 					= $replaceRow->user_ph_code;
+													$replace_phone 						= $replaceRow->user_phone;
+													$replace_city 						= $replaceRow->user_city;
+													$replace_state 						= $replaceRow->user_state;
+													$replace_zip_code 					= $replaceRow->user_zip_code;
+													$replace_country_code 				= $replaceRow->user_country_code;
+													$replace_country 					= $replaceRow->user_country;
+													$replace_whatsapp 					= $replaceRow->user_whatsapp;
+													$replace_telegram 					= $replaceRow->user_telegram;
+													$replace_signal 					= $replaceRow->user_signal;
+													$replace_messenger 					= $replaceRow->user_messenger;
+													$replace_master_action_log 			= stripslashes($replaceRow->user_action_log);
+													$replace_timezone_id 				= $replaceRow->user_timezone_id;
+													$replace_languages 					= $replaceRow->user_languages;
+													$replace_survey_score 				= $replaceRow->user_survey_score;
+													$replace_is_admin					= $replaceRow->user_is_admin;
+													$replace_role 						= $replaceRow->user_role;
+													$replace_master_date_created 		= $replaceRow->user_date_created;
+													$replace_master_date_updated 		= $replaceRow->user_date_updated;
 
-													$replace_ID								= $studentRow->student_id;
-													$replace_call_sign						= $studentRow->student_call_sign;
-													$replace_time_zone  					= $studentRow->student_time_zone;
-													$replace_timezone_offset				= $studentRow->student_timezone_offset;
-													$replace_youth  						= $studentRow->student_youth;
-													$replace_age  							= $studentRow->student_age;
-													$replace_replace_parent 				= $studentRow->student_parent;
-													$replace_replace_parent_email  			= strtolower($studentRow->student_parent_email);
-													$replace_level  						= $studentRow->student_level;
-													$replace_waiting_list 					= $studentRow->student_waiting_list;
-													$replace_request_date  					= $studentRow->student_request_date;
-													$replace_semester						= $studentRow->student_semester;
-													$replace_notes  						= $studentRow->student_notes;
-													$replace_welcome_date  					= $studentRow->student_welcome_date;
-													$replace_email_sent_date  				= $studentRow->student_email_sent_date;
-													$replace_email_number  					= $studentRow->student_email_number;
-													$replace_response  						= strtoupper($studentRow->student_response);
-													$replace_response_date  				= $studentRow->student_response_date;
-													$replace_abandoned  					= $studentRow->student_abandoned;
-													$replace_replace_status  				= strtoupper($studentRow->student_status);
-													$replace_action_log  					= stripslashes($studentRow->student_action_log);
-													$replace_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-													$replace_selected_date  				= $studentRow->student_selected_date;
-													$replace_no_catalog  					= $studentRow->student_no_catalog;
-													$replace_hold_override  				= $studentRow->student_hold_override;
-													$replace_assigned_advisor  				= $studentRow->student_assigned_advisor;
-													$replace_advisor_select_date  			= $studentRow->student_advisor_select_date;
-													$replace_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-													$replace_hold_reason_code  				= $studentRow->student_hold_reason_code;
-													$replace_class_priority  				= $studentRow->student_class_priority;
-													$replace_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-													$replace_promotable  					= $studentRow->student_promotable;
-													$replace_excluded_advisor  				= $studentRow->student_excluded_advisor;
-													$replace_replace_survey_completion_date	= $studentRow->student_survey_completion_date;
-													$replace_available_class_days  			= $studentRow->student_available_class_days;
-													$replace_intervention_required  		= $studentRow->student_intervention_required;
-													$replace_copy_control  					= $studentRow->student_copy_control;
-													$replace_first_class_choice  			= $studentRow->student_first_class_choice;
-													$replace_second_class_choice  			= $studentRow->student_second_class_choice;
-													$replace_third_class_choice  			= $studentRow->student_third_class_choice;
-													$replace_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-													$replace_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-													$replace_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-													$replace_catalog_options				= $studentRow->student_catalog_options;
-													$replace_flexible						= $studentRow->student_flexible;
-													$replace_date_created 					= $studentRow->student_date_created;
-													$replace_date_updated			  		= $studentRow->student_date_updated;
+													$replace_ID								= $replaceRow->student_id;
+													$replace_call_sign						= $replaceRow->student_call_sign;
+													$replace_time_zone  					= $replaceRow->student_time_zone;
+													$replace_timezone_offset				= $replaceRow->student_timezone_offset;
+													$replace_youth  						= $replaceRow->student_youth;
+													$replace_age  							= $replaceRow->student_age;
+													$replace_replace_parent 				= $replaceRow->student_parent;
+													$replace_replace_parent_email  			= strtolower($replaceRow->student_parent_email);
+													$replace_level  						= $replaceRow->student_level;
+													$replace_waiting_list 					= $replaceRow->student_waiting_list;
+													$replace_request_date  					= $replaceRow->student_request_date;
+													$replace_semester						= $replaceRow->student_semester;
+													$replace_notes  						= $replaceRow->student_notes;
+													$replace_welcome_date  					= $replaceRow->student_welcome_date;
+													$replace_email_sent_date  				= $replaceRow->student_email_sent_date;
+													$replace_email_number  					= $replaceRow->student_email_number;
+													$replace_response  						= strtoupper($replaceRow->student_response);
+													$replace_response_date  				= $replaceRow->student_response_date;
+													$replace_abandoned  					= $replaceRow->student_abandoned;
+													$replace_replace_status  				= strtoupper($replaceRow->student_status);
+													$replace_action_log  					= stripslashes($replaceRow->student_action_log);
+													$replace_pre_assigned_advisor  			= $replaceRow->student_pre_assigned_advisor;
+													$replace_selected_date  				= $replaceRow->student_selected_date;
+													$replace_no_catalog  					= $replaceRow->student_no_catalog;
+													$replace_hold_override  				= $replaceRow->student_hold_override;
+													$replace_assigned_advisor  				= $replaceRow->student_assigned_advisor;
+													$replace_advisor_select_date  			= $replaceRow->student_advisor_select_date;
+													$replace_advisor_class_timezone 		= $replaceRow->student_advisor_class_timezone;
+													$replace_hold_reason_code  				= $replaceRow->student_hold_reason_code;
+													$replace_class_priority  				= $replaceRow->student_class_priority;
+													$replace_assigned_advisor_class 		= $replaceRow->student_assigned_advisor_class;
+													$replace_promotable  					= $replaceRow->student_promotable;
+													$replace_excluded_advisor  				= $replaceRow->student_excluded_advisor;
+													$replace_replace_survey_completion_date	= $replaceRow->student_survey_completion_date;
+													$replace_available_class_days  			= $replaceRow->student_available_class_days;
+													$replace_intervention_required  		= $replaceRow->student_intervention_required;
+													$replace_copy_control  					= $replaceRow->student_copy_control;
+													$replace_first_class_choice  			= $replaceRow->student_first_class_choice;
+													$replace_second_class_choice  			= $replaceRow->student_second_class_choice;
+													$replace_third_class_choice  			= $replaceRow->student_third_class_choice;
+													$replace_first_class_choice_utc  		= $replaceRow->student_first_class_choice_utc;
+													$replace_second_class_choice_utc  		= $replaceRow->student_second_class_choice_utc;
+													$replace_third_class_choice_utc  		= $replaceRow->student_third_class_choice_utc;
+													$replace_catalog_options				= $replaceRow->student_catalog_options;
+													$replace_flexible						= $replaceRow->student_flexible;
+													$replace_date_created 					= $replaceRow->student_date_created;
+													$replace_date_updated			  		= $replaceRow->student_date_updated;
 													
 													if ($replace_assigned_advisor == '') {
 														//// add student to the advisor's class
@@ -1234,6 +1234,107 @@ function daily_student_cron_v4_func() {
 															if ($doDebug) {
 																echo "&nbsp;&nbsp;&nbsp; student $replacement_student was replaced by $replace_call_sign<br />";
 															}
+															//// format replacement email to advisor
+																					
+															///// send the email to the advisor
+															$theSubject			= "CW Academy Replacement Student Information for your Class";
+															if ($testMode) {
+																$theRecipient			= 'rolandksmith@gmail.com';
+																$theSubject				= "TESTMODE $theSubject";
+																$mailCode				= 2;
+															} else {
+																$theRecipient			= $advisorEmail;
+																$mailCode				= 14;
+															}
+																
+															$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
+																						<p>You have requested a replacement student for 
+																						$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
+																						<p>A replacement student has been added to your class. Please login to 
+																						<a href='$siteURL/login'>CW Academy</a> and follow the directions there.
+																						<p>If you have questions or concerns, do not reply to this email as the address is not monitored. 
+																						Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
+																						<p>Thanks for your service as an advisor!<br />
+																						CW Academy</p>";
+															$mailResult				= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
+																											'theSubject'=>$theSubject,
+																											'theContent'=>$thisContent,
+																											'jobname'=>$jobname,
+																											'mailCode'=>$mailCode,
+																											'testMode'=>$testMode,
+																											'doDebug'=>FALSE));
+															// $mailResult = TRUE;
+															if ($mailResult[0] === TRUE) {
+																$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$advisorClass_advisor_call_sign&strpass=2' target='_blank'>$theRecipient</a>.<br />";
+																if ($doDebug) {
+																	echo $mailResult[1];
+																	echo "Replacement email sent to the advisor at $theRecipient<br />";
+																}
+																$studentEmailCount--;
+															} else {
+																$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.</p><br />";
+																if ($doDebug) {
+																	echo $mailResult[1];
+																	echo "Replacement email FAILED to advisor at $theRecipient<br />";
+																}
+															}
+															// add the reminder to the reminders table
+															if ($doDebug) {
+																echo "Adding reminder to reminders table<br />";
+															}
+															$myStr				= date('Y-m-d H:i:s');
+															$closeStr			= strtotime("+10 days");
+															$close_date			= date('Y-m-d H:i:s',$closeStr);
+															$token				= mt_rand();
+															$reminder_text		= "<b>Replacement Student:</b> Your class makeup has been revised and students need to be contacted 
+and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_advisor_call_sign&token=$token'>Advisor Verification of Students</a> to complete that task.";
+															$inputParams		= array("effective_date|$myStr|s",
+																						"close_date|$close_date|s",
+																						"resolved_date||s",
+																						"send_reminder|N|s",
+																						"send_once|Y|s",
+																						"call_sign|$advisorClass_advisor_call_sign|s",
+																						"role||s",
+																						"email_text||s",
+																						"reminder_text|$reminder_text|s",
+																						"resolved|N|s",
+																						"token|$token|s");
+															$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
+															if ($insertResult[0] === FALSE) {
+																if ($doDebug) {
+																	echo "inserting reminder failed: $insertResult[1]<br />";
+																}
+																$content		.= "Inserting reminder failed: $insertResult[1]<br />";
+															} else {
+																					
+																/// mark the replacement request as fulfilled
+																$myStr 		= date("Y-m-d H:i:s");
+																$replResult		= $wpdb->update($replacementRequests,
+																								array('date_resolved'=>$myStr), 
+																								array('record_id'=>$replacement_id), 
+																								array('%s'), 
+																								array('%d'));
+																if ($replResult === FALSE) {
+																	$myError			= $wpdb->last_error;
+																	$myQuery			= $wpdb->last_query;
+																	if ($doDebug) {
+																		echo "updating $replacementRequests table failed<br />
+																			  wpdb->last_query: $myQuery<br />
+																			  wpdb->last_error: $myError<br />";
+																	}
+																	$errorMsg			= "$jobname updating $replacementRequests failed.\nSQL: $myQuery\nError: $myError";
+																	sendErrorEmail($errorMsg);
+																	$content		.= "Unable to update $replacementRequests<br />";
+																} else {
+																	$outstandingFulfilled++;
+																						
+																	$replacedCount++;
+																	if ($doDebug) {
+																		$debugLog	.= "replacement request marked as filled<br />";
+																	}
+																}
+															}
+
 															///// unset the replacement student in replaceArray
 															if (isset(${'replaceArray' . $replacement_level}[$replacingSequence])) {
 																unset(${'replaceArray' . $replacement_level}[$replacingSequence]);
@@ -1243,106 +1344,6 @@ function daily_student_cron_v4_func() {
 															} else {
 																if ($doDebug) {
 																	echo "<b>ERROR</b> replaceArray $replacement_level $replacingSequence not available to unset<br />";
-																}
-															}
-														}
-														//// format replacement email to advisor
-																				
-														///// send the email to the advisor
-														$theSubject			= "CW Academy Replacement Student Information for your Class";
-														if ($testMode) {
-															$theRecipient			= 'rolandksmith@gmail.com';
-															$theSubject				= "TESTMODE $theSubject";
-															$mailCode				= 2;
-														} else {
-															$theRecipient			= $advisorEmail;
-															$mailCode				= 14;
-														}
-															
-														$thisContent			= "<p>To: $advisorClass_advisor_last_name, $advisorClass_advisor_first_name ($advisorClass_advisor_call_sign):</p>
-																					<p>You have requested a replacement student for 
-																					$replacement_student in your $replacement_level class number $advisorClass_sequence.</p>
-																					<p>A replacement student has been added to your class. Please login to 
-																					<a href='$siteURL/login'>CW Academy</a> and follow the directions there.
-																					<p>If you have questions or concerns, do not reply to this email as the address is not monitored. 
-																					Instead reach out to <a href='classResolutionURL' target='_blank'>CWA Class Resolution</a> and select the appropriate person.</p> 
-																					<p>Thanks for your service as an advisor!<br />
-																					CW Academy</p>";
-														$mailResult				= emailFromCWA_v3(array('theRecipient'=>$theRecipient,
-																										'theSubject'=>$theSubject,
-																										'theContent'=>$thisContent,
-																										'jobname'=>$jobname,
-																										'mailCode'=>$mailCode,
-																										'testMode'=>$testMode,
-																										'doDebug'=>FALSE));
-														// $mailResult = TRUE;
-														if ($mailResult[0] === TRUE) {
-															$content .= "&nbsp;&nbsp;&nbsp;&nbsp;An email was sent to <a href='$siteURL/cwa-search-sent-email-by-callsign-or-email/?inp_callsign=$advisorClass_advisor_call_sign&strpass=2' target='_blank'>$theRecipient</a>.<br />";
-															if ($doDebug) {
-																echo $mailResult[1];
-																echo "Replacement email sent to the advisor at $theRecipient<br />";
-															}
-															$studentEmailCount--;
-														} else {
-															$content .= "&nbsp;&nbsp;&nbsp;&nbsp;The replacement email send function to advisor $advisor_call_sign; email: $theRecipient failed.</p><br />";
-															if ($doDebug) {
-																echo $mailResult[1];
-																echo "Replacement email FAILED to advisor at $theRecipient<br />";
-															}
-														}
-														// add the reminder to the reminders table
-														if ($doDebug) {
-															echo "Adding reminder to reminders table<br />";
-														}
-														$myStr				= date('Y-m-d H:i:s');
-														$closeStr			= strtotime("+10 days");
-														$close_date			= date('Y-m-d H:i:s',$closeStr);
-														$token				= mt_rand();
-														$reminder_text		= "<b>Replacement Student:</b> Your class makeup has been revised and students need to be contacted 
-and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_advisor_call_sign&token=$token'>Advisor Verification of Students</a> to complete that task.";
-														$inputParams		= array("effective_date|$myStr|s",
-																					"close_date|$close_date|s",
-																					"resolved_date||s",
-																					"send_reminder|N|s",
-																					"send_once|Y|s",
-																					"call_sign|$advisorClass_advisor_call_sign|s",
-																					"role||s",
-																					"email_text||s",
-																					"reminder_text|$reminder_text|s",
-																					"resolved|N|s",
-																					"token|$token|s");
-														$insertResult		= add_reminder($inputParams,$testMode,$doDebug);
-														if ($insertResult[0] === FALSE) {
-															if ($doDebug) {
-																echo "inserting reminder failed: $insertResult[1]<br />";
-															}
-															$content		.= "Inserting reminder failed: $insertResult[1]<br />";
-														} else {
-																				
-															/// mark the replacement request as fulfilled
-															$myStr 		= date("Y-m-d H:i:s");
-															$replResult		= $wpdb->update($replacementRequests,
-																							array('date_resolved'=>$myStr), 
-																							array('record_id'=>$replacement_id), 
-																							array('%s'), 
-																							array('%d'));
-															if ($replResult === FALSE) {
-																$myError			= $wpdb->last_error;
-																$myQuery			= $wpdb->last_query;
-																if ($doDebug) {
-																	echo "updating $replacementRequests table failed<br />
-																		  wpdb->last_query: $myQuery<br />
-																		  wpdb->last_error: $myError<br />";
-																}
-																$errorMsg			= "$jobname updating $replacementRequests failed.\nSQL: $myQuery\nError: $myError";
-																sendErrorEmail($errorMsg);
-																$content		.= "Unable to update $replacementRequests<br />";
-															} else {
-																$outstandingFulfilled++;
-																					
-																$replacedCount++;
-																if ($doDebug) {
-																	$debugLog	.= "replacement request marked as filled<br />";
 																}
 															}
 														}
