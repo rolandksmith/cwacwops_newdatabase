@@ -1953,7 +1953,7 @@ function getTheReason($strReasonCode) {
 				if ($changeLevel) {
 					$student_action_log .= " / $actionDate $jobname $userName Level changed to $inp_level ";
 					$updateParams		= array('student_level'=>$inp_level,
-												' student_action_log'=>$student_action_log);
+												'student_action_log'=>$student_action_log);
 					$updateFormat		= array('%s','%s');
 					$studentUpdateData	= array('tableName'=>$studentTableName,
 													'inp_data'=>$updateParams,
