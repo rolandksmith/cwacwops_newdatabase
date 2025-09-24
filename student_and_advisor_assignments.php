@@ -167,7 +167,10 @@ function getTheReason($strReasonCode) {
 		return "(A) Student hard-assigned to AC6AC";
 	}
 	if ($strReasonCode	== 'X') {
-		return "(H) Student is being recycled for schedule issues";
+		return "(X) Student is being recycled for schedule issues";
+	}
+	if ($strReasonCode == 'N') {
+		return "(N) Student is unassigned and has been moved to the next semester";
 	}
 	return "($strReasonCode) unknown";
 }	
