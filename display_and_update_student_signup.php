@@ -76,7 +76,8 @@ function display_and_update_student_signup_func() {
 								'H'=>'Student not promotable but signed up for next level',
 								'Q'=>'Advisor quite; student signed up for next level',
 								'W'=>'Student withdrew but signed up for next level',
-								'B'=>'Student is a bad actor');
+								'B'=>'Student is a bad actor',
+								'N'=>'Student moved to next semester');
 	$promotableCode		= array(''=>'Not specified',
 								'P'=>'Promotable',
 								'N'=>'Not Promotable',
@@ -1170,7 +1171,7 @@ function display_and_update_student_signup_func() {
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
@@ -1254,6 +1255,7 @@ function display_and_update_student_signup_func() {
 					$reasonQ				= '';
 					$reasonW				= '';
 					$reasonB				= '';
+					$reasonN				= '';
 					if ($student_hold_reason_code == '') {
 						$reasonBlank		= 'checked';
 					} elseif ($student_hold_reason_code == 'X') {
@@ -1268,6 +1270,8 @@ function display_and_update_student_signup_func() {
 						$reasonW			= 'checked';
 					} elseif ($student_hold_reason_code == 'B') {
 						$reasonB			= 'checked';
+					} elseif ($student_hold_reason_code == 'N') {
+						$reasonN			= 'checked';
 					}
 					
 					$abandonedBlank			= 'checked';
@@ -1447,7 +1451,8 @@ function display_and_update_student_signup_func() {
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='H' $reasonH>H: Student not promotable but signed up for next level<br />
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='Q' $reasonQ>Q: Advisor quit; student signed up for next level <br />
 														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='W' $reasonW>W: Student withdrew but signed up for next level<br />
-														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='B' $reasonB>B: Student is a bad actor</td></tr>
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='B' $reasonB>B: Student is a bad actor<br />
+														<input type='radio' class='formInputButton' name='inp_student_hold_reason_code' value='B' $reasonB>N: Student moved to next semester</td></tr>
 												<tr><td>student_class_priority</td>
 													<td><input type='text' class='formInputText' name='inp_student_class_priority' length='20' 
 													maxlength='5' value='$student_class_priority'></td></tr>
@@ -1568,7 +1573,7 @@ function display_and_update_student_signup_func() {
 					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
 					$student_promotable  					= $studentRow->student_promotable;
 					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
+					$student_survey_completion_date			= $studentRow->student_survey_completion_date;
 					$student_available_class_days  			= $studentRow->student_available_class_days;
 					$student_intervention_required  		= $studentRow->student_intervention_required;
 					$student_copy_control  					= $studentRow->student_copy_control;
