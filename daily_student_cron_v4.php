@@ -693,8 +693,10 @@ function daily_student_cron_v4_func() {
 						$utc3Days					= '';
 						$noGo						= FALSE;
 						if ($student_intervention_required == 'H') {
-							if ($doDebug) {
-								echo "&nbsp;&nbsp;&nbsp;&nbsp;student is on hold<br />";
+							if (student_hold_reason_code != 'N') {
+								if ($doDebug) {
+									echo "&nbsp;&nbsp;&nbsp;&nbsp;student is on hold<br />";
+								}
 							}
 							$noGo					= TRUE;
 						}
@@ -1516,7 +1518,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 								$badActorCount++;
 								$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold as a bad actor<br />";
 							} else {
-								if ($student_hold_reason_code != 'X') {
+								if ($student_hold_reason_code != 'X' && $studentr_hold_reason_code != 'N') {
 									$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold<br />";
 								}
 							}
