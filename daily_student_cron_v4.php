@@ -1518,7 +1518,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 								$badActorCount++;
 								$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold as a bad actor<br />";
 							} else {
-								if ($student_hold_reason_code != 'X' && $studentr_hold_reason_code != 'N') {
+								if ($student_hold_reason_code != 'X' && $student_hold_reason_code != 'N') {
 									$content		.= "Student $student_last_name, $student_first_name (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$student_call_sign</a>) is on hold<br />";
 								}
 							}
@@ -3383,7 +3383,7 @@ assignment that meet the criteria for your class.<p>";
 								'jobwho' 		=> $userName,
 								'jobmode'		=> 'Time',
 								'jobdatatype' 	=> $thisStr,
-								'jobaddlinfo'	=> "$strPass: $elapsedTime",
+								'jobaddlinfo'	=> "0: $elapsedTime",
 								'jobip' 		=> $ipAddr,
 								'jobmonth' 		=> $jobmonth,
 								'jobcomments' 	=> '',
