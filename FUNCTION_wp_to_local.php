@@ -57,7 +57,7 @@ function wp_to_local($timeZoneId, $effectiveOffset, $expirationOffset) {
 		$nowDateTime	= date('Y-m-d H:i:s',$newDate);
 	}
 	$effectiveDateTime	= strtotime("$nowDateTime + $effectiveOffset days");
-	$effectiveDate	= date('Y-m-d H:i:s',$effectiveDateTime);
+	$effectiveDate	= date('Y-m-d 00:00:00',$effectiveDateTime);
 	$expiration 	= strtotime("$effectiveDate + $expirationOffset days");
 	$expireDate 	= date('Y-m-d H:i:s',$expiration);
 
