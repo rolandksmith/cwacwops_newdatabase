@@ -727,7 +727,7 @@ function verify_advisor_class_func() {
 							$updateFormat			= array('%s',
 															'%s');
 							$content				.= "Marking $theAttendingCallSign as not attending<br />";
-							if ($student_student_status == 'S') {			// make status a Y
+							if ($student_status == 'S') {			// make status a Y
 								$updateData['student_status']	= 'Y';
 								$updateFormat[]					= '%s';
 							}
