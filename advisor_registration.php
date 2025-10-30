@@ -321,10 +321,6 @@ function advisor_registration_func() {
 				$inp_number_classes = $str_value;
 				$inp_number_classes = filter_var($inp_number_classes,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key == "inp_language") {
-				$inp_language = $str_value;
-				$inp_language = filter_var($inp_language,FILTER_UNSAFE_RAW);
-			}
 			if ($str_key == "inp_id") {
 				$inp_id = $str_value;
 				$inp_id = filter_var($inp_id,FILTER_UNSAFE_RAW);
@@ -1055,12 +1051,18 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 								//Build language selection
 								$languageOptions			= '';
 								$firstTime					= TRUE;
+								$languageChecked			= '';
 								foreach($languageArray as $thisLanguage) {
+									if ($thisLanguage == $advisorClass_language) {
+										$languageChecked	= 'checked';
+									} else {
+										$languageCHecked	= '';
+									}
 									if ($firstTime) {
 										$firstTime			= FALSE;
-										$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' required>$thisLanguage";
+										$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $languageChecked required>$thisLanguage";
 									} else {
-										$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage'>$thisLanguage";
+										$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $languageChecked required>$thisLanguage";
 									}
 								}
 
@@ -1347,7 +1349,6 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 													"advisorclass_semester|$inp_semester|s",
 													"advisorclass_timezone_offset|$inp_timezone_offset|f",
 													"advisorclass_level|$inp_level|s",
-													"advisorclass_language|$inp_language|s",
 													"advisorclass_class_size|$inp_class_size|d",
 													"advisorclass_language|$inp_advisorclass_language|s",
 													"advisorclass_class_schedule_days|$inp_class_schedule_days|s",
@@ -1470,12 +1471,18 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 					//Build language selection
 					$languageOptions			= '';
 					$firstTime					= TRUE;
+					$languageChecked			= '';
 					foreach($languageArray as $thisLanguage) {
+						if ($thisLanguage == 'English') {
+							$languageChecked	= 'checked';
+						} else {
+							$languageChecked	= '';
+						}
 						if ($firstTime) {
 							$firstTime			= FALSE;
-							$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' >$thisLanguage";
+							$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage $languageChecked' >$thisLanguage";
 						} else {
-							$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' >$thisLanguage";
+							$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $languageChecked >$thisLanguage";
 						}
 					}
 
@@ -1622,7 +1629,7 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 										"advisorclass_semester|$inp_semester|s",
 										"advisorclass_timezone_offset|$inp_timezone_offset|f",
 										"advisorclass_level|$inp_level|s",
-										"advisorclass_language|$inp_language|s",
+										"advisorclass_language|$inp_advisorclass_language|s",
 										"advisorclass_class_size|$inp_class_size|d",
 										"advisorclass_class_schedule_days|$inp_class_schedule_days|s",
 										"advisorclass_class_schedule_times|$inp_class_schedule_times|s",
