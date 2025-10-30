@@ -104,6 +104,7 @@ function student_report_generator_func() {
 						'student_parent',
 						'student_parent_email',
 						'student_level',
+						'student_class_language',
 						'student_waiting_list',
 						'student_request_date',
 						'student_semester',
@@ -178,6 +179,7 @@ function student_report_generator_func() {
     $student_parent = '';
     $student_parent_email = '';
     $student_level = '';
+    $student_class_language = '';
     $student_waiting_list = '';
     $student_request_date = '';
     $student_semester = '';
@@ -252,6 +254,7 @@ function student_report_generator_func() {
     $student_parent_checked = '';
     $student_parent_email_checked = '';
     $student_level_checked = '';
+    $student_class_language_checked = '';
     $student_waiting_list_checked = '';
     $student_request_date_checked = '';
     $student_semester_checked = '';
@@ -568,6 +571,13 @@ function student_report_generator_func() {
                 $reportConfig['student_level_checked'] = 'X';
                 if ($doDebug) {
                     echo "student_level included in report<br />";
+                }
+            }
+            if ($str_key == 'student_class_language') {
+                $student_class_language_checked = 'X';
+                $reportConfig['student_class_language_checked'] = 'X';
+                if ($doDebug) {
+                    echo "student_class_language included in report<br />";
                 }
             }
             if ($str_key == 'student_waiting_list') {
@@ -1040,6 +1050,12 @@ function student_report_generator_func() {
                 if ($str_value != '') {
 	                $student_level_sequence = $str_value;
 					$sequenceArray[$student_level_sequence]	= 'student_level';
+				}
+            }
+            if ($str_key == 'student_class_language_sequence') {
+                if ($str_value != '') {
+	                $student_class_language_sequence = $str_value;
+					$sequenceArray[$student_class_language_sequence]	= 'student_class_language';
 				}
             }
             if ($str_key == 'student_waiting_list_sequence') {
@@ -1643,6 +1659,12 @@ function student_report_generator_func() {
 								<td><input type='text' class='formInputText' 
 									name='student_level_sequence' size='5' maxlength='5'></td>
 								<td>student_level</td></tr>
+							<tr><td><input type='checkbox' class='formInputButton' id='student_class_language' 
+									name='student_class_language' value='student_class_language'>
+									<label for 'student_class_language'>student_class_language</label></td>
+								<td><input type='text' class='formInputText' 
+									name='student_class_language_sequence' size='5' maxlength='5'></td>
+								<td>student_class_language</td></tr>
 							<tr><td><input type='checkbox' class='formInputButton' id='student_waiting_list' 
 									name='student_waiting_list' value='student_waiting_list'>
 									<label for 'student_waiting_list'>student_waiting_list</label></td>
@@ -1994,6 +2016,7 @@ function student_report_generator_func() {
         $nameConversionArray['student_parent'] = 'student<br />parent';
         $nameConversionArray['student_parent_email'] = 'student<br />parent_email';
         $nameConversionArray['student_level'] = 'student<br />level';
+        $nameConversionArray['student_class_language'] = 'student<br />class_language';
         $nameConversionArray['student_waiting_list'] = 'student<br />waiting_list';
         $nameConversionArray['student_request_date'] = 'student<br />request_date';
         $nameConversionArray['student_semester'] = 'student<br />semester';
@@ -2270,6 +2293,7 @@ function student_report_generator_func() {
 					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
