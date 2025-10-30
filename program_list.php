@@ -349,7 +349,7 @@ function program_list_func() {
 				}
 				$content	.= "<p><b>CRITICAL!</b> Your record is missing a zipcode. As a result, the system is unable to properly 
 								calculate your time offset to UTC. Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug'
-								target='_blank'>HERE</a> to update the advisor Master Data with your zipcode. When that is complete, please close that tab and refresh this tab.</p>";
+								target='_blank'>HERE</a> to update the Master Data with your zipcode. When that is complete, please close that tab and refresh this tab.</p>";
 				$doProceed	= FALSE;
 			} else {
 				if ($doDebug) {
@@ -814,7 +814,7 @@ function program_list_func() {
 		if ($doProceed) {
 			$content	.= "<p><b>Is Your Advisor Master Data Correct?</b><br />
 							Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-							target='_blank'>HERE</a> to update the advisor Master Data</p>";
+							target='_blank'>HERE</a> to update the Master Data</p>";
 			if (!$userRole == 'advisor') {
 				// see if the advisor has a advisor record. If not, indicate that they must sign up
 				$sql	= "select count(advisor_call_sign) from $advisorTableName 
@@ -913,7 +913,7 @@ function program_list_func() {
 		if ($doProceed) {
 			$content	.= "<p><b>Is Your Student Master Data Correct?</b><br />
 							Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$userName&testMode=$testMode&doDebug=$doDebug' 
-							target='_blank'>HERE</a> to update the advisor Master Data</p>";
+							target='_blank'>HERE</a> to update the Master Data</p>";
 			if ($userRole == 'student') {
 				if ($doDebug) {
 					echo "checking to see if student has signed up<br />";
