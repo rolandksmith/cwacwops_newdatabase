@@ -26,6 +26,7 @@ function student_registration_func() {
 	$userName					= $initializationArray['userName'];
 	$userRole					= $initializationArray['userRole'];
 	$userEmail					= $initializationArray['userEmail'];
+	$languageArray				= $initializationArray['languageArray'];
 	$fakeIt						= "Y";
 	$replacementPeriod			= $initializationArray['validReplacementPeriod'];
 	
@@ -132,6 +133,7 @@ function student_registration_func() {
 		$student_country				= ''; 
 		$student_time_zone				= ''; 
 		$student_level					= ''; 
+		$student_class_language			= '';
 		$student_semester				= ''; 
 		$student_youth					= ''; 
 		$student_age					= ''; 
@@ -189,6 +191,7 @@ function student_registration_func() {
 		$inp_countryb					= ''; 
 		$inp_timezone					= ''; 
 		$inp_level						= ''; 
+		$inp_class_language				= '';
 		$inp_semester					= '';
 		$newSemester					= ''; 
 		$inp_youth						= ''; 
@@ -300,6 +303,9 @@ function student_registration_func() {
 				$enstr			 = $str_value;
 //				$enstr			= filter_var($enstr,FILTER_UNSAFE_RAW);
 				$encodedString	= base64_decode($enstr);
+				if ($doDebug) {
+					echo "Key: $str_key | value: $encodedString<br />";
+				}
 				$myArray		= explode("&",$encodedString);
 				foreach($myArray as $thisValue) {
 					$enArray	= explode("=",$thisValue);
@@ -307,6 +313,9 @@ function student_registration_func() {
 						$enArray[1] = substr($enArray[1],0,1);
 					} else {
 						${$enArray[0]}	= $enArray[1];
+						if ($doDebug) {
+							echo "set $enArray[0] to $enArray[1]<br />";
+						}
 						if ($enArray[0] == 'inp_callsign') {
 							$haveInpCallsign	= TRUE;
 						}
@@ -936,6 +945,13 @@ function student_registration_func() {
 					echo "set inp_available to $inp_available<br />";
 				}
 			}
+			if ($str_key 		== "inp_class_language") {
+				$inp_class_language	 = $str_value;
+				$inp_class_language	 = filter_var($inp_class_language,FILTER_UNSAFE_RAW);
+				if ($doDebug) {
+					echo "set inp_class_language to $inp_class_language<br />";
+				}
+			}
 			if ($str_key 		== "insertDataJson") {
 				$insertDataJson	 = $str_value;
 				$insertDataJson	 = filter_var($insertDataJson,FILTER_UNSAFE_RAW);
@@ -1182,6 +1198,7 @@ function student_registration_func() {
 				$student_parent 						= $studentRow->student_parent;
 				$student_parent_email  					= strtolower($studentRow->student_parent_email);
 				$student_level  						= $studentRow->student_level;
+				$student_class_language					= $studentRow->student_class_language;
 				$student_waiting_list 					= $studentRow->student_waiting_list;
 				$student_request_date  					= $studentRow->student_request_date;
 				$student_semester						= $studentRow->student_semester;
@@ -1814,6 +1831,24 @@ function student_registration_func() {
 									steps or your confirmation information <u>will not be 
 									recorded in the database</u>.</p></td></tr></table>";
 				}
+				//Build language selection
+				$languageOptions			= '';
+				$firstTime					= TRUE;
+				$languageChecked			= '';
+				foreach($languageArray as $thisLanguage) {
+					if ($thisLanguage == $student_class_language) {
+						$languageChecked		= 'checked';
+					} else {
+						$languageChecked		= '';
+					}
+					if ($firstTime) {
+						$firstTime			= FALSE;
+						$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_class_language' value='$thisLanguage' $languageChecked required>$thisLanguage";
+					} else {
+						$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_class_language' value='$thisLanguage' $languageChecked required>$thisLanguage";
+					}
+				}
+
 				$content		.= "<p>You may make changes to your sign-up information 
 									until about three weeks before the start of the semester at which time the process to assign 
 									students to advisor classes will occur.</p>";
@@ -1823,10 +1858,12 @@ function student_registration_func() {
 											<b>Semester</b><br />
 											$semesterList</td>
 										<td style='vertical-align:top;'>
+											<b>Class Language</b><br />
+											$languageOptions</td>
+										<td style='vertical-align:top;'>
 											<b>Class Level</b><br />
 											$levelList</td>
-										<td colspan='2'>
-											&nbsp;</td></tr>";
+										<td>&nbsp;</td></tr>";
 				$content			.= "<p>It is CW Academy's policy that a student 
 										should not register for another class until 
 										the student has completed the current class.</p>
@@ -1842,6 +1879,7 @@ function student_registration_func() {
 										<input type='hidden' name='inp_callsign' value='$student_call_sign'>
 										<input type='hidden' name='inp_verify' value='$inp_verify'>
 										<input type='hidden' name='token' value='$token'>
+										<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 										<input type='hidden' name='student_ID' value='$student_ID'>
 										$extraHidden
 										$deleteMsg											
@@ -1861,22 +1899,23 @@ function student_registration_func() {
 											<td><b>Signal</b><br />$student_signal</td>
 											<td><b>Messenger</b><br />$student_messenger</td></tr>
 									<tr><td colspan='4'><hr></td></tr>
-									<tr><td colspan='4'><h4>You Make Class Sign-up Changes Here:</h4></td></tr>											
+									<tr><td colspan='4'><h4>You Can Make Class Sign-up Changes Here:</h4></td></tr>											
 									$firstLine
-									<tr><td colspan='3'><hr></td></tr>
+									<tr><td colspan='4'><hr></td></tr>
 									<tr><td style='vertical-align:top;'>
 											<b>Youth?</b><br />Select 'Yes' if <b>20 years of age or younger</b><br />
 											<input type='radio' class='formInputButton' name='inp_youth' id='chk_youth' value='Yes' $youthYesChecked > Yes<br />
 											<input type='radio' class='formInutButton' name='inp_youth' id='chk_youth' value='No' $youthNoChecked > No</td>
-										<td style='vertical-align:top;'>	
+										<td style='vertical-align:top;'><br />	
 											If 20 years of age or younger, please enter your age<br />
 											<input type='text' name='inp_age' id='chk_age' size='5' class='formInputText' maxlength='5' value='$student_age'></td>
-										<td style='vertical-align:top;'>
+										<td style='vertical-align:top;'><br />
 											If you are 17 years of age or younger, please provide a parent or guardian name and email address<br />
 											Parent or guardian Name<br />
 											<input type='text' name='inp_student_parent' id='chk_student_parent' size='30' class='formInputText' maxlength='30' value='$student_student_parent' ><br />
 											Parent or Guardian email<br />
-											<input type='text' name='inp_student_parent_email' id='chk_student_parent_email' size='40' class='formInputText' maxlength='40' value='$student_student_parent_email' ></td></tr></table>
+											<input type='text' name='inp_student_parent_email' id='chk_student_parent_email' size='40' class='formInputText' maxlength='40' value='$student_student_parent_email' ></td>
+										<td></td></tr></table>
 																				
 										<p>Click <b>Next</b> to select your class preferences:<br />	
 										<input class='formInputButton' type='submit' value='Next' /></p>
@@ -1944,6 +1983,7 @@ function student_registration_func() {
 								<input type='hidden' name='inp_callsign' value='$inp_callsign'>
 								<input type='hidden' name='inp_semester' value='$inp_semester'>
 								<input type='hidden' name='inp_level' value='$inp_level'>
+								<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 								<input type='hidden' name='token' value='$token'>
 								<input type='hidden' id='browser_timezone_id' name='browser_timezone_id' value='$browser_timezone_id' />
 								<input type='hidden' name='student_id' value='$student_ID'>
@@ -2125,6 +2165,7 @@ function student_registration_func() {
 			 $student_semester			= $inp_semester;
 			 $student_request_date		= $nowDate;
 			 $student_action_log		= $inp_action_log;
+			 $student_class_language	= $inp_class_language;
 	
 
 			$insertParams		= array('student_call_sign'=>$inp_callsign,
@@ -2138,9 +2179,10 @@ function student_registration_func() {
 										 'student_level'=>$inp_level,
 										 'student_semester'=>$inp_semester,
 										 'student_request_date'=>$nowDate,
-										 'student_action_log'=>$inp_action_log);
+										 'student_action_log'=>$inp_action_log, 
+										 'student_class_language'=>$inp_class_language);
 			$insertFormat		= array('%s','%s','%f','%s','%s','%s','%s','%s','%s',
-										  '%s','%s','%s');
+										  '%s','%s','%s','%s');
 										  
 			$insertData			= array('params'=>$insertParams,'format'=>$insertFormat);
 			$insertDataJson		= json_encode($insertData);
@@ -2225,6 +2267,7 @@ function student_registration_func() {
 									<input type='hidden' name='token' value='$token'>
 									<input type='hidden' name='inp_semester' value='$student_semester'>
 									<input type='hidden' name='inp_level' value='$student_level'>
+									<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 									<input type='hidden' name='schedAvail' value='$schedAvail'>
 									<input type='hidden' name='insertDataJson' value='$insertDataJson'>
 									$result[1]<br clear='all' />
@@ -2427,7 +2470,7 @@ function student_registration_func() {
 				$thirdChoice									= 'None';
 			}
 			
-			if ($inp_flex == 'Y') {
+			if ($inp_flex == 'ANY') {
 				$student_flexible								= 'Y';
 				$updateParams['student_flexible']				= 'Y';
 				$updateFormat[]									= '%s';
@@ -2640,10 +2683,11 @@ function student_registration_func() {
 									<td><b>Signal</b><br />$student_signal</td>
 									<td><b>Messenger</b><br />$student_messenger</td></tr>
 								<tr><td><b>Level: </b>$inp_level</td>
-									<td colspan='3'><b>Semester: </b>$inp_semester</td></tr>";
+									<td><b>Language: </b>$inp_class_language</td>
+									<td colspan='2'><b>Semester: </b>$inp_semester</td></tr>";
 		if ($result_option == 'option') {
 			$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
-			if ($student_flexible == 'Y') {
+			if ($inp_flex == 'ANY') {
 				$content	.= "My time is flexible</td></tr>";
 			} else {
 				$myArray	= explode(",",$student_catalog_options);
@@ -2858,6 +2902,12 @@ function student_registration_func() {
 					$updateLog				.= "level changed to $inp_level. ";
 					$student_level			= $inp_level;
 					$levelChanged			= TRUE;
+				}
+				if ($inp_class_language != $student_class_language) {
+					$updateParams[]			= "student_class_language|$inp_class_language|s";
+					$doUpdate				= TRUE;
+					$updateLog				.= "class language changed to $inp_class_language. ";
+					$student_class_language	= $inp_class_language;
 				}
 				if ($semesterChanged || $levelChanged) {						
 					$updateParams[]			= "student_email_sent_date||s";
@@ -3187,7 +3237,7 @@ function student_registration_func() {
 				$updateParams[]				= "student_abandoned|N|s";
 				$doUpdateStudent			= TRUE;
 
-				if ($inp_flex == 'Y') {
+				if ($inp_flex == 'ANY') {
 					$updateParams[]			= "student_flexible|Y|s";
 					$actionLogUpdates		.= "set flexible to Y ";
 					$doUpdateStudent		= TRUE;
@@ -3519,9 +3569,10 @@ function student_registration_func() {
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
+						$student_class_language					= $studentRow->student_class_language;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
 						$student_request_date  					= $studentRow->student_request_date;
 						$student_semester						= $studentRow->student_semester;
@@ -3628,7 +3679,8 @@ function student_registration_func() {
 													<td><b>Telegram</b><br />$student_telegram</td>
 													<td><b>Signal</b><br />$student_signal</td>
 													<td><b>Messenger</b><br />$student_messenger</td></tr>
-												<tr><td colspan='2'><b>Level: </b>$student_level</td>
+												<tr><td><b>Level: </b>$student_level</td>
+													<td><b>Language: </b>$student_class_language</td>
 													<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
 						if ($student_no_catalog == 'Y') {
 							$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
@@ -3797,7 +3849,8 @@ function student_registration_func() {
 											<td><b>Telegram</b><br />$student_telegram</td>
 											<td><b>Signal</b><br />$student_signal</td>
 											<td><b>Messenger</b><br />$student_messenger</td></tr>
-										<tr><td colspan='2'><b>Level: </b>$student_level</td>
+										<tr><td><b>Level: </b>$student_level</td>
+											<td><b>Language: </b>$student_class_language</td>
 											<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
 				if ($student_no_catalog == 'Y') {
 					$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
@@ -3990,12 +4043,30 @@ function student_registration_func() {
 				}		
 			}
 			if ($haveMasterData) {
+				//Build language selection
+				$languageOptions			= '';
+				$firstTime					= TRUE;
+				$englishChecked				= '';
+				foreach($languageArray as $thisLanguage) {
+					if ($thisLanguage == 'English') {
+						$englishChecked		= 'checked';
+					} else {
+						$englishChecked		= '';
+					}
+					if ($firstTime) {
+						$firstTime			= FALSE;
+						$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_class_language' value='$thisLanguage' $englishChecked required>$thisLanguage";
+					} else {
+						$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_class_language' value='$thisLanguage' $englishChecked required>$thisLanguage";
+					}
+				}
+		
 				$content				.= "<h4>Sign Up for a Class at CW Academy</h4>
 											<p>Ready to boost your Morse Code proficiency? CW Academy offers free, volunteer-led classes to help you achieve your goals.</p>
 											<h4>How to Sign Up (4 Easy Steps)</h4>
 											<p>The sign-up process is straightforward. You'll need to complete all four steps to secure your spot in a class:
 											<ol>
-											<li><b>Choose Your Class & Semester:</b> Select the specific class you want to attend and the semester that works best for you.
+											<li><b>Choose Your Class, Preferred Class Language, and Semester:</b> Select the specific class you want to attend, your preferred class language, and the semester that works best for you.
 											<li><b>Take a Morse Code Proficiency Assessment:</b> This short process will help verify which of the four class levels you should take. Note: 
 													if you have taken a proficiency assessment in the previous 10 days and scored 60% or higher, you will not need to repeat the assessment.  
 											<li><b>Provide Parent/Guardian Information (if applicable):</b> If you're under 21, you'll need to provide information for a parent or guardian.
@@ -4009,6 +4080,10 @@ function student_registration_func() {
 											<li><b>Intermediate:</b> Designed for those capable of sending and receiving at a minimum of 10 WPM, looking to increase their speed to about 20 WPM.
 											<li><b>Advanced:</b> For experienced operators who can send and receive at a minimum of 20 WPM and aspire to reach 30 WPM.
 											</ul></p>
+											<h4>CW Academy Class Languages</h4>
+											<p>Most CW Academy classes are taught in English. A few classes are available in other languages. You can select your preferred language 
+											and if there is a class available in that language that meets your availability, you will be assigned to that class. Otherwise, you will 
+											be assigned to a class taught in English.</p>
 											<h4>Important Class Information</h4>
 											<ul>
 											<li><b>Free of Charge:</b> All CW Academy classes are completely free, taught by passionate volunteer advisors and staff.
@@ -4052,6 +4127,8 @@ function student_registration_func() {
 													<input type='radio' class='formInputText' name='inp_level' id='chk_level' value='Fundamental' required > Fundamental<br />
 													<input type='radio' class='formInputText' name='inp_level' id='chk_level' value='Intermediate' required > Intermediate<br />
 													<input type='radio' class='formInputText' name='inp_level' id='chk_level' value='Advanced' required > Advanced</td></tr>
+											<tr><td style='vertical-align:top;'><b>Your preferred Class Language</b></td>
+												<td>$languageOptions</td>
 											$semesterSelection
 											$testModeOption<br />
 											<tr><td colspan='2'>'<input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" value='Next' /></td></tr></table>
@@ -4129,9 +4206,10 @@ function student_registration_func() {
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_level;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
@@ -4254,7 +4332,7 @@ function student_registration_func() {
 	
 			/// student doing a signup. Setup to carry info forward
 			$allowSignup				= TRUE;
-			$stringToPass 				= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup";
+			$stringToPass 				= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_class_language=$inp_class_language";
 			$enstr						= base64_encode($stringToPass);
 			if ($doDebug) {
 				echo "enstr encoded from: $stringToPass<br />";
@@ -4381,6 +4459,7 @@ function student_registration_func() {
 												<input type='hidden' name='timezone' value='$timezone'>
 												<input type='hidden' name='allowSignup' value='$allowSignup'>
 												<input type='hidden' name='inp_level' value='$inp_level'>
+												<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 												<input type='hidden' name='needsAssessment' value='1'>
 												<input type='submit' class='formInputButton' name='proficiency' value='Continue to Proficiency Assessment'>
 												</form></td>
@@ -4396,6 +4475,7 @@ function student_registration_func() {
 												<input type='hidden' name='timezone' value='$timezone'>
 												<input type='hidden' name='allowSignup' value='$allowSignup'>
 												<input type='hidden' name='inp_level' value='$inp_level'>
+												<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 												<input type='submit' class='formInputButton' name='noproficiency' value='Skip Proficiency Assessment'>
 												</form></td></tr></table>";
 			} else {
@@ -4413,7 +4493,7 @@ function student_registration_func() {
 						allowSignup: $allowSignup<br />";
 			}
 			$needsAssessment = FALSE;
-			$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
+			$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level&inp_class_language=$inp_class_language";
 			$enstr			= base64_encode($stringToPass);
 			$thisDate		= date('Y-m-d H:i:s');
 			// save the enstr info in the temporary table
@@ -4456,7 +4536,7 @@ function student_registration_func() {
 		} else {
 			if ($doProceed) {
 				if (!$needsAssessment) {			/// doesn't need assessment. Continue to signup
-					$stringToPass 	= "inp_callsign=$inp_callsign&inp_phone=$inp_phone&inp_ph_code=$inp_ph_code&inp_email=$inp_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level";
+					$stringToPass 	= "inp_callsign=$inp_callsign&inp_phone=$inp_phone&inp_ph_code=$inp_ph_code&inp_email=$inp_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level&inp_class_language=$inp_class_language";
 					$enstr			= base64_encode($stringToPass);
 					$content		.= "<h3>$jobname</h3>
 										<p><table style='border:4px solid green;width:auto;'><tr><td>You have recently successfly met the Morse code proficiency requirements 
@@ -4536,7 +4616,8 @@ function student_registration_func() {
 						  firsttime: $firsttime<br />
 						  timezone: $timezone<br />
 						  allowSignup: $allowSignup<br />
-						  inp_level: $inp_level<br />";
+						  inp_level: $inp_level<br />
+						  inp_class_language: $inp_class_language<br />";
 				}
 
 				// now delete the temp_data record
@@ -4582,7 +4663,8 @@ function student_registration_func() {
 				  firsttime: $firsttime<br />
 				  timezone: $timezone<br />
 				  allowSignup: $allowSignup<br />
-				  inp_level: $inp_level<br />";
+				  inp_level: $inp_level<br />
+				  inp_class_language: $inp_class_language<br />";
 		}
 		
 		if ($doProceed) {
@@ -4702,7 +4784,7 @@ function student_registration_func() {
 				}
 				$content		.= "</p>";
 		
-				$stringToPass 	= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&$inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&allowSignup=$allowSignup";
+				$stringToPass 	= "inp_callsign=$inp_callsign&inp_semester=$inp_semester&$inp_level=$inp_level&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&allowSignup=$allowSignup&inp_class_language=$inp_class_language";
 				$enstr			= base64_encode($stringToPass);
 				if ($doDebug) {
 					echo "set up enstr using $stringToPass<br />";
