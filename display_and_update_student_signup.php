@@ -20,6 +20,7 @@ function display_and_update_student_signup_func() {
 	$userEmail			= $initializationArray['userEmail'];
 	$userDisplayName	= $initializationArray['userDisplayName'];
 	$userRole			= $initializationArray['userRole'];
+	$languageArray		= $initializationArray['languageArray'];
 	
 //	CHECK THIS!								//////////////////////
 	if ($validUser == "N") {
@@ -193,6 +194,10 @@ function display_and_update_student_signup_func() {
 			if ($str_key == "inp_student_level") {
 				$inp_student_level = $str_value;
 				$inp_student_level = filter_var($inp_student_level,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key == "inp_student_class_language") {
+				$inp_student_class_language = $str_value;
+				$inp_student_class_language = filter_var($inp_student_class_language,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "inp_student_waiting_list") {
 				$inp_student_waiting_list = $str_value;
@@ -839,6 +844,7 @@ function display_and_update_student_signup_func() {
 						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
+						$student_class_language					= $studentRow->student_class_language;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
 						$student_request_date  					= $studentRow->student_request_date;
 						$student_semester						= $studentRow->student_semester;
@@ -1012,6 +1018,8 @@ function display_and_update_student_signup_func() {
 													<td>$student_parent_email</td></tr>
 												<tr><td>Student Level</td>
 													<td>$student_level</td></tr>
+												<tr><td>Student Class Language</td>
+													<td>$student_class_language</td></tr>
 												<tr><td>Student Waiting List</td>
 													<td>$student_waiting_list $waitingStr</td></tr>
 												<tr><td>Student Request Date</td>
@@ -1147,6 +1155,7 @@ function display_and_update_student_signup_func() {
 					$student_age  							= $studentRow->student_age;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
@@ -1332,6 +1341,23 @@ function display_and_update_student_signup_func() {
 						$catalogN			= 'checked';
 					}
 
+					//Build language selection
+					$languageOptions			= '';
+					$firstLanguage				= TRUE;
+					$languageChecked			= '';
+					foreach($languageArray as $thisLanguage) {
+						if ($thisLanguage == $student_class_language) {
+							$languageChecked		= 'checked';
+						} else {
+							$languageChecked		= '';
+						}
+						if ($firstLanguage) {
+							$firstLanguage			= FALSE;
+							$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_student_class_language' value='$thisLanguage' $languageChecked >$thisLanguage\n";
+						} else {
+							$languageOptions		.= "<br /><input type='radio' class='formInputButton' name='inp_student_class_language' value='$thisLanguage' $languageChecked >$thisLanguage\n";
+						}
+					}
 					$content				.= "<h3>Update $inp_callsign Signup Record for $student_semester Semester</h3>
 												<p>Click <a href='$theURL'>HERE</a> to Look Up a Different Student</p>
 												<form method='post' action='$theURL' 
@@ -1380,6 +1406,8 @@ function display_and_update_student_signup_func() {
 														<input type='radio' class='formInputButton' name='inp_student_level' value='Fundamental' $levelFun>Fundamental<br />
 														<input type='radio' class='formInputButton' name='inp_student_level' value='Intermediate' $levelInt>Intermediate<br />
 														<input type='radio' class='formInputButton' name='inp_student_level' value='Advanced' $levelAdv>Advanced</td></tr>
+												<tr><td style='vertical-align:top;'>Student_class_language</td>
+													<td>$languageOptions</td>
 												<tr><td style='vertical-align:top;'>student_waiting_list</td>
 													<td><input type='radio' class='formInputButton' name='inp_student_waiting_list' value='' $waitingBlank>Blank: Not Specified (same as not on the waiting list)<br />
 														<input type='radio' class='formInputButton' name='inp_student_waiting_list' value='N' $waitingN>N: Not on waiting list<br />
@@ -1549,6 +1577,7 @@ function display_and_update_student_signup_func() {
 					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
@@ -1644,6 +1673,13 @@ function display_and_update_student_signup_func() {
 						$updateFormat[]	= "%s";
 						$content	.= "student_level updated to $inp_student_level<br />";
 						$updateLog	.= " /student_level updated to $inp_student_level";
+					}
+					if ($inp_student_class_language != $student_class_language) {
+						$student_class_language = $inp_student_class_language;
+						$updateParams['student_class_language']	= $inp_student_class_language;
+						$updateFormat[]	= "%s";
+						$content	.= "student_class_language updated to $inp_student_class_language<br />";
+						$updateLog	.= " /student_class_language updated to $inp_student_class_language";
 					}
 					if ($inp_student_waiting_list != $student_waiting_list) {
 						$student_waiting_list = $inp_student_waiting_list;
@@ -2042,6 +2078,7 @@ function display_and_update_student_signup_func() {
 											$student_parent 						= $studentRow->student_parent;
 											$student_parent_email  					= strtolower($studentRow->student_parent_email);
 											$student_level  						= $studentRow->student_level;
+											$student_class_language					= $studentRow->student_class_language;
 											$student_waiting_list 					= $studentRow->student_waiting_list;
 											$student_request_date  					= $studentRow->student_request_date;
 											$student_semester						= $studentRow->student_semester;
@@ -2124,6 +2161,8 @@ function display_and_update_student_signup_func() {
 																		<td>$student_parent_email</td></tr>
 																	<tr><td>Student Level</td>
 																		<td>$student_level</td></tr>
+																	<tr><td>Student Class Language</td>
+																		<td>$student_class_language</td></tr>
 																	<tr><td>Student Waiting List</td>
 																		<td>$student_waiting_list $waitingStr</td></tr>
 																	<tr><td>Student Request Date</td>
@@ -2250,6 +2289,7 @@ function display_and_update_student_signup_func() {
 					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
