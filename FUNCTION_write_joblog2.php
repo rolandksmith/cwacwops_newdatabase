@@ -94,22 +94,37 @@ function write_joblog2_func($dataToWrite=array()) {
 		$myStr				= print_r($dataToWrite,TRUE);
 		sendErrorEmail("function_write_joblog2: Bad jobname $badCode. $jobtitle\n<br /><pre>$myStr</pre>");
 	}
-
-	$updateParams					= array('job_name' 		=> $jobname,
-											'job_date' 		=> $jobdate,
-											'job_time'		=> $jobtime,
-											'job_who' 		=> $jobwho,
-											'job_mode'		=> $jobmode,
-											'job_data_type' => $jobdatatype,
-											'job_addl_info'	=> $jobaddlinfo,
-											'job_ip_addr' 	=> $jobip,
-											'job_month' 	=> $jobmonth,
-											'job_comments' 	=> $jobcomments,
-											'job_title' 	=> $jobtitle);
+	$jobIPData			= get_the_user_ip_data();
+	if ($doDebug) {
+		echo "jobIPData:<br /><pre>";
+		print_r($jobIPData);
+		echo "</pre><br />";
+	}
+	$thisBrowser 		= $jobIPData['browser'];
+	$thisVersion 		= $jobIPData['version'];
+	$thisOS 			= $jobIPData['OS'];
+	$thisMfgr 			= $jobIPData['Mfgr'];
+	$thisDevice 		= $jobIPData['device'];
+	$updateParams			= array('job_name' 		=> $jobname,
+									'job_date' 		=> $jobdate,
+									'job_time'		=> $jobtime,
+									'job_who' 		=> $jobwho,
+									'job_mode'		=> $jobmode,
+									'job_data_type' => $jobdatatype,
+									'job_addl_info'	=> $jobaddlinfo,
+									'job_ip_addr' 	=> $jobip,
+									'job_month' 	=> $jobmonth,
+									'job_comments' 	=> $jobcomments,
+									'job_title' 	=> $jobtitle,
+									'job_browser'	=> $thisBrowser,
+									'job_version'	=> $thisVersion,
+									'job_OS'		=> $thisOS,
+									'job_Mfgr'		=> $thisMfgr,
+									'job_device'	=> $thisDevice);
 											
 
-	$updateFormat						= array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');
-
+	$updateFormat			= array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');
+		
 	$result							= $wpdb->insert($joblogTableName,
 													$updateParams,
 													$updateFormat);
