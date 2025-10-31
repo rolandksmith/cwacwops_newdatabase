@@ -98,7 +98,7 @@ function advisor_session_info_func() {
 				$inp_session_record_id		 = filter_var($inp_session_record_id,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key 		== "inp_session_notes") {
-				$inp_session_notes		 = $str_value;
+				$inp_session_notes		 = stripslashes($str_value);
 				$inp_session_notes		 = filter_var($inp_session_notes,FILTER_UNSAFE_RAW);
 			}
 			for ($snum=1;$snum<31;$snum++) {
@@ -116,7 +116,7 @@ function advisor_session_info_func() {
 					${'inp_attend_' . $strSnum}		 = filter_var(${'inp_attend_' . $strSnum},FILTER_UNSAFE_RAW);
 				}
 				if ($str_key 		== "inp_notes_$strSnum") {
-					${'inp_notes_' . $strSnum}		 = $str_value;
+					${'inp_notes_' . $strSnum}		 = stripslashes($str_value);
 					${'inp_notes_' . $strSnum}		 = filter_var(${'inp_notes_' . $strSnum},FILTER_UNSAFE_RAW);
 				}
 			}
@@ -650,7 +650,7 @@ function advisor_session_info_func() {
 								$session_semester				= $notesRow->session_semester;
 								$session						= $notesRow->session;
 								$session_date					= $notesRow->session_date;
-								$session_notes					= $notesRow->session_notes;
+								$session_notes					= stripslashes($notesRow->session_notes);
 								$session_date_created			= $notesRow->session_date_created;
 								$session_date_updated			= $notesRow->session_date_updated;
 								
@@ -664,69 +664,59 @@ function advisor_session_info_func() {
 																<td colspan='3'><textarea style='formInputText' name='inp_session_notes' rows='5' cols='50'>$session_notes</textarea></td></tr>";
 								
 								// now get the attend info
-								for ($snum=1;$snum<31;$snum++) {
-									if ($snum < 10) {
-										$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
-									} else {
-										$strSnum		= strval($snum);
+								$thisCount		= 0;
+								$attendSQL		= "select * from $sessionAttendTableName 
+													where attend_advisor_call_sign = '$advisorClass_call_sign' 
+													and attend_advisor_class_sequence = $advisorClass_sequence 
+													and attend_session = $session 
+													and attend_semester = '$theSemester'";
+								$attendResult	= $wpdb->get_results($attendSQL);
+								if ($attendResult === FALSE) {
+									handleWPDBError($jobname,$doDebug,'attempting to read the attend info');
+								} else {
+									$numASRows	= $wpdb->num_rows;
+									if ($doDebug) {
+										echo "ran $attendSQL<br />and retrieved $numASRows rows<br />";
 									}
-									$studentCallSign	= ${'advisorClass_student' . $strSnum};
-									if ($studentCallSign != '') {
-										$studentCount++;
-										if ($doDebug) {
-											echo "<br />processing student $studentCallSign<br />";
-										}
-										
-										$attendSQL		= "select * from $sessionAttendTableName 
-															where attend_advisor_call_sign = '$advisorClass_call_sign' 
-															and attend_advisor_class_sequence = $advisorClass_sequence 
-															and attend_session = $session 
-															and attend_semester = '$theSemester' 
-															and attend_student_call_sign = '$studentCallSign'";
-										$attendResult	= $wpdb->get_results($attendSQL);
-										if ($attendResult === FALSE) {
-											handleWPDBError($jobname,$doDebug,'attempting to read the attend info');
-										} else {
-											$numASRows	= $wpdb->num_rows;
-											if ($doDebug) {
-												echo "ran $attendSQL<br />and retrieved $numASRows rows<br />";
+									if ($numASRows > 0) {
+										foreach ($attendResult as $attendRow) {
+											$attend_record_id				= $attendRow->attend_record_id;
+											$attend_advisor_call_sign		= $attendRow->attend_advisor_call_sign;
+											$attend_advisor_class_sequence	= $attendRow->attend_advisor_class_sequence;
+											$attend_semester				= $attendRow->attend_semester;
+											$attend_session					= $attendRow->attend_session;
+											$attend_session_date			= $attendRow->attend_session_date;
+											$attend_student_call_sign		= $attendRow->attend_student_call_sign;
+											$attend_student_name			= $attendRow->attend_student_name;
+											$attend_status					= $attendRow->attend_status;
+											$attend_notes					= stripslashes($attendRow->attend_notes);
+											$attend_date_created			= $attendRow->attend_date_created;
+											$attend_date_updated			= $attendRow->attend_date_updated;
+											
+											$yesStr				= 'checked';
+											$noStr				= '';
+											if ($attend_status == 'N') {
+												$yesStr			= '';
+												$noStr			= 'checked';
 											}
-											if ($numASRows > 0) {
-												foreach ($attendResult as $attendRow) {
-													$attend_record_id				= $attendRow->attend_record_id;
-													$attend_advisor_call_sign		= $attendRow->attend_advisor_call_sign;
-													$attend_advisor_class_sequence	= $attendRow->attend_advisor_class_sequence;
-													$attend_semester				= $attendRow->attend_semester;
-													$attend_session					= $attendRow->attend_session;
-													$attend_session_date			= $attendRow->attend_session_date;
-													$attend_student_call_sign		= $attendRow->attend_student_call_sign;
-													$attend_student_name			= $attendRow->attend_student_name;
-													$attend_status					= $attendRow->attend_status;
-													$attend_notes					= $attendRow->attend_notes;
-													$attend_date_created			= $attendRow->attend_date_created;
-													$attend_date_updated			= $attendRow->attend_date_updated;
-													
-													$yesStr				= 'checked';
-													$noStr				= '';
-													if ($attend_status == 'N') {
-														$yesStr			= '';
-														$noStr			= 'checked';
-													}
-													$displayVariable	.= "<input type='hidden' name='inp_attend_record_id_$strSnum' value='$attend_record_id'>
-																			<tr><td><b>Student $snum:</b></td>
-																				<td colspan='3'>$attend_student_name ($attend_student_call_sign)</td><tr>
-																			<tr><td><b>Attended</td>
-																				<td colspan='3'><input type='radio' class='formInputButton' name='inp_attend_$strSnum' value='Y' $yesStr >Yes<br />
-																							    <input type='radio' class='formInputButton' name='inp_attend_$strSnum' value='N' $noStr >No</td></tr>
-																			<tr><td style='vertical-align:top;'><b>Notes</b></td>
-																				<td colspan='3'><textarea class='formInputText' name='inp_notes_$strSnum' rows='5' cols='50'>$attend_notes</textarea></td></tr>";
-												}
-//												$displayVariable		.= "</table>";
+											$thisCount++;
+											if ($thisCount < 10) {
+												$myStr 		= str_pad($thisCount,2,'0',STR_PAD_LEFT);
+											} else {
+												$myStr		= strval($thisCount);
 											}
+//											$attend_notes	= formatActionLog($attend_notes);
+											$displayVariable	.= "<input type='hidden' name='inp_attend_record_id_$myStr' value='$attend_record_id'>
+																	<tr><td><b>Student $myStr:</b></td>
+																		<td colspan='3'>$attend_student_name ($attend_student_call_sign)</td><tr>
+																	<tr><td><b>Attended</td>
+																		<td colspan='3'><input type='radio' class='formInputButton' name='inp_attend_$myStr' value='Y' $yesStr >Yes<br />
+																						<input type='radio' class='formInputButton' name='inp_attend_$myStr' value='N' $noStr >No</td></tr>
+																	<tr><td style='vertical-align:top;'><b>Notes</b></td>
+																		<td colspan='3'><textarea class='formInputText' name='inp_notes_$myStr' rows='5' cols='50'>$attend_notes</textarea></td></tr>";
 										}
 									}
 								}
-								
 							}
 						}
 					}
@@ -893,6 +883,7 @@ function advisor_session_info_func() {
 											$yesStr			= '';
 											$noStr			= 'checked';
 										}
+//										$attend_notes		= formatActionLog($attend_notes);
 										$displayVariable	.= "<tr><td><b>Student $snum:</b></td>
 																	<td colspan='3'>$attend_student_name ($attend_student_call_sign)</td><tr>
 																<tr><td><b>Attended</td>
