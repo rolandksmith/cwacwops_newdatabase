@@ -1,13 +1,5 @@
 function student_evaluation_of_advisor_func() {
 
-/*
-
-	Modified 15Jul23 by Roland to use consolidated tables
-	Modified 3Mar24 by Roland to be started from a reminder
-	Modified 6Oct24 by Roland for new database
-
-*/
-
 	global $wpdb;
 
 	$doDebug					= FALSE;
@@ -334,11 +326,13 @@ function student_evaluation_of_advisor_func() {
 					$student_first_name 				= $studentRow->user_first_name;
 					$student_last_name 					= $studentRow->user_last_name;
 					$student_email 						= $studentRow->user_email;
+					$student_ph_code 					= $studentRow->user_ph_code;
 					$student_phone 						= $studentRow->user_phone;
 					$student_city 						= $studentRow->user_city;
 					$student_state 						= $studentRow->user_state;
 					$student_zip_code 					= $studentRow->user_zip_code;
 					$student_country_code 				= $studentRow->user_country_code;
+					$student_country 					= $studentRow->user_country;
 					$student_whatsapp 					= $studentRow->user_whatsapp;
 					$student_telegram 					= $studentRow->user_telegram;
 					$student_signal 					= $studentRow->user_signal;
@@ -358,9 +352,10 @@ function student_evaluation_of_advisor_func() {
 					$student_timezone_offset				= $studentRow->student_timezone_offset;
 					$student_youth  						= $studentRow->student_youth;
 					$student_age  							= $studentRow->student_age;
-					$student_parent 				= $studentRow->student_parent;
+					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
@@ -399,30 +394,6 @@ function student_evaluation_of_advisor_func() {
 					$student_flexible						= $studentRow->student_flexible;
 					$student_date_created 					= $studentRow->student_date_created;
 					$student_date_updated			  		= $studentRow->student_date_updated;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$student_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$student_country		= "UNKNOWN";
-						$student_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$student_country		= $countryRow->country_name;
-								$student_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$student_country			= "Unknown";
-							$student_ph_code			= "";
-						}
-					}
 				
 					if ($doDebug) {
 						echo "Processing student $student_last_name, $student_first_name ($student_call_sign)<br />
@@ -458,11 +429,13 @@ function student_evaluation_of_advisor_func() {
 								$advisor_first_name 				= $advisorRow->user_first_name;
 								$advisor_last_name 					= $advisorRow->user_last_name;
 								$advisor_email 						= $advisorRow->user_email;
+								$advisor_ph_code 					= $advisorRow->user_ph_code;
 								$advisor_phone 						= $advisorRow->user_phone;
 								$advisor_city 						= $advisorRow->user_city;
 								$advisor_state 						= $advisorRow->user_state;
 								$advisor_zip_code 					= $advisorRow->user_zip_code;
 								$advisor_country_code 				= $advisorRow->user_country_code;
+								$advisor_country 					= $advisorRow->user_country;
 								$advisor_whatsapp 					= $advisorRow->user_whatsapp;
 								$advisor_telegram 					= $advisorRow->user_telegram;
 								$advisor_signal 					= $advisorRow->user_signal;
@@ -490,30 +463,6 @@ function student_evaluation_of_advisor_func() {
 								$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 								$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 			
-								// if you need the country name and phone code, include the following
-								$countrySQL		= "select * from wpw1_cwa_country_codes  
-													where country_code = '$advisor_country_code'";
-								$countrySQLResult	= $wpdb->get_results($countrySQL);
-								if ($countrySQLResult === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-									$advisor_country		= "UNKNOWN";
-									$advisor_ph_code		= "";
-								} else {
-									$numCRows		= $wpdb->num_rows;
-									if ($doDebug) {
-										echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-									}
-									if($numCRows > 0) {
-										foreach($countrySQLResult as $countryRow) {
-											$advisor_country		= $countryRow->country_name;
-											$advisor_ph_code		= $countryRow->ph_code;
-										}
-									} else {
-										$advisor_country			= "Unknown";
-										$advisor_ph_code			= "";
-									}
-								}
-	
 								if ($doDebug) {
 									echo "Got student and advisor. Now do the evaluation form<br />";
 								}
@@ -609,21 +558,22 @@ function student_evaluation_of_advisor_func() {
 														<input type='radio' name='inp_rufzxp' class='formInputButton' value='Not Really'> Not Really<br />
 														<input type='radio' name='inp_rufzxp' class='formInputButton' value='Not Applicable' $beginner_checked> Not Applicable</td>
 												</tr><tr>
-													<td style='vertical-align:top;'>Were the QSO's effective for you?</td>
+													<td style='vertical-align:top;'>Were the Short Files (Words, Phrases, QSOs, POTA) effective for you?</td>
 													<td><input type='radio' name='inp_short_stories' class='formInputButton' value='Very Much'> Very Much<br />
 														<input type='radio' name='inp_short_stories' class='formInputButton' value='Mostly'> Mostly<br />
 														<input type='radio' name='inp_short_stories' class='formInputButton' value='Somewhat'> Somewhat<br />
 														<input type='radio' name='inp_short_stories' class='formInputButton' value='Not Really'> Not Really<br />
 														<input type='radio' name='inp_short_stories' class='formInputButton' value='Not Applicable' $beginner_checked> Not Applicable</td>
 												</tr><tr>
-													<td style='vertical-align:top;'>Were the Short Stories effective for you?</td>
+													
+													<td style='vertical-align:top;'>Were the Prefix and Suffix files effective for you?</td>
 													<td><input type='radio' name='inp_qsos' class='formInputButton' value='Very Much'> Very Much<br />
 														<input type='radio' name='inp_qsos' class='formInputButton' value='Mostly'> Mostly<br />
 														<input type='radio' name='inp_qsos' class='formInputButton' value='Somewhat'> Somewhat<br />
 														<input type='radio' name='inp_qsos' class='formInputButton' value='Not Really'> Not Really<br />
 														<input type='radio' name='inp_qsos' class='formInputButton' value='Not Applicable' $beginner_checked> Not Applicable</td>
 												</tr><tr>
-													<td style='vertical-align:top;'>Were the weekly CWT's effective for you?</td>
+													<td style='vertical-align:top;'>Were the weekly MST, SST, and/or CWTs effective for you?</td>
 													<td><input type='radio' name='inp_cwt' class='formInputButton' value='Very Much'> Very Much<br />
 														<input type='radio' name='inp_cwt' class='formInputButton' value='Mostly'> Mostly<br />
 														<input type='radio' name='inp_cwt' class='formInputButton' value='Somewhat'> Somewhat<br />
