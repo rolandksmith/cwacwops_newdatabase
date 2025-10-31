@@ -652,6 +652,7 @@ function student_and_advisor_color_chart_v2_func() {
 									$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 									$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 									$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+									$advisorClass_language					= $advisorClassRow->advisorclass_language;
 									$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -840,6 +841,7 @@ function student_and_advisor_color_chart_v2_func() {
 						$student_parent 				= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
+						$student_class_language					= $studentRow->student_class_language;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
 						$student_request_date  					= $studentRow->student_request_date;
 						$student_semester						= $studentRow->student_semester;
@@ -1862,6 +1864,7 @@ function student_and_advisor_color_chart_v2_func() {
 						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
 						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
 						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
+						$advisorClass_language					= $advisorClassRow->advisorclass_language;
 						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
 						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -2003,9 +2006,10 @@ function student_and_advisor_color_chart_v2_func() {
 						$student_timezone_offset				= $studentRow->student_timezone_offset;
 						$student_youth  						= $studentRow->student_youth;
 						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
+						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
+						$student_class_language					= $studentRow->student_class_language;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
 						$student_request_date  					= $studentRow->student_request_date;
 						$student_semester						= $studentRow->student_semester;
