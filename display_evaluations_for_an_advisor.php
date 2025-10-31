@@ -440,9 +440,9 @@ function display_evaluations_for_an_advisor_func() {
 											<tr><td>Morse Runner:</td><td>$evaluateAdvisor_morse_trainer</td></tr>
 											<tr><td>LCWO</td><td>$evaluateAdvisor_lcwo</td></tr>
 											<tr><td>RufzXP:</td><td>$evaluateAdvisor_rufzxp</td></tr>
-											<tr><td>CWT:</td><td>$evaluateAdvisor_cwt</td></tr>
-											<tr><td>QSOs</td><td>$evaluateAdvisor_qsos</td></tr>
-											<tr><td>Short Stories</td><td>$evaluateAdvisor_short_stories</td></tr>
+											<tr><td>CWTs, etc.:</td><td>$evaluateAdvisor_cwt</td></tr>
+											<tr><td>Short Stories</td><td>$evaluateAdvisor_qsos</td></tr>
+											<tr><td>Prefix/Suffix</td><td>$evaluateAdvisor_short_stories</td></tr>
 											<tr><td>Enjoy Class</td><td>$evaluateAdvisor_enjoy_class</td></tr>
 											<tr><td style='vertical-align:top;'>Student Comments:</td><td>$evaluateAdvisor_student_comments</td></tr>
 											<tr><td style='vertical-align:top;'>Applications:</td><td>$evaluateAdvisor_applications</td></tr>
