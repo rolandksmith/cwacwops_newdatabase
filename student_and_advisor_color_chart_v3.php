@@ -59,7 +59,7 @@ function student_and_advisor_color_chart_v3_func() {
 
 
 	$strPass					= "1";
-	$theURL						= "$siteURL/cwa-student-and-advisor-color-chart-v3/";
+	$theURL						= "$siteURL/cwa-student-and-advisor-color-chart/";
 	$updateAdvisorURL			= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$updateStudentURL			= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$currentSemester			= $initializationArray['currentSemester'];
