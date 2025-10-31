@@ -25,6 +25,7 @@ function send_end_of_semester_assessment_email_to_advisors_func() {
 	}
 	$validUser = $initializationArray['validUser'];
 	$siteURL			= $initializationArray['siteurl'];
+	$userName			= $initializationArray['userName'];
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -44,7 +45,6 @@ function send_end_of_semester_assessment_email_to_advisors_func() {
 	$myCount			= 0;
 	$additionaltext		= "";
 	$increment			= 0;
-	$userName			= $initializationArray['userName'];
 	$validTestmode		= $initializationArray['validTestmode'];
 	$siteURL			= $initializationArray['siteurl'];
 	$theURL				= "$siteURL/cwa-send-end-of-semester-assessment-email-to-advisors/";
