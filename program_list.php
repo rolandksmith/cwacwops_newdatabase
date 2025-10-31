@@ -456,7 +456,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-show-timezone-information-for-a-location/' target='_blank'>Show Timezone Information for a Location</a>
 								<li><a href='$siteURL/cwa-show-saved-email/' target='_blank'>Show Saved Email</a>
 								<li><a href='$siteURL/cwa-student-and-advisor-assignments/' target='_blank'>Student and Advisor Assignments (#1 Report)</a>
-								<li><a href='$siteURL/cwa-student-and-advisor-color-chart-v2/' target='_blank'>Student and Advisor Color Chart V2</a>
+								<li><a href='$siteURL/cwa-student-and-advisor-color-chart/' target='_blank'>Student and Advisor Color Chart</a>
 								<li><a href='$siteURL/cwa-student-evaluation-of-advisor/' target='_blank'>Student Evaluation of Advisor</a>
 								<li><a href='$siteURL/cwa-student-management/' target='_blank'>Student Management</a>
 								<li><a href='$siteURL/cwa-student-progression-report/' target='_blank'>Student Progression Report</a>
@@ -637,7 +637,7 @@ function program_list_func() {
 								<h4>Common Student / Advisor Management Tasks</h4>
 								<li><a href='$siteURL/cwa-make-or-restore-backups/' target='_blank'>Make or Restore Backups</a><br /><br />
 								<li><a href='$siteURL/cwa-student-and-advisor-assignments/' target='_blank'>Student and Advisor Assignments (#1 Report)</a>
-								<li><a href='$siteURL/cwa-student-and-advisor-color-chart-v2/' target='_blank'>Student and Advisor Color Chart V2</a><br /><br />
+								<li><a href='$siteURL/cwa-student-and-advisor-color-chart/' target='_blank'>Student and Advisor Color Chart</a><br /><br />
 								<li><a href='$siteURL/cwa-display-and-update-user-master-information/' target='_blank'>Display and Update User Master Information</a>
 								<li><a href='$siteURL/cwa-display-and-update-advisor-signup-info/' target='_blank'>Display and Update Advisor Signup Info</a>
 								<li><a href='$siteURL/cwa-display-and-update-student-signup-information/' target='_blank'>Display and Update Student Signup Information</a><br /><br />
