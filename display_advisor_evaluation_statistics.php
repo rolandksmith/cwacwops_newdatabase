@@ -509,8 +509,8 @@ function display_advisor_evaluation_statistics_func() {
 										'rufzxp'=>'RufzXP',
 										'morse_runner'=>'Morse Runner',
 										'lcwo'=>'LCWO',
-										'short_stories'=>'Short Stories',
-										'qsos'=>'QSOs',
+										'short_stories'=>'Prefix/Suffix',
+										'qsos'=>'Short Files',
 										'cwt'=>'CWT'
 										);
 
