@@ -183,13 +183,13 @@ function send_evaluation_email_to_advisors_func() {
 		$advisorTableName			= "wpw1_cwa_advisor2";
 		$advisorClassTableName		= "wpw1_cwa_advisorclass2";
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
-		$remindersTablName			= 'wpw1_cwa_reminders2';
+		$remindersTableName			= 'wpw1_cwa_reminders2';
 		$inp_mode						= 'tm';
 	} else {
 		$advisorTableName			= "wpw1_cwa_advisor";
 		$advisorClassTableName		= "wpw1_cwa_advisorclass";
 		$userMasterTableName		= 'wpw1_cwa_user_master';
-		$remindersTablName			= 'wpw1_cwa_reminders';
+		$remindersTableName			= 'wpw1_cwa_reminders';
 		$inp_mode						= 'pd';
 	}
 
@@ -535,7 +535,7 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 						$thisCloseDate		= $checkResultRow->close_date;
 						
 						$thisDate			= date('Y-m-d H:i:s');
-						if ($thisCloseData > $thisDate) {		// reminder is already set
+						if ($thisCloseDate > $thisDate) {		// reminder is already set
 							$addTheReminder	= FALSE;
 						}
 					}
@@ -547,13 +547,6 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 				if ($doDebug) {
 					echo "preparing to add reminder<br />";
 				}
-				$reminder_text	= "<b>Evaluate Student Promotability</b> Please enter the promotability information for your students, that is,  
-is the Beginner, Fundamental, or Intermediate student is ready to take the next higher level class, or 
-the Advanced student met the class objectives. 
-Please click 
-<a href='$evaluateStudentURL?semester=$theSemester&strpass=2&inp_mode=$inp_mode&inp_callsign=$advisor_call_sign&token=$token' target='_blank'>
-<b>Evaluate Students</b></a>. A CWA web page will display and allow you to enter your evaluations. 
-When all your evaluations are completed, you’ll be immediately able to register as an advisor for the next semester.";
 
 
 				$returnArray		= wp_to_local($advisor_tz_id, 0, 90);
@@ -571,6 +564,13 @@ When all your evaluations are completed, you’ll be immediately able to registe
 					$close_date			= $returnArray['expiration'];
 				}
 				$token				= mt_rand();
+				$reminder_text	= "<b>Evaluate Student Promotability</b> Please enter the promotability information for your students, that is,  
+is the Beginner, Fundamental, or Intermediate student is ready to take the next higher level class, or 
+the Advanced student met the class objectives. 
+Please click 
+<a href='$evaluateStudentURL?semester=$theSemester&strpass=2&inp_mode=$inp_mode&inp_callsign=$advisor_call_sign&token=$token' target='_blank'>
+<b>Evaluate Students</b></a>. A CWA web page will display and allow you to enter your evaluations. 
+When all your evaluations are completed, you’ll be immediately able to register as an advisor for the next semester.";
 				$inputParams		= array("effective_date|$effective_date|s",
 											"close_date|$close_date|s",
 											"resolved_date||s",
