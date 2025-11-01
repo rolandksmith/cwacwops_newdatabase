@@ -1,7 +1,5 @@
 function data_initialization_func($attrib='') {
 
-// modified 23Feb20 by Roland to add prevSemester to the return array
-// modified and remodified 10Mar21 by Roland and Bob about semester Apr/May moving to May/Jun
 
 	// Initialize fields
 	$validUser						= "N";
@@ -204,8 +202,10 @@ function data_initialization_func($attrib='') {
 	}
 
 // set up pastSemesters
-	$pastSemesters				= '2020 Jan/Feb|2020 APR/MAY|2020 SEP/OCT|2021 Jan/Feb|2021 Apr/May|2021 Sep/Oct|2022 Jan/Feb|2022 May/Jun|2022 Sep/Oct|2023 Jan/Feb|2023 May/Jun|2023 Sep/Oct|2024 Jan/Feb|2024 May/Jun|2024 Sep/Oct|2025 Jan/Feb|2025 May/Jun';
-	$pastSemestersArray			= array('2025 Jan/Feb',
+	$pastSemesters				= '2020 Jan/Feb|2020 APR/MAY|2020 SEP/OCT|2021 Jan/Feb|2021 Apr/May|2021 Sep/Oct|2022 Jan/Feb|2022 May/Jun|2022 Sep/Oct|2023 Jan/Feb|2023 May/Jun|2023 Sep/Oct|2024 Jan/Feb|2024 May/Jun|2024 Sep/Oct|2025 Jan/Feb|2025 May/Jun|2025 Sep/Oct';
+	$pastSemestersArray			= array('2025 Sep/Oct',
+										'2025 May/Jun',
+										'2025 Jan/Feb',
 										'2024 Sep/Oct',
 										'2024 May/Jun',
 										'2024 Jan/Feb',
@@ -220,8 +220,7 @@ function data_initialization_func($attrib='') {
 										'2021 Jan/Feb',
 										'2020 SEP/OCT',
 										'2020 APR/MAY',
-										'2020 Jan/Feb',
-										'2025 May/Jun');
+										'2020 Jan/Feb');
 	
 // get site url
 	$siteURL					= get_site_url();
