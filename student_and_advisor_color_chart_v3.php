@@ -677,7 +677,7 @@ function student_and_advisor_color_chart_v3_func() {
 										}
 									
 										if ($doDebug) {
-											echo "&nbsp;&nbsp;&nbsp;&nbsp;Class advisor; $advisorClass_call_sign ($advisorClass_advisor_callsign)<br />
+											echo "&nbsp;&nbsp;&nbsp;&nbsp;Class advisor; $advisorClass_call_sign ($advisorClass_call_sign)<br />
 												  &nbsp;&nbsp;&nbsp;&nbsp;level: $advisorClass_level<br />
 												  &nbsp;&nbsp;&nbsp;&nbsp;language: $advisorClass_language<br />
 												  &nbsp;&nbsp;&nbsp;&nbsp;Sequence: $advisorClass_sequence<br />
@@ -1232,9 +1232,9 @@ function student_and_advisor_color_chart_v3_func() {
 										if ($doDebug) {
 											echo "&nbsp;&nbsp;&nbsp;&nbsp;student $student_call_sign had no matching classes<br />";
 										}
-										$myResult		= addCombinedArray($thisFirstTimes,$thisFirstDays,$student_level,$thisLanguage&'Students',1,$student_call_sign,0);
+										$myResult		= addCombinedArray($thisFirstTimes,$thisFirstDays,$student_level,$thisLanguage,'Students',1,$student_call_sign,0);
 										if ($doDebug) {
-											echo "&nbsp;&nbsp;&nbsp;&nbsp;did AddCombinedArray with $thisFirstTimes,$thisFirstDays,$thisLanguage,$student_level,Students,1,$student_call_sign<br />";
+											echo "&nbsp;&nbsp;&nbsp;&nbsp;did AddCombinedArray with $thisFirstTimes,$thisFirstDays,$student_level,$thisLanguage,Students,1,$student_call_sign<br />";
 										}
 								
 										$noClassChoiceFilled++;
