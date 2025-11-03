@@ -1179,7 +1179,7 @@ available to your advisor. To start the assessment, please click $url.";
 		$didIntermediate		= FALSE;
 		$bestResultAdvanced		= 0;
 		$didAdvanced			= FALSE;
-		$retVal					= displayAssessment('',$token,$doDebug);
+		$retVal					= displayAssessment($inp_callsign,$token,$doDebug);
 		if ($retVal[0] === FALSE) {
 			if ($doDebug) {
 				echo "displayAssessment returned FALSE. Called with $inp_callsign, $token<br />";
