@@ -112,8 +112,7 @@ function displayAssessment($inp_callsign='',$inp_token='',$doDebug=FALSE) {
 				echo "ran $sql<br />and retrieved $numASRows rows<br />";
 			}
 			if ($numASRows > 0) {
-				$report				= "<h4>Assessment Details for $inp_callsign</h4>
-										<table style='width:1200px;'>";
+				$thisFirstTime		= TRUE;
 				foreach($assessmentResult as $newAssessment) {				
 					$record_id		= $newAssessment->record_id;
 					$thiscallsign	= $newAssessment->callsign;
@@ -131,6 +130,12 @@ function displayAssessment($inp_callsign='',$inp_token='',$doDebug=FALSE) {
 					$thisScore		= $newAssessment->score;
 					$thisDetail		= $newAssessment->details;
 					$thisDate		= $newAssessment->date_written;
+					
+					if ($thisFirstTime) {
+						$thisFirstTime	= FALSE;
+						$report			= "<h4>Assessment Details for $thiscallsign</h4>
+											<table style='width:1200px;'>";
+					}
 					
 					if ($thisLevel == 'Beginner') {
 						$didBeginner	= TRUE;
