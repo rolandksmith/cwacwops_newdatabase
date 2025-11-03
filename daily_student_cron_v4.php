@@ -65,30 +65,6 @@ function daily_student_cron_v4_func() {
   		Welcome Date:			Y-M-D
   		Advisor Selected Date:	Y-M-Dif ($doDebug)
   
- 	Created from the large daily cron job on 6July2021 by Roland
- 	Modified to add ability in testmode to modify the dates so that the 
-		verify processes could be tested. Both verifyMode and testMode must be true to 
-		do this test method
-	Modified 26July21 by Roland to change the replacement process. The process now is 
-		limited to the periods 4/10 - 5/10; 8/10 - 9/10; and 12/10 - 01/10
-		The replacement criteria is also changed to use student class choices 
-	Modified 29Aug21 by Roland to make the class choice conversion to utc if the utc fields are empty
-		moved the version to V3
-	Modified 2Jan22 by Roland to fix the link to update student information and to add link to check 
-		student status
-	Modified 13Jul22 by Roland to simplify several processes and to check class availability when 
-		sending welcome or verify emails
-	Modified 1Nov22 by Roland to accommodate timezone table changes
-	Modified 3Feb23 by Roland to handle multiple excluded advisors
-	Modified 15Apr23 by Roland to fix action_log
-	Modified 12Jul23 by Roland to use consolidated tables
-	Modified 27Jul23 by Roland to incorporate the outstanding replacement requests
-	Modified 28Oct23 by Roland to correct the welcome message when no catalog
-	Modified 12Nov23 by Roland to notify Roland when a duplicate student callsign is found
-	Modified 17Nov23 by Roland to store actions in the reminders table
-	Modified 25Dec23 by Roland to store the debug log correctly. Version upgraded to 4
-	Modified 26Feb24 by Roland to add additional counts
-	Modified 12Oct24 by Roland for new database
  
 */
 
@@ -242,6 +218,7 @@ function daily_student_cron_v4_func() {
 	$log_student_parent 					= '';    // student_parent
 	$log_student_parent_email				= '';    // student_parent_email
 	$log_level  							= '';    // level
+	$log_class_language						= '';
 	$log_waiting_list 						= '';    
 	$log_request_date  						= '';    // request_date
 	$log_semester  							= '';    // semester
@@ -463,20 +440,20 @@ function daily_student_cron_v4_func() {
 	
 	///////////////// end of checkClasses function
 
+// $validEmailPeriod = 'Y';
 
 	$runTheJob				= TRUE;
 ////// see if this is the time to actually run
 	if ($doDebug) {
 		echo "<br />starting<br />";
 	}
-// $validReplacementPeriod = 'Y';
 		
 	if ($userName != '') {
 		$content 			.= "<h3>$jobname Executed by $userName</h3>";
 	} else {
 		$content			.= "<h3>$jobname Process Automatically Executed</h3>";
 		$userName			= "CRON";
-		$runTheJob				= allow_job_to_run($doDebug);
+		$runTheJob			= allow_job_to_run($doDebug);
 	}
 
 	
@@ -617,6 +594,7 @@ function daily_student_cron_v4_func() {
 						$student_parent 						= $studentRow->student_parent;
 						$student_parent_email  					= strtolower($studentRow->student_parent_email);
 						$student_level  						= $studentRow->student_level;
+						$student_class_language					= $studentRow->student_class_language;
 						$student_waiting_list 					= $studentRow->student_waiting_list;
 						$student_request_date  					= $studentRow->student_request_date;
 						$student_semester						= $studentRow->student_semester;
@@ -931,6 +909,7 @@ function daily_student_cron_v4_func() {
 									$advisorEmail							= $advisorClassRow->user_email;
 									$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
 									$advisorClass_level						= $advisorClassRow->advisorclass_level;
+									$advisorClass_language					= $advisorClassRow->advisorclass_language;
 									$advisorClass_action_log				= stripslashes($advisorClassRow->advisorclass_action_log);
 									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -1167,6 +1146,7 @@ function daily_student_cron_v4_func() {
 													$replace_replace_parent 				= $replaceRow->student_parent;
 													$replace_replace_parent_email  			= strtolower($replaceRow->student_parent_email);
 													$replace_level  						= $replaceRow->student_level;
+													$replace_class_language					= $replaceRow->student_class_language;
 													$replace_waiting_list 					= $replaceRow->student_waiting_list;
 													$replace_request_date  					= $replaceRow->student_request_date;
 													$replace_semester						= $replaceRow->student_semester;
@@ -1401,6 +1381,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 		if ($doDebug) {
 			echo "<br /><b>STUDENT</b> Starting Student Process<br />";
 		}
+		
 		$content				.= "<h4>Processing Student Records</h4>";
 		$myDate = date('Y-m-d', $currentTimestamp);
 		$myCount				= 0;
@@ -1462,6 +1443,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 					$student_parent 						= $studentRow->student_parent;
 					$student_parent_email  					= strtolower($studentRow->student_parent_email);
 					$student_level  						= $studentRow->student_level;
+					$student_class_language					= $studentRow->student_class_language;
 					$student_waiting_list 					= $studentRow->student_waiting_list;
 					$student_request_date  					= $studentRow->student_request_date;
 					$student_semester						= $studentRow->student_semester;
@@ -1576,6 +1558,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										  &nbsp;&nbsp;&nbsp;Semester: $student_semester<br />
 										  &nbsp;&nbsp;&nbsp;daysToSemester: $daysToSemester<br />
 										  &nbsp;&nbsp;&nbsp;Level: $student_level<br />
+										  &nbsp;&nbsp;&nbsp;Language: $student_class_language<br />
 										  &nbsp;&nbsp;&nbsp;Time Zone: $student_timezone_offset<br />
 										  &nbsp;&nbsp;&nbsp;Request Date: $student_request_date<br />
 										  &nbsp;&nbsp;&nbsp;Class Priority: $student_class_priority<br />
@@ -1807,6 +1790,7 @@ and verified. Click on <a href='$advisorVerifyURL/?callsign=$advisorClass_adviso
 										$emailContent = "To: $student_last_name, $student_first_name ($student_call_sign):<br />
 														<p>Welcome to the CW Academy and thank you for your student registration!  You are currently $waiting for:
 														<br />&nbsp;&nbsp;&nbsp;$student_level CW class
+														<br />&nbsp;&nbsp;&nbsp;For a class taught in $student_class_language 
 														<br />&nbsp;&nbsp;&nbsp;For the $student_semester semester
 														<br />Classes are one hour in length and their starting time will be within the time block indicated. 
 														The class times and days you selected are (all dates and times in your local time):
@@ -2076,6 +2060,7 @@ under 'Reminders and Actions Requested'.";
 														  <br />&nbsp;&nbsp;&nbsp;Name: $student_last_name, $student_first_name
 														  <br />&nbsp;&nbsp;&nbsp;Email: $student_email
 														  <br />&nbsp;&nbsp;&nbsp;Level: $student_level
+														  <br />&nbsp;&nbsp;&nbsp;Language: $student_class_language
 														  <br />&nbsp;&nbsp;&nbsp;TZ: $student_timezone_offset
 														  <br />&nbsp;&nbsp;&nbsp;Semester: $student_semester 
 														  <br />&nbsp;&nbsp;&nbsp;Abandoned: $student_abandoned
@@ -2321,9 +2306,9 @@ set email_number to 4, and send the no Response email.
 																					
 																					
 															$token				= mt_rand();
-															$reminder_text		= "<b>Select Class Schedule Preferences:</b> It is time to verify your availability to take a class in the upcoming semester 
+															$reminder_text		= "<b>Select Class Schedule and Language Preferences:</b> It is time to verify your availability to take a class in the upcoming semester 
 and to select your class preferences. The class catalog is now available. Select one of the following:<br />
-1. To verify your availability and indicate your desired class schedule click <a href='$studentRegistrationURL?inp_verify=Y&strpass=2&inp_verify=Y&token=$token&enstr=$encstr'>Select Class Preferences</a>. 
+1. To verify your availability and indicate your desired class schedule and language, click <a href='$studentRegistrationURL?inp_verify=Y&strpass=2&inp_verify=Y&token=$token&enstr=$encstr'>Select Class Preferences</a>. 
 Students will be assigned to advisor classes in about three weeks<br />
 2. You can move your registration to the $semesterTwo semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=1&token=$token'>HERE</a><br />
 3. You can move your registration to the $semesterThree semester by clicking <a href='$TURemoveURL?appid=$student_ID&strpass=2&xmode=$xmode&inp_option=2&token=$token'>HERE</a><br /> 
@@ -2617,6 +2602,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 														$advisorEmail							= $advisorClassRow->user_email;
 														$advisorClass_sequence					= $advisorClassRow->advisorclass_sequence;
 														$advisorClass_level						= $advisorClassRow->advisorclass_level;
+														$advisorClass_language					= $advisorClassRow->advisorclass_language;
 														$advisorClass_action_log				= stripslashes($advisorClassRow->advisorclass_action_log);
 														$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
 														$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -2841,6 +2827,7 @@ had a student status of V and is on hold waiting for a possible reassignment. Wh
 																		$replace_replace_parent 				= $replaceRow->student_parent;
 																		$replace_replace_parent_email  			= strtolower($replaceRow->student_parent_email);
 																		$replace_level  						= $replaceRow->student_level;
+																		$replace_class_language					= $replaceRow->student_class_language;
 																		$replace_waiting_list 					= $replaceRow->student_waiting_list;
 																		$replace_request_date  					= $replaceRow->student_request_date;
 																		$replace_semester						= $replaceRow->student_semester;
@@ -3161,6 +3148,7 @@ assignment that meet the criteria for your class.<p>";
 													$student_parent 						= $studentRow->student_parent;
 													$student_parent_email  					= strtolower($studentRow->student_parent_email);
 													$student_level  						= $studentRow->student_level;
+													$student_class_language					= $studentRow->student_class_language;
 													$student_waiting_list 					= $studentRow->student_waiting_list;
 													$student_request_date  					= $studentRow->student_request_date;
 													$student_semester						= $studentRow->student_semester;
