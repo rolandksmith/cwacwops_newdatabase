@@ -2,7 +2,8 @@ function generate_catalog_for_student($inp_data = array('')) {
 
 /*	Input data comes in the form of an array
 		$inp_data			= array('student_semester'=>$student_semester, 
-									'student_level'=>$student_level, 
+									'student_level'=>$student_level,
+									'student_class_language'=>$student_class_language, 
 									'student_no_catalog'=>$student_no_catalog, 
 									'student_catalog_options'=>$student_catalog_options,
 									'student_flexible'=>$student_flexible,  
@@ -156,10 +157,10 @@ function generate_catalog_for_student($inp_data = array('')) {
 	}
 	
 	$myInt							= count($inp_data);
-	if ($myInt < 9) {
-		$errorInfo			= "inp_data should have 9 elements. Only $myInt elements given";
+	if ($myInt < 10) {
+		$errorInfo			= "inp_data should have 10 elements. Only $myInt elements given";
 		if ($doDebug) {
-			echo "inp_data should have 9 elements. Only $myInt elements given<br />";
+			echo "inp_data should have 10 elements. Only $myInt elements given<br />";
 		}
 		$doProceed			= FALSE;
 	}
@@ -239,6 +240,10 @@ function generate_catalog_for_student($inp_data = array('')) {
 				$showAvail		= FALSE;
 			}
 		}
+
+$showCatalog = TRUE;
+$show13Options = FALSE;
+$showAvail = FALSE;
 		
 		if ($doProceed) {
 			if ($show13Options) {
@@ -325,32 +330,35 @@ function generate_catalog_for_student($inp_data = array('')) {
 							$numClasses	= $myArray[5];
 							$advisors	= $myArray[6];
 
-
-							$myStr			= str_replace(","," and ",$localDays);
-							$utcValue		= "$utcTime $utcDays";
-							$sendValue		= "$localTime $localDays|$utcTime $utcDays";
-							$thisChoice1	= '';
-							$thisChoice2	= '';
-							$thisChoice3	= '';
-							if ($student_first_class_choice_utc == $utcValue) {
-								$thisChoice1	= 'checked'; 
-								$none1			= '';
+							// only process if language is English or matches student_class_language
+							if ($clanguage == 'English' || $clanguage == $student_class_language) {
+								$myStr			= str_replace(","," and ",$localDays);
+								$utcValue		= "$utcTime $utcDays";
+								$sendValue		= "$localTime $localDays|$utcTime $utcDays";
+								$thisChoice1	= '';
+								$thisChoice2	= '';
+								$thisChoice3	= '';
+								if ($student_first_class_choice_utc == $utcValue) {
+									$thisChoice1	= 'checked'; 
+									$none1			= '';
+								}
+								if ($student_second_class_choice_utc == $utcValue) {
+									$thisChoice2	= 'checked';
+									$none2			= '';
+								}
+								if ($student_third_class_choice_utc == $utcValue) {
+									$thisChoice3	= 'checked';
+									$none3			= '';
+								}
+								$convertedTime	= $timeConversion[$localTime];
+								$returnCatalog	.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='$sendValue' $thisChoice1></td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendValue' $thisChoice2></td>\n
+														<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='$sendValue' $thisChoice3></td>\n
+														<td>$convertedTime $myStr</td>\n
+														<td style='text-align:center;'>$numClasses</td>
+														<td>$clanguage</td></tr>\n";
 							}
-							if ($student_second_class_choice_utc == $utcValue) {
-								$thisChoice2	= 'checked';
-								$none2			= '';
-							}
-							if ($student_third_class_choice_utc == $utcValue) {
-								$thisChoice3	= 'checked';
-								$none3			= '';
-							}
-							$convertedTime	= $timeConversion[$localTime];
-							$returnCatalog	.= "<tr><td><input type='radio' class='formInputText' id='chk_sked1' name='inp_sked1' value='$sendValue' $thisChoice1></td>\n
-													<td><input type='radio' class='formInputText' id='chk_sked2' name='inp_sked2' value='$sendValue' $thisChoice2></td>\n
-													<td><input type='radio' class='formInputText' id='chk_sked3' name='inp_sked3' value='$sendValue' $thisChoice3></td>\n
-													<td>$convertedTime $myStr</td>\n
-													<td style='text-align:center;'>$numClasses</td>
-													<td>$clanguage</td></tr>\n";
+						
 						}
 					}
 					$flexYChecked			= '';
