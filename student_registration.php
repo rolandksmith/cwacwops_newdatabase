@@ -3028,7 +3028,8 @@ function student_registration_func() {
 
 
 				$inp_data			= array('student_semester'=>$student_semester, 
-											'student_level'=>$student_level, 
+											'student_level'=>$student_level,
+											'student_class_language'=>$student_class_language, 
 											'student_no_catalog'=>$student_no_catalog, 
 											'student_catalog_options'=>$student_catalog_options,
 											'student_flexible'=>$student_flexible,  
@@ -3067,7 +3068,14 @@ function student_registration_func() {
 											selecting from the list below:</p>";
 					} elseif ($result_option == 'catalog') {
 						$result_option		= $result[0];
+						$languageStr		= '';
+						if ($student_class_language != 'English') {
+							$languageStr	= "Your preferred class language is $student_class_language. If a class 
+												is being offered in your preferred language, it will be shown below along 
+												with classes being offered in English. ";
+						}
 						$option_message		= "<p>The Class Catalog for $student_level Level classes is now available. 
+												$languageStr
 												Select up to three class schedule options from the table below. 
 												CW Acadamy will try to assign you to one of the class options in the order you 
 												specify. Whether or not you are assigned to a class will depend on the 
