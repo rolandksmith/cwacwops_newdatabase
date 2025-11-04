@@ -1053,11 +1053,11 @@ function getAdvisorInfoToDisplay($inp_callsign,$inp_semester,$noUpdate) {
 								$firstTime					= TRUE;
 								$languageChecked			= '';
 								foreach($languageArray as $thisLanguage) {
-									if ($thisLanguage == $advisorClass_language) {
-										$languageChecked	= 'checked';
-									} else {
-										$languageCHecked	= '';
-									}
+//									if ($thisLanguage == $advisorClass_language) {
+//										$languageChecked	= 'checked';
+//									} else {
+//										$languageCHecked	= '';
+//									}
 									if ($firstTime) {
 										$firstTime			= FALSE;
 										$languageOptions		.= "<input type='radio' class='formInputButton' name='inp_advisorclass_language' value='$thisLanguage' $languageChecked required>$thisLanguage";
