@@ -946,7 +946,7 @@ function program_list_func() {
 			}
 			$content	.= "<h4>Student Programs</h4>
 							<p><a href='$siteURL/cwa-student-registration/' target='_blank'>Student Sign up</a><br />
-								Use this program to sign up for a CW Academy Class or to modify your signup 
+								Use this program to sign up for a CW Academy Class; modify your class details; or take a Morse code proficiency assessment 
 								details.</p>
 							<p><a href='$siteURL/cwa-display-and-update-user-master-information' target='_blank'>Update User Master Information</a><br />
 								The program allows you to maintain your personal information such as address, phone number, and text messaging 
