@@ -207,7 +207,8 @@ function list_advisors_incomplete_evaluations_func() {
 									<th>Time Zone</th>
 									<th>Level</th>
 									<th>Nmbr Students</th>
-									<th>Nmbr Eval</th></tr>";
+									<th>Nmbr Eval</th>
+									<th>Unevaluated Students</th></tr>";
 		
 		$sql							= "select * from $advisorClassTableName 
 											left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
@@ -342,7 +343,7 @@ function list_advisors_incomplete_evaluations_func() {
 						if ($doDebug) {
 							echo "Got advisor $advisorClass_call_sign sequence $advisorClass_sequence students<br />";
 						}
-	
+						$unevaluatedStudents		= "";
 						for ($snum=1;$snum<=$advisorClass_number_students;$snum++) {
 							if ($snum < 10) {
 								$strSnum 			= str_pad($snum,2,'0',STR_PAD_LEFT);
@@ -352,7 +353,7 @@ function list_advisors_incomplete_evaluations_func() {
 							$studentCallSign		= ${'advisorClass_student' . $strSnum};
 							if ($studentCallSign != '') {
 								$studentCount++;
-	//												$totalStudents++;
+	//							$totalStudents++;
 							
 								// count number of students and number evaluated
 								$sql					= "select * from $studentTableName 
@@ -421,10 +422,11 @@ function list_advisors_incomplete_evaluations_func() {
 											}
 											if ($student_promotable == 'P' || $student_promotable == 'N' || $student_promotable == 'W') {
 												$studentEval++;
-	//																$totalEvaluated++;
 												if ($doDebug) {
 													echo "counts: studentEval: $studentEval<br />";
 												}
+											} else {
+												$unevaluatedStudents	.= " $student_call_sign";
 											}
 										}
 									} else {
@@ -436,13 +438,15 @@ function list_advisors_incomplete_evaluations_func() {
 							}
 						}
 						if ($studentCount > 0 && $studentEval < $studentCount) {
-							$content		.= "<tr><td>$thisCallSign</td>
+							$thisLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$thisCallSign&inp_depth=one&doDebug&testMode' target='_blank'>$thisCallSign</a>";
+							$content		.= "<tr><td>$thisLink</td>
 													<td>$thisName</td>
 													<td>$advisorClass_sequence</td>
 													<td>$advisorClass_timezone_id $advisorClass_timezone_offset</td>
 													<td>$advisorClass_level</td>
 													<td>$studentCount</td>
-													<td>$studentEval</td></tr>";
+													<td>$studentEval</td>
+													<td>$unevaluatedStudents</td></tr>";
 							if ($thisCallSign != '') {
 								$advisorCount++;
 							}
