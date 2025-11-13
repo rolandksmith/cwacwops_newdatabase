@@ -348,6 +348,7 @@ function send_advisor_email_to_view_student_evaluations_func() {
 							if ($doDebug) {
 								echo "$prevAdvisor advisorClass evaluations are not complete. Advisor bypassed<br />";
 							}
+							$content .= "$prevAdvisor advisorClass evaluations are not complete. Advisor bypassed<br />";
 						}
 						$prevAdvisor			= $advisorClass_call_sign;
 						$prevID					= $advisorClass_ID;
@@ -394,6 +395,23 @@ function send_advisor_email_to_view_student_evaluations_func() {
 							}
 						}
 					}
+				}
+				// see if the last record has evals complete
+				if ($evalsComplete) {
+					if ($doDebug) {
+						echo "evals complete on last record read<br />";
+					}
+					if (!array_key_exists($advisorClass_call_sign,$advisorArray)) {
+						if ($doDebug) {
+							echo "adding $advisorClass_call_sign to advisor Array<br />";
+						}
+						$advisorInfo			= "$advisorClass_ID|$advisorClass_first_name|$advisorClass_last_name|$advisorClass_email";
+						if ($doDebug) {
+							echo "Adding $advisorInfo for $prevAdvisor to advisorArray<br />";
+						}
+						$advisorArray[$prevAdvisor]			= $advisorInfo;
+					}
+
 				}
 			} else {
 				if ($doDebug) {
