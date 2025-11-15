@@ -176,7 +176,7 @@ function update_callsign_func() {
 		}
 		$extMode		= 'tm';
 		// table format: table name|field to change|action log field|id field name
-		$changeTables 	= array('wpw1_cwa_advisor|advisor_call_sign2|advisor_action_log|advisor_id',
+		$changeTables 	= array('wpw1_cwa_advisor2|advisor_call_sign|advisor_action_log|advisor_id',
 								'wpw1_cwa_advisorclass2|advisorclass_call_sign|advisorclass_action_log|advisorclass_id',
 								'wpw1_cwa_audio_assessment2|call_sign|assessment_notes|record_id',
 								'wpw1_cwa_audit_log2|logwho&logcallsign||record_id',
@@ -188,7 +188,7 @@ function update_callsign_func() {
 								'wpw1_cwa_reminders2|call_sign||record_id',
 								'wpw1_cwa_replacement_requests2|call_sign||record_id|',
 								'wpw1_cwa_student2|student_call_sign&student_pre_assigned_advisor&student_assigned_advisor|student_action_log|student_id',
-								'wpw1_cwa_temp_data2|callsign|record_id',
+								'wpw1_cwa_temp_data2|callsign||record_id',
 								'wpw1_cwa_user_master_deleted2|user_call_sign|user_action_log|user_ID',
 								'wpw1_cwa_user_master_history2|historywho&historycallsign||record_id',
 								'wpw1_cwa_user_master2|user_call_sign|user_action_log|user_ID',
@@ -520,6 +520,7 @@ student$strSnum call sign changed from $inp_old_callsign to $inp_new_callsign ";
 										}
 										
 										$thisActionLog	.= " / $thisActionDate $jobname $userName $fieldToChange updated to $inp_new_callsign ";
+										$thisActionLog = addslashes($thisActionLog);
 										$updateSql		= "update $tableToChange 
 															set $fieldToChange = '$inp_new_callsign', 
 															    $actionLogField = '$thisActionLog' 
