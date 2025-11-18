@@ -2338,7 +2338,7 @@ Error: $result[3]<br />";
 										   "advisorclass_semester|$inp_advisorclass_semester|s",							// 5
 										   "advisorclass_timezone_offset|$inp_advisorclass_timezone_offset|f",			// 7
 										   "advisorclass_level|$inp_advisorclass_level|s",								// 8
-										   "advisorclass_language|inp_advisorclass_language|s",							// 9
+										   "advisorclass_language|$inp_advisorclass_language|s",							// 9
 										   "advisorclass_action_log|$advisorclass_action_log|s",							// 10
 										   "advisorclass_class_size|$inp_advisorclass_class_size|d",						// 11
 										   "advisorclass_class_schedule_days|$inp_advisorclass_class_schedule_days|s",	// 12
@@ -2375,6 +2375,7 @@ Error: $result[3]<br />";
 			$advisorClass_semester					= $inp_advisorclass_semester;
 			$advisorClass_timezone_offset			= $inp_advisorclass_timezone_offset;
 			$advisorClass_level						= $inp_advisorclass_level;
+			$advisorClass_language					= $inp_advisorclass_language;
 			$advisorCLass_language					= $inp_advisorclass_language;
 			$advisorClass_class_size				= $inp_advisorclass_class_size;
 			$advisorClass_class_schedule_days		= $inp_class_schedule_days;
@@ -2392,7 +2393,7 @@ Error: $result[3]<br />";
 							<table style='width:600px;'>
 							<tr><td style='width:250px;'><b>Level</b></td>
 								<td>$advisorClass_level</td></tr>
-							<tr><td>Language</td>
+							<tr><td><b>Language</b></td>
 								<td>$advisorClass_language</td></tr>
 							<tr><td><b>Class Size</b></td>
 								<td>$advisorClass_class_size</td></tr>
