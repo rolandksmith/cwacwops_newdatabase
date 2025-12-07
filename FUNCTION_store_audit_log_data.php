@@ -69,6 +69,7 @@ function storeAuditLogData($dataToStore='',$doDebug=FALSE) {
 	$logdata						= array();
 	
 	$auditLogTableName				= "wpw1_cwa_audit_log";
+	$dataLogTableName				= 'wpw1_cwa_data_log';
 	$errorReason					= "";
 
 	$haveError						= FALSE;
@@ -207,6 +208,38 @@ function storeAuditLogData($dataToStore='',$doDebug=FALSE) {
 			if ($doDebug) {
 				$myInt		= $wpdb->insert_id;
 				echo "audit Log data has been stored at record $myInt<br /><br />";
+			}
+			
+			$tableNameConversion = array('ADVISOR'=>'wpw1_cwa_advisor',
+										  'STUDENT' => 'wpw1_cwa_student',
+										  'CLASS' => 'wpw1_cwa_advisorclass');
+			
+			/// write to data_log
+			$data_date_written = date('Y-m-d H:i:s');
+			$data_user = $logwho;
+			$data_call_sign = $logcallsign;
+			$data_table_name = $tableNameConversion[$logtype];
+			$data_action = 'unknown';
+			$data_field_values = json_encode($logdata);
+			
+			$insertResult = $wpdb->insert($dataLogTableName,
+										  array('data_date_written' => $data_date_written,
+												'data_user' => $data_user,
+												'data_call_sign' => $data_call_sign,
+												'data_table_name' => $data_table_name,
+												'data_action' => $data_action,
+												'data_field_values' => $data_field_values),
+											array('%s','%s','%s','%s','%s','%s',));
+			if ($insertResult === FALSE || $insertResult === NULL) {
+				if ($doDebug) {
+					$lastQuery = $wpdb->last_query;
+					$lastError = $wpdb->last_error;
+					echo "attempting to insert into $dataLogTableName returned an error<br />
+							lastQuery: $lastQuery<br />
+							lastError: $lastError<br />";
+				}
+				$haveError = TRUE;
+				$errorReason .= "attempting to insert into $dataLogTableName failed<br />";
 			}
 		}
 	}
