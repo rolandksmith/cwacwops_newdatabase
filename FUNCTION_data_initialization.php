@@ -21,6 +21,11 @@ function data_initialization_func($attrib='') {
     						'Catalan',
     						'język polski (Polish)',
     						'Deutsch (German)');
+    $languageConversion = ['English' => 'English',
+    					   'Ελληνικά (Greek)' => 'Greek',
+    					   'Catalan' => 'Catalan',
+    					   'język polski (Polish)' => 'Polish',
+    					   'Deutsch (German)' => 'German'];
 
 
 	// determine if current user is a valid user
@@ -256,7 +261,8 @@ function data_initialization_func($attrib='') {
 											'siteurl'=>$siteURL,
 											'userEmail'=>$user_email,
 											'userDisplayName'=>$user_display_name,
-											'languageArray'=>$languageArray
+											'languageArray'=>$languageArray,
+											'languageConversion'=>$languageConversion
 											);
 	} else {
 		$result 					= array('validUser'=>$validUser,
@@ -286,7 +292,8 @@ function data_initialization_func($attrib='') {
 											'siteurl'=>$siteURL,
 											'userEmail'=>$user_email,
 											'userDisplayName'=>$user_display_name,
-											'languageArray'=>$languageArray
+											'languageArray'=>$languageArray,
+											'languageConversion'=>$languageConversion
 											);
 	}
 	return $result;
