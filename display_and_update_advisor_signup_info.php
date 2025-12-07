@@ -953,9 +953,13 @@ function display_and_update_advisor_info_func() {
 											<td><b>Signal</b><br />$user_signal</td>
 											<td><b>Messenger</b><br />$user_messenger</td></tr>
 										<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
-											<td><b>Languages/b><br />$user_languages</td>
+											<td><b>Languages</b><br />$user_languages</td>
 											<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
 											<td><b>Survey Score</b><br />$user_survey_score</td></tr>
+										<tr><td><b>is_admin</b><br />$user_is_admin</td>
+											<td><b> Rold</b><br />$user_role</td>
+											<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
+											<td></td></td>
 										<tr><td><b>Date Created</b><br />user_$user_date_created</td>
 											<td><b>Date Updated</b><br />user_$user_date_updated</td>
 											<td></td>
