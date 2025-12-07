@@ -53,6 +53,8 @@ function make_or_restore_backups_func() {
 	$copy_wpw1_cwa_advisorclass_wpw1_cwa_advisorclass2						= FALSE;
 	$copy_wpw1_cwa_advisorclass2_wpw1_cwa_advisorclass						= FALSE;
 	$copy_wpw1_cwa_audit_log_wpw1_cwa_audit_log2							= FALSE;
+	$copy_wpw1_cwa_data_log_wpw1_cwa_data_log2								= FALSE;
+	$copy_wpw1_cwa_data_log2_wpw1_cwa_data_log								= FALSE;
 	$copy_wpw1_cwa_audit_log2_wpw1_cwa_audit_log							= FALSE;
 	$copy_wpw1_cwa_current_catalog_wpw1_cwa_current_catalog2				= FALSE;
 	$copy_wpw1_cwa_current_catalog2_wpw1_cwa_current_catalog				= FALSE;
@@ -136,6 +138,11 @@ function make_or_restore_backups_func() {
 				$audit_log = $str_value;
 				$audit_log = filter_var($audit_log,FILTER_UNSAFE_RAW);
 				$copy_wpw1_cwa_audit_log_wpw1_cwa_audit_log2 = TRUE;
+			}
+			if ($str_key == 'data_log') {
+				$data_log = $str_value;
+				$data_log = filter_var($data_log,FILTER_UNSAFE_RAW);
+				$copy_wpw1_cwa_data_log_wpw1_cwa_data_log2 = TRUE;
 			}
 			if ($str_key == 'current_catalog') {
 				$current_catalog = $str_value;
@@ -253,6 +260,11 @@ function make_or_restore_backups_func() {
 				$audit_log2 = filter_var($audit_log2,FILTER_UNSAFE_RAW);
 				$copy_wpw1_cwa_audit_log2_wpw1_cwa_audit_log = TRUE;
 			}
+			if ($str_key == 'data_log2') {
+				$data_log = $str_value;
+				$data_log = filter_var($data_log2,FILTER_UNSAFE_RAW);
+				$copy_wpw1_cwa_data_log2_wpw1_cwa_data_log = TRUE;
+			}
 			if ($str_key == 'current_catalog2') {
 				$current_catalog2 = $str_value;
 				$current_catalog2 = filter_var($current_catalog2,FILTER_UNSAFE_RAW);
@@ -349,6 +361,7 @@ function make_or_restore_backups_func() {
 				$copy_wpw1_cwa_advisor_wpw1_cwa_advisor2								= TRUE;
 				$copy_wpw1_cwa_advisorclass_wpw1_cwa_advisorclass2						= TRUE;
 				$copy_wpw1_cwa_audit_log_wpw1_cwa_audit_log2							= TRUE;
+				$copy_wpw1_cwa_data_log_wpw1_cwa_data_log2								= TRUE;
 				$copy_wpw1_cwa_current_catalog_wpw1_cwa_current_catalog2				= TRUE;
 				$copy_wpw1_cwa_deleted_advisor_wpw1_cwa_deleted_advisor2				= TRUE;
 				$copy_wpw1_cwa_deleted_advisorclass_wpw1_cwa_deleted_advisorclass2		= TRUE;
@@ -376,6 +389,7 @@ function make_or_restore_backups_func() {
 				$copy_wpw1_cwa_advisor2_wpw1_cwa_advisor								= TRUE;
 				$copy_wpw1_cwa_advisorclass2_wpw1_cwa_advisorclass						= TRUE;
 				$copy_wpw1_cwa_audit_log2_wpw1_cwa_audit_log							= TRUE;
+				$copy_wpw1_cwa_data_log2_wpw1_cwa_data_log								= TRUE;
 				$copy_wpw1_cwa_current_catalog2_wpw1_cwa_current_catalog				= TRUE;
 				$copy_wpw1_cwa_deleted_advisor2_wpw1_cwa_deleted_advisor				= TRUE;
 				$copy_wpw1_cwa_deleted_advisorclass2_wpw1_cwa_deleted_advisorclass		= TRUE;
@@ -499,7 +513,7 @@ function make_or_restore_backups_func() {
 							
 <tr><td><b><u>All Tables</u></b></td></tr>
 <tr><td><table style='width:900px;'>
-		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='copymain' name='copymain' value='copymain' checked>Copy All Tables to their backups</td>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='copymain' name='copymain' value='copymain' >Copy All Tables to their backups</td>
 			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='restoremain' name='restoremain' value='restoremain'>Restore All Tables from their backups</td></tr>
 			</table></td></tr>
 
@@ -543,6 +557,8 @@ function make_or_restore_backups_func() {
 <tr><td><table style='width:900px;'>
 		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log' name='audit_log' value='audit_log'>Copy audit_log to audit_log2</td>
 			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log2' name='audit_log2' value='audit_log2'>Copy audit_log2 to audit_log</td></tr>
+		<tr><td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log' name='audit_log' value='audit_log'>Copy data_log to data_log2</td>
+			<td style='vertical-align:top;text-align:left;width:450px;'><input type='checkbox' class='formInputButton' id='audit_log2' name='audit_log2' value='data_log2'>Copy data_log2 to data_log</td></tr>
 		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='current_catalog' name='current_catalog' value='current_catalog'>Copy current_catalog to current_catalog2</td>
 			<td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='current_catalog2' name='current_catalog2' value='current_catalog2'>Copy current_catalog2 to current_catalog</td></tr>
 		<tr><td style='vertical-align:top;text-align:left;'><input type='checkbox' class='formInputButton' id='joblog' name='joblog' value='joblog'>Copy joblog to joblog2</td>
@@ -593,6 +609,18 @@ function make_or_restore_backups_func() {
 			$copyArray[] = 'wpw1_cwa_audit_log|wpw1_cwa_audit_log2';
 			 if ($doDebug) {
 				echo "copying wpw1_cwa_audit_log to wpw1_cwa_audit_log2<br />";
+			}
+		}
+		if ($copy_wpw1_cwa_data_log_wpw1_cwa_data_log2) {
+			$copyArray[] = 'wpw1_cwa_data_log|wpw1_cwa_data_log2';
+			 if ($doDebug) {
+				echo "copying wpw1_cwa_data_log to wpw1_cwa_data_log2<br />";
+			}
+		}
+		if ($copy_wpw1_cwa_data_log_wpw1_cwa_data_log2) {
+			$copyArray[] = 'wpw1_cwa_data_log|wpw1_cwa_data_log2';
+			 if ($doDebug) {
+				echo "copying wpw1_cwa_data_log to wpw1_cwa_data_log2<br />";
 			}
 		}
 		if ($copy_wpw1_cwa_current_catalog_wpw1_cwa_current_catalog2) {
@@ -726,6 +754,12 @@ function make_or_restore_backups_func() {
 			$copyArray[] = 'wpw1_cwa_audit_log2|wpw1_cwa_audit_log';
 			 if ($doDebug) {
 				echo "copying wpw1_cwa_audit_log2 to wpw1_cwa_audit_log<br />";
+			}
+		}
+		if ($copy_wpw1_cwa_data_log2_wpw1_cwa_data_log) {
+			$copyArray[] = 'wpw1_cwa_data_log2|wpw1_cwa_data_log';
+			 if ($doDebug) {
+				echo "copying wpw1_cwa_data_log2 to wpw1_cwa_data_log<br />";
 			}
 		}
 		if ($copy_wpw1_cwa_current_catalog2_wpw1_cwa_current_catalog) {
