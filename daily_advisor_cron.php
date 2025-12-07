@@ -1,4 +1,4 @@
-function daily_advisor_cron_process_v2_func() {
+function daily_advisor_cron_process_func() {
 
 /*		Daily Advisor Cron
   validEmailPeriod is FALSE
@@ -20,19 +20,6 @@ function daily_advisor_cron_process_v2_func() {
   		Welcome Date:			Y-M-D
   		Advisor Selected Date:	Y-M-D
   
-	Created from the original Cron job on 6July2021 by Roland and 
-	modified to add ability in testmode to modify the dates so that the 
-		verify processes could be tested. Both verifyMode and testMode must be true to 
-		do this test
- 	modified 19Jan2022 by Roland to use tables rather than pods
- 	Modified 15Jul22 by Roland to send only one verify email and modified the verify message
- 		also modified welcome message to allow advisor to decline if email within the verification period
- 	Modified 31Oct22 by Roland for the new timezone information
- 	Modified 15Apr23 by Roland to fix action_log
- 	Modified 12Jul23 by Roland to use consolidated tables
- 	Modified 15Aug23 by Roland to fix the totals
- 	Modified 20Nov23 by Roland for new portal process
- 	Modified 12Oct24 by Roland for the new database
 */
 
 	global $wpdb;
@@ -45,7 +32,7 @@ function daily_advisor_cron_process_v2_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 	
-	$versionNumber			= '2';
+	$versionNumber			= '3';
 	
 	
 	$testEmailTo			= "kcgator@gmail.com,rolandksmith@gmail.com";
@@ -82,6 +69,7 @@ function daily_advisor_cron_process_v2_func() {
 	$replacedCount			= 0;
 	$notReplacedCount		= 0;
 	$surveyScore6			= 0;
+	$numARows				= 0;
 	$jobname				= 'Daily Advisor Cron';
 	$currentTimestamp 		= $initializationArray['currentTimestamp'];
 	$todaysDate 			= $initializationArray['currentDate'];
@@ -96,7 +84,7 @@ function daily_advisor_cron_process_v2_func() {
 	$validEmailPeriod 		= $initializationArray['validEmailPeriod'];
 	$daysToSemester			= $initializationArray['daysToSemester'];
 	$siteURL				= $initializationArray['siteurl'];
-	$actionDate				= date('dMy H:i');
+	$actionDate				= date('Y-m-d H:i:s');
 	$logDate				= date('Y-m-d H:i:s');
 	$advisorVerifyURL		= "$siteURL/cwa-process-advisor-verification/";
 	$classResolutionURL		= "https://cwops.org/cwa-class-resolution/";
@@ -266,7 +254,6 @@ $runTheJob	= TRUE;
 	if ($runTheJob) {
 	
 		if ($testMode) {
-			$studentTableName		= 'wpw1_cwa_student2';
 			$advisorTableName		= 'wpw1_cwa_advisor2';
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
 			$userMasterTableName	= 'wpw1_cwa_user_master2';
@@ -274,15 +261,19 @@ $runTheJob	= TRUE;
 			if ($doDebug) {
 				echo "<b>Operating in TestMode</b><br />";
 			}
+			$operatingMode			= 'Testmode';
 			$xmode					= 'tm';
 		} else {
-			$studentTableName	 	= 'wpw1_cwa_student';
 			$advisorTableName		= 'wpw1_cwa_advisor';
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass';
 			$userMasterTableName	= 'wpw1_cwa_user_master';
 			$xmode					= 'pd';
+			$operatingMode			= 'Production';
 		}
 
+		$advisor_dal = new CWA_Advisor_DAL();
+		$advisorclass_dal = new CWA_Advisorclass_DAL();
+		$user_dal = new CWA_User_Master_DAL();
 
 	// Advisor welcome and verify process
 
@@ -307,88 +298,55 @@ $runTheJob	= TRUE;
 			$doAdvisorVerify	= TRUE;
 		}
 		$doProceed				= TRUE;
-		$sql					= "select * from $advisorTableName 
-									left join $userMasterTableName on user_call_sign = advisor_call_sign 
-									where (advisor_semester='$currentSemester' 
-										   or advisor_semester = '$nextSemester' 
-										   or advisor_semester = '$semesterTwo' 
-										   or advisor_semester = '$semesterThree' 
-										   or advisor_semester = '$semesterFour') 
-									order by advisor_call_sign";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
-			$doProceed 			= FALSE;
+		// get the advisor
+		$criteria = [
+			'relation' => 'AND',
+			'clauses' => [
+				// field1 = $value1
+				['field' => 'advisor_call_sign', 'value' => '', 'compare' => '!='],
+				
+				// (field2 = $value2 OR field2 = $value3)
+				[
+					'relation' => 'OR',
+					'clauses' => [
+						['field' => 'advisor_semester', 'value' => $currentSemester, 'compare' => '='],
+						['field' => 'advisor_semester', 'value' => $nextSemester, 'compare' => '='],
+						['field' => 'advisor_semester', 'value' => $semesterTwo, 'compare' => '='],
+						['field' => 'advisor_semester', 'value' => $semesterThree, 'compare' => '='],
+						['field' => 'advisor_semester', 'value' => $semesterFour, 'compare' => '=']
+					]
+				]
+			]
+		];
+		$advisorResult = $advisor_dal->get_advisor_by_order($criteria,'advisor_call_sign','ASC',$operatingMode);
+		if ($advisorResult === FALSE) {
+			$content .= "Attempting to retrieve all advisors for current or future semesters returned FALSE<br />";
 		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_master_ID 					= $advisorRow->user_ID;
-					$advisor_master_call_sign			= $advisorRow->user_call_sign;
-					$advisor_first_name 				= $advisorRow->user_first_name;
-					$advisor_last_name 					= $advisorRow->user_last_name;
-					$advisor_email 						= $advisorRow->user_email;
-					$advisor_phone 						= $advisorRow->user_phone;
-					$advisor_city 						= $advisorRow->user_city;
-					$advisor_state 						= $advisorRow->user_state;
-					$advisor_zip_code 					= $advisorRow->user_zip_code;
-					$advisor_country_code 				= $advisorRow->user_country_code;
-					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-					$advisor_telegram 					= $advisorRow->user_telegram;
-					$advisor_signal 					= $advisorRow->user_signal;
-					$advisor_messenger 					= $advisorRow->user_messenger;
-					$advisor_action_log 				= $advisorRow->user_action_log;
-					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-					$advisor_languages 					= $advisorRow->user_languages;
-					$advisor_survey_score 				= $advisorRow->user_survey_score;
-					$advisor_is_admin					= $advisorRow->user_is_admin;
-					$advisor_role 						= $advisorRow->user_role;
-					$advisor_master_date_created 		= $advisorRow->user_date_created;
-					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					// if you need the country name and phone code, include the following
-					$countrySQL		= "select * from wpw1_cwa_country_codes  
-										where country_code = '$advisor_country_code'";
-					$countrySQLResult	= $wpdb->get_results($countrySQL);
-					if ($countrySQLResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-						$advisor_country		= "UNKNOWN";
-						$advisor_ph_code		= "";
-					} else {
-						$numCRows		= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if($numCRows > 0) {
-							foreach($countrySQLResult as $countryRow) {
-								$advisor_country		= $countryRow->country_name;
-								$advisor_ph_code		= $countryRow->ph_code;
-							}
-						} else {
-							$advisor_country			= "Unknown";
-							$advisor_ph_code			= "";
+			$numARows = count($advisorResult);
+			foreach($advisorResult as $key => $value) {
+				foreach($value as $thisField => $thisValue) {
+					$$thisField = $thisValue;
+				}
+				if ($doDebug) {
+					echo "<br />Processing $advisor_call_sign<br />";
+				}
+				// get the user_master for this advisor
+				$userResult = $user_dal->get_user_master_by_callsign($advisor_call_sign,$operatingMode);
+				if ($userResult == NULL) {
+					$content .= "Attempting to get user_master for $user_call_sign returned NULL<br />";
+				} else {
+//					if ($doDebug) {
+//						echo "userResult:<br /><pre>";
+//						print_r($userResult);
+//						echo "</pre><br />";
+//					}
+					foreach($userResult as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
 						}
 					}
-
 					if ($doProceed) {
-						$advisor_last_name 	= no_magic_quotes($advisor_last_name);
+						$user_last_name 	= no_magic_quotes($user_last_name);
 	
 						$sendEmail			= FALSE;
 						$doUpdate			= FALSE;
@@ -399,24 +357,24 @@ $runTheJob	= TRUE;
 						if ($advisor_semester == $nextSemester) {
 							$isNextSemester	= TRUE;
 						}
-						$stringToPass		= "inp_callsign=$advisor_call_sign&inp_email=$advisor_email&inp_phone=$advisor_phone&inp_mode=$xmode";
+						$stringToPass		= "inp_callsign=$advisor_call_sign&inp_email=$user_email&inp_phone=$user_phone&inp_mode=$xmode";
 						$enstr				= base64_encode($stringToPass);
-						$stringToPass1		= "id=$advisor_ID&action=Y&xmode=$xmode&validate=valid";
+						$stringToPass1		= "id=$advisor_id&action=Y&xmode=$xmode&validate=valid";
 						$enstr1				= base64_encode($stringToPass1);
-						$stringToPass2		= "id=$advisor_ID&action=R&xmode=$xmode&validate=valid";
+						$stringToPass2		= "id=$advisor_id&action=R&xmode=$xmode&validate=valid";
 						$enstr2				= base64_encode($stringToPass2);
-						$advisor_action_log	= "$advisor_action_log / $actionDate ";
-						if ($advisor_whatsapp == '') {
-							$advisor_whatsapp = '--';
+						$user_action_log	= "$advisor_action_log / $actionDate ";
+						if ($user_whatsapp == '') {
+							$user_whatsapp = '--';
 						}
-						if ($advisor_signal == '') {
-							$advisor_signal = '--';
+						if ($user_signal == '') {
+							$user_signal = '--';
 						}
-						if ($advisor_telegram == '') {
-							$advisor_telegram = '--';
+						if ($user_telegram == '') {
+							$user_telegram = '--';
 						}
-						if ($advisor_messenger == '') {
-							$advisor_messenger = '--';
+						if ($user_messenger == '') {
+							$user_messenger = '--';
 						}
 	
 	
@@ -426,13 +384,13 @@ $runTheJob	= TRUE;
 								  &nbsp;&nbsp;&nbsp;advisor_verify_email_date: $advisor_verify_email_date<br />
 								  &nbsp;&nbsp;&nbsp;advisor_verify_email_number: $advisor_verify_email_number<br />
 								  &nbsp;&nbsp;&nbsp;advisor_verify_response: $advisor_verify_response<br />
-								  &nbsp;&nbsp;&nbsp;advisor_timezone: $advisor_timezone_id <br />
+								  &nbsp;&nbsp;&nbsp;user_timezone: $user_timezone_id <br />
 								  &nbsp;&nbsp;&nbsp;advisor_semester:$advisor_semester<br />
-								  &nbsp;&nbsp;&nbsp;advisor_survey_score:$advisor_survey_score<br />";
+								  &nbsp;&nbsp;&nbsp;user_survey_score:$user_survey_score<br />";
 						}
 	
 						// if the advisor has a survey score of 6, bypass the advisor
-						if ($advisor_survey_score == '6') {
+						if ($user_survey_score == '6') {
 							if ($doDebug) {
 								echo "Survey score of 6. Bypassing<br />";
 							}
@@ -503,7 +461,7 @@ $runTheJob	= TRUE;
 										if ($doDebug) {
 											echo "myVerifyDate should be false and isn't. Resetting the verify date<br />";
 										}
-										$updateParams[]			= 'advisor_verify_email_date||s';
+										$updateParams['advisor_verify_email_date'] = '';
 										$myVerifyDate			= FALSE;
 										$doUpdate				= TRUE;
 										$advisor_action_log		.= "removed verify_email_date ";
@@ -512,7 +470,7 @@ $runTheJob	= TRUE;
 										if ($doDebug) {
 											echo "myNotVerified should be false and is not. Blanking out verify_response<br />";
 										}
-										$updateParams[]			= 'advisor_verify_response||s';
+										$updateParams['advisor_verify_response'] = '';
 										$doUpdate				= TRUE;
 										$myNotVerified			= FALSE;
 										$advisor_action_log		.= "removed verify_response ";
@@ -531,112 +489,114 @@ $runTheJob	= TRUE;
 								$advisorInfo	= "<h4>Advisor Registration Record</h4>
 													<table style='width:600px;'>
 													<tr><td><b>Call Sign</b><br />$advisor_call_sign</td>
-														<td><b>First Name</b><br />$advisor_first_name</td>
-														<td><b>Last Name</b><br />$advisor_last_name</td></tr>
-													<tr><td><b>Email</b><br />$advisor_email</td>
-														<td><b>Phone</b><br />$advisor_ph_code $advisor_phone</td>
-														<td><b>City</b><br />$advisor_city</td></tr>
-													<tr><td><b>State / Region / Province</b><br />$advisor_state</td>
-														<td><b>Zip / Postal Code</b><br />$advisor_zip_code</td>
-														<td><b>Country</b><br />$advisor_country ($advisor_country_code)</td></tr>
-													<tr><td><b>Languages</b><br />$advisor_languages</td>
+														<td><b>First Name</b><br />$user_first_name</td>
+														<td><b>Last Name</b><br />$user_last_name</td></tr>
+													<tr><td><b>Email</b><br />$user_email</td>
+														<td><b>Phone</b><br />$user_ph_code $user_phone</td>
+														<td><b>City</b><br />$user_city</td></tr>
+													<tr><td><b>State / Region / Province</b><br />$user_state</td>
+														<td><b>Zip / Postal Code</b><br />$user_zip_code</td>
+														<td><b>Country</b><br />$user_country ($user_country_code)</td></tr>
+													<tr><td><b>Languages</b><br />$user_languages</td>
 														<td><b>Semester</b><br />$advisor_semester</td>
-														<td ><b>Timezone</b><br />$advisor_timezone_id</td></tr>
+														<td ><b>Timezone</b><br />$user_timezone_id</td></tr>
 													<tr><td colspan='3'><b>Other messaging apps</b><br />
 														<table>
-														<tr><td style='width:30%;'><b>Whatsapp</b><br />$advisor_whatsapp</td>
-															<td style='width:30%;'><b>Signal</b><br />$advisor_signal</td>
-															<td style='width:30%;'><b>Telegram</b><br />$advisor_telegram</td>
-															<td><b>Messenger</b><br />$advisor_messenger</td></tr></table></tr>
+														<tr><td style='width:30%;'><b>Whatsapp</b><br />$user_whatsapp</td>
+															<td style='width:30%;'><b>Signal</b><br />$user_signal</td>
+															<td style='width:30%;'><b>Telegram</b><br />$user_telegram</td>
+															<td><b>Messenger</b><br />$user_messenger</td></tr></table></tr>
 													</table>";
 	
 								// Obtain the class record information
 								$classRecord		= "";
-								$sql				= "select * from $advisorClassTableName 
-														where advisorclass_call_sign='$advisor_call_sign' 
-														and advisorclass_semester='$advisor_semester' 
-														order by advisorclass_sequence";
-								$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
+								$updateClassParams = array();
+								$criteria = [
+									'relation' => 'AND',
+									'clauses' => [
+										['field' => 'advisorclass_call_sign', 'value' => $advisor_call_sign, 'compare' => '=' ],
+										['field' => 'advisorclass_semester', 'value' => $advisor_semester, 'compare' => '=' ]
+									]
+								];
+								$orderby = 'advisorclass_sequence';
+								$order = 'ASC';								
+								$wpw1_cwa_advisorclass = $advisorclass_dal->get_advisorclasses_by_order($criteria,$orderby,$order,$operatingMode);
 								if ($wpw1_cwa_advisorclass === FALSE) {
-									handleWPDBError($jobname,$doDebug);
+									$content .= "Attempting to retrieve advisorclass record for $advisor_call_sign $advisor_semester returned FALSE<br />";
 								} else {
-									$numACRows		= $wpdb->num_rows;
-									if ($doDebug) {
-										echo "ran $sql<br />and found $numACRows rows<br />";
-									}
-									if ($numACRows > 0) {
-										foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-											$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-											$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-											$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-											$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-											$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-											$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-											$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-											$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-											$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-											$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-											$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-											$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-											$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-											$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-											$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-										
+									if (! empty($wpw1_cwa_advisorclass)) {
+										foreach($wpw1_cwa_advisorclass as $key => $value) {
+											foreach($value as $thisField => $thisValue) {
+												$$thisField = $thisValue;
+											}
 											if ($doDebug) {
-												echo "have $advisorClass_call_sign class $advisorClass_sequence<br />";
+												echo "have $advisorclass_call_sign class $advisorclass_sequence<br />";
 											}
 										
 											/// get the UTC times if these fields are empty for some reason
-											if ($advisorClass_class_schedule_days_utc == '' || $advisorClass_class_schedule_times_utc == '') {									
-												if ($advisorClass_class_incomplete != 'Y') {	
-													$thisResult						= utcConvert('toutc',$advisorClass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days);
+											if ($advisorclass_class_schedule_days_utc == '' || $advisorclass_class_schedule_times_utc == '') {									
+												if ($advisorclass_class_incomplete != 'Y') {	
+													$thisResult						= utcConvert('toutc',$advisorclass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days);
 													if ($thisResult[0] == 'FAIL') {
 														if ($doDebug) {
-															echo "utcConvert failed toutc,$advisorClass_timezone,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days<br />Error: $result[3]<br />";
+															echo "utcConvert failed toutc,$advisorclass_timezone,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days<br />Error: $result[3]<br />";
 														}
-														$advisorClass_class_schedule_days_utc	= "ERROR";
-														$advisorClass_class_schedule_times_utc	= '';
-														$advisorClass_class_incomplete	= 'Y';
-														$updateParams[]							= "advisor_class_schedule_days_utc|$advisorClass_class_schedule_days_utc|s";
-														$updateParams[]							= "advisor_class_schedule_times_utc|$advisorClass_class_schedule_times_utc|s";
-														$updateParams[]							= "advisor_class_incomplete|Y|s";
-														$advisor_action_log						.= "updated UTC times ";
-														$doUpdate								= TRUE;
+														$advisorclass_class_schedule_days_utc	= "ERROR";
+														$advisorclass_class_schedule_times_utc	= '';
+														$advisorclass_class_incomplete	= 'Y';
+														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorClass_class_schedule_days_utc;
+														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorClass_class_schedule_times_utc;
+														$updateParams['advisorclass_incomplete'] = 'Y';
+														$advisorclass_action_log .= "updated UTC times ";
 													} else {
-														$advisorClass_class_schedule_times_utc	= $thisResult[1];
-														$advisorClass_class_schedule_days_utc	= $thisResult[2];
-														$updateParams[]							= "advisor_class_schedule_days_utc|$advisorClass_class_schedule_days_utc|s";
-														$updateParams[]							= "advisor_class_schedule_times_utc|$advisorClass_class_schedule_times_utc|s";
-														$advisor_action_log						.= "updated UTC times ";
-														$doUpdate								= TRUE;
+														$advisorclass_class_schedule_times_utc	= $thisResult[1];
+														$advisorclass_class_schedule_days_utc	= $thisResult[2];
+														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorClass_class_schedule_days_utc;
+														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorClass_class_schedule_times_utc;
+														$advisorclass_action_log .= "updated UTC times ";
 													}
 												} else {
-													$advisorClass_class_schedule_days_utc		= "ERROR";
+													$advisorclass_class_schedule_days_utc		= "ERROR";
 												}
 											}
 											$classScheduleProblem	= "";
-											if ($advisorClass_class_schedule_days_utc == "ERROR" || $advisorClass_class_incomplete == 'Y') {
+											if ($advisorclass_class_schedule_days_utc == "ERROR" || $advisorclass_class_incomplete == 'Y') {
 												$classScheduleProblem	= "<b>There is an issue with your teaching schedule. Please go to 
 																		   <a href='$advisorRegistrationURL?$enstr'>CWA Advisor Sign-up</a> and correct the problem.";
 											}
-											if ($advisorClass_sequence == 1) {
+											if ($advisorclass_sequence == 1) {
 												$classRecord		.= "<table style='width:600px;'>";
 											}
-											$classRecord			.= "<tr><td style='width:33%;'><b>Class</b><br />$advisorClass_sequence</td>
-																			<td style='width:33%;'><b>Level</b><br />$advisorClass_level</td>
-																			<td><b>Class Size</b><br />$advisorClass_class_size</td></tr>
-																		<tr><td colspan='3'><b>Class Schedule</b><br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days local time</td></tr>";
+											$classRecord			.= "<tr><td style='width:33%;'><b>Class</b><br />$advisorclass_sequence</td>
+																			<td style='width:33%;'><b>Level</b><br />$advisorclass_level</td>
+																			<td><b>Class Size</b><br />$advisorclass_class_size</td></tr>
+																		<tr><td colspan='3'><b>Class Schedule</b><br />$advisorclass_class_schedule_times $advisorclass_class_schedule_days local time</td></tr>";
 											if ($classScheduleProblem != '') {
 												$classRecord	.= "<tr><td colspan='3'>$classScheduleProblem</td></tr>";
 											}
 											$classRecord	.= "<tr><td colspan='3'><hr></td></tr>";
+											if (! empty($updateClassParams)) {
+												// need to update the advisor class record
+												if ($doDebug) {
+													echo "updateClassParams:<br /><pre>";
+													print_r($updateClassParams);
+													echo "</pre><br />";
+												}
+												$classUpdateResult = $advisorclass_dal->update($advisorclass_id,$updateClassParams,$operatingMode);
+												if ($classUpdateResult === FALSE) {
+													$content .= "Attempt to update advisorclass_id $advisorclass_id ($advisorclass_call_sign $advisorclass_semester $advisorclass_sequence) returned FALSE<br />";
+												} else {
+													$content .= "Advisor Class $advisorclass_call_sign sequence $advisorclass_sequence for $advisorclass_semester UTC times update<br />";
+												}
+											}
+
 										}
 										$classRecord		.= "</table>";
 										if ($doDebug) {
 											echo "got the advisor and class records and ready to proceed<br />";
 										}
 										if (!$myWelcomeDate) {			/// welcome email needed						
-											$updateParams[]			= "advisor_welcome_email_date|$checkDate|s";
+											$updateParams['advisor_welcome_email_date'] = $actionDate;
 											$doUpdate				= TRUE;
 											$sendEmail				= TRUE;
 											$content				.= "Welcome email sent to $advisor_call_sign<br />";
@@ -648,16 +608,16 @@ $runTheJob	= TRUE;
 												if ($doDebug) {
 													echo "validEMailPeriod is Y. Verifying the advisor<br />";
 												}
-												$advisor_action_log		.= "verify email sent to $advisor_email. ";
-												$updateParams[]			= "advisor_verify_response|Y|s";
-												$updateParams[]			= "advisor_verify_email_date|$checkDate|s";
-												$updateParams[]			= "advisor_verify_email_number|0|d";
+												$advisor_action_log		.= "verify email sent to $user_email. ";
+												$updateParams['advisor_verify_response'] = 'Y';
+												$updateParams['advisor_verify_email_date'] = $actionDate;
+												$updateParams['advisor_verify_email_number'] = 0;
 												$doUpdate				= TRUE;
 											}
 							
 											// welcome email 
 											$mySubject					= "CW Academy - Thank You for Registering as an Advisor";
-											$myContent					= "To: $advisor_last_name, $advisor_first_name ($advisor_call_sign):<br />
+											$myContent					= "To: $user_last_name, $user_first_name ($advisor_call_sign):<br />
 																			<p>Thank you for registering as a CW Academy advisor! Your registration information:</p>
 																			$advisorInfo
 																			<p>You have registered to be an advisor for the following class(es):</p>
@@ -691,7 +651,6 @@ $runTheJob	= TRUE;
 												echo "Advisor $advisor_call_sign has already received a welcome email<br />";
 											}
 										}
-	
 									} else {
 										$classRecord		= "<p>No class information is available. Please update your 
 																sign-up information to include at least one class or delete your registration information. To do so, 
@@ -736,7 +695,7 @@ $runTheJob	= TRUE;
 											}
 											if ($advisor_welcome_email_date == '') {
 												$myStr					.= "advisor welcome email date is empty; ";
-												$updateParams[]			= "advisor_welcome_email_date|$checkDate|s";
+												$updateParams['advisor_welcome_email_date'] = $actionDate;
 												$doUpdate				= TRUE;
 											} else {
 												$myStr					.= "advisor welcome email date is $advisor_welcome_email_date; ";							
@@ -756,7 +715,7 @@ $runTheJob	= TRUE;
 											}
 											$verifyEmailCount++;
 											$mySubject					= "CW Academy Advisor Verification";
-											$myContent					= "To: $advisor_last_name, $advisor_first_name ($advisor_call_sign):<br />
+											$myContent					= "To: $user_last_name, $user_first_name ($advisor_call_sign):<br />
 																			<p>This is a confirmation email being sent about 45 days before the start 
 																			of the semester. <b>No action is needed on your part UNLESS your circumstances 
 																			have changed</b>. You can update your registration information by logging into  
@@ -791,9 +750,9 @@ $runTheJob	= TRUE;
 											if ($doDebug) {
 												echo "setting verify response to Y. isNextSemester and verifyOption are TRUE<br />";
 											}
-											$updateParams[]			= "advisor_verify_response|Y|s";
-											$updateParams[]			= "advisor_verify_email_date|$checkDate|s";
-											$updateParams[]			= "advisor_verify_email_number|0|d";
+											$updateParams['advisor_verify_response'] = 'Y';
+											$updateParams['advisor_verify_email_date'] = $actionDate;
+											$updateParams['advisor_verify_email_number'] = 0;
 											$doUpdate				= TRUE;
 											$advisorFirstCount++;
 											$content				.= "ADVISOR VERIFY $advisor_call_sign Verify Email will be sent to $advisor_email<br />";
@@ -825,7 +784,7 @@ $runTheJob	= TRUE;
 											}
 										} else 	{	
 											$myCode		= 12;
-											$myTo		= $advisor_email;
+											$myTo		= $user_email;
 										}
 										$mailResult 	= emailFromCWA_v2(array('theRecipient'=>$myTo,
 																				'theSubject'=>$mySubject,
@@ -843,48 +802,20 @@ $runTheJob	= TRUE;
 										} else {
 											$advisorEmails++;
 											if ($doDebug) {
-												echo "Email sent to $myTo on behalf of $advisor_call_sign ($advisor_email)<br >";
+												echo "Email sent to $myTo on behalf of $advisor_call_sign ($user_email)<br >";
 											}
 										}
 									}
 									if ($doUpdate) {
-										$updateParams[]				= "advisor_action_log|$advisor_action_log|s";
+										$updateParams['advisor_action_log'] = $advisor_action_log;
 										if ($doDebug) {
-											echo "Update parameters:<br />";
+											echo "UpdateParams:<br /><pre>";
+											print_r($updateParams);
+											echo "</pre><br />";
 										}
-										$updateArray				= array();
-										$formatArray				= array();
-										foreach($updateParams as $myValue) {
-											if ($doDebug) {
-												echo "$myValue<br />";
-											}
-											$myArray				= explode("|",$myValue);
-											$field					= $myArray[0];
-											$fieldValue				= $myArray[1];
-											$fieldFormat			= $myArray[2];
-											$updateArray[$field]	= $fieldValue;
-											$formatArray[]			= "'%$fieldFormat'";
-										}
-										$advisorUpdateData		= array('tableName'=>$advisorTableName,
-																		'inp_method'=>'update',
-																		'inp_data'=>$updateParams,
-																		'jobname'=>$jobname,
-																		'inp_id'=>$advisor_ID,
-																		'inp_callsign'=>$advisor_call_sign,
-																		'inp_semester'=>$advisor_semester,
-																		'inp_who'=>$userName,
-																		'testMode'=>$testMode,
-																		'doDebug'=>$doDebug);
-										$updateResult	= updateAdvisor($advisorUpdateData);
-										if ($updateResult[0] === FALSE) {
-											$myError	= $wpdb->last_error;
-											$mySql		= $wpdb->last_query;
-											$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-											if ($doDebug) {
-												echo $errorMsg;
-											}
-											sendErrorEmail($errorMsg);
-											$content		.= "Unable to update content in $advisorTableName<br />";
+										$updateResult	= $advisor_dal->update($advisor_id,$updateParams,$operatingMode);
+										if ($updateResult === FALSE) {
+											$content		.= "Unable to update advisorclass content for $advisorclass_call_sign (id: $advisorclass_id)<br />";
 										} else {
 											if ($doDebug) {
 												echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
@@ -896,8 +827,6 @@ $runTheJob	= TRUE;
 						}
 					}
 				}
-			} else {
-				$content		.= "No advisor records found in $advisorTableName table to verify.<br />";
 			}
 		}
 
@@ -1024,4 +953,4 @@ $runTheJob	= TRUE;
 		}
 	}
 }
-add_shortcode ('daily_advisor_cron_process_v2', 'daily_advisor_cron_process_v2_func');
+add_shortcode ('daily_advisor_cron_process', 'daily_advisor_cron_process_func');
