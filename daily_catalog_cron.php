@@ -34,7 +34,7 @@ function daily_catalog_cron_process_func() {
 
 	global $wpdb, $testMode, $doDebug, $printArray;
 
-	$doDebug				= TRUE;
+	$doDebug				= FALSE;
 	$testMode				= FALSE;
 	
 	$versionNumber			= '5';
@@ -161,13 +161,19 @@ function daily_catalog_cron_process_func() {
 			$catalogTableName			= 'wpw1_cwa_current_catalog';
 			$userMasterTableName		= "wpw1_cwa_user_master2";
 			$mode						= 'TestMode';
+			$operatingMode = 'Testmode';
 		} else {
 			$advisorClassTableName		= 'wpw1_cwa_advisorclass';
 			$advisorTableName			= 'wpw1_cwa_advisor';
 			$catalogTableName			= 'wpw1_cwa_current_catalog';
 			$userMasterTableName		= "wpw1_cwa_user_master";
+			$operatingMode = 'Production';
 			$mode						= 'Production';
 		}
+		
+		$advisorclass_dal = new CWA_Advisorclass_DAL();
+		$advisor_dal = new CWA_Advisor_DAL();
+		$user_dal = new CWA_User_Master_DAL();
 		
 		// set up theSemester
 		$theSemester					= $currentSemester;
@@ -203,7 +209,9 @@ function daily_catalog_cron_process_func() {
 					
 					$oldCatalog		= json_decode($jsonCatalog,TRUE);
 					if ($doDebug) {
-						echo "got a catalog for $theSemester in mode $mode<br />";
+						echo "got a catalog for $theSemester in mode $mode<br /><pre>";
+						print_r($oldCatalog);
+						echo "</pre><br />";
 					}
 				}
 			} else {
@@ -221,92 +229,136 @@ function daily_catalog_cron_process_func() {
 
 		//////////	Build the arrays
 
-		/// get each advisor and associated class record for that advisor
-
-		$sql	= "SELECT 
-						ac.advisorclass_call_sign, 
-						ac.advisorclass_sequence, 
-						ac.advisorclass_semester, 
-						ac.advisorclass_level, 
-						ac.advisorclass_language,
-						ac.advisorclass_class_size, 
-						ac.advisorclass_class_incomplete, 
-						ac.advisorclass_class_schedule_days_utc, 
-						ac.advisorclass_class_schedule_times_utc, 
-						a.advisor_verify_response, 
-						um.user_survey_score 
-					FROM wpw1_cwa_advisorclass ac 
-					LEFT JOIN wpw1_cwa_user_master um ON ac.advisorclass_call_sign = um.user_call_sign 
-					LEFT JOIN wpw1_cwa_advisor a ON ac.advisorclass_call_sign = a.advisor_call_sign 
-						and a.advisor_semester = ac.advisorclass_semester 
-					WHERE ac.advisorclass_semester = '$proximateSemester' 
-					order by ac.advisorclass_call_sign";
-							   
-		$cwa_advisor		= $wpdb->get_results($sql);
-		if ($cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
-		} else {
-			$numARows									= $wpdb->num_rows;
+		/// get each advisorclass and associated advisor and user_master records for that advisor
+		$prevAdvisor = '';
+		$doProceed = TRUE;
+		$criteria = [
+			'relation' => 'AND',
+			'clauses' => [
+				['field' => 'advisorclass_semester', 'value' => $proximateSemester, 'compare' => '=' ]
+			]
+		];
+		$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order($criteria,'advisorclass_call_sign','ASC',$operatingMode);	
+		if ($advisorclassData === FALSE) {
 			if ($doDebug) {
-				echo "ran $sql<br />and found $numARows rows<br />";
+				echo "attempting to get the advisorclasses returned FALSE<br />";
 			}
-			if ($numARows > 0) {
-				$newCatalog			= array();
-				foreach ($cwa_advisor as $advisorRow) {
-					$advisorClass_call_sign 				= strtoupper($advisorRow->advisorclass_call_sign);
-					$advisorClass_survey_score 				= $advisorRow->user_survey_score;
-					$advisorClass_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisorClass_sequence 					= $advisorRow->advisorclass_sequence;
-					$advisorClass_semester					= $advisorRow->advisorclass_semester;
-					$advisorClass_level 					= $advisorRow->advisorclass_level;
-					$advisorClass_language					= $advisorRow->advisorclass_language;
-					$advisorClass_class_size				= $advisorRow->advisorclass_class_size;
-					$advisorClass_class_incomplete 			= $advisorRow->advisorclass_class_incomplete;
-					$advisorClass_class_schedule_days_utc 	= $advisorRow->advisorclass_class_schedule_days_utc;
-					$advisorClass_class_schedule_times_utc 	= $advisorRow->advisorclass_class_schedule_times_utc;
-
-					if ($doDebug) {
-						echo "<br /><b>Processing Advisor $advisorClass_call_sign Sequence $advisorClass_sequence</b> ($advisorClass_survey_score | $advisorClass_verify_response)<br />
-							  Level: $advisorClass_level<br />
-							  Size: $advisorClass_class_size<br />
-							  schedule Days: $advisorClass_class_schedule_days_utc 
-							  schedule times: $advisorClass_class_schedule_times_utc<br />";
+			$doProceed = FALSE;
+			$content .= "<p>Unable to get the advisorclasses</p>";
+		} else {
+			if (! empty ($advisorclassData)) {
+				if ($doDebug) {
+					$myInt = count($advisorclassData);
+					echo "have $myInt advisorclass records to process<br />";
+				}
+				foreach($advisorclassData as $key => $value) {
+					$doProceed = TRUE;
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
 					}
-					if ($advisorClass_survey_score != '6' and $advisorClass_verify_response != 'R') {
+					if ($advisorclass_call_sign != $prevAdvisor) {	/// need advisor and user_master records
 						if ($doDebug) {
-							echo "Adding $advisorClass_call_sign to advisorArray and processing classes<br />";
+							echo "<br />have a new advisor with $advisorclass_call_sign<br />";
 						}
-						if ($advisorClass_class_incomplete == 'Y') {
+						$userData = $user_dal->get_user_master_by_callsign($advisorclass_call_sign,$operatingMode);
+						if ($userData === FALSE || $userData === NULL) {
 							if ($doDebug) {
-								echo "&nbsp;&nbsp;&nbsp;&nbsp;advisorClass incomplete. Skipping<br />
-									  &nbsp;&nbsp;&nbsp;&nbsp;Value: $advisorClass_class_incomplete<br />";
+								echo "attempting to get the user_master returned FALSE|NULL<br />";
 							}
-							$errorArray[]	= "advisorClass incomplete for $advisorClass_call_sign, $advisorClass_sequence. Skipped.<br />";
+							$doProceed = FALSE;
 						} else {
-							// fix up the class schedule times to be on the hour
-							$myStr1 		= substr($advisorClass_class_schedule_times_utc,0,2);
-							$advisorClass_class_schedule_times_utc	= $myStr1 . "00";
-
-							// add this class to the newCatalog
-							if (isset($newCatalog[$advisorClass_level][$advisorClass_language]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"])) {
-								$classArray		= $newCatalog[$advisorClass_level][$advisorClass_language]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"];
-								$classArray[]	= "$advisorClass_call_sign-$advisorClass_sequence";
-								$newCatalog[$advisorClass_level][$advisorClass_language]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"] 	= $classArray;
+							if (!empty($userData)) {
+								foreach($userData as $key => $value) {
+									foreach($value as $thisField => $thisValue) {
+										$$thisField = $thisValue;
+									}
+									if ($doDebug) {
+										echo "have userData for $advisorclass_call_sign<br />";
+									}
+									// now get the advisor data
+									$criteria = [
+										'relation' => 'AND',
+										'clauses' => [
+											['field' => 'advisor_call_sign', 'value' => $advisorclass_call_sign, 'compare' => '=' ],
+											['field' => 'advisor_semester', 'value' => $proximateSemester, 'compare' => '=' ]
+										]
+									];
+									$advisorData = $advisor_dal->get_advisor($criteria,$operatingMode);
+									if ($advisorData === FALSE || $advisorData === NULL) {
+										if ($doDebug) {
+											echo "attempting to get advisor returned FALSE|NULL<br />";
+										}
+										$doProceed = FALSE;
+									} else {
+										if (!empty($advisorData)) {
+											foreach($advisorData as $key => $value) {
+												foreach($value as $thisField => $thisValue) {
+													$$thisField = $thisValue;
+												}
+												if ($doDebug) {
+													echo "have advisorData for $advisorclass_call_sign<br />";
+												}
+												$prevAdvisor = $advisorclass_call_sign;
+											}
+										} else {
+											$doProceed = FALSE;
+											$content .= "No advisor record for $advisorclass_call_sign class $advisorclass_sequence in $advisorclass_semester semester</p>";
+										}
+									}
+								}
 							} else {
-								$newCatalog[$advisorClass_level][$advisorClass_language]["$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc"] 	= array("$advisorClass_call_sign-$advisorClass_sequence");
+								$doProceed = FALSE;
+								$content .= "<p>No user_master record for $advisorclass_call_sign class $advisorclass_sequence in $advisorclass_semester semester</p>";
 							}
-
-						}
-					} else {
-						if ($doDebug) {
-							echo "$advisorClass_call_sign has issues with survey score or verify response<br />";
 						}
 					}
+					if ($doProceed) {		
+						if ($doDebug) {
+							echo "<br /><b>Processing Advisor $advisorclass_call_sign Sequence $advisorclass_sequence</b> ($user_survey_score | $advisor_verify_response)<br />
+								  Level: $advisorclass_level<br />
+								  Size: $advisorclass_class_size<br />
+								  schedule Days: $advisorclass_class_schedule_days_utc 
+								  schedule times: $advisorclass_class_schedule_times_utc<br />";
+						}
+						if ($user_survey_score != '6' and $advisor_verify_response != 'R') {
+							if ($doDebug) {
+								echo "Adding $advisorclass_call_sign to advisorArray and processing classes<br />";
+							}
+							if ($advisorclass_class_incomplete == 'Y') {
+								if ($doDebug) {
+									echo "&nbsp;&nbsp;&nbsp;&nbsp;advisorclass incomplete. Skipping<br />
+										  &nbsp;&nbsp;&nbsp;&nbsp;Value: $advisorclass_class_incomplete<br />";
+								}
+								$errorArray[]	= "advisorclass incomplete for $advisorclass_call_sign, $advisorclass_sequence. Skipped.<br />";
+							} else {
+								// fix up the class schedule times to be on the hour
+								$myStr1 		= substr($advisorclass_class_schedule_times_utc,0,2);
+								$advisorclass_class_schedule_times_utc	= $myStr1 . "00";
+			
+								// add this class to the newCatalog
+								if (isset($newCatalog[$advisorclass_level][$advisorclass_language]["$advisorclass_class_schedule_times_utc $advisorclass_class_schedule_days_utc"])) {
+									$classArray		= $newCatalog[$advisorclass_level][$advisorclass_language]["$advisorclass_class_schedule_times_utc $advisorclass_class_schedule_days_utc"];
+									$classArray[]	= "$advisorclass_call_sign-$advisorclass_sequence";
+									$newCatalog[$advisorclass_level][$advisorclass_language]["$advisorclass_class_schedule_times_utc $advisorclass_class_schedule_days_utc"] 	= $classArray;
+								} else {
+									$newCatalog[$advisorclass_level][$advisorclass_language]["$advisorclass_class_schedule_times_utc $advisorclass_class_schedule_days_utc"] 	= array("$advisorclass_call_sign-$advisorclass_sequence");
+								}
+			
+							}
+						} else {
+							if ($doDebug) {
+								echo "$advisorclass_call_sign has issues with survey score or verify response<br />";
+							}
+						}
+					}
+					
+				}
+				if ($doDebug) {
+					echo "all advisorclass records processed<br /><br />";
 				}
 			} else {
-				if ($doDebug) {
-					echo "No records found for $nextSemester<br />";
-				}
+				$doProceed = FALSE;
+				$content .= "<p>No advisorclass records found for $proximateSemester semester</p>";
 			}
 		}
 
@@ -322,7 +374,7 @@ function daily_catalog_cron_process_func() {
 				echo "no oldCatalog!!!!<br />";
 			}
 		}
-		ksort($newCatalog);
+//		ksort($newCatalog);
 		if ($doDebug) {
 			echo "<br />newCatalog:<br /><pre>";
 			print_r($newCatalog);
