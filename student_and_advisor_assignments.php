@@ -1,35 +1,5 @@
 function student_and_advisor_assignments_func() {
 
-/*
- 	
- 	
- 	modified 7Jan2020 by Roland to select semester to be displayed
-	modified 12Mar2020 by Roland to eliminate duplicate records
-	Modified 14Mar2020 by Roland to display advisors w/o students
-	Modified 1Aug2020 by Roland to select either assigned or pre-assigned student
-	modified 10Aug2020 by Roland significantly overhaul the logic
-	modified 13Dec2020 by Roland to add the state to the advisor class display and 
-		display the advisors with small classes
-	modified 26Dec2020 by Roland to add class time to advisor class header
-	modified 13Mar2021 by Roland to add large class report
-	Extensively modified 9July2021 by Roland for the new formats and assignment process
-	Modified 22Aug21 by Roland to
-		sort advisor class slots available report by level
-		do a lookback to previous semesters for Fundamental level students and indicate if the 
-			student has taken a basic class previously and was promotable
-		sort the unassigned student reports by class priority, add class priority to the 
-			report
-	Modified 29Oct2021 by Roland to select the semester rather than just show the current
-		semester
-	Modified 6Dec21 by Roland to add the arbitrary assignments information
-	Modified 31Dec21 by Roland to move to table structure from pods
-	Modified 29Oct22 by Roland for new timezone table format
-	Modified 17Apr23 by Roland to fix action_log
-	Modified 15July23 by Roland to use the consolidated tables
-	Modified 16Aug23 by Roland ... extensively and updated to V3
-	Modified 23Sep24 by Roland to use new database
-
-*/
 	global $wpdb, $advisorClassArray, $doDebug;
 
 	$initializationArray = data_initialization_func();
@@ -144,11 +114,17 @@ function student_and_advisor_assignments_func() {
 			echo "Function is under development. Using student2 and advisor2, not the production data.<br />";
 		}
 		$theStatement			= "<p>Running in TESTMODE using test data.</p>";
+		$operatingMode = 'Testmode';
 	} else {
 		$extMode				= 'pd';
 		$theStatement			= "";
+		$operatingMode = 'Production';
 	}
 
+	$student_dal = new CWA_Student_DAL();
+	$advisor_dal = new CWA_Advisor_DAL();
+	$advisorclass_dal = new CWA_Advisorclass_DAL();
+	$user_dal = new CWA_User_Master_DAL();
 
 function getTheReason($strReasonCode) {
 	if ($strReasonCode == 'H') {
@@ -310,19 +286,7 @@ function getTheReason($strReasonCode) {
  		
  		$inp_semester				= $inp_semesterlist;
  		
-		if ($testMode) {
-			$advisorTableName		= 'wpw1_cwa_advisor2';
-			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
-			$studentTableName		= 'wpw1_cwa_student2';
-			$userMasterTableName	= 'wpw1_cwa_user_master2';
-			$thisMode				= 'TM';
-		} else {
-			$advisorTableName		= 'wpw1_cwa_advisor';
-			$advisorClassTableName	= 'wpw1_cwa_advisorclass';
-			$studentTableName		= 'wpw1_cwa_student';
-			$userMasterTableName	= 'wpw1_cwa_user_master';
-			$thisMode				= 'PD';
-		}
+
 		$doPreAssigned				= FALSE;
 		$preAssignedStr				= 'FALSE';
  		if ($inp_type == 'pre-assigned') {
@@ -331,9 +295,6 @@ function getTheReason($strReasonCode) {
  		}
  		if ($doDebug) {
  			echo "Using inp_semester: $inp_semester<br />
-					advisorTableName: $advisorTableName<br />
-					advisorClassTableName: $advisorClassTableName<br />
-					studentTableName: $studentTableName<br />
 					doPreAssigned: $preAssignedStr<br />";
  		}
  
@@ -363,67 +324,38 @@ function getTheReason($strReasonCode) {
 		$content					.= "<a name='report1'><h3>Current Advisor Assignment Information for $inp_semester</h3>\n";
 
  		// get each advisor
-		$sql			= "select * from $advisorTableName 
-							left join $userMasterTableName on user_call_sign = advisor_call_sign 
-							where advisor_semester='$inp_semester' 
-							order by advisor_call_sign";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
-			$content		.= "Unable to obtain content from $advisorNewTableName<br />";
+		$criteria = [
+			'relation' => 'AND',
+			'clauses' => [
+				['field' => 'advisor_semester', 'value' => $inp_semester, 'compare' => '=' ]
+			]
+		];
+		$orderby = 'advisor_call_sign';
+		$order = 'ASC';
+		$requestInfo = array('criteria' => $criteria,
+							 'orderby' => $orderby,
+							 'order' => $order);
+		$advisorData = get_advisor_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+		if ($advisorData === FALSE) {
+			echo "get_advisor_and_user_master returned FALSE<br />";
 		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_master_ID 					= $advisorRow->user_ID;
-					$advisor_master_call_sign			= $advisorRow->user_call_sign;
-					$advisor_first_name 				= $advisorRow->user_first_name;
-					$advisor_last_name 					= $advisorRow->user_last_name;
-					$advisor_email 						= $advisorRow->user_email;
-					$advisor_ph_code 					= $advisorRow->user_ph_code;
-					$advisor_phone 						= $advisorRow->user_phone;
-					$advisor_city 						= $advisorRow->user_city;
-					$advisor_state 						= $advisorRow->user_state;
-					$advisor_zip_code 					= $advisorRow->user_zip_code;
-					$advisor_country_code 				= $advisorRow->user_country_code;
-					$advisor_country 					= $advisorRow->user_country;
-					$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-					$advisor_telegram 					= $advisorRow->user_telegram;
-					$advisor_signal 					= $advisorRow->user_signal;
-					$advisor_messenger 					= $advisorRow->user_messenger;
-					$advisor_master_action_log 			= $advisorRow->user_action_log;
-					$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-					$advisor_languages 					= $advisorRow->user_languages;
-					$advisor_survey_score 				= $advisorRow->user_survey_score;
-					$advisor_is_admin					= $advisorRow->user_is_admin;
-					$advisor_role 						= $advisorRow->user_role;
-					$advisor_master_date_created 		= $advisorRow->user_date_created;
-					$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
+			if (! empty($advisorData)) {
+				$numARows = count($advisorData);
+				if ($doDebug) {
+					echo "have $numARows of advisors:<br /><pre>";
+					print_r($advisorData);
+					echo "</pre><br />";
+				}
+				foreach($advisorData as $key => $value) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
 							
 					// determine if we can use this advisor
 					$doProceed							= TRUE;
-					if ($advisor_survey_score == 6 || $advisor_survey_score == 13) {
+					if ($user_survey_score == 6 || $user_survey_score == 13) {
 						if ($doDebug) {
-							echo "Can not use $advisor_call_sign due to survey score of $advisor_survey_score<br />";
+							echo "Can not use $advisor_call_sign due to survey score of $user_survey_score<br />";
 						}
 						$doProceed						= FALSE;
 						$badAdvisors[]					= $advisor_call_sign;
@@ -472,7 +404,7 @@ function getTheReason($strReasonCode) {
 		if($doDebug) {
 			echo "<br />end of current advisor information report<br /><br />";
 		}
-
+// goto Bypass;
 
 		
 //////// end of Current Advisor Assignment Information report			
@@ -499,121 +431,39 @@ function getTheReason($strReasonCode) {
 			$studentCount		= 0;
 			$verifiedCount		= 0;								
 
-			$sql			= "select * from $studentTableName
-								left join $userMasterTableName on user_call_sign = student_call_sign 
-								where student_semester='$inp_semester' 
-								and student_response != 'R' 
-								and student_promotable != 'W' 
-								and (student_status = 'S' 
-									or student_status = 'Y') 
-								order by student_level, student_call_sign";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],
+					['field' => 'student_response', 'value' => 'R', 'compare' => '!='],
+					['field' => 'student_promotable', 'value' => 'W', 'compare' => '!='],
+					
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_status', 'value' => 'S', 'compare' => '='],
+							['field' => 'student_status', 'value' => 'Y', 'compare' => '=']
+						]
+					]
+				]
+			];
+					
+			$orderby = 'student_level,student_call_sign';
+			$order = 'ASC';
+			$requestInfo = array('criteria' => $criteria,
+								 'orderby' => $orderby,
+								 'order' => $order);
+			$studentData = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+			if ($studentData == FALSE) {
 				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numSRows rows<br />";
+					echo "getting student and user master returned FALSE<br />";
 				}
-				if ($numSRows > 0) {
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
+			} else {
+				if (! empty($studentData)) {
+					foreach($studentData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
 						}
-						$student_excluded_advisor_array			= explode("&",$student_excluded_advisor);
 						$studentCount++;
 						if ($student_status == 'Y') {
 							$verifiedCount++;
@@ -622,13 +472,14 @@ function getTheReason($strReasonCode) {
 						${$student_level . 'Array'}[]		 	= "<tr><td style='vertical-align:top;'>$student_level</td>
 																		<td style='vertical-align:top;'>$student_assigned_advisor</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_assigned_advisor_class</td>
-																		<td style='text-align:center;vertical-align:top;' style='vertical-align:top;'>$student_last_name, $student_first_name, ($student_call_sign)</td>
+																		<td style='text-align:center;vertical-align:top;'>$student_class_language</td>
+																		<td style='text-align:center;vertical-align:top;'>$user_last_name, $user_first_name, ($student_call_sign)</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_timezone_offset</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_status</td>
-																		<td style='vertical-align:top;'>$student_email</td>
-																		<td style='vertical-align:top;'>+$student_ph_code $student_phone</td>
-																		<td style='vertical-align:top;'>$student_state</td>
-																		<td style='vertical-align:top;'>$student_country</td>
+																		<td style='vertical-align:top;'>$user_email</td>
+																		<td style='vertical-align:top;'>+$user_ph_code $user_phone</td>
+																		<td style='vertical-align:top;'>$user_state</td>
+																		<td style='vertical-align:top;'>$user_country</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_promotable</td></tr>";
 					}
 
@@ -639,6 +490,7 @@ function getTheReason($strReasonCode) {
 												<tr><th>Level</th>
 													<th>Advisor</th>
 													<th>Class</th>
+													<th>Language</th>
 													<th>Student</th>
 													<th>TZ</th>
 													<th>Status</th>
@@ -659,6 +511,7 @@ function getTheReason($strReasonCode) {
 												<tr><th>Level</th>
 													<th>Advisor</th>
 													<th>Class</th>
+													<th>Language</th>
 													<th>Student</th>
 													<th>TZ</th>
 													<th>Status</th>
@@ -679,6 +532,7 @@ function getTheReason($strReasonCode) {
 												<tr><th>Level</th>
 													<th>Advisor</th>
 													<th>Class</th>
+													<th>Language</th>
 													<th>Student</th>
 													<th>TZ</th>
 													<th>Status</th>
@@ -699,6 +553,7 @@ function getTheReason($strReasonCode) {
 												<tr><th>Level</th>
 													<th>Advisor</th>
 													<th>Class</th>
+													<th>Language</th>
 													<th>Student</th>
 													<th>TZ</th>
 													<th>Status</th>
@@ -713,7 +568,7 @@ function getTheReason($strReasonCode) {
 						$content			.= "</table>
 												<p>Total Assigned Advanced Students: $myCount</p>
 												<p>Total Assigned Students: $studentCount<br />
-												Verified Students: $verifiedCount</p>";
+												Confirmed Students: $verifiedCount</p>";
 					}
 					unset($BeginnerArray);
 					unset($FundamentalArray);
@@ -727,40 +582,51 @@ function getTheReason($strReasonCode) {
 			if ($doDebug) {
 				echo "end of the student assignment information report<br />";
 			}
-// $doDebug = FAlSE;									
+// $doDebug = FAlSE;
+// goto Bypass;
 		
 //////// End of Student Assignment Information Report	
 
 
-//////// Start of the C&R Report
+//////// Start of the withdrawn Report
 // $doDebug = TRUE;
 
 			if ($doDebug) {
-				echo "<br >Start of the C&R Report<br />";
+				echo "<br >Start of the withdrawn Report<br />";
 			}
-			// Prepare report of C and R Students
+			// Prepare report of withdrawn Students
 			$content		.= "<a name='reportW'><h3>Students Who Have Withdrawn (promotable = W)</h3></a>";
 			$cCount			= 0;
 			$rCouht			= 0;
-								
-			$sql			= "select * from $studentTableName 
-								left join $userMasterTableName on user_call_sign = student_call_sign 
-								where student_semester='$inp_semester' 
-								and (student_status = 'Y' 
-									or student_status = 'S') 
-								and student_promotable = 'W'  
-								order by student_call_sign";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
+
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],
+					['field' => 'student_promotable', 'value' => 'W', 'compare' => '='],
+					
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_status', 'value' => 'S', 'compare' => '='],
+							['field' => 'student_status', 'value' => 'Y', 'compare' => '=']
+						]
+					]
+				]
+			];
+					
+			$orderby = 'student_level,student_call_sign';
+			$order = 'ASC';
+			$requestInfo = array('criteria' => $criteria,
+								 'orderby' => $orderby,
+								 'order' => $order);
+			$studentData = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+			if ($studentData == FALSE) {
 				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numSRows rows<br />";
+					echo "getting student and user master returned FALSE<br />";
 				}
-				if ($numSRows > 0) {
+			} else {
+				if (! empty($studentData)) {
 					$content		.= "<table style='width:900px;'><tr>
 										<th>Name</th>
 										<th>Email</th>
@@ -768,95 +634,27 @@ function getTheReason($strReasonCode) {
 										<th>State</th>
 										<th>TZ</th>
 										<th>Level</th>
+										<th>Language</th>
 										<th>Promotable</th>
 										<th>Former<br />Advisor</th></tr>";
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_ph_code 					= $studentRow->user_ph_code;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_country 					= $studentRow->user_country;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						$student_excluded_advisor_array			= explode("&",$student_excluded_advisor);
+					foreach($studentData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+						}
+						$studentCount++;
 						
 						if ($doDebug) {
 							echo "processing student $student_call_sign with status of $student_status<br />";
 						}
 
-						$theLink			= "$student_last_name, $student_first_name <a href='$siteURL/cwa-display-and-update-student-information/?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>($student_call_sign)";
+						$theLink			= "$user_last_name, $user_first_name <a href='$siteURL/cwa-display-and-update-student-information/?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>($student_call_sign)";
 						$content			.= "<tr><td>$theLink</td>
-													<td>$student_email</td>
-													<td>$student_ph_code $student_phone</td>
-													<td>$student_state</td>
+													<td>$user_email</td>
+													<td>$user_ph_code $user_phone</td>
+													<td>$user_state</td>
 													<td>$student_timezone_offset</td>
 													<td>$student_level</td>
+													<td>$student_class_language</td>
 													<td>$student_promotable</td>
 													<td>$student_assigned_advisor ($student_assigned_advisor_class)</td></tr>";
 					}
@@ -887,23 +685,33 @@ function getTheReason($strReasonCode) {
 			$cCount			= 0;
 			$rCouht			= 0;
 								
-			$sql			= "select * from $studentTableName 
-								left join $userMasterTableName on user_call_sign = student_call_sign 
-								where student_semester='$inp_semester' 
-								and (student_status = 'C' 
-									or student_status = 'R' 
-									or student_status = 'V') 
-									order by student_status, student_call_sign";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],					
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_status', 'value' => 'C', 'compare' => '='],
+							['field' => 'student_status', 'value' => 'R', 'compare' => '='],
+							['field' => 'student_status', 'value' => 'V', 'compare' => '=']
+						]
+					]
+				]
+			];
+					
+			$orderby = 'student_level,student_call_sign';
+			$order = 'ASC';
+			$requestInfo = array('criteria' => $criteria,
+								 'orderby' => $orderby,
+								 'order' => $order);
+			$studentData = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+			if ($studentData == FALSE) {
 				if ($doDebug) {
-					echo "ran $sql<br />and found $numSRows rows<br />";
+					echo "getting student and user master returned FALSE<br />";
 				}
-				if ($numSRows > 0) {
+			} else {
+				if (! empty($studentData)) {
 					$content		.= "<table style='width:900px;'><tr>
 										<th>Name</th>
 										<th>Email</th>
@@ -911,116 +719,27 @@ function getTheReason($strReasonCode) {
 										<th>State</th>
 										<th>TZ</th>
 										<th>Level</th>
+										<th>Language</th>
 										<th>Status</th>
 										<th>Former<br />Advisor</th></tr>";
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
+					foreach($studentData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
 						}
-						$student_excluded_advisor_array			= explode("&",$student_excluded_advisor);
+						$studentCount++;
 						
 						if ($doDebug) {
 							echo "processing student $student_call_sign with status of $student_status<br />";
 						}
 
-						$theLink			= "$student_last_name, $student_first_name <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>($student_call_sign)";
+						$theLink			= "$user_last_name, $user_first_name <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>($student_call_sign)";
 						$content			.= "<tr><td>$theLink</td>
-													<td>$student_email</td>
-													<td>$student_ph_code $student_phone</td>
-													<td>$student_state</td>
+													<td>$user_email</td>
+													<td>$user_ph_code $user_phone</td>
+													<td>$user_state</td>
 													<td>$student_timezone_offset</td>
 													<td>$student_level</td>
+													<td>$student_class_language</td>
 													<td style='text-align:center;'>$student_status</td>
 													<td>$student_assigned_advisor ($student_assigned_advisor_class)</td></tr>";
 					}
@@ -1045,110 +764,40 @@ function getTheReason($strReasonCode) {
 			}
 			
 			$advisorArray				= array();
-			$sql						= "select * from $advisorClassTableName 
-											left join $userMasterTableName on user_call_sign = advisorclass_call_sign 
-											where advisorclass_semester='$inp_semester' 
-											order by advisorclass_call_sign, advisorclass_sequence";
-			$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisorclass === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numACRows						= $wpdb->num_rows;
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'advisorclass_semester', 'value' => $inp_semester, 'compare' => '=' ]
+				]
+			];
+			$orderby = 'advisorclass_call_sign, $advisorclass_sequence';
+			$order = 'ASC';
+			$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, $orderby, $order, $operatingMode );
+			if ($advisorclassData === FALSE || $advisorclassData === NULL) {
 				if ($doDebug) {
-					$myStr						= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numACRows rows<br />";
+					echo "get_advisorclasses_by_order returned FALSE|NULL<br />";
 				}
-				if ($numACRows > 0) {
-					foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-						$advisorClass_master_ID 				= $advisorClassRow->user_ID;
-						$advisorClass_master_call_sign			= $advisorClassRow->user_call_sign;
-						$advisorClass_first_name 				= $advisorClassRow->user_first_name;
-						$advisorClass_last_name 				= $advisorClassRow->user_last_name;
-						$advisorClass_email 					= $advisorClassRow->user_email;
-						$advisorClass_ph_code 					= $advisorClassRow->user_ph_code;
-						$advisorClass_phone 					= $advisorClassRow->user_phone;
-						$advisorClass_city 						= $advisorClassRow->user_city;
-						$advisorClass_state 					= $advisorClassRow->user_state;
-						$advisorClass_zip_code 					= $advisorClassRow->user_zip_code;
-						$advisorClass_country_code 				= $advisorClassRow->user_country_code;
-						$advisorClass_country	 				= $advisorClassRow->user_country;
-						$advisorClass_whatsapp 					= $advisorClassRow->user_whatsapp;
-						$advisorClass_telegram 					= $advisorClassRow->user_telegram;
-						$advisorClass_signal 					= $advisorClassRow->user_signal;
-						$advisorClass_messenger 				= $advisorClassRow->user_messenger;
-						$advisorClass_master_action_log 		= $advisorClassRow->user_action_log;
-						$advisorClass_timezone_id 				= $advisorClassRow->user_timezone_id;
-						$advisorClass_languages 				= $advisorClassRow->user_languages;
-						$advisorClass_survey_score 				= $advisorClassRow->user_survey_score;
-						$advisorClass_is_admin					= $advisorClassRow->user_is_admin;
-						$advisorClass_role 						= $advisorClassRow->user_role;
-						$advisorClass_master_date_created 		= $advisorClassRow->user_date_created;
-						$advisorClass_master_date_updated 		= $advisorClassRow->user_date_updated;
-	
-						$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-						$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-						$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-						$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-						$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-						$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-						$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-						$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-						$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-						$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-						$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-						$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-						$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-						$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-						$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-						$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-						$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-						$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-						$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-						$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-						$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-						$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-						$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-						$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-						$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-						$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-						$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-						$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-						$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-						$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-						$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-						$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-						$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-						$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-						$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-						$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-						$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-						$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-						$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-						$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-						$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-						$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-						$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+			} else {
+				if (! empty($advisorclassData)) {
+					foreach($advisorclassData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+						}
 	
 						// see if we can use this advisor
 						$doProceed				= TRUE;
-						if (in_array($advisorClass_call_sign,$badAdvisors)) {
+						if (in_array($advisorclass_call_sign,$badAdvisors)) {
 							if ($doDebug) {
-								echo "can not use $advisorClass_call_sign due to bad survey score<br />";
+								echo "can not use $advisorclass_call_sign due to bad survey score<br />";
 							}
 							$doProceed			= FALSE;
 						}
 						if ($doProceed) {						
 							if ($doDebug) {
-								echo "processing advisorClass $advisorClass_call_sign; class $advisorClass_sequence<br />";
+								echo "processing advisorclass $advisorclass_call_sign; class $advisorclass_sequence<br />";
 							}
-							$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorClass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>($advisorClass_call_sign)</a>";
-							$advisorArray[]		= "$advisorClass_level|$advisorClass_call_sign|$advisorClass_last_name, $advisorClass_first_name|$theLink|$advisorClass_sequence|$advisorClass_timezone_offset|$advisorClass_class_size|$advisorClass_class_schedule_days|$advisorClass_class_schedule_times|$advisorClass_class_schedule_days_utc|$advisorClass_class_schedule_times_utc|$advisorClass_number_students";
+							$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorclass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>($advisorclass_call_sign)</a>";
+							$advisorArray[]		= "$advisorclass_level|$advisorclass_call_sign|$user_last_name, $user_first_name|$theLink|$advisorclass_sequence|$advisorclass_timezone_offset|$advisorclass_class_size|$advisorclass_class_schedule_days|$advisorclass_class_schedule_times|$advisorclass_class_schedule_days_utc|$advisorclass_class_schedule_times_utc|$advisorclass_number_students|$advisorclass_language";
 						}
 					}
 					if ($doDebug) {
@@ -1164,7 +813,7 @@ function getTheReason($strReasonCode) {
 				}
 			}
 			if ($doDebug) {
-				echo "end of getting the advisorClass information<br /><br />";
+				echo "end of getting the advisorclass information<br /><br />";
 			}
 				
 // $doDebug = FALSE;
@@ -1176,10 +825,11 @@ function getTheReason($strReasonCode) {
 			}
 			sort($advisorArray);
 			$content			.= "<a name='reportBB'><h3>All Advisors and Class Slots</h3></a>
-									<table>
+									<table style='width:1000px;'>
 									<tr><th>Name</th>
 										<th>Sequence</th>
 										<th>Level</th>
+										<th>Language</th>
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
@@ -1204,6 +854,7 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_days_utc	= $myArray[9];
 				$advisorClass_class_schedule_times_utc	= $myArray[10];
 				$advisorClass_number_students			= $myArray[11];
+				$advisorClass_language					= $myArray[12];
 				
 				if ($doDebug) {
 					echo "<br />Processing $advisor_call_sign<br />
@@ -1212,6 +863,7 @@ function getTheReason($strReasonCode) {
 							advisorClass_sequence: $advisorClass_sequence<br />
 							advisorClass_tiezone_offset: $advisorClass_timezone_offset<br />
 							advisorClass_level: $advisorClass_level<br />
+							advisorClass_language: $advisorClass_language<br />
 							advisorClass_class_size: $advisorClass_class_size<br />
 							advisorClass_class_schedule_days: $advisorClass_class_schedule_days<br />
 							advisorClass_class_schedule_times: $advisorClass_class_schedule_times <br />
@@ -1234,6 +886,7 @@ function getTheReason($strReasonCode) {
 				$content	.= "<tr><td style='vertical-align:top;'>$advisor_name $theLink</td>
 									<td style='vertical-align:top;'>$advisorClass_sequence</td>
 									<td style='vertical-align:top;'>$advisorClass_level</td> 
+									<td style='vertical-align:top;'>$advisorClass_language</td>
 									<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 									<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 									<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
@@ -1260,10 +913,11 @@ function getTheReason($strReasonCode) {
 			$advisorCount			= 0;
 			$totalAvailable			= 0;
 			$content			.= "<a name='reportS'><h3>Advisor with Small Classes</h3></a>
-									<p><table>
+									<p><table style='width:1000px;'>
 									<tr><th>Name</th>
 										<th>Sequence</th>
 										<th>Level</th>
+										<th>Language</th>
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
@@ -1285,7 +939,8 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_times		= $myArray[8];
 				$advisorClass_class_schedule_days_utc	= $myArray[9];
 				$advisorClass_class_schedule_times_utc	= $myArray[10];
-				$advisorClass_number_students					= $myArray[11];
+				$advisorClass_number_students			= $myArray[11];
+				$advisorClass_language					= $myArray[12];
 				
 
 				$slotsAvailable			= 0;
@@ -1304,10 +959,11 @@ function getTheReason($strReasonCode) {
 					$advisorCount++;
 					$slotsAvailable		= $advisorClass_class_size - $advisorClass_number_students;
 					$totalAvailable		= $totalAvailable + $slotsAvailable;
-					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$thisMode' target='_blank'>($advisor_call_sign)</a>";
+					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$inp_mode' target='_blank'>($advisor_call_sign)</a>";
 					$content	.= "<tr><td style='vertical-align:top;'>$advisor_name $theLink</td>
 										<td style='vertical-align:top;'>$advisorClass_sequence</td>
-										<td style='vertical-align:top;'>$advisorClass_level</td> 
+										<td style='vertical-align:top;'>$advisorClass_level</td>
+										 <td style='vertical-align:top;'>$advisorClass_language</td>
 										<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 										<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 										<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
@@ -1346,10 +1002,12 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_times		= $myArray[8];
 				$advisorClass_class_schedule_days_utc	= $myArray[9];
 				$advisorClass_class_schedule_times_utc	= $myArray[10];
-				$advisorClass_number_students					= $myArray[11];
+				$advisorClass_number_students			= $myArray[11];
+				$advisorClass_language					= $myArray[12];
+
 				$slotsAvailable		= $advisorClass_class_size - $advisorClass_number_students;
 				if ($slotsAvailable > 0) {
-					$advisorSortArray[] 	= "$advisorClass_level|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|$advisor_call_sign|$advisor_name|$theLink|$advisorClass_sequence|$advisorClass_timezone_offset|$advisorClass_class_size|$advisorClass_class_schedule_days|$advisorClass_class_schedule_times|$advisorClass_number_students";
+					$advisorSortArray[] 	= "$advisorClass_level|$advisorClass_class_schedule_times_utc|$advisorClass_class_schedule_days_utc|$advisor_call_sign|$advisor_name|$theLink|$advisorClass_sequence|$advisorClass_timezone_offset|$advisorClass_class_size|$advisorClass_class_schedule_days|$advisorClass_class_schedule_times|$advisorClass_number_students|$advisorClass_language";
  		 			//                          0                  1                                      2                                      3                  4              5        6                     7                             8                        9                                 10                                  11
 				}
 			}
@@ -1361,10 +1019,11 @@ function getTheReason($strReasonCode) {
 
 
 			$content			.= "<a name='reportY'><h3>Advisor Class Slots Available</h3></a>
-									<p><table>
+									<p><table style='width:1000px;'>
 									<tr><th>Name</th>
 										<th>Sequence</th>
 										<th>Level</th>
+										<th>Language</th>
 										<th>TZ</th>
 										<th>Class Schedule</th>
 										<th style='text-align:center;'>Class Size</th>
@@ -1386,6 +1045,7 @@ function getTheReason($strReasonCode) {
 				$advisorClass_class_schedule_days_utc	= $myArray[2];
 				$advisorClass_class_schedule_times_utc	= $myArray[1];
 				$advisorClass_number_students			= $myArray[11];
+				$advisorClass_language					= $myArray[12];
 				
 // echo "advisorClassclass_schedule_days_utc: $advisorClass_class_schedule_days_utc<br />";
 				$slotsAvailable			= 0;
@@ -1403,10 +1063,11 @@ function getTheReason($strReasonCode) {
 				if ($slotsAvailable > 0) {
 					$advisorCount++;
 					$totalAvailable		= $totalAvailable + $slotsAvailable;
-					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$thisMode' target='_blank'>($advisor_call_sign)</a>";
+					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$inp_mode' target='_blank'>($advisor_call_sign)</a>";
 					$content	.= "<tr><td style='vertical-align:top;'>$theLink</td>
 										<td style='vertical-align:top;'>$advisorClass_sequence</td>
 										<td style='vertical-align:top;'>$advisorClass_level</td> 
+										<td style='vertical-align:top;'>$advisorClass_language</td> 
 										<td style='vertical-align:top;'>$advisorClass_timezone_offset</td>
 										<td style='vertical-align:top;'>$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc<br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days Local</td>
 										<td style='text-align:center;vertical-align:top;'>$advisorClass_class_size</td>
@@ -1443,154 +1104,61 @@ function getTheReason($strReasonCode) {
 			$AdvancedArray		= array();
 			$totalUnassigned	= 0;									
 
-			$sql			= "select * from $studentTableName 
-								left join $userMasterTableName on user_call_sign = student_call_sign 
-								where student_semester='$inp_semester' 
-								and student_response = 'Y' 
-								and student_status = '' 
-								and student_intervention_required != 'H' 
-								order by student_request_date DESC, 
-										student_level, 
-										student_call_sign";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
-				if ($doDebug) {
-					$myStr			= $wpdb->last_query;
-					echo "ran $myStr<br />and found $numSRows rows<br />";
-				}
-				if ($numSRows > 0) {
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],
+					['field' => 'student_response', 'value' => 'Y', 'compare' => '='],
+					['field' => 'student_status', 'value' => '', 'compare' => '='],
+					['field' => 'student_intervention_requred', 'value' => 'H', 'compare' => '!='],
+				]
+			];
 
-						$student_excluded_advisor_array			= explode("&",$student_excluded_advisor);
+					
+			$orderby = 'student_level,student_call_sign';
+			$order = 'ASC';
+			$requestInfo = array('criteria' => $criteria,
+								 'orderby' => $orderby,
+								 'order' => $order);
+			$studentData = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+			if ($studentData == FALSE) {
+				if ($doDebug) {
+					echo "getting student and user master returned FALSE<br />";
+				}
+			} else {
+				if (! empty($studentData)) {
+					foreach($studentData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+						}
 						$totalUnassigned++;
 						
 						$theLink		= "<a href='$siteURL/cwa-student-management/?strpass=70&inp_student_callsign=$student_call_sign&inp_mode=$inp_mode' target='_blank'>$student_call_sign</a> (<a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&doDebug=$doDebug&testMode=0' target='_Blank'>UPD</a>)";
 						$reqDate		= substr($student_request_date,0,10);
 						
 						${$student_level . 'Array'}[]		 	= "<tr><td style='vertical-align:top;'>$theLink</td>
-																		<td style='vertical-align:top;'>$student_last_name, $student_first_name</td>
-																		<td style='vertical-align:top;'>$student_first_class_choice_utc<br />
-																										$student_second_class_choice_utc<br />
-																										$student_third_class_choice_utc</td>
-																		<td style='text-align:center;vertical-align:top;'>$student_timezone_offset</td>
-																		<td style='vertical-align:top;'>$student_email</td>
-																		<td style='vertical-align:top;'>+$student_ph_code $student_phone</td>
-																		<td style='vertical-align:top;'>$student_state</td>
-																		<td style='vertical-align:top;'>$student_country</td>
-																		<td style='vertical-align:top;'>$reqDate</td>
+																		<td style='vertical-align:top;'>$user_last_name, $user_first_name</td>
+																		<td style='vertical-align:top;'>$student_class_language</td>
+																		<td style='text-align:center;vertical-align:top;'>$student_timezone_offset<br />UTC:</td>
+																		<td style='vertical-align:top;'>$user_email<br />$student_first_class_choice_utc</td>
+																		<td style='vertical-align:top;'>+$user_ph_code $user_phone<br />$student_second_class_choice_utc</td>
+																		<td style='vertical-align:top;'>$user_zip_code<br />$student_third_class_choice_utc</td>
+																		<td style='vertical-align:top;'>$user_country</td>
 																		<td style='text-align:center;vertical-align:top;'>$student_promotable</td></tr>";
 					}
+
 					if (count($BeginnerArray) > 0) {
 						$myCount			= count($BeginnerArray);
 						$content			.= "<h4>Beginner Unassigned</h4>
-												<table style='width:1000px;'>
+												<table style='width:1200px;'>
 												<tr><th>Call Sign</th>
 													<th>Student</th>
-													<th style='width:180px;'>Choices UTC</th>
+													<th>Language</th>
 													<th>TZ</th>
 													<th>Email</th>
 													<th>Phone</th>
-													<th>State</th>
+													<th>ZipCode</th>
 													<th>Country</th>
-													<th>Req Date</th>
 													<th>Prom</th></tr>";
 						foreach($BeginnerArray as $thisValue) {
 							$content		.= $thisValue;
@@ -1602,16 +1170,15 @@ function getTheReason($strReasonCode) {
 					if (count($FundamentalArray) > 0) {
 						$myCount			= count($FundamentalArray);
 						$content			.= "<h4>Fundamental Unassigned</h4>
-												<table style='width:1000px;'>
+												<table style='width:1200px;'>
 												<tr><th>Call Sign</th>
 													<th>Student</th>
-													<th style='width:180px;'>Choices UTC</th>
+													<th>Language</th>
 													<th>TZ</th>
 													<th>Email</th>
 													<th>Phone</th>
-													<th>State</th>
+													<th>ZipCode</th>
 													<th>Country</th>
-													<th>Req Date</th>
 													<th>Prom</th></tr>";
 						foreach($FundamentalArray as $thisValue) {
 							$content		.= $thisValue;
@@ -1623,16 +1190,15 @@ function getTheReason($strReasonCode) {
 					if (count($IntermediateArray) > 0) {
 						$myCount			= count($IntermediateArray);
 						$content			.= "<h4>Intermediate Unassigned</h4>
-												<table style='width:1000px;'>
+												<table style='width:1200px;'>
 												<tr><th>Call Sign</th>
 													<th>Student</th>
-													<th style='width:180px;'>Choices UTC</th>
+													<th>Language</th>
 													<th>TZ</th>
 													<th>Email</th>
 													<th>Phone</th>
-													<th>State</th>
+													<th>ZipCode</th>
 													<th>Country</th>
-													<th>Req Date</th>
 													<th>Prom</th></tr>";
 						foreach($IntermediateArray as $thisValue) {
 							$content		.= $thisValue;
@@ -1644,16 +1210,15 @@ function getTheReason($strReasonCode) {
 					if (count($AdvancedArray) > 0) {
 						$myCount			= count($AdvancedArray);
 						$content			.= "<h4>Advanced Unassigned</h4>
-												<table style='width:1000px;'>
+												<table style='width:1200px;'>
 												<tr><th>Call Sign</th>
 													<th>Student</th>
-													<th style='width:180px;'>Choices UTC</th>
+													<th>Language</th>
 													<th>TZ</th>
 													<th>Email</th>
 													<th>Phone</th>
-													<th>State</th>
+													<th>ZipCode</th>
 													<th>Country</th>
-													<th>Req Date</th>
 													<th>Prom</th></tr>";
 						foreach($AdvancedArray as $thisValue) {
 							$content		.= $thisValue;
@@ -1688,126 +1253,41 @@ function getTheReason($strReasonCode) {
 				
 		
 			$content		.= "<a name='reportH'><h3>Students On Hold Report</h3></a>
-								<table>
+								<table style='width:1000px;'>
 								<tr><th>Student</th>
 									<th>Level</th>
+									<th>Language</th>
 									<th>Response</th>
 									<th>Status</th>
 									<th>Hold Reason</th>
 									<th>Action Log</th></tr>";
-			$sql			= "SELECT * FROM $studentTableName 
-								left join $userMasterTableName on user_call_sign = student_call_sign  
-								WHERE student_intervention_required = 'H' 
-								and student_semester = '$inp_semester' 
-								order by student_call_sign";
-			$wpw1_cwa_student		= $wpdb->get_results($sql);
-			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-				$content		.= "Unable to obtain content from $studentTableName<br />";
-			} else {
-				$numSRows			= $wpdb->num_rows;
+									
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_intervention_required', 'value' => 'H', 'compare' => '=' ],
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '=' ]
+				]
+			];
+			$orderby = 'student_call_sign';
+			$order = 'ASC';
+			$requestInfo = array('criteria' => $criteria,
+								 'orderby' => $orderby,
+								 'order' => $order);
+			$studentData = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
+			if ($studentData == FALSE) {
 				if ($doDebug) {
-					echo "ran $sql<br />and found $numSRows rows<br />";
+					echo "getting student and user master returned FALSE<br />";
 				}
-				if ($numSRows > 0) {
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 				= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
+			} else {
+				if (! empty($studentData)) {
+					foreach($studentData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
 						}
 
 						$myStr				= getTheReason($student_hold_reason_code);
-						$theLink			= "$student_last_name, $student_first_name <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_blank'>($student_call_sign)</a>";
+						$theLink			= "$user_last_name, $user_first_name <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_blank'>($student_call_sign)</a>";
 						$holdLink			= "<a href='$studentManagementURL?strpass=26&inp_student_callsign=$student_call_sign&inp_mode=$inp_mode&inp_verbose=$inp_verbose' target='_blank'>Remove Hold</a>";
 						$findLink			= "<a href='$studentManagementURL?strpass=71&inp_student_callsign=$student_call_sign&inp_choice=option1&inp_mode=$inp_mode&inp_verbose=$inp_verbose' target='_blank'>Find Classes</a>";
 						$thisLog			= formatActionLog($student_action_log);
@@ -1815,6 +1295,7 @@ function getTheReason($strReasonCode) {
 														$holdLink<br />
 														$findLink</td>
 													<td style='vertical-align:top;'>$student_level</td>
+													<td style='vertical-align:top;'>$student_class_language</td>
 													<td style='vertical-align:top;'>$student_response</td>
 													<td style='vertical-align:top;'>$student_status</td>
 													<td style='vertical-align:top;'>$myStr</td>
@@ -1844,7 +1325,7 @@ function getTheReason($strReasonCode) {
 
 
 	}
-
+Bypass:
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>V$thisVersion Prepared at $thisTime</p>";
 	$endingMicroTime = microtime(TRUE);
