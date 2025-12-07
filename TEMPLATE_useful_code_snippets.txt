@@ -794,3 +794,66 @@ try {
 		Change the button name from 'Yes or No' as desired
 
 
+// NEW DAL complex selection criteria examples:
+
+Use example 1:
+
+// Get advisors where
+// (semester = 'Fall 2025' AND call_sign = 'K1ABC')
+// OR (semester = 'Spring 2026')
+$criteria = [
+    'relation' => 'OR',
+    'clauses' => [
+        [
+            'relation' => 'AND',
+            'clauses' => [
+                ['field' => 'advisor_semester', 'value' => 'Fall 2025', 'compare' => '='],
+                ['field' => 'advisor_call_sign', 'value' => 'K1ABC', 'compare' => '=']
+            ]
+        ],
+        [
+            'relation' => 'AND',
+            'clauses' => [
+                ['field' => 'advisor_semester', 'value' => 'Spring 2026', 'compare' => '=']
+            ]
+        ]
+    ]
+];
+$advisors = $dal->get_advisors($criteria);
+
+
+
+Use Example 2
+
+// Update advisors where
+// field1 = $value1 AND (field2 = $value2 OR field2 = $value3)
+$data_to_update = [
+    'advisor_action_log' => 'Updated by new complex query.'
+];
+
+$criteria = [
+    'relation' => 'AND',
+    'clauses' => [
+        // field1 = $value1
+        ['field' => 'advisor_call_sign', 'value' => 'K1ABC', 'compare' => '='],
+        
+        // (field2 = $value2 OR field2 = $value3)
+        [
+            'relation' => 'OR',
+            'clauses' => [
+                ['field' => 'advisor_semester', 'value' => 'Fall 2025', 'compare' => '='],
+                ['field' => 'advisor_semester', 'value' => 'Spring 2026', 'compare' => '=']
+            ]
+        ]
+    ]
+];
+
+$rows_affected = $dal->update($data_to_update, $criteria);
+
+Example 3 (simple request)
+$criteria = [
+    'relation' => 'AND',
+    'clauses' => [
+        ['field' => 'advisor_call_sign', 'value' => 'K7OJL', 'compare' => '=' ]
+    ]
+];
