@@ -1,14 +1,8 @@
 function display_and_update_user_master_func() {
 
-/*
-
-	Modified 7Nov24 by Roland to include previous callsigns
-	Modified 8Jan25 by Roland to change method of getting timezone_id
-*/
-
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -31,6 +25,7 @@ function display_and_update_user_master_func() {
 	$semesterTwo		= $initializationArray['semesterTwo'];
 	$semesterThree		= $initializationArray['semesterThree'];
 	$semesterFour		= $initializationArray['semesterFour'];
+	$proximateSemester	= $initializationArray['proximateSemester'];
 	
 
 //	ini_set('memory_limit','256M');
@@ -107,7 +102,7 @@ function display_and_update_user_master_func() {
 				$inp_callsign	= $inp_call_sign;
 			}
 			if ($str_key == "inp_id") {
-				$inp_id = strtoupper($str_value);
+				$inp_id = $str_value;
 				$inp_id = filter_var($inp_id,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "request_type") {
@@ -157,6 +152,10 @@ function display_and_update_user_master_func() {
 			if ($str_key == "inp_date_created") {
 				$inp_date_created = $str_value;
 				$inp_date_created = filter_var($inp_date_created,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key == "inp_country_code") {
+				$inp_country_code = $str_value;
+				$inp_country_code = filter_var($inp_country_code,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == "inp_country_data") {
 				$inp_country_data 	= $str_value;
@@ -323,6 +322,7 @@ function display_and_update_user_master_func() {
 		$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
 		$advisorTableName			= 'wpw1_cwa_advisor2';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history2';
+		$operatingMode				= 'Testmode';
 	} else {
 		$extMode					= 'pd';
 		$userMasterTableName		= "wpw1_cwa_user_master";
@@ -331,16 +331,58 @@ function display_and_update_user_master_func() {
 		$advisorClassTableName		= 'wpw1_cwa_advisorclass';
 		$advisorTableName			= 'wpw1_cwa_advisor';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history';
+		$operatingMode				= 'Production';
 	}
+	
+	
+	$user_dal = new CWA_User_Master_DAL();
+	$student_dal = new CWA_Student_DAL();
+	$advisor_dal = new CWA_Advisor_DAL();
+	$advisorclass_dal = new CWA_Advisorclass_DAL();
+	
+function selectCountry($inp_country) {
+	global $wpdb;
+	$selectList = FALSE;
+	$country_sql = "select * from wpw1_cwa_country_codes order by country_code";
+	$countryResult = $wpdb->get_results($country_sql);
+	if ($countryResult === FALSE) {
+		if ($doDebug) {
+			echo "getting phone code from wpw1_cwa_country_codes table for country_code $inp_country_code failed<br />";
+			echo "wpdb->last_query: " . $wpdb->last_query . "<br />";
+			echo "<b>wpdb->last_error: " . $wpdb->last_error . "</b><br />";
+		}
+	} else {
+		$numCCRows			= $wpdb->num_rows;
+		if ($numCCRows > 0) {
+			$selectList .= "<label for='country'>Choose a country:<br /></label>\n
+							  <select id='inp_country_data' name='inp_country_data'>";
+			foreach($countryResult as $countryCodeRows) {
+				$countryCode_ID				= $countryCodeRows->record_id;
+				$countryCode_country_code	= $countryCodeRows->country_code;
+				$countryCode_country_name	= $countryCodeRows->country_name;
+				$countryCode_ph_code		= $countryCodeRows->ph_code;
+				$countryCode_date_updated	= $countryCodeRows->date_updated;
+				
+				$isSelected = '';
+				if ($inp_country == $countryCode_country_name) {
+					$isSelected = 'selected';
+				}
+				$selectList .= "<option value='$countryCode_country_code|$countryCode_country_name|$countryCode_ph_code' $isSelected>$countryCode_country_name</option>\n";
+			}
+		}
+	}	
+	return $selectList;
+}
+
 
 	if ($strPass == "1") {
 		if ($loginRole == 'administrator') {
 			$strPass					= "1";
 		} else {
-			$inp_callsign				= strtoupper($userName);
 			$strPass					= "2";
-			$callSignMethod				= TRUE;
 			$runByUser					= TRUE;	// job run from link on user's portal
+			$request_type				= 'callsign';
+			$request_info				= $strtoupper($userName);
 		}
 	}
 
@@ -381,17 +423,18 @@ function display_and_update_user_master_func() {
 		$doProceed					= TRUE;
 		$displayedAlready			= FALSE;
 
-		if ($callSignMethod) {
-			$request_type				= 'callsign';
-			$request_info				= $inp_callsign;
-			if ($doDebug) {
-				echo "callSignMethod is TRUE. Setting request_type to $request_type and request_info to $request_info<br />";
-			}
-		} else {
-			if ($doDebug) {
-				echo "callSignMethod is FALSE. request_type is set to $request_type and request_info is set to $request_info<br />";
-			}
-		}
+//		if ($callSignMethod) {
+//			$request_type				= 'callsign';
+//			$request_info				= $inp_callsign;
+//			$criteria					= array('user_call_sign'=>$inp_callsign);
+//			if ($doDebug) {
+//				echo "callSignMethod is TRUE. Setting request_type to $request_type and request_info to $request_info<br />";
+//			}
+//		} else {
+//			if ($doDebug) {
+//				echo "callSignMethod is FALSE. request_type is set to $request_type and request_info is set to $request_info<br />";
+//			}
+//		}
 
 	
 		$content			.= "<h3>$jobname</h3>";
@@ -410,23 +453,75 @@ function display_and_update_user_master_func() {
 		}
 		if ($request_type == 'callsign') {
 			$request_info	= strtoupper($request_info);
-			$sql			= "select * from $userMasterTableName 
-								where user_call_sign like '$request_info'";
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_call_sign', 
+						'value'   => $request_info, 
+						'compare' => '=' 
+					]
+				]
+			];
+			if ($doDebug) {
+				echo "set up the criteria for a callsign request type<br />";
+			}
 		} elseif ($request_type == 'id') {
-			$sql			= "select * from $userMasterTableName 
-								where user_ID = $request_info";
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_ID', 
+						'value'   => $request_info, 
+						'compare' => '=' 
+					]
+				]
+			];
+			if ($doDebug) {
+				echo "set up the criteria for an id request type<br />";
+			}
 		} elseif ($request_type == 'surname') {
-			$sql			= "select * from $userMasterTableName 
-								where user_last_name like '%$request_info%' 
-								order by user_call_sign";
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_last_name', 
+						'value'   => $request_info, 
+						'compare' => '=' 
+					]
+				]
+			];
+			if ($doDebug) {
+				echo "set up the criteria for a surname request type<br />";
+			}
 		} elseif ($request_type == 'given') {
-			$sql			= "select * from $userMasterTableName 
-								where user_first_name like '%$request_info%' 
-								order by user_call_sign";
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_first_name', 
+						'value'   => $request_info, 
+						'compare' => '=' 
+					]
+				]
+			];
+			if ($doDebug) {
+				echo "set up the criteria for a given name request type<br />";
+			}
 		} elseif ($request_type == 'email') {
-			$sql			= "select * from $userMasterTableName 
-								where user_email = '$request_info' 
-								order by user_call_sign";
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_email', 
+						'value'   => $request_info, 
+						'compare' => '=' 
+					]
+				]
+			];
+			if ($doDebug) {
+				echo "set up the criteria for an email request type<br />";
+			}
 		} else {
 			if ($doDebug) {
 				echo "invalid request_type of $request_type<br />";
@@ -436,44 +531,28 @@ function display_and_update_user_master_func() {
 		}
 		
 		if ($doProceed) {
-		
-			$sqlResult		= $wpdb->get_results($sql);
-			if ($sqlResult === FALSE) {
-				handleWPDBError($jobname,$doDebug,"pass2. attempting to get results from $sql. UserName: $userName");
+			// get the user_master information
+			if ($doDebug) {
+				echo "calling user_dal->get_user_master<br />";
+			}
+			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
+			if ($doDebug) {
+				echo "returned from get_user_master. user_data:<br /><pre>";
+				print_r($user_data);
+				echo "</pre><br />";
+			}
+			if ($user_data === FALSE) {
+				$content		.= "Attempting to retrieve $request_info failed<br />";
 			} else {
-				$numRows	= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numRows rows<br />";
-				}
-				if ($numRows > 0) {
+				if (count($user_data) > 0) {
 					$haveUserMaster				= TRUE;
-					foreach($sqlResult as $sqlRow) {
-						$user_id				= $sqlRow->user_ID;
-						$user_call_sign			= $sqlRow->user_call_sign;
-						$user_first_name		= $sqlRow->user_first_name;
-						$user_last_name			= $sqlRow->user_last_name;
-						$user_email				= $sqlRow->user_email;
-						$user_ph_code			= $sqlRow->user_ph_code;
-						$user_phone				= $sqlRow->user_phone;
-						$user_city				= $sqlRow->user_city;
-						$user_state				= $sqlRow->user_state;
-						$user_zip_code			= $sqlRow->user_zip_code;
-						$user_country_code		= $sqlRow->user_country_code;
-						$user_country			= $sqlRow->user_country;
-						$user_whatsapp			= $sqlRow->user_whatsapp;
-						$user_telegram			= $sqlRow->user_telegram;
-						$user_signal			= $sqlRow->user_signal;
-						$user_messenger			= $sqlRow->user_messenger;
-						$user_action_log		= stripslashes($sqlRow->user_action_log);
-						$user_timezone_id		= $sqlRow->user_timezone_id;
-						$user_languages			= $sqlRow->user_languages;
-						$user_survey_score		= $sqlRow->user_survey_score;
-						$user_is_admin			= $sqlRow->user_is_admin;
-						$user_role				= $sqlRow->user_role;
-						$user_prev_callsign		= $sqlRow->user_prev_callsign;
-						$user_date_created		= $sqlRow->user_date_created;
-						$user_date_updated		= $sqlRow->user_date_updated;
-
+					foreach($user_data as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+						}
+						if ($doDebug) {
+							echo "have the data, setting up to display<br />";
+						}
 						$myStr			= formatActionLog($user_action_log);
 						$timezoneMsg	= '';
 						if ($user_timezone_id == '??') {
@@ -490,12 +569,12 @@ function display_and_update_user_master_func() {
 													<li>State / Province: Again, a valid name
 												</ul>";
 						}
-						$content		.= "<h4>User Master Data</h4>
+						$content		.= "<h4>User Master Data for ID $user_ID</h4>
 											$timezoneMsg
 											<form method='post' action='$theURL' 
 											name='selection_form' ENCTYPE='multipart/form-data'>
 											<input type='hidden' name='strpass' value='3'>
-											<input type='hidden' name='inp_id' value='$user_id'>
+											<input type='hidden' name='inp_id' value='$user_ID'>
 											<input type='hidden' name='inp_call_sign' value='$user_call_sign'>
 											<input type='hidden' name='inp_mode' value='$inp_mode'>
 											<input type='hidden' name='inp_verbose' value='$inp_verbose'>
@@ -527,54 +606,44 @@ function display_and_update_user_master_func() {
 											<tr><td colspan='4'><input type='submit' class='formInputButton' name='submit' value='Update $user_call_sign' /></td></tr>
 											</table></form>";
 						if ($loginRole == 'administrator') {
-							// see if there is a student or an advisor record
+	           						// see if there is a student or an advisor record
 							$haveStudentRecord	= FALSE;
-							$sql1		= "select student_id, student_semester, student_level 
-											from $studentTableName 
-											where student_call_sign like '$user_call_sign' 
-											order by student_id DESC 
-											limit 1";
-							$student_result	= $wpdb->get_results($sql1);
-							if ($student_result === FALSE) {
-								handleWPDBError($jobname,$doDebug,"attempting to find a student record");
-							} else {
-								$numSRows	= $wpdb->num_rows;
-								if ($doDebug) {
-									echo "ran $sql1<br />and retrieved $numSRows rows<br />";
-								}
-								if ($numSRows > 0) {
-									$haveStudentRecord = TRUE;
-									foreach($student_result as $student_role) {
-										$student_id			= $student_role->student_id;
-										$student_semester	= $student_role->student_semester;
-										$student_level		= $student_role->student_level;
+							$studentCriteria = ['relation' => 'AND',
+												'clauses' => [
+																['field' => 'student_call_sign', 'value' => $user_call_sign, 'compare' => '='],
+																['field' => 'student_semester', 'value' => $proximateSemester, 'compare' => '=']
+															]
+												];
+									
+							$student_data = $student_dal->get_student($studentCriteria,'student_date_created','DESC',$operatingMode);
+							if (count($student_data) > 0) {
+								foreach($student_data as $key => $value) {
+									foreach($value as $thisField => $thisValue) {
+										$$thisField = $thisValue;
 									}
+									$haveStudentRecord = TRUE;
 								}
 							}
 							$haveAdvisorRecord		= FALSE;
-							$sql2					= "select advisor_id, advisor_semester 
-														from $advisorTableName 
-														order by advisor_id DESC 
-														limit 1";
-							$advisor_result	= $wpdb->get_results($sql2);
-							if ($advisor_result === FALSE) {
-								handleWPDBError($jobname,$doDebug,"attempting to find a advisor record");
-							} else {
-								$numARows	= $wpdb->num_rows;
-								if ($doDebug) {
-									echo "ran $sql2<br />and retrieved $numARows rows<br />";
-								}
-								if ($numARows > 0) {
-									$haveAdvisorRecord = TRUE;
-									foreach($advisor_result as $advisorRow) {
-										$advisor_id			= $advisorRow->advisor_id;
-										$advisor_semester	= $advisorRow->advisor_semester;
+							$advisorCriteria = [
+								'relation' => 'AND',
+								'clauses' => [
+									[ 
+										'field'   => 'advisor_call_sign', 
+										'value'   => $user_call_sign, 
+										'compare' => '=' 
+									]
+								]
+							];
+							$advisor_result = $advisor_dal->get_advisor($advisorCriteria,$operatingMode);
+							if (count($advisor_result) > 0) {
+								foreach($advisor_result as $key=>$value) {
+									foreach($value as $thisField=>$thisValue) {
+										$$thisField = $thisValue;
 									}
+									$haveAdvisorRecord = TRUE;
 								}
 							}
-																				
-						
-						
 							$content	.= "<p>To List User Master Change History for $user_call_sign click 
 											<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
 											target='_blank'>HERE</a></p>";
@@ -587,119 +656,96 @@ function display_and_update_user_master_func() {
 												for $advisor_semester</p>";
 							}
 						}
-						
 						$displayedAlready	= TRUE;
 						$haveUserMaster		= TRUE;
 					}
 				} else {
-					$content		.= "<p>No User Master record found for $request_info</p>";
+					$content		.= "<p>No User Master record found for $request_type - $request_info</p>";
 					if ($request_type == 'callsign') {
 						// see if this is a previous callsign
 						if ($doDebug) {
-							echo "no record found running $sql. Looking for a previous callsign<br />";
+							echo "no record found for $request_info. Looking for a previous callsign<br />";
 						}
-						$sql1		= "select * from $userMasterTableName 
-										where user_prev_callsign like '%$request_info%'";
-						$sqlResult		= $wpdb->get_results($sql1);
-						if ($sqlResult === FALSE) {
-							handleWPDBError($jobname,$doDebug,"pass2. No record using callsign. Trying to get results from $sql1. UserName: $userName");
-						} else {
-							$numRows	= $wpdb->num_rows;
+						$callsignCriteria = [
+							'relation' => 'LIKE',
+							'clauses' => [
+								[ 
+									'field'   => 'user_prev_callsign', 
+									'value'   => "%$request_info%", 
+									'compare' => 'LIKE' 
+								]
+							]
+						];
+						$new_user_data = $user_dal->get_user_master($callsignCriteria,'user_call_sign','ASC',$operatingMode);
+						if (count($new_user_data) > 0) {
 							if ($doDebug) {
-								echo "ran $sql<br />and retrieved $numRows rows<br />";
+								echo "found a new call sign<br />";
 							}
-							if ($numRows > 0) {
-								$haveUserMaster				= TRUE;
-								foreach($sqlResult as $sqlRow) {
-									$user_id				= $sqlRow->user_ID;
-									$user_call_sign			= $sqlRow->user_call_sign;
-									$user_first_name		= $sqlRow->user_first_name;
-									$user_last_name			= $sqlRow->user_last_name;
-									$user_email				= $sqlRow->user_email;
-									$user_ph_code			= $sqlRow->user_ph_code;
-									$user_phone				= $sqlRow->user_phone;
-									$user_city				= $sqlRow->user_city;
-									$user_state				= $sqlRow->user_state;
-									$user_zip_code			= $sqlRow->user_zip_code;
-									$user_country_code		= $sqlRow->user_country_code;
-									$user_country			= $sqlRow->user_country;
-									$user_whatsapp			= $sqlRow->user_whatsapp;
-									$user_telegram			= $sqlRow->user_telegram;
-									$user_signal			= $sqlRow->user_signal;
-									$user_messenger			= $sqlRow->user_messenger;
-									$user_action_log		= stripslashes($sqlRow->user_action_log);
-									$user_timezone_id		= $sqlRow->user_timezone_id;
-									$user_languages			= $sqlRow->user_languages;
-									$user_survey_score		= $sqlRow->user_survey_score;
-									$user_is_admin			= $sqlRow->user_is_admin;
-									$user_role				= $sqlRow->user_role;
-									$user_prev_callsign		= $sqlRow->user_prev_callsign;
-									$user_date_created		= $sqlRow->user_date_created;
-									$user_date_updated		= $sqlRow->user_date_updated;
-			
-									$content		.= "<p>Callsign $request_info has been changed to $user_call_sign</p>";
-			
-									$myStr			= formatActionLog($user_action_log);
-									$content		.= "<h4>User Master Data</h4>
-														<form method='post' action='$theURL' 
-														name='selection_form' ENCTYPE='multipart/form-data'>
-														<input type='hidden' name='strpass' value='3'>
-														<input type='hidden' name='inp_id' value='$user_id'>
-														<input type='hidden' name='inp_call_sign' value='$user_call_sign'>
-														<input type='hidden' name='inp_mode' value='$inp_mode'>
-														<input type='hidden' name='inp_verbose' value='$inp_verbose'>
-														<table style='width:900px;'>
-														<tr><td><b>Callsign<br />$user_call_sign</b></td>
-															<td><b>Name</b><br />$user_last_name, $user_first_name</td>
-															<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
-															<td><b>Email</b><br />$user_email</td></tr>
-														<tr><td><b>City</b><br />$user_city</td>
-															<td><b>State</b><br />$user_state</td>
-															<td><b>Zip Code</b><br />$user_zip_code</td>
-															<td><b>Country</b><br />$user_country</td></tr>
-														<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
-															<td><b>Telegram</b><br />$user_telegram</td>
-															<td><b>Signal</b><br />$user_signal</td>
-															<td><b>Messenger</b><br />$user_messenger</td></tr>
-														<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
-															<td><b>Languages</b><br />$user_languages</td>
-															<td><b>Date Created</b><br />$user_date_created</td>
-															<td><b>Date Updated</b><br />$user_date_updated</td></tr>";
-									if ($loginRole == 'administrator') {
-										$content 	.= "<tr><td><b>Survey Score</b><br />$user_survey_score</td>
-															<td><b>Is Admin</b><br />$user_is_admin</td>
-															<td><b>Role</b><br />$user_role</td>
-															<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
-														<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
-									}
-									$content		.= "<tr><td colspan='4'><hr></td></tr>
-														<tr><td colspan='4'><input type='submit' class='formInputButton' name='submit' value='Update $user_call_sign' /></td></tr>
-														</table></form>";
-									if ($loginRole == 'administrator') {
-										$content	.= "<p>To List User Master Change History for $user_call_sign click 
-														<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
-														target='_blank'>HERE</a></p>";
-									}
-									
-									$displayedAlready	= TRUE;
-									$haveUserMaster		= TRUE;
+							foreach($new_user_data as $key => $value) {
+								foreach($value as $thisField => $thisValue) {
+									$$thisField = $thisValue;
+								}								
+								$content		.= "<p>Callsign $request_info has been changed to $user_call_sign</p>";
+		
+								$myStr			= formatActionLog($user_action_log);
+								$content		.= "<h4>User Master Data for ID $user_ID</h4>
+													<form method='post' action='$theURL' 
+													name='selection_form' ENCTYPE='multipart/form-data'>
+													<input type='hidden' name='strpass' value='3'>
+													<input type='hidden' name='inp_id' value='$user_ID'>
+													<input type='hidden' name='inp_call_sign' value='$user_call_sign'>
+													<input type='hidden' name='inp_mode' value='$inp_mode'>
+													<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+													<table style='width:900px;'>
+													<tr><td><b>Callsign<br />$user_call_sign</b></td>
+														<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+														<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+														<td><b>Email</b><br />$user_email</td></tr>
+													<tr><td><b>City</b><br />$user_city</td>
+														<td><b>State</b><br />$user_state</td>
+														<td><b>Zip Code</b><br />$user_zip_code</td>
+														<td><b>Country</b><br />$user_country</td></tr>
+													<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+														<td><b>Telegram</b><br />$user_telegram</td>
+														<td><b>Signal</b><br />$user_signal</td>
+														<td><b>Messenger</b><br />$user_messenger</td></tr>
+													<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
+														<td><b>Languages</b><br />$user_languages</td>
+														<td><b>Date Created</b><br />$user_date_created</td>
+														<td><b>Date Updated</b><br />$user_date_updated</td></tr>";
+								if ($loginRole == 'administrator') {
+									$content 	.= "<tr><td><b>Survey Score</b><br />$user_survey_score</td>
+														<td><b>Is Admin</b><br />$user_is_admin</td>
+														<td><b>Role</b><br />$user_role</td>
+														<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
+													<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
 								}
-							} else {
-//								sendErrorEmail("$jobname. Pass2. No User Master record running $sql1. UserName: $userName");
-								$haveUserMaster			= FALSE;
-								$content				.= "<p>No User Master record found searching by callsign and searching previous callsign</p>";
+								$content		.= "<tr><td colspan='4'><hr></td></tr>
+													<tr><td colspan='4'><input type='submit' class='formInputButton' name='submit' value='Update $user_call_sign' /></td></tr>
+													</table></form>";
+								if ($loginRole == 'administrator') {
+									$content	.= "<p>To List User Master Change History for $user_call_sign click 
+													<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
+													target='_blank'>HERE</a></p>";
+								}
+								
+								$displayedAlready	= TRUE;
+								$haveUserMaster		= TRUE;
 							}
+						} else {
+							$haveUserMaster			= FALSE;
+							$content				.= "<p>No User Master record found searching by callsign and searching previous callsign</p>";
 						}
 					}
 				}
 			}
 			if ($haveUserMaster && !$displayedAlready) {
 				$myStr			= formatActionLog($user_action_log);
-				$updateLink		= "<a href='$theURL/?strpass=3&inp_id=$user_id'>$user_id<a/>";
+				$updateLink		= "<a href='$theURL/?strpass=3&inp_id=$user_id'>$user_ID<a/>";
 				$content		.= "<form method='post' action='$theURL' 
 									name='selection_form' ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='3'>
-									<input type='hidden' name='inp_id' value='$user_id'>
+									<input type='hidden' name='inp_id' value='$user_ID'>
 									<input type='hidden' name='inp_call_sign' value='$user_call_sign'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
@@ -751,87 +797,34 @@ function display_and_update_user_master_func() {
 		
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
-			echo "<br />arrived at pass3 with inp_call_sign: $inp_call_sign<br />";
+			echo "<br />arrived at pass3 with inp_call_sign: $inp_call_sign and inp_id = $inp_id<br />";
 		}
 		$content		.= "<h3>$jobname for $inp_call_sign</h3>";
 		
 		// get the record and display it for update
-		$sql			= "select * from $userMasterTableName 
-							where user_call_sign = '$inp_call_sign'";
-		$sqlResult		= $wpdb->get_results($sql);
-		if ($sqlResult === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$user_data = $user_dal->get_user_master_by_id($inp_id,$operatingMode);
+		if ($user_data === FALSE) {
+			$content .= "FATAL ERROR: attempting to get $inp_call_sign returned FALSE<br />";
 		} else {
-			$numRows	= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and retrieved $numRows rows<br />";
-			}
-			if ($numRows > 0) {
-				foreach($sqlResult as $sqlRow) {
-					$user_id				= $sqlRow->user_ID;
-					$user_call_sign			= $sqlRow->user_call_sign;
-					$user_first_name		= $sqlRow->user_first_name;
-					$user_last_name			= $sqlRow->user_last_name;
-					$user_email				= $sqlRow->user_email;
-					$user_ph_code			= $sqlRow->user_ph_code;
-					$user_phone				= $sqlRow->user_phone;
-					$user_city				= $sqlRow->user_city;
-					$user_state				= $sqlRow->user_state;
-					$user_zip_code			= $sqlRow->user_zip_code;
-					$user_country_code		= $sqlRow->user_country_code;
-					$user_country			= $sqlRow->user_country;
-					$user_whatsapp			= $sqlRow->user_whatsapp;
-					$user_telegram			= $sqlRow->user_telegram;
-					$user_signal			= $sqlRow->user_signal;
-					$user_messenger			= $sqlRow->user_messenger;
-					$user_action_log		= stripslashes($sqlRow->user_action_log);
-					$user_timezone_id		= $sqlRow->user_timezone_id;
-					$user_languages			= $sqlRow->user_languages;
-					$user_survey_score		= $sqlRow->user_survey_score;
-					$user_is_admin			= $sqlRow->user_is_admin;
-					$user_role				= $sqlRow->user_role;
-					$user_prev_callsign		= $sqlRow->user_prev_callsign;
-					$user_date_created		= $sqlRow->user_date_created;
-					$user_date_updated		= $sqlRow->user_date_updated;
-	
-					// get the country codes and country information
-					$countryOptionList			= "";
-					$option1					= "";
-					$countrySQL		= "select * from wpw1_cwa_country_codes 
-										order by country_name";
-					$countryResult	= $wpdb->get_results($countrySQL);
-					if ($countryResult=== FALSE) {
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						$numCRows	= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-						}
-						if ($numCRows > 0) {
-							foreach($countryResult as $countryRow) {
-								$record_id			= $countryRow->record_id;
-								$thisCountryCode	= $countryRow->country_code;
-								$thisCountryName		= $countryRow->country_name;
-								$thisPhCode			= $countryRow->ph_code;
-								
-								if ($user_country_code == $thisCountryCode) {
-									$option1		= "<option value='$thisCountryCode|$thisCountryName|$thisPhCode' selected>$thisCountryName</option>\n";
-								}
-								
-								$countryOptionList	.= "<option value='$thisCountryCode|$thisCountryName|$thisPhCode'>$thisCountryName</option>\n";
-								
-							}
-						}
+			if (count($user_data) > 0) {
+				foreach($user_data as $key => $value) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
 					}
 					$zipRequired	= '';
 					if ($user_country_code == 'US') {
 						$zipRequired	= ' required ';
 					}
-					$content	.= "<form method='post' action='$theURL' 
+					$countrySelect = selectCountry($user_country);
+					if ($countrySelect === FALSE) {
+						$countrySelect = "<input type = 'text' class='formInputText' name='inp_country_code' length='5' 
+										  maxlength = '5' value='$user_country_code' ><br />$user_country";
+					}
+ 					$content	.= "<form method='post' action='$theURL' 
 									name='deletion_form' ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='5'>
 									<input type='hidden' name='inp_call_sign' value='$inp_call_sign'>
-									<input type='hidden' name='inp_id' value='$user_id'>
+									<input type='hidden' name='inp_id' value='$user_ID'>
 									<input class='formInputButton' type='submit' 
 									onclick=\"return confirm('Are you sure?');\"  
 									value='Delete This Record' />
@@ -840,11 +833,12 @@ function display_and_update_user_master_func() {
 									name='selection_form' ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='4'>
 									<input type='hidden' name='inp_call_sign' value='$inp_call_sign'>
+									<input type='hidden' name='inp_id' value='$user_ID'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<table style='width:900px;'>
 									<tr><td>ID</td>
-										<td>$user_id</td></tr>
+										<td>$user_ID</td></tr>
 									<tr><td>Call Sign</td>
 										<td>$user_call_sign</td></tr>
 									<tr><td>First Name</td>
@@ -871,12 +865,9 @@ function display_and_update_user_master_func() {
 									<tr><td>Zip Code</td>
 										<td><input type='text' class='formInputText' name='inp_zip_code' id='inp_zip_code' length='20' 
 										maxlength='20' value='$user_zip_code' ></td></tr>
-									<tr><td>Country</td>
-										<td><select name='inp_country_data' id='chk_country_data' class='formSelect' size='5'>
-											$option1
-											$countryOptionList
-											</select></td></tr>
-									<tr><td>Whatsapp</td>
+									<tr><td  style-'vertical-align:top;'>Country</td>
+										<td>$countrySelect</td></tr>
+									<tr><td>WhatsApp</td>
 										<td><input type='text' class='formInputText' name='inp_whatsapp' length='20' 
 										maxlength='20' value='$user_whatsapp'></td></tr>
 									<tr><td>Telegram</td>
@@ -902,11 +893,11 @@ function display_and_update_user_master_func() {
 						} else {
 							$adminNo		= " checked ";
 						}
-						if ($user_role == 'student') {
+						if ($user_role == 'student' || $user_role == 'Student') {
 							$roleStudent	= " checked ";
-						} elseif ($user_role == 'advisor') {
+						} elseif ($user_role == 'advisor' || $user_role == 'Advisor') {
 							$roleAdvisor	= " checked ";
-						} elseif ($user_role == 'administrator') {
+						} elseif ($user_role == 'administrator' || $user_role == 'Administrator') {
 							$roleAdmin		= " checked ";
 						}
 						$content 	.= "<tr><td>Survey Score</td>
@@ -935,18 +926,16 @@ function display_and_update_user_master_func() {
 				}
 			} else {
 				if ($doDebug) {
-					echo "No record found in $userMasterTableName for $inp_call_sign<br />";
+					echo "No record found in user_master table for $inp_call_sign at id $inp_id<br />";
 				}
-				$content		.= "<p>No record found in $userMasterTableName for $inp_call_sign</p>";
+				$content		.= "<p>No record found in user_master table for $inp_call_sign</p>";
 			}
 		}
-		bypass:
 		
 	} elseif ("4" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 4 with inp_call_sign: $inp_call_sign<br >";
-		}
-		
+			echo "<br />at pass 4 with inp_call_sign: $inp_call_sign and inp_id: $inp_id<br >";
+		}		
 		$doProceed			= TRUE;
 		$content			.= "<h3>Display and Update User $inp_call_sign Master Information</h3>
 								<h4>Updated User Master Data</h4>";
@@ -955,626 +944,499 @@ function display_and_update_user_master_func() {
 		if ($doDebug) {
 			echo "getting the user_master data<br />";
 		}
-		$sql			= "select * from $userMasterTableName 
-							where user_call_sign = '$inp_call_sign'";
-		$sqlResult		= $wpdb->get_results($sql);
-		if ($sqlResult === FALSE) {
-			handleWPDBError($jobname,$doDebug);
-		} else {
-			$numRows	= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and retrieved $numRows rows<br />";
-			}
-			if ($numRows > 0) {
-				foreach($sqlResult as $sqlRow) {
-					$user_id				= $sqlRow->user_ID;
-					$user_call_sign			= $sqlRow->user_call_sign;
-					$user_first_name		= $sqlRow->user_first_name;
-					$user_last_name			= $sqlRow->user_last_name;
-					$user_email				= $sqlRow->user_email;
-					$user_ph_code			= $sqlRow->user_ph_code;
-					$user_phone				= $sqlRow->user_phone;
-					$user_city				= $sqlRow->user_city;
-					$user_state				= $sqlRow->user_state;
-					$user_zip_code			= $sqlRow->user_zip_code;
-					$user_country_code		= $sqlRow->user_country_code;
-					$user_country			= $sqlRow->user_country;
-					$user_whatsapp			= $sqlRow->user_whatsapp;
-					$user_telegram			= $sqlRow->user_telegram;
-					$user_signal			= $sqlRow->user_signal;
-					$user_messenger			= $sqlRow->user_messenger;
-					$user_action_log		= stripslashes($sqlRow->user_action_log);
-					$user_timezone_id		= $sqlRow->user_timezone_id;
-					$user_languages			= $sqlRow->user_languages;
-					$user_survey_score		= $sqlRow->user_survey_score;
-					$user_is_admin			= $sqlRow->user_is_admin;
-					$user_role				= $sqlRow->user_role;
-					$user_prev_callsign		= $sqlRow->user_prev_callsign;
-					$user_date_created		= $sqlRow->user_date_created;
-					$user_date_updated		= $sqlRow->user_date_updated;
-	
-
-					$thisDate = date('dMy H:i');
-					$updateParams	= array();
-					$updateFormat	= array();
-					$updateLog	= " /$thisDate $userName performed the following updates:";
-					$updateContent					= "";
-					$significantChange				= FALSE;
-					$changeZip						= FALSE;
-					$changeCity						= FALSE;
-					$changeCountry					= FALSE;
-					$changeTimezoneID				= FALSE;
+		$user_result = $user_dal->get_user_master_by_id($inp_id,$operatingMode);
+		if (count($user_result) > 0) {
+			foreach($user_result as $key => $value) {
+				foreach($value as $thisField => $thisValue) {
+					$$thisField = $thisValue;
+				}
+				$thisDate = date('dMy H:i');
+				$updateParams	= array();
+				$updateLog	= " /$thisDate $userName performed the following updates:";
+				$updateContent					= "";
+				$significantChange				= FALSE;
+				$changeZip						= FALSE;
+				$changeCity						= FALSE;
+				$changeCountry					= FALSE;
+				$changeTimezoneID				= FALSE;
+				if ($doDebug) {
+					echo "determining what has been changed<br />";
+				}
+				if ($inp_first_name != $user_first_name) {
+					$updateParams['user_first_name']	= $inp_first_name;
+					$updateContent				.= "first_name updated to $inp_first_name<br />";
+					$updateLog					.= " / first_name updated to $inp_first_name";
+				}
+				if ($inp_last_name != $user_last_name) {
+					$updateParams['user_last_name']	= $inp_last_name;
+					$updateContent				.= "last_name updated to $inp_last_name<br />";
+					$updateLog					.= " / last_name updated to $inp_last_name";
+				}
+				if ($inp_email != $user_email) {
+					$updateParams['user_email']	= $inp_email;
+					$updateContent			.= "email updated to $inp_email<br />";
+					$updateLog				.= " / email updated to $inp_email";
+				}
+				if ($inp_phone != $user_phone) {
+					$updateParams['user_phone']	= $inp_phone;
+					$updateContent			.= "phone updated to $inp_phone<br />";
+					$updateLog				.= " / phone updated to $inp_phone";
+				}
+				
+				if ($inp_city != $user_city) {
+					$updateParams['user_city']	= $inp_city;
+					$updateContent			.= "city updated to $inp_city<br />";
+					$updateLog				.= " / city updated to $inp_city";
+					$signifcantChange		= TRUE;
+					$changeCity				= TRUE;
+					$user_city				= $inp_city;
+				}
+				if ($inp_state != $user_state) {
+					$updateParams['user_state']	= $inp_state;
+					$updateContent			.= "state updated to $inp_state<br />";
+					$updateLog				.= " / state updated to $inp_state";
+					$user_state				= $inp_state;
+				}
+				if ($inp_zip_code != $user_zip_code) {
+					$updateParams['user_zip_code']	= $inp_zip_code;
+					$updateContent				.= "zip_code updated to $inp_zip_code<br />";
+					$updateLog					.= " / zip_code updated to $inp_zip_code";
+					$significantChange			= TRUE;
+					$changeZip					= TRUE;
+					$user_zip_code				= $inp_zip_code;
+				}
+				if ($inp_country_code != $user_country_code) {
+					$updateParams['user_country_code']	= $inp_country_code;
+					$updateContent					.= "country_code updated to $inp_country_code<br />";
+					$updateLog						.= " / country_code updated to $inp_country_code";
+					$significantChange				= TRUE;
+					$changeCountry					= TRUE;
+					$user_country_code				= $inp_country_code;
+				}
+				if ($inp_ph_code != $user_ph_code) {
+					$updateParams['user_ph_code']	= $inp_ph_code;
+					$updateContent			.= "ph_code updated to $inp_ph_code<br />";
+					$updateLog				.= " / ph_code updated to $inp_ph_code";
+				}
+				if ($inp_country != $user_country) {
+					$updateParams['user_country']	= $inp_country;
+					$updateContent					.= "country updated to $inp_country<br />";
+					$updateLog						.= " / country updated to $inp_country";
+					$user_country					= $inp_country;
+				}
+				if ($inp_whatsapp != $user_whatsapp) {
+					$updateParams['user_whatsapp']	= $inp_whatsapp;
+					$updateContent				.= "whatsapp updated to $inp_whatsapp<br />";
+					$updateLog					.= " / whatsapp updated to $inp_whatsapp";
+				}
+				if ($inp_telegram != $user_telegram) {
+					$updateParams['user_telegram']	= $inp_telegram;
+					$updateContent				.= "telegram updated to $inp_telegram<br />";
+					$updateLog					.= " / telegram updated to $inp_telegram";
+				}
+				if ($inp_signal != $user_signal) {
+					$updateParams['user_signal']	= $inp_signal;
+					$updateContent			.= "signal updated to $inp_signal<br />";
+					$updateLog				.= " / signal updated to $inp_signal";
+				}				
+				if ($inp_messenger != $user_messenger) {
+					$updateParams['user_messenger']	= $inp_messenger;
+					$updateContent				.= "messenger updated to $inp_messenger<br />";
+					$updateLog					.= " / messenger updated to $inp_messenger";
+				}
+				if ($inp_languages != $user_languages) {
+					$updateParams['user_languages']	= $inp_languages;
+					$updateContent				.= "languages updated to $inp_languages<br />";
+					$updateLog					.= " / languages updated to $inp_languages";
+				}
+				
+				if ($loginRole == 'administrator') {		
+					if ($inp_survey_score != $user_survey_score) {
+						$updateParams['user_survey_score']	= $inp_survey_score;
+						$updateContent				.= "survey_score updated to $inp_survey_score<br />";
+						$updateLog					.= " / survey_score updated to $inp_survey_score";
+					}
+					if ($inp_timezone_id != $user_timezone_id) {
+						$updateParams['user_timezone_id']	= $inp_timezone_id;
+						$updateContent				.= "timezone_id updated to $inp_timezone_id<br />";
+						$updateLog					.= " / timezone_id updated to $inp_timezone_id";
+						$user_timezone_id			= $inp_timezone_id;
+						$changeTimezoneID			= TRUE;
+						if ($significantChange) {
+							$significantChange		= FALSE;
+						}
+					}
+					if ($inp_is_admin != $user_is_admin) {
+						$updateParams['user_is_admin']	= $inp_is_admin;
+						$updateContent				.= "is_admin updated to $inp_is_admin<br />";
+						$updateLog					.= " / is_admin updated to $inp_is_admin";
+					}
+					if ($inp_role != $user_role) {
+						$updateParams['user_role']	= $inp_role;
+						$updateContent				.= "role updated to $inp_role<br />";
+						$updateLog					.= " / role updated to $inp_role";
+					}
+					if ($inp_action_log != $user_action_log) {
+						$updateLog					.= " / Action log was updated";
+						$updateContent				.= "Action log was updated<br />";
+					}
+					if ($inp_prev_callsign != $user_prev_callsign) {
+						$updateParams['user_prev_callsign']	= $inp_prev_callsign;
+						$updateContent				.= "prev_callsign updated to $inp_prev_callsign<br />";
+						$updateLog					.= " / prev_callsign updated to $inp_prev_callsign";
+					}
+					if ($inp_date_created != $user_date_created) {
+						$updateLog					.= " / date_created was updated";
+						$updateContent				.= "date_created was updated<br />";
+						$updateParams['user_date_created']	= $inp_date_created;
+					}
+					
+				} else {
 					if ($doDebug) {
-						echo "determining what has been changed<br />";
+						echo "skipping survey_score, timezone_id, role, prev_callsign, and action_log as user is not an admin<br />"; 
 					}
-					if ($inp_first_name != $user_first_name) {
-						$updateParams['user_first_name']	= $inp_first_name;
-						$updateFormat[]				= "%s";
-						$updateContent				.= "first_name updated to $inp_first_name<br />";
-						$updateLog					.= " / first_name updated to $inp_first_name";
+				}
+				if ($user_timezone_id == '??' || $user_timezone_id == '') {
+					$significantChange	= TRUE;
+					if ($doDebug) {
+						echo "user_timezone_id is ?? or blank. Setting significantChange to TRUE<br />";
 					}
-					if ($inp_last_name != $user_last_name) {
-						$updateParams['user_last_name']	= $inp_last_name;
-						$updateFormat[]			 	= '%s';
-						$updateContent				.= "last_name updated to $inp_last_name<br />";
-						$updateLog					.= " / last_name updated to $inp_last_name";
+				}
+				
+				if ($significantChange) {
+					if ($doDebug) {
+						echo "A significant change has occurred<br />";
 					}
-					if ($inp_email != $user_email) {
-						$updateParams['user_email']	= $inp_email;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "email updated to $inp_email<br />";
-						$updateLog				.= " / email updated to $inp_email";
+					$doSignificantChange			= FALSE;
+					// If US: zip code change is significant. City change is not
+					if ($inp_country_code == 'US' && $changeZip) {
+						$doSignificantChange		= TRUE;
+					} elseif ($inp_country_code == 'CA' && $changeZip) {
+						$doSignificantChange		= TRUE;
+					} else {		/// treat any of the changes as significant
+						$doSignificantChange		= TRUE;
 					}
-					if ($inp_phone != $user_phone) {
-						$updateParams['user_phone']	= $inp_phone;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "phone updated to $inp_phone<br />";
-						$updateLog				.= " / phone updated to $inp_phone";
-					}
-					
-					if ($inp_city != $user_city) {
-						$updateParams['user_city']	= $inp_city;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "city updated to $inp_city<br />";
-						$updateLog				.= " / city updated to $inp_city";
-						$signifcantChange		= TRUE;
-						$changeCity				= TRUE;
-						$user_city				= $inp_city;
-					}
-					if ($inp_state != $user_state) {
-						$updateParams['user_state']	= $inp_state;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "state updated to $inp_state<br />";
-						$updateLog				.= " / state updated to $inp_state";
-						$user_state				= $inp_state;
-					}
-					if ($inp_zip_code != $user_zip_code) {
-						$updateParams['user_zip_code']	= $inp_zip_code;
-						$updateFormat[]				='%s';
-						$updateContent				.= "zip_code updated to $inp_zip_code<br />";
-						$updateLog					.= " / zip_code updated to $inp_zip_code";
-						$significantChange			= TRUE;
-						$changeZip					= TRUE;
-						$user_zip_code				= $inp_zip_code;
-					}
-					if ($inp_country_code != $user_country_code) {
-						$updateParams['user_country_code']	= $inp_country_code;
-						$updateFormat[]					= '%s';
-						$updateContent					.= "country_code updated to $inp_country_code<br />";
-						$updateLog						.= " / country_code updated to $inp_country_code";
-						$significantChange				= TRUE;
-						$changeCountry					= TRUE;
-						$user_country_code				= $inp_country_code;
-/*
-						// get the country name
-						$countrySQL				= "select * from $countryCodesTableName 
-													where country_code = '$user_country_code'";
-						$countrySQLResult		= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$inp_country		= "UNKNOWN";
-							$inp_ph_code		= "";
+					if ($doSignificantChange) {
+						// figure out the timezone_id
+						if ($doDebug) {
+							echo "figuring out the timezone_id<br />";
+						}
+						$doCheck				= TRUE;
+						if ($user_country_code == '') {
+							$user_timezone_id 	= '??';
+							$doCheck			= FALSE;
 						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$inp_country		= $countryRow->country_name;
-									$inp_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$inp_country			= "Unknown";
-								$inp_ph_code			= "";
-							}
-						}
-*/
-					}
-					if ($inp_ph_code != $user_ph_code) {
-						$updateParams['user_ph_code']	= $inp_ph_code;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "ph_code updated to $inp_ph_code<br />";
-						$updateLog				.= " / ph_code updated to $inp_ph_code";
-					}
-					if ($inp_country != $user_country) {
-						$updateParams['user_country']	= $inp_country;
-						$updateFormat[]					= '%s';
-						$updateContent					.= "country updated to $inp_country<br />";
-						$updateLog						.= " / country updated to $inp_country";
-						$user_country					= $inp_country;
-					}
-					if ($inp_whatsapp != $user_whatsapp) {
-						$updateParams['user_whatsapp']	= $inp_whatsapp;
-						$updateFormat[]				= '%s';
-						$updateContent				.= "whatsapp updated to $inp_whatsapp<br />";
-						$updateLog					.= " / whatsapp updated to $inp_whatsapp";
-					}
-					if ($inp_telegram != $user_telegram) {
-						$updateParams['user_telegram']	= $inp_telegram;
-						$updateFormat[]				= '%s';
-						$updateContent				.= "telegram updated to $inp_telegram<br />";
-						$updateLog					.= " / telegram updated to $inp_telegram";
-					}
-					if ($inp_signal != $user_signal) {
-						$updateParams['user_signal']	= $inp_signal;
-						$updateFormat[]			= '%s';
-						$updateContent			.= "signal updated to $inp_signal<br />";
-						$updateLog				.= " / signal updated to $inp_signal";
-					}				
-					if ($inp_messenger != $user_messenger) {
-						$updateParams['user_messenger']	= $inp_messenger;
-						$updateFormat[]				= '%s';
-						$updateContent				.= "messenger updated to $inp_messenger<br />";
-						$updateLog					.= " / messenger updated to $inp_messenger";
-					}
-					if ($inp_languages != $user_languages) {
-						$updateParams['user_languages']	= $inp_languages;
-						$updateFormat[]				= '%s';
-						$updateContent				.= "languages updated to $inp_languages<br />";
-						$updateLog					.= " / languages updated to $inp_languages";
-					}
-					
-					if ($loginRole == 'administrator') {		
-						if ($inp_survey_score != $user_survey_score) {
-							$updateParams['user_survey_score']	= $inp_survey_score;
-							$updateFormat[]				= '%d';
-							$updateContent				.= "survey_score updated to $inp_survey_score<br />";
-							$updateLog					.= " / survey_score updated to $inp_survey_score";
-						}
-						if ($inp_timezone_id != $user_timezone_id) {
-							$updateParams['user_timezone_id']	= $inp_timezone_id;
-							$updateFormat[]				= '%s';
-							$updateContent				.= "timezone_id updated to $inp_timezone_id<br />";
-							$updateLog					.= " / timezone_id updated to $inp_timezone_id";
-							$user_timezone_id			= $inp_timezone_id;
-							$changeTimezoneID			= TRUE;
-							if ($significantChange) {
-								$significantChange		= FALSE;
-							}
-						}
-						if ($inp_is_admin != $user_is_admin) {
-							$updateParams['user_is_admin']	= $inp_is_admin;
-							$updateFormat[]				= '%s';
-							$updateContent				.= "is_admin updated to $inp_is_admin<br />";
-							$updateLog					.= " / is_admin updated to $inp_is_admin";
-						}
-						if ($inp_role != $user_role) {
-							$updateParams['user_role']	= $inp_role;
-							$updateFormat[]				= '%s';
-							$updateContent				.= "role updated to $inp_role<br />";
-							$updateLog					.= " / role updated to $inp_role";
-						}
-						if ($inp_action_log != $user_action_log) {
-							$updateLog					.= " / Action log was updated";
-							$updateContent				.= "Action log was updated<br />";
-						}
-						if ($inp_prev_callsign != $user_prev_callsign) {
-							$updateParams['user_prev_callsign']	= $inp_prev_callsign;
-							$updateFormat[]				= '%s';
-							$updateContent				.= "prev_callsign updated to $inp_prev_callsign<br />";
-							$updateLog					.= " / prev_callsign updated to $inp_prev_callsign";
-						}
-						if ($inp_date_created != $user_date_created) {
-							$updateLog					.= " / date_created was updated";
-							$updateContent				.= "date_created was updated<br />";
-							$updateParams['user_date_created']	= $inp_date_created;
-							$updateFormat[]				= '%s';
-						}
-						
-					} else {
-						if ($doDebug) {
-							echo "skipping survey_score, timezone_id, role, prev_callsign, and action_log as user is not an admin<br />"; 
-						}
-					}
-					if ($user_timezone_id == '??' || $user_timezone_id == '') {
-						$significantChange	= TRUE;
-						if ($doDebug) {
-							echo "user_timezone_id is ?? or blank. Setting significantChange to TRUE<br />";
-						}
-					}
-					
-					if ($significantChange) {
-						if ($doDebug) {
-							echo "A significant change has occurred<br />";
-						}
-						$doSignificantChange			= FALSE;
-						// If US: zip code change is significant. City change is not
-						if ($inp_country_code == 'US' && $changeZip) {
-							$doSignificantChange		= TRUE;
-						} elseif ($inp_country_code == 'CA' && $changeZip) {
-							$doSignificantChange		= TRUE;
-						} else {		/// treat any of the changes as significant
-							$doSignificantChange		= TRUE;
-						}
-						if ($doSignificantChange) {
-							// figure out the timezone_id
-							if ($doDebug) {
-								echo "figuring out the timezone_id<br />";
-							}
-							$doCheck				= TRUE;
-							if ($user_country_code == '') {
-								$user_timezone_id 	= '??';
-								$doCheck			= FALSE;
-							} else {
-								if ($user_zip_code != '') {
-									// check using zip code
-									if ($user_country_code == 'US') {
-										if (strlen($user_zip_code) < 5) {
-											if ($doDebug) {
-												echo "Have invalid US zip code<br />";
-											}
-											$user_zip_code		= '??';
-											$user_timezone_id	= '??';
-											$doCheck		 	= FALSE;
-										} else {
-											$myInt			= strpos($user_zip_code,"-");
-											if ($myInt === FALSE) {
-												$checkStr			= array('zip'=>$user_zip_code,
-																			'country'=>$user_country);
-											} else {
-												$newZip				= substr($user_zip_code,0,$myInt);
-												$checkStr			= array('zip'=>$newZip,
-																			'country'=>$user_country);
-											}
+							if ($user_zip_code != '') {
+								// check using zip code
+								if ($user_country_code == 'US') {
+									if (strlen($user_zip_code) < 5) {
+										if ($doDebug) {
+											echo "Have invalid US zip code<br />";
 										}
+										$user_zip_code		= '??';
+										$user_timezone_id	= '??';
+										$doCheck		 	= FALSE;
 									} else {
-										$checkStr			= array('zip'=>$user_zip_code,
-																	'country'=>$user_country);
+										$myInt			= strpos($user_zip_code,"-");
+										if ($myInt === FALSE) {
+											$checkStr			= array('zip'=>$user_zip_code,
+																		'country'=>$user_country);
+										} else {
+											$newZip				= substr($user_zip_code,0,$myInt);
+											$checkStr			= array('zip'=>$newZip,
+																		'country'=>$user_country);
+										}
 									}
 								} else {
-									if ($user_country_code == 'US') {
-										$user_zip_code 		= '??';
-										$user_timezone_id	= '??';
-										$doCheck			= FALSE;
-										if ($doDebug) {
-											echo "US country code and empty zipcode. Set zipcode to ??<br />";
-										}
-									}
-									// no zipcode. check using address info
-									$checkStr			= array('city'=>$user_city,
-																'state'=>$user_state,
+									$checkStr			= array('zip'=>$user_zip_code,
 																'country'=>$user_country);
 								}
-								if ($doCheck) {
-									$checkStr['doDebug']	= $doDebug;
-									$user_timezone_id		= getTimeZone($checkStr);
-								}
-							}
-							if ($user_timezone_id == '??') {		// unable to get the id
-								if ($doDebug) {
-									echo "timezone_id is ??<br />
-										  user_zip_code: $user_zip_code<br />
-										  user_city: $user_city<br >
-										  user_state: $user_state<br />
-										  $user_zip_code: $user_zip_code<br />
-										  $user_country: $user_country<br />";
-								}
-								$content	.= "<h3>$jobname</h3>
-												<p>The program was not able to determine your 
-												timezone identifier. No updates can be made 
-												until the data is correct and the timezone 
-												identifier can be determined.</p>
-												<p>First, click the 'Back' button and make certain 
-												that the following fields are correct and valid:<br />
-												<ul><li>Country: the value in this field must 
-														be a valid country name
-													<li>Zip / Postal Code: the code must valid 
-														or, if Postal Codes are not used in 
-														$user_country, this field must be empty
-													<li>City: the value in this field must be 
-														a valid city name
-													<li>State / Province: Again, a valid name
-												</ul>
-												<p>If all that information is valid, the please email the 
-													appropriate person at <a href='https://cwops.org/cwa-class-resolution/' 
-													target='_blank'>Contact Information</a>. The process to figure out 
-													a timezone identifier is quite complex and may need to be updated.";
-								goto bypass;
 							} else {
-								$updateParams['user_timezone_id']	= $user_timezone_id;
-								$updateFormat[]						= '%s';
-								$inp_timezone_id					= $user_timezone_id;
-								$changeTimezoneID					= TRUE;
-							}
-						}
-					}
-						
-					// see if the timezone_id has changed
-					if ($changeTimezoneID) {	// it has changed								
-						if ($doDebug) {
-							echo "timezone_id has changed<br >";
-						}
-						if ($user_role == 'student') {
-							if ($doDebug) {
-								echo "timezone has changed. Updating current and future student records<br />";
-							}					
-							// now update the offset in any current or future student records
-							$studentSQL		= "select * from $studentTableName 
-												where student_call_sign = '$inp_call_sign' and 
-												(student_semester = '$currentSemester' or 
-												student_semester = '$nextSemester' or 
-												student_semester = '$semesterTwo' or
-												student_semester = '$semesterThree' or 
-												student_semester = '$semesterFour')";
-							$studentResult	= $wpdb->get_results($studentSQL);
-							if ($studentResult === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								$numSRows	= $wpdb->num_rows;
-								if ($doDebug) {
-									echo "ran $studentSQL<br />and retrieved $numSRows rows<br />";
-								}
-								if ($numSRows > 0) {		// have a record to update
-									foreach($studentResult as $studentRow) {
-										$student_ID								= $studentRow->student_id;
-										$student_call_sign						= strtoupper($studentRow->student_call_sign);
-										$student_time_zone  					= $studentRow->student_time_zone;
-										$student_timezone_offset				= $studentRow->student_timezone_offset;
-										$student_semester						= $studentRow->student_semester;
-										$student_action_log  					= $studentRow->student_action_log;
-			
-										$myArray				= explode(" ",$student_semester);
-										$thisYear				= $myArray[0];
-										$thisMonDay				= $myArray[1];
-										$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
-										$myMonDay				= $myConvertArray[$thisMonDay];
-										$thisNewDate			= "$thisYear$myMonDay 00:00:00";
-										if ($doDebug) {
-											echo "converted $student_semester to $thisNewDate<br />";
-										}
-										$dateTimeZoneLocal 		= new DateTimeZone($inp_timezone_id);
-										$dateTimeZoneUTC 		= new DateTimeZone("UTC");
-										$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
-										$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
-										$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
-										$inp_timezone_offset 	= $php2/3600;
-										
-										$thisDate				= date('dMy H:i');
-										$student_action_log		.= "/ $thisDate $userName $jobname: updated timezone to $inp_timezone_id and offset to $inp_timezone_offset ";
-										
-										$thisUpdateParams		= array('student_time_zone'=>$inp_timezone_id,
-																		'student_timezone_offset'=>$inp_timezone_offset, 
-																		'student_action_log'=>$student_action_log);
-										$studentUpdate			= $wpdb->update($studentTableName, 
-																			$thisUpdateParams,
-																			array('student_id'=>$student_ID),
-																			array('%s','%f','%s'),
-																			array('%d'));
-										if ($studentUpdate === FALSE) {
-											handleWPDBError($jobname,$doDebug);
-										} else {
-											if ($doDebug) {
-												echo "updated timezone to $inp_timezone_id and offset to $inp_timezone_offset for $inp_call_sign<br >";
-											}
-										}
+								if ($user_country_code == 'US') {
+									$user_zip_code 		= '??';
+									$user_timezone_id	= '??';
+									$doCheck			= FALSE;
+									if ($doDebug) {
+										echo "US country code and empty zipcode. Set zipcode to ??<br />";
 									}
 								}
+								// no zipcode. check using address info
+								$checkStr			= array('city'=>$user_city,
+															'state'=>$user_state,
+															'country'=>$user_country);
 							}
-						} elseif ($user_role == 'advisor') {
+							if ($doCheck) {
+								$checkStr['doDebug']	= $doDebug;
+								$user_timezone_id		= getTimeZone($checkStr);
+							}
+						}
+						if ($user_timezone_id == '??') {		// unable to get the id
 							if ($doDebug) {
-								echo "timezone has changed. updating offset in current and future advisorClass records<br />";
+								echo "timezone_id is ??<br />
+									  user_zip_code: $user_zip_code<br />
+									  user_city: $user_city<br >
+									  user_state: $user_state<br />
+									  $user_zip_code: $user_zip_code<br />
+									  $user_country: $user_country<br />";
 							}
-							$sql 		= "select * from $advisorClassTableName 
-											where advisorclass_call_sign = '$inp_call_sign' 
-												and (advisorclass_semester = '$currentSemester' or 
-												advisorclass_semester = '$nextSemester' or 
-												advisorclass_semester = '$semesterTwo' or
-												advisorclass_semester = '$semesterThree' or 
-												advisorclass_semester = '$semesterFour')";
-							$advisorClassResult	= $wpdb->get_results($sql);
-							if ($advisorClassResult === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								$numACRows		= $wpdb->num_rows;
-								if ($doDebug) {
-									echo "ran $sql<br />and retrieved $numACRows rows<br />";
-								}
-								if ($numACRows > 0) {
-									foreach($advisorClassResult as $advisorClassRow) {
-										$advisorClass_id		= $advisorClassRow->advisorclass_id;
-										$advisorClass_semester	= $advisorClassRow->advisorclass_semester;
-										$timezone_offset		= $advisorClassRow->advisorclass_timezone_offset;
-										$advisorClassActionLog	= $advisorClassRow->advisorclass_action_log;
-										
-										if ($doDebug) {
-											echo "have advisorClass_id of $advisorClass_id to update<br />";
-										}
-										$myArray				= explode(" ",$advisorClass_semester);
-										$thisYear				= $myArray[0];
-										$thisMonDay				= $myArray[1];
-										$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
-										$myMonDay				= $myConvertArray[$thisMonDay];
-										$thisNewDate			= "$thisYear$myMonDay 00:00:00";
-										if ($doDebug) {
-											echo "converted $advisorClass_semester to $thisNewDate<br />";
-										}
-										$dateTimeZoneLocal 		= new DateTimeZone($inp_timezone_id);
-										$dateTimeZoneUTC 		= new DateTimeZone("UTC");
-										$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
-										$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
-										$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
-										$inp_timezone_offset 	= $php2/3600;
-
-										$thisDate				= date('dMy H:i');
-
-										$advisorClassActionLog	.= "/ $thisDate $userName $jobname: updated timezone offset to $inp_timezone_offset ";
-										$ACUpdateParams			= array('advisorclass_timezone_offset'=>$inp_timezone_offset, 
-																		'advisorclass_action_log'=>$advisorClassActionLog);
-										$ACUpdateFormat			= array('%f','%s');
-										$ACUpdateResult			= $wpdb->update($advisorClassTableName,
-																				$ACUpdateParams,
-																				array('advisorclass_id'=>$advisorClass_id),
-																				$ACUpdateFormat,
-																				array('%d'));
-										if ($ACUpdateResult === FALSE) {
-											handleWPDBError($jobname,$doDebug);
-										} else {
-											if ($doDebug) {
-												echo "$advisorClass_id id was updated<br />";
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if ($updateLog != '') {		/// have changes to apply
-						if ($doDebug) {
-							echo "<br />updateParams:<br /><pre>";
-							print_r($updateParams);
-							echo "</pre><br />
-								  updateContent: $updateContent<br >
-								  updateLog: $updateLog<br />";
-						}
-
-						$doProceed			= TRUE;
-						// do the update
-						$user_action_log					= $inp_action_log . " / $actionLogDate $userName $jobname $updateLog";
-						$updateParams['user_action_log']	= $user_action_log;
-						$updateFormat[]						= '%s';
-						$userMasterData			= array('tableName'=>$userMasterTableName,
-														'inp_method'=>'update',
-														'inp_data'=>$updateParams,
-														'inp_format'=>$updateFormat,
-														'jobname'=>$jobname,
-														'inp_id'=>$user_id,
-														'inp_callsign'=>$user_call_sign,
-														'inp_who'=>$userName,
-														'testMode'=>$testMode,
-														'doDebug'=>$doDebug);
-						$updateResult	= update_user_master($userMasterData);
-						if ($updateResult[0] === FALSE) {
-							$content			.= "Updating the user_master record for $user_call_sign failed<br />";
-							handleWPDBError($jobname,$doDebug);
-							$doProceed				= FALSE;
+							$content	.= "<h3>$jobname</h3>
+											<p>The program was not able to determine your 
+											timezone identifier. No updates can be made 
+											until the data is correct and the timezone 
+											identifier can be determined.</p>
+											<p>First, click the 'Back' button and make certain 
+											that the following fields are correct and valid:<br />
+											<ul><li>Country: the value in this field must 
+													be a valid country name
+												<li>Zip / Postal Code: the code must valid 
+													or, if Postal Codes are not used in 
+													$user_country, this field must be empty
+												<li>City: the value in this field must be 
+													a valid city name
+												<li>State / Province: Again, a valid name
+											</ul>
+											<p>If all that information is valid, the please email the 
+												appropriate person at <a href='https://cwops.org/cwa-class-resolution/' 
+												target='_blank'>Contact Information</a>. The process to figure out 
+												a timezone identifier is quite complex and may need to be updated.";
+							goto bypass;
 						} else {
-							if ($doDebug) {
-								echo "updating the user master information for $user_call_sign was successful<br />";
-							}
-						}
-					} else {
-						$content		.= "<p>No updates requested</p>";
-						if ($doDebug) {
-							echo "no updates requested<br />";
-						}
-					}
-				}	
-				if ($doProceed) {
-					////// get user_master
-					$sql			= "select * from $userMasterTableName 
-										where user_call_sign = '$inp_call_sign'";
-					$sqlResult		= $wpdb->get_results($sql);
-					if ($sqlResult === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						$numRows	= $wpdb->num_rows;
-						if ($doDebug) {
-							echo "ran $sql<br />and retrieved $numRows rows<br />";
-						}
-						if ($numRows > 0) {
-							foreach($sqlResult as $sqlRow) {
-								$user_id				= $sqlRow->user_ID;
-								$user_call_sign			= $sqlRow->user_call_sign;
-								$user_first_name		= $sqlRow->user_first_name;
-								$user_last_name			= $sqlRow->user_last_name;
-								$user_email				= $sqlRow->user_email;
-								$user_ph_code			= $sqlRow->user_ph_code;
-								$user_phone				= $sqlRow->user_phone;
-								$user_city				= $sqlRow->user_city;
-								$user_state				= $sqlRow->user_state;
-								$user_zip_code			= $sqlRow->user_zip_code;
-								$user_country_code		= $sqlRow->user_country_code;
-								$user_country			= $sqlRow->user_country;
-								$user_whatsapp			= $sqlRow->user_whatsapp;
-								$user_telegram			= $sqlRow->user_telegram;
-								$user_signal			= $sqlRow->user_signal;
-								$user_messenger			= $sqlRow->user_messenger;
-								$user_action_log		= stripslashes($sqlRow->user_action_log);
-								$user_timezone_id		= $sqlRow->user_timezone_id;
-								$user_languages			= $sqlRow->user_languages;
-								$user_survey_score		= $sqlRow->user_survey_score;
-								$user_is_admin			= $sqlRow->user_is_admin;
-								$user_role				= $sqlRow->user_role;
-								$user_prev_callsign		= $sqlRow->user_prev_callsign;
-								$user_date_created		= $sqlRow->user_date_created;
-								$user_date_updated		= $sqlRow->user_date_updated;
-				
-							
-								//// display user_master
-								$myStr			= formatActionLog($user_action_log);
-								$content		.= "<h4>User Master Data</h4>
-													$updateContent
-												<table style='width:900px;'>
-												<tr><td><b>Callsign<br />$user_call_sign</b></td>
-													<td><b>Name</b><br />$user_last_name, $user_first_name</td>
-													<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
-													<td><b>Email</b><br />$user_email</td></tr>
-												<tr><td><b>City</b><br />$user_city</td>
-													<td><b>State</b><br />$user_state</td>
-													<td><b>Zip Code</b><br />$user_zip_code</td>
-													<td><b>Country</b><br />$user_country</td></tr>
-												<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
-													<td><b>Telegram</b><br />$user_telegram</td>
-													<td><b>Signal</b><br />$user_signal</td>
-													<td><b>Messenger</b><br />$user_messenger</td></tr>
-												<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
-													<td><b>Languages</b><br />$user_languages</td>
-													<td><b>Date Created</b><br />$user_date_created</td>
-													<td><b>Date Updated</b><br />$user_date_updated</td></tr>";
-								if ($loginRole == 'administrator') {
-									$content .= "<tr><td><b>Survey Score</b><br />$user_survey_score</td>
-													<td><b>Is Admin</b><br />$user_is_admin</td>
-													<td><b>Role</b><br />$user_role</td>
-													<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
-												<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
-								}
-								$content	.= "</table>
-												<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode' 
-												target='_blank'>HERE</a> to update the advisor Master Data</p>";
-								if ($loginRole == 'administrator') {
-									$content	.= "<p>To List User Master Change History for $user_call_sign click 
-													<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
-													target='_blank'>HERE</a></p>
-													<p>To show a different callsign, click <a href='$theURL'>HERE</a></p>";
-								}
-							}
-						} else {
-							if ($doDebug) {
-								echo "No record found in $userMasterTableName for $inp_call_sign<br />";
-							}
-							$content			.= "<p>No record found in $userMasterTableName for $inp_call_sign</p>";
+							$updateParams['user_timezone_id']	= $user_timezone_id;
+							$inp_timezone_id					= $user_timezone_id;
+							$changeTimezoneID					= TRUE;
 						}
 					}
 				}
-			} else {
-				$content		.= "<p>Unable to obtain the $userMasterTableName record for $inp_call_sign</p>";
+					
+				// see if the timezone_id has changed
+				if ($changeTimezoneID) {	// it has changed								
+					if ($doDebug) {
+						echo "timezone_id has changed<br >";
+					}
+					if ($user_role == 'student') {
+						if ($doDebug) {
+							echo "timezone has changed. Updating current and future student records<br />";
+						}					
+						// now update the offset in any current or future student records
+						$criteria = [
+							'relation' => 'AND',
+							'clauses' => [
+								// field1 = $value1
+								['field' => 'student_call_sign', 'value' => $user_call_sign, 'compare' => '='],
+								
+								// (field2 = $value2 OR field2 = $value3)
+								[
+									'relation' => 'OR',
+									'clauses' => [
+										['field' => 'student_semester', 'value' => $currentSemester, 'compare' => '='],
+										['field' => 'student_semester', 'value' => $nextSemester, 'compare' => '='],
+										['field' => 'student_semester', 'value' => $semesterTwo, 'compare' => '='],
+										['field' => 'student_semester', 'value' => $semesterThree, 'compare' => '='],
+										['field' => 'student_semester', 'value' => $semesterFour, 'compare' => '=']
+									]
+								]
+							]
+						];
+						$student_data = $student_dal->get_student($criteria, 'student_call_sign', 'ASC', $operatingMode);
+						if (count($student_data) > 0) {
+							foreach($student_data as $key=>$value) {
+								foreach($value as $thisField => $thisValue) {
+									$thisField .= "_fix";
+									$$thisField = $thisValue;
+								}
+								$myArray				= explode(" ",$student_semester_fix);
+								$thisYear				= $myArray[0];
+								$thisMonDay				= $myArray[1];
+								$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
+								$myMonDay				= $myConvertArray[$thisMonDay];
+								$thisNewDate			= "$thisYear$myMonDay 00:00:00";
+								if ($doDebug) {
+									echo "converted $student_semester_fix to $thisNewDate<br />";
+								}
+								$dateTimeZoneLocal 		= new DateTimeZone($inp_timezone_id);
+								$dateTimeZoneUTC 		= new DateTimeZone("UTC");
+								$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
+								$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
+								$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
+								$inp_timezone_offset 	= $php2/3600;
+								
+								$thisDate				= date('dMy H:i');
+								$student_action_log		.= "/ $thisDate $userName $jobname: updated timezone to $inp_timezone_id and offset to $inp_timezone_offset ";
+								
+								$thisUpdateParams		= array('student_time_zone'=>$inp_timezone_id,
+																'student_timezone_offset'=>$inp_timezone_offset, 
+																'student_action_log'=>$student_action_log);
+								$updateResult = $student_dal->update($student_id_fix, $thisUpdateParams, $operatingMode);
+								if ($updateResult === FALSE) {
+									$content .= "Failed to update TZ info for $student_call_sign_fix at id $student_id_fix<br />";
+								} else {
+									if ($doDebug) {
+										echo "updated timezone to $inp_timezone_id and offset to $inp_timezone_offset for $inp_call_sign at id $student_id_fix<br >";
+									}
+								}
+							}
+						}
+					} elseif ($user_role == 'advisor') {
+						if ($doDebug) {
+							echo "timezone has changed. updating offset in current and future advisorClass records<br />";
+						}
+						$criteria = [
+							'relation' => 'AND',
+							'clauses' => [
+								// field1 = $value1
+								['field' => 'advisorclass_call_sign', 'value' => $user_call_sign, 'compare' => '='],
+								
+								// (field2 = $value2 OR field2 = $value3)
+								[
+									'relation' => 'OR',
+									'clauses' => [
+										['field' => 'advisorclass_semester', 'value' => $currentSemester, 'compare' => '='],
+										['field' => 'advisorclass_semester', 'value' => $nextSemester, 'compare' => '='],
+										['field' => 'advisorclass_semester', 'value' => $semesterTwo, 'compare' => '='],
+										['field' => 'advisorclass_semester', 'value' => $semesterThree, 'compare' => '='],
+										['field' => 'advisorclass_semester', 'value' => $semesterFour, 'compare' => '=']
+									]
+								]
+							]
+						];
+						$advisorClassResult = $advisorclass_dal->get_advisorclasses($criteria,$operatingMode);
+						if (count($advisorClassResult) > 0) {
+							foreach($advisorClassResult as $key => $value) {
+								foreach($value as $thisField=>$thisValue) {
+									$thisField .= "_fix";
+									$$thisField = $thisValue;
+									if ($doDebug) {
+										echo "set $thisField to $thisValue<br />";
+									}
+								}
+								if ($doDebug) {
+									echo "have advisorclass_id of $advisorclass_id_fix to update<br />";
+								}
+								$myArray				= explode(" ",$advisorclass_semester_fix);
+								$thisYear				= $myArray[0];
+								$thisMonDay				= $myArray[1];
+								$myConvertArray			= array('Jan/Feb'=>'-01-01','May/Jun'=>'-05-01','Sep/Oct'=>'-09-01');
+								$myMonDay				= $myConvertArray[$thisMonDay];
+								$thisNewDate			= "$thisYear$myMonDay 00:00:00";
+								if ($doDebug) {
+									echo "converted $advisorclass_semester_fix to $thisNewDate<br />";
+								}
+								$dateTimeZoneLocal 		= new DateTimeZone($inp_timezone_id);
+								$dateTimeZoneUTC 		= new DateTimeZone("UTC");
+								$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
+								$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
+								$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
+								$inp_timezone_offset 	= $php2/3600;
+
+								$thisDate				= date('dMy H:i');
+
+								$advisorclass_action_log_fix	.= "/ $thisDate $userName $jobname: updated timezone offset to $inp_timezone_offset ";
+								$ACUpdateParams			= array('advisorclass_timezone_offset'=>$inp_timezone_offset, 
+																'advisorclass_action_log'=>$advisorclass_action_log_fix);
+
+								$ACUpdateResult = $advisorclass_dal->update($advisorclass_id_fix,$ACUpdateParams,$operatingMode);
+								if ($ACUpdateResult === FALSE) {
+									$content .= "Attempting to update the advisorclass record for $user_call_sign returned FALSE<br />";
+								} else {
+									if ($doDebug) {
+										echo "$advisorclass_id_fix id was updated<br />";
+									}
+								}
+							}
+						}
+					}
+				}
+
+				if ($updateLog != '') {		/// have changes to apply
+					if ($doDebug) {
+						echo "<br />updateParams:<br /><pre>";
+						print_r($updateParams);
+						echo "</pre><br />
+							  updateContent: $updateContent<br >
+							  updateLog: $updateLog<br />";
+					}
+
+					$doProceed			= TRUE;
+					// do the update
+					$user_action_log					= $inp_action_log . " / $actionLogDate $userName $jobname $updateLog";
+					$updateParams['user_action_log']	= $user_action_log;
+					$updateResult = $user_dal->update($user_ID,$updateParams,$operatingMode);
+					if ($updateResult === FALSE) {
+						$content			.= "Updating the user_master record for $user_call_sign failed<br />";
+						$doProceed				= FALSE;
+					} else {
+						if ($doDebug) {
+							echo "updating the user master information for $user_call_sign was successful<br />";
+						}
+					}
+				} else {
+					$content		.= "<p>No updates requested</p>";
+					if ($doDebug) {
+						echo "no updates requested<br />";
+					}
+				}
+				if ($doProceed) {
+					////// get user_master
+					$getResult		= $user_dal->get_user_master_by_id($user_ID,$operatingMode);
+					if ($getResult === FALSE) {
+						$content .= "Attempting to redisplay $user_ID returned FALSE<br />";
+					} else {
+						foreach($getResult as $key => $value) {
+							foreach($value as $thisField => $thisValue) {
+								$$thisField = $thisValue;
+							}
+							//// display user_master
+							$myStr			= formatActionLog($user_action_log);
+							$content		.= "<h4>User Master Data</h4>
+												$updateContent
+											<table style='width:900px;'>
+											<tr><td><b>Callsign<br />$user_call_sign</b></td>
+												<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+												<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+												<td><b>Email</b><br />$user_email</td></tr>
+											<tr><td><b>City</b><br />$user_city</td>
+												<td><b>State</b><br />$user_state</td>
+												<td><b>Zip Code</b><br />$user_zip_code</td>
+												<td><b>Country</b><br />$user_country</td></tr>
+											<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+												<td><b>Telegram</b><br />$user_telegram</td>
+												<td><b>Signal</b><br />$user_signal</td>
+												<td><b>Messenger</b><br />$user_messenger</td></tr>
+											<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
+												<td><b>Languages</b><br />$user_languages</td>
+												<td><b>Date Created</b><br />$user_date_created</td>
+												<td><b>Date Updated</b><br />$user_date_updated</td></tr>";
+							if ($loginRole == 'administrator') {
+								$content .= "<tr><td><b>Survey Score</b><br />$user_survey_score</td>
+												<td><b>Is Admin</b><br />$user_is_admin</td>
+												<td><b>Role</b><br />$user_role</td>
+												<td><b>Prev Callsign</b><br />$user_prev_callsign</td>
+											<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
+							}
+							$content	.= "</table>
+											<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode' 
+											target='_blank'>HERE</a> to update the advisor Master Data</p>";
+							if ($loginRole == 'administrator') {
+								$content	.= "<p>To List User Master Change History for $user_call_sign click 
+												<a href='$siteURL/cwa-list-user-master-callsign-history/?strpass=2&inp_callsign=$user_call_sign' 
+												target='_blank'>HERE</a></p>
+												<p>To show a different callsign, click <a href='$theURL'>HERE</a></p>";
+							}
+						}
+					}
+				} else {
+					if ($doDebug) {
+						echo "No record found in $userMasterTableName for $inp_call_sign<br />";
+					}
+					$content			.= "<p>No record found in $userMasterTableName for $inp_call_sign</p>";
+				}
 			}
+		} else {
+			$content		.= "<p>Unable to obtain the $userMasterTableName record for $inp_call_sign</p>";
 		}
-		
+		bypass:
 //////////// Pass 5 ... delete the record		
-		
-		
+			
 	} elseif ("5" == $strPass) {
 		if ($doDebug) {
 			echo "<br />arrived at pass 5 to delete $inp_call_sign at $inp_id id record<br />";
@@ -1584,70 +1446,23 @@ function display_and_update_user_master_func() {
 							<h4>Deleting the User Master Record</h4>";
 
 		// get the user_master record
-		$sql			= "select * from $userMasterTableName 
-							where user_id = '$inp_id'";
-		$sqlResult		= $wpdb->get_results($sql);
-		if ($sqlResult === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$getResult = $user_dal->get_user_master_by_id($inp_id,$operatingMode);
+		if ($getResult === FALSE) {
+			$content .= "Attempting to retrieve record id $user_ID returned FALSE<br />";
 		} else {
-			$numRows	= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and retrieved $numRows rows<br />";
-			}
-			if ($numRows > 0) {
-				foreach($sqlResult as $sqlRow) {
-					$user_id				= $sqlRow->user_ID;
-					$user_call_sign			= $sqlRow->user_call_sign;
-					$user_first_name		= $sqlRow->user_first_name;
-					$user_last_name			= $sqlRow->user_last_name;
-					$user_email				= $sqlRow->user_email;
-					$user_ph_code			= $sqlRow->user_ph_code;
-					$user_phone				= $sqlRow->user_phone;
-					$user_city				= $sqlRow->user_city;
-					$user_state				= $sqlRow->user_state;
- 					$user_zip_code			= $sqlRow->user_zip_code;
-					$user_country_code		= $sqlRow->user_country_code;
-					$user_country			= $sqlRow->user_country;
-					$user_whatsapp			= $sqlRow->user_whatsapp;
-					$user_telegram			= $sqlRow->user_telegram;
-					$user_signal			= $sqlRow->user_signal;
-					$user_messenger			= $sqlRow->user_messenger;
-					$user_action_log		= stripslashes($sqlRow->user_action_log);
-					$user_timezone_id		= $sqlRow->user_timezone_id;
-					$user_languages			= $sqlRow->user_languages;
-					$user_survey_score		= $sqlRow->user_survey_score;
-					$user_is_admin			= $sqlRow->user_is_admin;
-					$user_role				= $sqlRow->user_role;
-					$user_prev_callsign		= $sqlRow->user_prev_callsign;
-					$user_date_created		= $sqlRow->user_date_created;
-					$user_date_updated		= $sqlRow->user_date_updated;
-
-					if ($doDebug) {
-						echo "we have a user_master record that can be deleted<br />";
-					}
-					$userMasterData			= array('tableName'=>$userMasterTableName,
-													'inp_method'=>'delete',
-													'inp_data'=>array(),
-													'inp_format'=>array(),
-													'jobname'=>$jobname,
-													'inp_id'=>$user_id,
-													'inp_callsign'=>$user_call_sign,
-													'inp_who'=>$userName,
-													'testMode'=>$testMode,
-													'doDebug'=>$doDebug);
-					$updateResult	= update_user_master($userMasterData);
-					if ($updateResult[0] === FALSE) {
-						$content			.= "The attempt to delete user master record for $inp_call_sign at $inp_id idfailed<br />";
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						$content		.= "The user master record id $inp_id for $inp_call_sign has been deleted<br />";
-					}
+			foreach($getResult as $key=>$value) {
+				foreach($value as $thisField => $thisValue) {
+					$$thisField = $thisValue;
 				}
-			} else {
 				if ($doDebug) {
-					echo "No record found in $userMasterTableName for $inp_id<br />";
+					echo "we have a user_master record that can be deleted<br />";
 				}
-				$content			.= "<p>No record found in $userMasterTableName for $inp_id</p>";
+				$deleteResult = $user_dal->delete($inp_id,$operatingMode);
+				if ($deleteResult === FALSE) {
+					$content			.= "The attempt to delete user master record for $inp_call_sign at $inp_id failed<br />";
+				} else {
+					$content		.= "The user master record id $inp_id for $inp_call_sign has been deleted<br />";
+				}
 			}
 		}
 	}
