@@ -30,6 +30,7 @@ function generic_updater_func() {
 
 	$strPass					= "1";
 	$theURL						= "$siteURL/cwa-generic-updater/";
+	$jobname					= "Generic Updater";
 
 // get the input information
 	if (isset($_REQUEST)) {
