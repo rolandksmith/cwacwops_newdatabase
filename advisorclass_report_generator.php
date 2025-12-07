@@ -1,11 +1,5 @@
 function advisorclass_report_generator_func() {
 
-/*
-
-	created 7Oct24 by Roland
-
-*/
-
 	global $wpdb;
 
 	$doDebug						= FALSE;
@@ -95,6 +89,7 @@ function advisorclass_report_generator_func() {
     $advisorclass_semester = '';
     $advisorclass_timezone_offset = '';
     $advisorclass_level = '';
+    $advisorclass_language = '';
     $advisorclass_class_size = '';
     $advisorclass_class_schedule_days = '';
     $advisorclass_class_schedule_times = '';
@@ -183,6 +178,7 @@ function advisorclass_report_generator_func() {
     $advisorclass_semester_checked = '';
     $advisorclass_timezone_offset_checked = '';
     $advisorclass_level_checked = '';
+    $advisorclass_language_checked = '';
     $advisorclass_class_size_checked = '';
     $advisorclass_class_schedule_days_checked = '';
     $advisorclass_class_schedule_times_checked = '';
@@ -571,6 +567,13 @@ function advisorclass_report_generator_func() {
                 $reportConfig['advisorclass_level_checked'] = 'X';
                 if ($doDebug) {
                     echo "advisorclass_level included in report<br />";
+                }
+            }
+            if ($str_key == 'advisorclass_language') {
+                $advisorclass_language_checked = 'X';
+                $reportConfig['advisorclass_language_checked'] = 'X';
+                if ($doDebug) {
+                    echo "advisorclass_language included in report<br />";
                 }
             }
             if ($str_key == 'advisorclass_class_size') {
@@ -1212,6 +1215,10 @@ function advisorclass_report_generator_func() {
                                     name='advisorclass_level' value='advisorclass_level'>
                                     <label for 'advisorclass_level'>advisorclass_level</label></td>
                                 <td>advisorclass_level</td></tr>
+                            <tr><td><input type='checkbox' class='formInputButton' id='advisorclass_language' 
+                                    name='advisorclass_language' value='advisorclass_language'>
+                                    <label for 'advisorclass_language'>advisorclass_language</label></td>
+                                <td>advisorclass_language</td></tr>
                             <tr><td><input type='checkbox' class='formInputButton' id='advisorclass_class_size' 
                                     name='advisorclass_class_size' value='advisorclass_class_size'>
                                     <label for 'advisorclass_class_size'>advisorclass_class_size</label></td>
@@ -1486,6 +1493,7 @@ function advisorclass_report_generator_func() {
         $nameConversionArray['advisorclass_semester'] = 'advisorclass<br />semester';
         $nameConversionArray['advisorclass_timezone_offset'] = 'advisorclass<br />timezone_offset';
         $nameConversionArray['advisorclass_level'] = 'advisorclass<br />level';
+        $nameConversionArray['advisorclass_language'] = 'advisorclass<br />language';
         $nameConversionArray['advisorclass_class_size'] = 'advisorclass<br />class_size';
         $nameConversionArray['advisorclass_class_schedule_days'] = 'advisorclass<br />class_schedule_days';
         $nameConversionArray['advisorclass_class_schedule_times'] = 'advisorclass<br />class_schedule_times';
@@ -1796,6 +1804,10 @@ where rg_report_name = '$inp_report_name'";
            }
             if ($advisorclass_level_checked == 'X') {
                 $headerName = $nameConversionArray['advisorclass_level'];
+                $content .= "<th>$headerName</th>";
+           }
+            if ($advisorclass_language_checked == 'X') {
+                $headerName = $nameConversionArray['advisorclass_language'];
                 $content .= "<th>$headerName</th>";
            }
             if ($advisorclass_class_size_checked == 'X') {
@@ -2365,6 +2377,15 @@ where rg_report_name = '$inp_report_name'";
                 $content .= $headerName;
                 $needComma = TRUE;
             }
+            if ($advisorclass_language_checked == 'X') {
+                if ($needComma) {
+                    $content .= '	';
+                }
+                $headerName = $nameConversionArray['advisorclass_language'];
+                $headerName = str_replace('<br />','_',$headerName);
+                $content .= $headerName;
+                $needComma = TRUE;
+            }
             if ($advisorclass_class_size_checked == 'X') {
                 if ($needComma) {
                     $content .= '	';
@@ -2808,6 +2829,7 @@ where rg_report_name = '$inp_report_name'";
 					$advisorclass_semester					= $advisorClassRow->advisorclass_semester;
 					$advisorclass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;
 					$advisorclass_level						= $advisorClassRow->advisorclass_level;
+					$advisorclass_language					= $advisorClassRow->advisorclass_language;
 					$advisorclass_class_size				= $advisorClassRow->advisorclass_class_size;
 					$advisorclass_class_schedule_days		= $advisorClassRow->advisorclass_class_schedule_days;
 					$advisorclass_class_schedule_times		= $advisorClassRow->advisorclass_class_schedule_times;
@@ -2988,6 +3010,9 @@ where rg_report_name = '$inp_report_name'";
                          }
                         if ($advisorclass_level_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$advisorclass_level</td>";
+                         }
+                        if ($advisorclass_language_checked == 'X') {
+                            $content .= "<td style='vertical-align:top'>$advisorclass_language</td>";
                          }
                         if ($advisorclass_class_size_checked == 'X') {
                             $content .= "<td style='vertical-align:top'>$advisorclass_class_size</td>";
@@ -3420,6 +3445,13 @@ where rg_report_name = '$inp_report_name'";
                                 $content .= '	';
                             }
                             $content .= $advisorclass_level;
+                            $needComma = TRUE;
+                        }
+                        if ($advisorclass_language_checked == 'X') {
+                            if ($needComma) {
+                                $content .= '	';
+                            }
+                            $content .= $advisorclass_language;
                             $needComma = TRUE;
                         }
                         if ($advisorclass_class_size_checked == 'X') {
