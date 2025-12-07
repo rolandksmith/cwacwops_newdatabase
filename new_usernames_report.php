@@ -58,7 +58,7 @@ function new_usernames_report_func(){
 	
 	$theURL					= "$siteURL/cwa-new-usernames-report/";
 	$studentUpdateURL		= "$siteURL/cwa-display-and-update-student-signup-information/";	
-	$advisorUpdateURL		= "$siteURL/cwa-display-and-update-advisor-signup-information/";
+	$advisorUpdateURL		= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$userMasterUpdateURL	= "$siteURL/cwa-display-and-update-user-master-information/";	
 	$jobname				= "New UserNames Report V$versionNumber";
 	$advisorTableName		= "wpw1_cwa_advisor";
@@ -244,7 +244,18 @@ function new_usernames_report_func(){
 	if ($runTheJob) {
 /////// real start
 
+		if ($testMode) {
+			$usersTableName = 'wpw1_users2';
+			$operatingMode = 'Testmode';
+		} else {
+			$usersTableName = 'wpw1_users';
+			$operatingMode = 'Production';
+		}
+
 		require_once( ABSPATH . 'wp-admin/includes/user.php' );
+		$user_dal = new CWA_User_Master_DAL();
+		$advisor_dal = new CWA_Advisor_DAL();
+		$student_dal = new CWA_Student_DAL();
 
 		// get all registrations
 		$sql				= "SELECT id, 
@@ -364,52 +375,63 @@ function new_usernames_report_func(){
 							// does the user have a user_master record? 
 							$hasUserMaster				= FALSE;
 							// if not, display and go onto the next login record
-							$sql						= "select count(user_call_sign) 
-															from wpw1_cwa_user_master 
-															where user_call_sign like '$user_uppercase'";
-							$masterCount				= $wpdb->get_var($sql);
-							$debugData					.= "running $sql returned $masterCount records<br />";
-							if ($masterCount == NULL || $masterCount == 0) {
-								// no user_master record. So, no signup record
-								$allUsersArray[$user_uppercase]['hasError']	= 'Y';
-								$allUsersArray[$user_uppercase]['theError']	.= 'No user_master record<br />';
-								$debugData				.= "running $sql returned either NULL or no record<br />";
-								$noUserMasterCount++;
+							$userMasterResult = $user_dal->get_user_master_by_callsign($user_uppercase,$operatingMode);
+							if ($userMasterResult === NULL) {
+								if ($doDebug) {
+									$debugData .= "attempting to retrieve user_master for $user_uppercase returned NULL<br />";
+								}
+								error_log("New Username Report ERROR Attempting to retrieve user_master for $user_uppercase returned NULL");
+								$doProceed = FALSE;
 							} else {
-								$allUsersArray[$user_uppercase]['hasUserMaster']	= 'Y';
-								$allUsersArray[$user_uppercase]['theError']	.= 'Has a user_master record<br />';
-								$hasUserMaster			= TRUE;
-							}
-								
+								if (empty($userMasterResult)) {		/// no record
+									// no user_master record. So, no signup record
+									$allUsersArray[$user_uppercase]['hasError']	= 'Y';
+									$allUsersArray[$user_uppercase]['theError']	.= 'No user_master record<br />';
+									$debugData .= "getting user_master for $user_uppercase returned no record<br />";
+									$noUserMasterCount++;
+									$doProceed = FALSE;
+								} else {
+									$allUsersArray[$user_uppercase]['hasUserMaster']	= 'Y';
+									$allUsersArray[$user_uppercase]['theError']	.= 'Has a user_master record<br />';
+									$hasUserMaster			= TRUE;
+								}
+							}	
 							if ($doProceed) {
 								// see if the user_login has a signup record
 								$registration				= '';
 								if ($user_role == 'student') {
 									$student_level	= '';
 									$student_semester = '';
-									$studentSQL		= "select * from $studentTableName 
-														where student_call_sign like '$user_uppercase'
-														order by student_date_created DESC 
-														limit 1";
-									$studentResult	= $wpdb->get_results($studentSQL);
-									if ($studentResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
-										$debugData	.= "ran $studentSQL and the result was FALSE<br />";
-										$doProceed	= FALSE;
+									$criteria = [
+										'relation' => 'AND',
+										'clauses' => [
+											['field' => 'student_call_sign', 'value' => $user_uppercase, 'compare' => '=' ]
+										]
+									];
+									$orderby = 'student_date_created';
+									$order = 'DESC';
+									$studentData = $student_dal->get_student($criteria, $orderby, $order, $operatingMode);
+									if ($studentData === FALSE) {
+										if ($doDebug) {
+											$debugData .= "attempting to get studentData for $user_uppercase returned FALSE<br />";
+										}
 									} else {
-										$numSRows	= $wpdb->num_rows;
-										$debugData	.= "ran $studentSQL and retrieved $numSRows rows of data<br />";
-										if ($numSRows > 0) {
-											foreach($studentResult as $studentResultRow) {
-												$student_semester	= $studentResultRow->student_semester;
-												$student_level		= $studentResultRow->student_level;
-											
+										$gotStudentData = FALSE;
+										if (! empty($studentData)) {
+											foreach($studentData as $key => $value) {
+												foreach($value as $thisField => $thisValue) {
+													$$thisField = $thisValue;
+												}
+												$gotStudentData = TRUE;
+												break;
+											}
+										}
+										if ($gotStudentData) {
 												$registration		= "signed up for $student_level in $student_semester";
 												$registrationRecord	= TRUE;
 												$allUsersArray[$user_uppercase]['hasSignup']	= 'Y';
 												$debugData .= "$user_login has a student signup record<br />";
 												$allUsersArray[$user_uppercase]['theError']	.= 'Has a student signup record<br />';
-											}
 										} else {
 												$allUsersArray[$user_uppercase]['theError']	.= "No student signup record<br />";
 												$allUsersArray[$user_uppercase]['hasError']	= "Y";
@@ -417,29 +439,32 @@ function new_usernames_report_func(){
 										}
 									}
 								} elseif ($user_role == 'advisor') {
-									$advisorSQL		= "select * from $advisorTableName 
-													where advisor_call_sign like '$user_uppercase'
-													order by advisor_date_created DESC 
-													limit 1";
-									$advisorResult	= $wpdb->get_results($advisorSQL);
+									// get the latest advisor record
+									$criteria = [
+										'relation' => 'AND',
+										'clauses' => [
+											['field' => 'advisor_call_sign', 'value' => $user_uppercase, 'compare' => '=' ]
+										]
+									];
+									$advisorResult = $advisor_dal->get_advisor_by_order($criteria,'advisor_date_created','DESC',$operatingMode);
 									if ($advisorResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
-										$debugData	.= "ran 4advisorSQL which returned FALSE<br />";
-										$doProceed	= FALSE;
-										
+										if ($doDebug) {
+											echo "getting advisor record for $user_uppercase returned FALSE<br />";
+										}
+										$doProceed = FALSE;
 									} else {
-										$numARows	= $wpdb->num_rows;
-										$debugData	.= "ran $advisorSQL which yielded $numARows rows of data<br />";
-										if ($numARows > 0) {
-											foreach($advisorResult as $advisorResultRow) {
-												$advisor_semester	= $advisorResultRow->advisor_semester;
-							
-												$registration				= "signed up $advisor_semester";
-												$registrationRecord		= TRUE;
-												$allUsersArray[$user_uppercase]['hasSignup']	= 'Y';
-												$debugData .= "$user_login has an advisor signup record<br /><br />";
-												$allUsersArray[$user_uppercase]['theError']	.= 'Has an advisor signup record<br />';
+										if (! empty ($advisorResult)) {
+											foreach($advisorResult as $key => $value) {
+												foreach($value as $thisField => $thisValue) {
+													$$thisField = $thisValue;
+												}
+												break;
 											}
+											$registration = "signed up $advisor_semester";
+											$registrationRecord		= TRUE;
+											$allUsersArray[$user_uppercase]['hasSignup']	= 'Y';
+											$debugData .= "$user_login has an advisor signup record<br /><br />";
+											$allUsersArray[$user_uppercase]['theError']	.= 'Has an advisor signup record<br />';
 										} else {
 											$allUsersArray[$user_uppercase]['theError']	.= "No advisor signup<br />";
 											$allUsersArray[$user_uppercase]['hasError']	= "Y";
@@ -459,7 +484,7 @@ function new_usernames_report_func(){
 									$thisStr			= '';
 									if ($verifiedUser) {
 										if ($user_role == 'advisor') {
-											$update			= "<a href='https://cwa.cwops.org/cwa-display-and-update-advisor-signup-information/?request_type=callsign&request_info=$user_uppercase&inp_table=advisor&strpass=2&inp_depth=one7inp_verbose=N' target='_blank'>$user_login</a>'";
+											$update			= "<a href='https://cwa.cwops.org/cwa-display-and-update-advisor-signup-information/?request_type=callsign&request_info=$user_uppercase&inp_table=advisor&strpass=2&inp_depth=one7inp_verbose=N' target='_blank'>$user_login</a>";
 										} elseif ($user_role == 'student') {
 											$update			= "<a href='https://cwa.cwops.org/cwa-display-and-update-student-signup-information/?request_type=callsign&request_info=$user_uppercase&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$user_login</a>";
 										} else {
