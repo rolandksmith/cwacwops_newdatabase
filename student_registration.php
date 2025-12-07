@@ -1,11 +1,5 @@
 function student_registration_func() {
 
-/*
-
-		
-*/
-    
-
 	global $wpdb,$doDebug,$testMode,$demoMode,$inp_verbose,$daysToGo;
 
 	$doDebug						= FALSE;
@@ -14,7 +8,7 @@ function student_registration_func() {
 	$doAssessment					= FALSE;
 	$maintenanceMode				= FALSE;
 	$verifyMode						= FALSE;
-	$versionNumber					= '13';
+	$versionNumber					= '14a';
 	$skipAssessment					= FALSE;
 	
 	$daysToGo						= 0;
@@ -123,14 +117,14 @@ function student_registration_func() {
 	$lastLevel							= "";
 		$thisAction						= ''; 	// |UPDATE(ADD)
 		$student_call_sign				= ''; 
-		$student_first_name				= ''; 
-		$student_last_name				= ''; 
-		$student_email					= ''; 
-		$student_phone					= ''; 
-		$student_city					= ''; 
-		$student_state					= ''; 
-		$student_zip_code				= ''; 
-		$student_country				= ''; 
+		$user_first_name				= ''; 
+		$user_last_name				= ''; 
+		$user_email					= ''; 
+		$user_phone					= ''; 
+		$user_city					= ''; 
+		$user_state					= ''; 
+		$user_zip_code				= ''; 
+		$user_country				= ''; 
 		$student_time_zone				= ''; 
 		$student_level					= ''; 
 		$student_class_language			= '';
@@ -142,13 +136,13 @@ function student_registration_func() {
 		$student_first_class_choice		= ''; 
 		$student_second_class_choice	= ''; 
 		$student_third_class_choice		= ''; 
-		$student_ID						= ''; 
+		$student_id						= ''; 
 		
 		$student_waiting_list				= '';
 		$student_request_date			= '';
 		$student_notes					= '';
-		$student_email_sent_date		= '';
-		$student_email_number			= '';
+		$user_email_sent_date		= '';
+		$user_email_number			= '';
 		$student_response				= '';
 		$student_response_date			= '';
 		$student_abandoned 		= '';
@@ -288,6 +282,7 @@ function student_registration_func() {
 	$haveInpSemester		= FALSE;
 	$haveStudentData		= FALSE;
 	$haveStudentID			= FALSE;
+	$allowSignup			= FALSE;
 
 // get the input information
 	if (isset($_REQUEST)) {
@@ -851,12 +846,14 @@ function student_registration_func() {
 					echo "set inp_times3 to $inp_times3<br />";
 				}
 			}
-			if ($str_key == 'student_ID') {
-				$student_ID = $str_value;
-				$student_ID = filter_var($student_ID,FILTER_UNSAFE_RAW);
-				$haveStudentID	= TRUE;
+			if ($str_key == 'student_id') {
+				$student_id = $str_value;
+				$student_id = filter_var($student_id,FILTER_UNSAFE_RAW);
+				if ($student_id != '') {
+					$haveStudentID	= TRUE;
+				}
 				if ($doDebug) {
-					echo "set student_ID to $student_ID<br />";
+					echo "set student_id to $student_id<br />";
 				}
 			}
 			if ($str_key == 'inp_bypass') {
@@ -1049,6 +1046,7 @@ function student_registration_func() {
 		$studentDeletedTableName	= 'wpw1_cwa_deleted_student2';
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
 		$catalogMode				= 'TestMode';
+		$operatingMode				= 'Testmode';
 	} elseif ($demoMode) {
 		$content					.= "<p>Operating in <b>Demonstration Mode</b>.</p>";
 		$studentTableName			= 'wpw1_cwa_student3';
@@ -1058,6 +1056,7 @@ function student_registration_func() {
 		$studentDeletedTableName	= 'wpw1_cwa_deleted_student2';
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
 		$catalogMode				= 'TestMode';
+		$operatingMode				= 'Testmode';
 	} else {
 		$studentTableName			= 'wpw1_cwa_student';
 		$oldAssessmentTableName		= "wpw1_cwa_audio_assessment";
@@ -1066,6 +1065,7 @@ function student_registration_func() {
 		$studentDeletedTableName	= 'wpw1_cwa_deleted_student';
 		$userMasterTableName		= 'wpw1_cwa_user_master';
 		$catalogMode				= 'Production';
+		$operatingMode				= 'Production';
 	}
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
@@ -1079,230 +1079,356 @@ function student_registration_func() {
 			$testModeOption	= '';
 		}
 
+	$student_dal = new CWA_Student_DAL();
+	$user_dal = new CWA_User_Master_DAL();
+	$advisor_dal = new CWA_Advisor_DAL();
+
+
 
 	// get the student info
 	$haveStudentData			= FALSE;
 	$haveMasterData				= FALSE;
 	$badTimezoneID				= FALSE;
+
+
+	
+	if ($doDebug) {
+		echo "<br />Get the Student Info Truth<br />
+				student_id: $student_id<br />";
+		if ($haveStudentID) {
+			echo "haveStudentID is TRUE<br />";
+		} else {
+			echo "haveStudentID is FALSE<br />";
+		}
+		echo "inp_callsign: $inp_callsign<br />";
+		if ($haveInpCallsign) {
+			echo "haveInpCallsign is TRUE<br />";
+		} else {
+			echo "haveInpCallsign is FALSE<br />";
+		}
+		echo "inp_semester: $inp_semester<br />";
+		if ($haveInpSemester) {
+			echo "haveInpSemester is TRUE<br />";
+		} else {
+			echo "haveInpSemester is FALSE<br />";
+		}
+		if ($haveMasterData) {
+			echo "haveMasterData is TRUE<br />";
+		} else {
+			echo "haveMasterData is FALSE<br />"; 
+		}
+		if ($allowSignup) {
+			echo "allowSignup is TRUE<br />";
+		} else {
+			echo "allowSignup is FALSE<br /><br />";
+		}
+	}
 	
 	// if haveStudentID that takes precedence
 	if ($haveStudentID) {
-		$sql			= "select * from $studentTableName 
-							left join $userMasterTableName on user_call_sign = student_call_sign 
-							where student_id = $student_ID";
-	} else {	
+		// get the student information and then get the user_master data using the student_call_sign
+		$student_data = $student_dal->get_student_by_id($student_id,$operatingMode);
+		if ($student_data !== NULL) {
+			foreach($student_data as $key => $value) {
+				$$key = $value;
+			}
+			$haveStudentData = TRUE;
+			if ($doDebug) {
+				echo "setting haveStudentData to TRUE<br />";
+			}
+			// now get the user_master
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_call_sign', 
+						'value'   => $student_call_sign, 
+						'compare' => '=' 
+					]
+				]
+			];
+			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
+			if ($user_data !== FALSE) {
+				foreach($user_data as $key => $value) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveMasterData = TRUE;
+					if ($doDebug) {
+						echo "setting haveMasterData to TRUE<br />";
+					}
+				}
+			}
+		}
+	} else {
+		if ($haveInpCallsign) {
+			// get the user_master data based on $inp_callsign
+			if ($doDebug) {
+				echo "getting user_master based on $inp_callsign<br />";
+			}
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_call_sign', 
+						'value'   => $inp_callsign, 
+						'compare' => '=' 
+					]
+				]
+			];
+			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
+			if ($user_data !== FALSE) {
+				foreach($user_data as $key => $value) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveMasterData = TRUE;
+					if ($doDebug) {
+						echo "setting haveMasterData to TRUE<br />";
+					}
+				}
+			}
+		} else {
+			// get the user master based on the userName
+			if ($doDebug) {
+				echo "getting the user-master based on userName $userName<br />";
+			}
+			$myStr = strtoupper($userName);
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					[ 
+						'field'   => 'user_call_sign', 
+						'value'   => $myStr, 
+						'compare' => '=' 
+					]
+				]
+			];
+			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
+			if ($user_data !== FALSE) {
+				foreach($user_data as $key => $value) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveMasterData = TRUE;
+					if ($doDebug) {
+						echo "setting haveMasterData to TRUE<br />";
+					}
+				}
+			}
+			
+		}
 		if ($haveInpCallsign && $haveInpSemester && !$haveStudentID) {
 			if ($doDebug) {
 				echo "haveInpCallsign and haveInpSemester<br />";
 			}
-			$sql 	= "select* from $studentTableName 
-						left join $userMasterTableName on user_call_sign = student_call_sign 
-						where student_call_sign = '$inp_callsign' 
-						and student_semester = '$inp_semester'";
-		} elseif ($haveInpCallsign && $allowSignup && !$haveStudentID) {
-			if ($doDebug) {
-				echo "haveInpCallsign and allowSignup<br />";
+			
+			// now get the student information
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '='],
+					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '=']
+				]
+			];
+			$orderby = 'student_call_sign';
+			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			if ($student_data !== FALSE) {
+				foreach($student_data as $key => $vaue) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveStudentData = TRUE;
+					if ($doDebug) {
+						echo "setting haveStudentData to TRUE<br />";
+					}
+				}
 			}
-			$sql 	= "select * from $studentTableName 
-						left join $userMasterTableName on user_call_sign = student_call_sign 
-						where student_call_sign = '$inp_callsign' 
-						and (student_semester = '$nextSemester' 
-							 or student_semester = '$semesterTwo' 
-							 or student_semester = '$semesterThree' 
-							 or student_semester = '$semesterFour')";
+		} elseif ($haveInpCallsign && $allowSignup && !$haveStudentID) {
+			
+			// now get the student information
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					// field1 = $value1
+					['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '='],
+					
+					// (field2 = $value2 OR field2 = $value3)
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_semester', 'value' => $currentSemester, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $nextSemester, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterTwo, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterThree, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterFour, 'compare' => '=']
+						]
+					]
+				]
+			];
+			$orderby = 'student_call_sign';
+			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			if ($student_data !== FALSE) {
+				foreach($student_data as $key => $vaue) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveStudentData = TRUE;
+					if ($doDebug) {
+						echo "setting haveStudentData to TRUE<br />";
+					}
+				}
+			}
 		} elseif ($haveInpCallsign && !$allowSignup && !$haveStudentID) {
 			if ($doDebug) {
 				echo "haveInpCallsign but not allowSignup<br />";
 			}
-			$sql 	= "select* from $studentTableName 
-						left join $userMasterTableName on user_call_sign = student_call_sign 
-						where student_call_sign = '$inp_callsign' 
-						and (student_semester = '$currentSemester' 
-							 or student_semester = '$nextSemester' 
-							 or student_semester = '$semesterTwo' 
-							 or student_semester = '$semesterThree' 
-							 or student_semester = '$semesterFour')";
-	
-		} elseif (!$haveInpCallsign && !$haveInpSemester && !$allowSignup && !$haveStudentID) {
-			if ($doDebug) {
-				echo "none of haveInpCallsign, haveInpSemester, allowSignup, $haveStudentID<br />";
-			}
-			$myStr	= strtoupper($userName);
-			$sql 	= "select* from $studentTableName 
-						left join $userMasterTableName on user_call_sign = student_call_sign 
-						where student_call_sign = '$myStr' 
-						and (student_semester = '$currentSemester' 
-							 or student_semester = '$nextSemester' 
-							 or student_semester = '$semesterTwo' 
-							 or student_semester = '$semesterThree' 
-							 or student_semester = '$semesterFour')";
-		} elseif (!$haveInpCallsign && !$haveStudentID && $allowSignup) {
-			$myStr	= strtoupper($userName);
-			$sql 	= "select * from $studentTableName 
-						left join $userMasterTableName on user_call_sign = student_call_sign 
-						where student_call_sign = '$myStr' 
-						and (student_semester = '$nextSemester' 
-							 or student_semester = '$semesterTwo' 
-							 or student_semester = '$semesterThree' 
-							 or student_semester = '$semesterFour')";
-		
-		}
-	}
-//	if ($doDebug) {
-//		echo "running $sql<br />";
-//	}
-	$wpw1_cwa_student	= $wpdb->get_results($sql);
-	if ($wpw1_cwa_student === FALSE) {
-		handleWPDBError($jobname,$doDebug);
-	} else {
-		$numSRows					= $wpdb->num_rows;
-		if ($doDebug) {
-			echo "ran $sql<br />and retrieved $numSRows rows from $studentTableName table<br >";
-		}
-		if ($numSRows > 0) {
-			$haveStudentData		= TRUE;
-			$haveMasterData			= TRUE;
-			foreach ($wpw1_cwa_student as $studentRow) {
-				$student_master_ID 					= $studentRow->user_ID;
-				$student_master_call_sign 			= $studentRow->user_call_sign;
-				$student_first_name 				= $studentRow->user_first_name;
-				$student_last_name 					= $studentRow->user_last_name;
-				$student_email 						= $studentRow->user_email;
-				$student_ph_code					= $studentRow->user_ph_code;
-				$student_phone 						= $studentRow->user_phone;
-				$student_city 						= $studentRow->user_city;
-				$student_state 						= $studentRow->user_state;
-				$student_zip_code 					= $studentRow->user_zip_code;
-				$student_country_code 				= $studentRow->user_country_code;
-				$student_country 					= $studentRow->user_country;
-				$student_whatsapp 					= $studentRow->user_whatsapp;
-				$student_telegram 					= $studentRow->user_telegram;
-				$student_signal 					= $studentRow->user_signal;
-				$student_messenger 					= $studentRow->user_messenger;
-				$student_master_action_log 			= $studentRow->user_action_log;
-				$student_timezone_id 				= $studentRow->user_timezone_id;
-				$student_languages 					= $studentRow->user_languages;
-				$student_survey_score 				= $studentRow->user_survey_score;
-				$student_is_admin					= $studentRow->user_is_admin;
-				$student_role 						= $studentRow->user_role;
-				$student_prev_callsign				= $studentRow->user_prev_callsign;
-				$student_master_date_created 		= $studentRow->user_date_created;
-				$student_master_date_updated 		= $studentRow->user_date_updated;
-
-				$student_ID								= $studentRow->student_id;
-				$student_call_sign						= $studentRow->student_call_sign;
-				$student_time_zone  					= $studentRow->student_time_zone;
-				$student_timezone_offset				= $studentRow->student_timezone_offset;
-				$student_youth  						= $studentRow->student_youth;
-				$student_age  							= $studentRow->student_age;
-				$student_parent 						= $studentRow->student_parent;
-				$student_parent_email  					= strtolower($studentRow->student_parent_email);
-				$student_level  						= $studentRow->student_level;
-				$student_class_language					= $studentRow->student_class_language;
-				$student_waiting_list 					= $studentRow->student_waiting_list;
-				$student_request_date  					= $studentRow->student_request_date;
-				$student_semester						= $studentRow->student_semester;
-				$student_notes  						= $studentRow->student_notes;
-				$student_welcome_date  					= $studentRow->student_welcome_date;
-				$student_email_sent_date  				= $studentRow->student_email_sent_date;
-				$student_email_number  					= $studentRow->student_email_number;
-				$student_response  						= strtoupper($studentRow->student_response);
-				$student_response_date  				= $studentRow->student_response_date;
-				$student_abandoned  					= $studentRow->student_abandoned;
-				$student_status  						= strtoupper($studentRow->student_status);
-				$student_action_log  					= $studentRow->student_action_log;
-				$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-				$student_selected_date  				= $studentRow->student_selected_date;
-				$student_no_catalog  					= $studentRow->student_no_catalog;
-				$student_hold_override  				= $studentRow->student_hold_override;
-				$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-				$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-				$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-				$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-				$student_class_priority  				= $studentRow->student_class_priority;
-				$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-				$student_promotable  					= $studentRow->student_promotable;
-				$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-				$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-				$student_available_class_days  			= $studentRow->student_available_class_days;
-				$student_intervention_required  		= $studentRow->student_intervention_required;
-				$student_copy_control  					= $studentRow->student_copy_control;
-				$student_first_class_choice  			= $studentRow->student_first_class_choice;
-				$student_second_class_choice  			= $studentRow->student_second_class_choice;
-				$student_third_class_choice  			= $studentRow->student_third_class_choice;
-				$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-				$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-				$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-				$student_catalog_options				= $studentRow->student_catalog_options;
-				$student_flexible						= $studentRow->student_flexible;
-				$student_date_created 					= $studentRow->student_date_created;
-				$student_date_updated			  		= $studentRow->student_date_updated;
-
-				if ($student_timezone_id == '') {
-					if ($doDebug) {
-						echo "$student_call_sign has empty timezone ID. Set badTimezoneID to TRUE<br />
-							  zipcode: $student_zip_code<br />
-							  country code: $student_country_code<br />";
-					}
-					$badTimezoneID		= TRUE;
-				}
-			}
-		} else {
-			if ($doDebug) {
-				echo "no record found in $studentTableName for either $inp_callsign or $userName. Getting user_master<br />";
-			}
-			
-			/// get the user master record
-			if ($haveInpCallsign) {
-				$myStr			= $inp_callsign;
-			} else {
-				$myStr			= strtoupper($userName);
-			}
-			$sql				= "select * from $userMasterTableName 
-									where user_call_sign = '$myStr'";
-			$sqlResult		= $wpdb->get_results($sql);
-			if ($sqlResult === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numRows	= $wpdb->num_rows;
-				if ($doDebug) {
-					echo "ran $sql<br />and retrieved $numRows rows<br />";
-				}
-				if ($numRows > 0) {
-					foreach($sqlResult as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_ph_code					= $studentRow->user_ph_code;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_country 					= $studentRow->user_country;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_prev_callsign				= $studentRow->user_prev_callsign;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
+			// now get the student information
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					// field1 = $value1
+					['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '='],
 					
-						$haveMasterData			= TRUE;
-						if ($student_timezone_id == '') {
-							$badTimezoneID		= TRUE;
+					// (field2 = $value2 OR field2 = $value3)
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_semester', 'value' => $nextSemester, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterTwo, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterThree, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterFour, 'compare' => '=']
+						]
+					]
+				]
+			];
+			$orderby = 'student_call_sign';
+			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			if ($student_data !== FALSE) {
+				$myInt = count($student_data);
+				if ($myInt > 0) {
+					if ($doDebug) {
+						echo "have $myInt student_data records<br />";
+					}
+					foreach($student_data as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+							if ($doDebug) {
+								echo "set $thisField to $thisValue<br />";
+							}
+						}
+						$haveStudentData = TRUE;
+						if ($doDebug) {
+							echo "setting haveStudentData to TRUE<br />";
 						}
 					}
+				} else {
+					if ($doDebug) {
+						echo "No data found<br />";
+					}
+				}  
+			}
+		} elseif (!$haveInpCallsign && !$haveInpSemester && !$allowSignup && !$haveStudentID) {
+			if ($doDebug) {
+				echo "none of haveInpCallsign, haveInpSemester, allowSignup, haveStudentID<br />";
+			}
+			$myStr	= strtoupper($userName);
+			// get the student information
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					// field1 = $value1
+					['field' => 'student_call_sign', 'value' => $myStr, 'compare' => '='],
+					
+					// (field2 = $value2 OR field2 = $value3)
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_semester', 'value' => $nextSemester, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterTwo, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterThree, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterFour, 'compare' => '=']
+						]
+					]
+				]
+			];
+			$orderby = 'student_call_sign';
+			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			if ($student_data !== FALSE) {
+				if (! empty($student_data)) {
+					foreach($student_data as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
+						}
+						$haveStudentData = TRUE;
+						if ($doDebug) {
+							echo "setting haveStudentData to TRUE<br />";
+						}
+					}
+				} else {
+					if ($doDebug) {
+						echo "get_student returned an empty dataset<br />";
+					}
+				}
+			} else {
+				if ($doDebug) {
+					echo "get_student returned FALSE<br />";
 				}
 			}
+		} elseif (!$haveInpCallsign && !$haveStudentID && $allowSignup) {
+			$myStr	= strtoupper($userName);
+			// get the student information
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					// field1 = $value1
+					['field' => 'student_call_sign', 'value' => $myStr, 'compare' => '='],
+					
+					// (field2 = $value2 OR field2 = $value3)
+					[
+						'relation' => 'OR',
+						'clauses' => [
+							['field' => 'student_semester', 'value' => $nextSemester, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterTwo, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterThree, 'compare' => '='],
+							['field' => 'student_semester', 'value' => $semesterFour, 'compare' => '=']
+						]
+					]
+				]
+			];
+			$orderby = 'student_call_sign';
+			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			if ($student_data !== FALSE) {
+				foreach($student_data as $key => $vaue) {
+					foreach($value as $thisField => $thisValue) {
+						$$thisField = $thisValue;
+					}
+					$haveStudentData = TRUE;
+					if ($doDebug) {
+						echo "setting haveStudentData to TRUE<br />";
+					}
+				}
+			}
+		}
+	}
+	if ($haveStudentData) {
+		if ($student_time_zone == '') {
+			if ($doDebug) {
+				echo "$student_call_sign has empty time_zone. Set badTimezoneID to TRUE<br />
+					  zipcode: $user_zip_code<br />
+					  country code: $user_country_code<br />";
+			}
+			$badTimezoneID		= TRUE;
+		}
+		if ($doDebug) {
+			echo "haveStudentData is set to TRUE<br />
+					student_semester: $student_semester<br /><br />";
+		}
+	}
+	if ($haveMasterData) {
+		if ($doDebug) {
+			echo "haveMasterData is set to TRUE<br />
+			master callsign: $user_call_sign<br />";
 		}
 	}
 
@@ -1355,9 +1481,9 @@ function student_registration_func() {
 						if ($doDebug) {
 							echo "haveStudentData is TRUE<br />";
 						}
-						$thisSemester				= $studentRow->student_semester;
-						$thisPromotable				= $studentRow->student_promotable;
-						$thisStudentStatus			= $studentRow->student_status;
+						$thisSemester				= $student_semester;
+						$thisPromotable				= $student_promotable;
+						$thisStudentStatus			= $student_status;
 						
 						if ($doDebug) {
 							echo "<br />thisSemester: $thisSemester<br />
@@ -1402,6 +1528,7 @@ function student_registration_func() {
 					if ($gotCurrentSemester === FALSE && $gotPromotable === FALSE && $gotFutureSemester === FALSE) {
 						$showSignup			= TRUE;
 						$showAll			= FALSE;
+						$allowSignup		= TRUE;
 	
 					} elseif ($gotCurrentSemester === FALSE && $gotPromotable === FALSE && $gotFutureSemester === TRUE) {
 						$showSignup			= FALSE;
@@ -1459,7 +1586,7 @@ function student_registration_func() {
 				}
 				
 				$goOn						= TRUE;
-				if ($student_timezone_id == '??') {
+				if ($user_timezone_id == '??') {
 					$timezoneMsg	= "<p><b>IMPORTANT!</b> The timezone information in your master record needs to 
 										be updated. Please go to 
 										<a href='$siteURL/cwa-display-and-update-user-master-information/'>
@@ -1488,21 +1615,21 @@ function student_registration_func() {
 									increase your CW skills, speed, and activity!</p>
 									<h4>Advisor Master Data</h4>
 									<table style='width:900px;'>
-									<tr><td><b>Callsign<br />$student_master_call_sign</b></td>
-										<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-										<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-										<td><b>Email</b><br />$student_email</td></tr>
-									<tr><td><b>City</b><br />$student_city</td>
-										<td><b>State</b><br />$student_state</td>
-										<td><b>Zip Code</b><br />$student_zip_code</td>
-										<td><b>Country</b><br />$student_country</td></tr>
-									<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-										<td><b>Telegram</b><br />$student_telegram</td>
-										<td><b>Signal</b><br />$student_signal</td>
-										<td><b>Messenger</b><br />$student_messenger</td></tr>
-									<tr><td><b>Timezone ID</b><br />$student_timezone_id</td>
-										<td><b>Date Created</b><br />$student_master_date_created</td>
-										<td><b>Date Updated</b><br />$student_master_date_updated</td>
+									<tr><td><b>Callsign<br />$user_call_sign</b></td>
+										<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+										<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+										<td><b>Email</b><br />$user_email</td></tr>
+									<tr><td><b>City</b><br />$user_city</td>
+										<td><b>State</b><br />$user_state</td>
+										<td><b>Zip Code</b><br />$user_zip_code</td>
+										<td><b>Country</b><br />$user_country</td></tr>
+									<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+										<td><b>Telegram</b><br />$user_telegram</td>
+										<td><b>Signal</b><br />$user_signal</td>
+										<td><b>Messenger</b><br />$user_messenger</td></tr>
+									<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
+										<td><b>Date Created</b><br />$user_date_created</td>
+										<td><b>Date Updated</b><br />$user_date_created</td>
 										<td></td></tr></table>
 									$timezoneMsg";
 				if ($goOn) {										
@@ -1558,9 +1685,9 @@ function student_registration_func() {
 	} elseif ("2" == $strPass) {
 		if ($doDebug) {
 			if ($haveStudentData) {
-				echo "haveStudentData is TRUE<br />";
+				echo "<br />haveStudentData is TRUE<br />";
 			} else {
-				echo "haveStudentData is FALSE<br />";
+				echo "<br />haveStudentData is FALSE<br />";
 			}
 			if ($haveMasterData) {
 				echo "haveMasterData is TRUE<br />";
@@ -1609,7 +1736,7 @@ function student_registration_func() {
 	N			N				N				error		
 */		
 		
-		if 		 ($allowSignup && $haveStudentData && $haveInpSemester) {
+		if ($allowSignup && $haveStudentData && $haveInpSemester) {
 			$noRecord		= FALSE;
 			$foundARecord	= TRUE;
 		} elseif ($allowSignup && $haveStudentData && !$haveInpSemester) {
@@ -1636,16 +1763,13 @@ function student_registration_func() {
 			$doProceed		= FALSE;
 		}
 		
-		
-		
-		
 		// Look up the student to determine if a record already exists
 		// if so, do the update process. Otherwise, do the new student (maybe)
 
 		if ($haveStudentData) {
 					
 			if ($doDebug) {
-				echo "country code: $student_country_code; country: $student_country<br />";
+				echo "country code: $user_country_code; country: $user_country<br />";
 			}
 			$noRecord									= FALSE;
 			$foundARecord								= TRUE;
@@ -1667,9 +1791,9 @@ function student_registration_func() {
 				$student_third_class_choice_utc		= 'None';
 			}
 
-			if ($student_youth == 'Yes') {
+			if ($student_youth == 'Yes' || $student_youth == 'Y') {
 				$youthYesChecked	= "checked='checked'";
-			} elseif ($student_youth == 'No') {
+			} elseif ($student_youth == 'No' || $student_youth == 'N') {
 				$youthNoChecked		= "checked='checked'";
 			}
 
@@ -1692,7 +1816,7 @@ function student_registration_func() {
 		
 			$daysToGo			= days_to_semester($student_semester);
 			if ($doDebug) {
-				echo "daysToGo calculated to be $daysToGo<br />";
+				echo "daysToGo calculated to be $daysToGo to $student_semester<br />";
 			}
 		
 			$currentSemester_checked 	= '';
@@ -1880,24 +2004,24 @@ function student_registration_func() {
 										<input type='hidden' name='inp_verify' value='$inp_verify'>
 										<input type='hidden' name='token' value='$token'>
 										<input type='hidden' name='inp_class_language' value='$inp_class_language'>
-										<input type='hidden' name='student_ID' value='$student_ID'>
+										<input type='hidden' name='student_id' value='$student_id'>
 										$extraHidden
 										$deleteMsg											
 										<h4>Student Master Data</h4>
 										<table style='width:900px;'>
 										<table style='width:900px;'>
 										<tr><td><b>Callsign<br />$userName</b></td>
-											<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-											<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-											<td><b>Email</b><br />$student_email</td></tr>
-										<tr><td><b>City</b><br />$student_city</td>
-											<td><b>State</b><br />$student_state</td>
-											<td><b>Zip Code</b><br />$student_zip_code</td>
-											<td><b>Country</b><br />$student_country</td></tr>
-										<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-											<td><b>Telegram</b><br />$student_telegram</td>
-											<td><b>Signal</b><br />$student_signal</td>
-											<td><b>Messenger</b><br />$student_messenger</td></tr>
+											<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+											<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+											<td><b>Email</b><br />$user_email</td></tr>
+										<tr><td><b>City</b><br />$user_city</td>
+											<td><b>State</b><br />$user_state</td>
+											<td><b>Zip Code</b><br />$user_zip_code</td>
+											<td><b>Country</b><br />$user_country</td></tr>
+										<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+											<td><b>Telegram</b><br />$user_telegram</td>
+											<td><b>Signal</b><br />$user_signal</td>
+											<td><b>Messenger</b><br />$user_messenger</td></tr>
 									<tr><td colspan='4'><hr></td></tr>
 									<tr><td colspan='4'><h4>You Can Make Class Sign-up Changes Here:</h4></td></tr>											
 									$firstLine
@@ -1983,10 +2107,11 @@ function student_registration_func() {
 								<input type='hidden' name='inp_callsign' value='$inp_callsign'>
 								<input type='hidden' name='inp_semester' value='$inp_semester'>
 								<input type='hidden' name='inp_level' value='$inp_level'>
+								<input type='hidden' name='allowSignup' value='$allowSignup'>
 								<input type='hidden' name='inp_class_language' value='$inp_class_language'>
 								<input type='hidden' name='token' value='$token'>
 								<input type='hidden' id='browser_timezone_id' name='browser_timezone_id' value='$browser_timezone_id' />
-								<input type='hidden' name='student_id' value='$student_ID'>
+								<input type='hidden' name='student_id' value='$student_id'>
 								<h4>Student Master Data</h4><p>
 								<table style='width:1000px;'>											
 								<tr><td style='vertical-align:top;'>
@@ -2034,9 +2159,9 @@ function student_registration_func() {
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
 			echo "<br />Arrived at pass 3<br />
-				  inp_callsign = $inp_callsign<br />
-				  inp_semester = $inp_semester<br />
-				  inp_level = $inp_level<br/><br />";
+				  inp_callsign: $inp_callsign<br />
+				  inp_semester: $inp_semester<br />
+				  inp_level: $inp_level<br/><br />";
 		}
 		$content	.= "<h3>$jobname</h3>
 						<h4>Step 4 of 4 Steps</h4>";
@@ -2078,14 +2203,14 @@ function student_registration_func() {
 		if ($doDebug) {
 			echo "converted $inp_semester to $thisNewDate<br />";
 		}
-		$dateTimeZoneLocal 		= new DateTimeZone($student_timezone_id);
+		$dateTimeZoneLocal 		= new DateTimeZone($user_timezone_id);
 		$dateTimeZoneUTC 		= new DateTimeZone("UTC");
 		$dateTimeLocal 			= new DateTime($thisNewDate,$dateTimeZoneLocal);
 		$dateTimeUTC			= new DateTime($thisNewDate,$dateTimeZoneUTC);
 		$php2 					= $dateTimeZoneLocal->getOffset($dateTimeUTC);
 		$inp_timezone_offset 	= $php2/3600;
 		if ($doDebug) {
-			echo "used timezone_id of $student_timezone_id to calculate offset of $inp_timezone_offset<br />";
+			echo "used timezone_id of $user_timezone_id to calculate offset of $inp_timezone_offset<br />";
 		}
 
 		$inp_action_log		= "STDREG $currentDateTime $inp_callsign sign-up record prepared ";
@@ -2154,7 +2279,7 @@ function student_registration_func() {
 			}
 
 			$student_call_sign			= $inp_callsign;
-			 $student_time_zone			= $student_timezone_id;
+			 $student_time_zone			= $user_timezone_id;
 			 $student_timezone_offset	= $inp_timezone_offset;
 			 $student_youth				= $inp_youth;
 			 $student_age				= $inp_age;
@@ -2162,36 +2287,35 @@ function student_registration_func() {
 			 $student_parent_email		= $inp_student_parent_email;
 			 $student_waiting_list		= $inp_waiting_list;
 			 $student_level				= $inp_level;
+			 $student_class_language	= $inp_class_language;
 			 $student_semester			= $inp_semester;
 			 $student_request_date		= $nowDate;
 			 $student_action_log		= $inp_action_log;
 			 $student_class_language	= $inp_class_language;
 	
 
-			$insertParams		= array('student_call_sign'=>$inp_callsign,
-										 'student_time_zone'=>$student_timezone_id,
-										 'student_timezone_offset'=>$inp_timezone_offset,
-										 'student_youth'=>$inp_youth,
-										 'student_age'=>$inp_age,
-										 'student_parent'=>$inp_student_parent,
-										 'student_parent_email'=>$inp_student_parent_email,
-										 'student_waiting_list'=>$inp_waiting_list,
-										 'student_level'=>$inp_level,
-										 'student_semester'=>$inp_semester,
+			$insertParams		= array('student_call_sign'=>$student_call_sign,
+										 'student_time_zone'=>$user_timezone_id,
+										 'student_timezone_offset'=>$student_timezone_offset,
+										 'student_youth'=>$student_youth,
+										 'student_age'=>$student_age,
+										 'student_parent'=>$student_student_parent,
+										 'student_parent_email'=>$student_parent_email,
+										 'student_waiting_list'=>$student_waiting_list,
+										 'student_level'=>$student_level,
+										 'student_class_language'=>$student_class_language,
+										 'student_semester'=>$student_semester,
 										 'student_request_date'=>$nowDate,
-										 'student_action_log'=>$inp_action_log, 
-										 'student_class_language'=>$inp_class_language);
-			$insertFormat		= array('%s','%s','%f','%s','%s','%s','%s','%s','%s',
-										  '%s','%s','%s','%s');
+										 'student_action_log'=>$student_action_log);
 										  
-			$insertData			= array('params'=>$insertParams,'format'=>$insertFormat);
-			$insertDataJson		= json_encode($insertData);
+			$insertDataJson		= json_encode($insertParams);
 	
 
 
 			/// get the catalog information and display it
 			$inp_data			= array('student_semester'=>$student_semester, 
 										'student_level'=>$student_level, 
+										'student_class_language'=>$student_class_language,
 										'student_no_catalog'=>'', 
 										'student_catalog_options'=>'',
 										'student_flexible'=>'',  
@@ -2330,10 +2454,8 @@ function student_registration_func() {
 		}
 
 		$insertDataJson1 	= stripslashes($insertDataJson);
-		$jsonArray 			= json_decode($insertDataJson1,TRUE);		
+		$updateParams		= json_decode($insertDataJson1,TRUE);		
 		
-		$updateParams		= $jsonArray['params'];
-		$updateFormat		= $jsonArray['format'];
 		$doUpdateStudent	= FALSE;
 		$actionLogUpdates	= "";
 		$badActorResult		= FALSE;
@@ -2341,10 +2463,8 @@ function student_registration_func() {
 		if ($result_option == 'option') {
 			$student_no_catalog						= 'Y';
 			$updateParams['student_no_catalog']		= 'Y';
-			$updateFormat[]							= '%s';
 			$student_abandoned						= 'N';
 			$updateParams['student_abandoned']		= 'N';
-			$updateFormat[]							= '%s';
 			$actionLogUpdates						.= "Set no_catalog to Y, Set abandoned to N, ";
 			$actionLogUpdates						.= "Set abandoned to N ";
 			$doUpdateStudent						= TRUE;
@@ -2365,13 +2485,11 @@ function student_registration_func() {
 			if ($inp_flex == 'ANY') {
 				$student_flexible				= 'Y';
 				$updateParams['student_flexible']	= 'Y';
-				$updateFormat[]					= '%s';
 				$actionLogUpdates				.= "Set flexible to Y, ";
 				$doUpdateStudent				= TRUE;
 				$student_catalog_options		= "";
 			}
 			$updateParams['student_catalog_options']	= $student_catalog_options;
-			$updateFormat[]								= '%s';
 			$actionLogUpdates					.= "set catalog_options to $student_catalog_options, ";
 			$doUpdateStudent					= TRUE;
 		} elseif ($result_option == 'catalog' || $result_option == 'avail') {
@@ -2383,7 +2501,6 @@ function student_registration_func() {
 			}
 			$student_no_catalog 				= 'N';
 			$updateParams['student_no_catalog']	= 'N';
-			$updateFormat[]						= '%s';
 			$student_abandoned					= 'N';
 			$updateParams['student_abandoned']	= 'N';
 			$updateFormat[]						= '%s';
@@ -2391,7 +2508,6 @@ function student_registration_func() {
 			$actionLogUpdates					.= "Set abandoned to N ";
 			if ($result_option == 'avail') {
 				$updateParams['student_waiting_list']					= 'Y';
-				$updateFormat[]											= '%s';
 				$actionLogUpdates										.= "Set waiting_list to Y ";
 				$student_waiting_list									= 'Y';
 			}
@@ -2401,9 +2517,7 @@ function student_registration_func() {
 				$student_first_class_choice						= $myArray[0];
 				$student_first_class_choice_utc					= $myArray[1];
 				$updateParams['student_first_class_choice']		= $student_first_class_choice;
-				$updateFormat[]									= '%s';
 				$updateParams['student_first_class_choice_utc']	= $student_first_class_choice_utc;
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set first_class_choices, ";
 				$firstChoice									= $student_first_class_choice;
@@ -2412,9 +2526,7 @@ function student_registration_func() {
 				$student_first_class_choice						= "None";
 				$student_first_class_choice_utc					= "None";
 				$updateParams['student_first_class_choice']		= 'None';
-				$updateFormat[]									= '%s';
 				$updateParams['student_first_class_choice_utc']	= 'None';
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set first_class_choices to NONE, ";
 				$firstChoice									= 'None';
@@ -2426,9 +2538,7 @@ function student_registration_func() {
 				$student_second_class_choice					= $myArray[0];
 				$student_second_class_choice_utc				= $myArray[1];
 				$updateParams['student_second_class_choice']		= $student_second_class_choice;
-				$updateFormat[]									= '%s';
 				$updateParams['student_second_class_choice_utc']	= $student_second_class_choice_utc;
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set second_class_choices, ";
 				$secondChoice									= $student_second_class_choice;
@@ -2437,9 +2547,7 @@ function student_registration_func() {
 				$student_second_class_choice					= "None";
 				$student_second_class_choice_utc				= "None";
 				$updateParams['student_second_class_choice']	= 'None';
-				$updateFormat[]									= '%s';
 				$updateParams['student_second_class_choice_utc']	= 'None';
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set second_class_choices to NONE, ";
 				$secondChoice									= 'None';
@@ -2451,9 +2559,7 @@ function student_registration_func() {
 				$student_third_class_choice						= $myArray[0];
 				$student_third_class_choice_utc					= $myArray[1];
 				$updateParams['student_third_class_choice']		= $student_third_class_choice;
-				$updateFormat[]									= '%s';
 				$updateParams['student_third_class_choice_utc']	= $student_third_class_choice_utc;
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set third_class_choices, ";
 				$thirdChoice									= $student_third_class_choice;
@@ -2462,9 +2568,7 @@ function student_registration_func() {
 				$student_third_class_choice						= "None";
 				$student_third_class_choice_utc					= "None";
 				$updateParams['student_third_class_choice']		= 'None';
-				$updateFormat[]									= '%s';
 				$updateParams['student_third_class_choice_utc']	= 'None';
-				$updateFormat[]									= '%s';
 				$doUpdateStudent								= TRUE;
 				$actionLogUpdates								.= "Set third_class_choices to NONE, ";
 				$thirdChoice									= 'None';
@@ -2473,17 +2577,14 @@ function student_registration_func() {
 			if ($inp_flex == 'ANY') {
 				$student_flexible								= 'Y';
 				$updateParams['student_flexible']				= 'Y';
-				$updateFormat[]									= '%s';
 				$actionLogUpdates								.= "Set flexible to Y, ";
 				$doUpdateStudent								= TRUE;
 			}
-			
+
 			$updateParams['student_response']						= 'Y';
-			$updateFormat[]											= '%s';
 			$student_response										= 'Y';
 			$myStr													= date('Y-m-d H:i:s');
 			$updateParams['student_response_date']					= $myStr;
-			$updateFormat[]											= '%s';
 			$actionLogUpdates										.= "set response to Y and set response_date, ";
 			$doUpdateStudent										= TRUE;
 		}
@@ -2493,30 +2594,26 @@ function student_registration_func() {
 		if ($badActorResult) {					/// is a bad actor
 			$actionLogUpdates	.= "Student is in the bad actor table, ";
 			$updateParams['student_intervention_required']			= 'H';
-			$updateFormat[]											= '%s';
 			$updateParams['student_hold_reason_code']				= 'B';
-			$updateFormat[]											= '%s';
 			$doUpdateStudent										= TRUE;
 		}
 		if ($doUpdateStudent) {
-			$myInt								= strlen($actionLogUpdates) -2;
-			$actionLogUpdates					= substr($actionLogUpdates,0,$myInt);
-			$updateParams['student_action_log']	.= " / $actionDate $userName STDREG $actionLogUpdates";
+			if ($doDebug) {
+				echo "setting up to insert a new student record<br />";
+			}
+			$myInt = strlen($actionLogUpdates) -2;
+			$actionLogUpdates = substr($actionLogUpdates,0,$myInt);
+			$updateParams['student_action_log']	= " / $actionDate $userName STDREG $actionLogUpdates";
+			$updateParams['student_call_sign'] = $inp_callsign;
 
-			$insertResult			= $wpdb->insert($studentTableName,
-													$updateParams,
-													$updateFormat);
+			// insert the record
+			$insertResult = $student_dal->insert($updateParams,$operatingMode);
 			if ($insertResult === FALSE) {
-				handleWPDBError($jobname,$doDebug,'attempting to insert a record');
 				if ($doDebug) {
-					$lastQuery 		= $wpdb->last_query;
-					$lastError		= $wpdb->last_error;
-					echo "Inserting record failed<br />
-							$lastQuery<br />
-							$lastError<br />";
+					echo "insert failed. Check debug.log<br />";
 				}
 			} else {
-				$insertID			= $wpdb->insert_id;
+				$insertID			= $insertResult;
 				if ($doDebug) {
 					echo "successfully inserted record $insertID<br />";
 				}
@@ -2526,73 +2623,35 @@ function student_registration_func() {
 				if ($doDebug) {
 					echo "checking to see if student is also signed up as an advisor<br />";
 				}
-				$sql				= "select * from $advisorTableName 
-										left join $userMasterTableName on user_call_sign = advisor_call_sign 
-										where advisor_call_sign='$inp_callsign' 
-										and advisor_verify_response != 'R' 
-										and advisor_semester='$student_semester'";
-				$wpw1_cwa_advisor		= $wpdb->get_results($sql);
+				$criteria = [
+					'relation' => 'AND',
+					'clauses' => [
+						['field' => 'advisor_call_sign','value' => $inp_callsign,'compare' => '='], 
+						['field' => 'adviso_verify_response','value' => 'R','compare' => '!='], 
+						['field' => 'advisor_semester','value' => $student_semester,'compare' => '='] 
+					]
+				];
+				$wpw1_cwa_advisor = $advisor_dal->get_advisor($criteria,$operatingMode);
 				if ($wpw1_cwa_advisor === FALSE) {
 					handleWPDBError($jobname,$doDebug);
 				} else {
-					$numARows			= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
-					}
-					if ($numARows > 0) {
-						foreach ($wpw1_cwa_advisor as $advisorRow) {
-							$advisor_master_ID 					= $advisorRow->user_ID;
-							$advisor_master_call_sign			= $advisorRow->user_call_sign;
-							$advisor_first_name 				= $advisorRow->user_first_name;
-							$advisor_last_name 					= $advisorRow->user_last_name;
-							$advisor_email 						= $advisorRow->user_email;
-							$advisor_phone 						= $advisorRow->user_phone;
-							$advisor_city 						= $advisorRow->user_city;
-							$advisor_state 						= $advisorRow->user_state;
-							$advisor_zip_code 					= $advisorRow->user_zip_code;
-							$advisor_country_code 				= $advisorRow->user_country_code;
-							$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-							$advisor_telegram 					= $advisorRow->user_telegram;
-							$advisor_signal 					= $advisorRow->user_signal;
-							$advisor_messenger 					= $advisorRow->user_messenger;
-							$advisor_master_action_log 			= $advisorRow->user_action_log;
-							$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-							$advisor_languages 					= $advisorRow->user_languages;
-							$advisor_survey_score 				= $advisorRow->user_survey_score;
-							$advisor_is_admin					= $advisorRow->user_is_admin;
-							$advisor_role 						= $advisorRow->user_role;
-							$advisor_master_date_created 		= $advisorRow->user_date_created;
-							$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-		
-							$advisor_ID							= $advisorRow->advisor_id;
-							$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-							$advisor_semester 					= $advisorRow->advisor_semester;
-							$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-							$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-							$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-							$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-							$advisor_action_log 				= $advisorRow->advisor_action_log;
-							$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-							$advisor_control_code 				= $advisorRow->advisor_control_code;
-							$advisor_date_created 				= $advisorRow->advisor_date_created;
-							$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-							$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-							$advisor_user_action_log			= "$advisor_action_log / $actionDate $userName STDREG student signed up as advisor in the same semester. Set advisor survey_score to 13 ";
-							$userMasterUpdate					= $wpdb->update($userMasterTableName, 
-																				array('user_action_log'=>$advisor_user_action_log,
-																			  		  'user_survey_score'=>13),
-																		array('user_ID'=>$advisor_user_id),
-																		array('%s','%d'),
-																		array('%d'));
-							if ($userMasterUpdate === FALSE) {
-								handleWPDBError($jobname,$doDebug);
-							} else {
-								if ($doDebug) {
-									echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
-								}
+					if (! empty($wpw1_cwa_advisor)) {
+						// student is also signed up as an advisor. Set the user_master survey score to 13
+						$user_result = $user_dal->get_user_master_by_callsign($inp_callsign,$operatingMode);
+						if ($user_result === NULL) {
+							sendErrorEmail("$jobname Pass4 Bad Actor Attempting to get user_master by callsign for $inp_callsign returned NULL");
+						} else {
+							foreach($user_result as $key => $value) {
+								$$key = $value;
 							}
-						}
+							$user_action_log .= " / $actionDate $userName STDREG student signed up as advisor in the same semester. Set advisor survey_score to 13 ";
+							$updateParams = array('user_action_log'=>$user_action_log,
+												  'user_survey_score'=>13);
+							$userUpdateResult = $user_dal->	update($user_ID,$updateParams,$operatingMode);
+							if ($userUpdateResult === FALSE) {
+								sendErrorMessage("$jobname Pass4 BAD ACTOR Attempting to update user_master for $inp_callsign returned FALSE");
+							}
+						}						
 					}
 				}
 			}			
@@ -2606,7 +2665,7 @@ function student_registration_func() {
 		$nocatalogMsg				= "";
 		if (!$badActorResult) {
 			$hotmailStr				= '';
-			if (strpos($student_email,'hotmail') !== FALSE) {
+			if (strpos($user_email,'hotmail') !== FALSE) {
 				$hotmailStr			= "<b>NOTE:</b> Whitelisting the CW Academy is particularly important 
 									   for you as you have a Hotmail account. Hotmail will 
 									   arbitrarily discard emails it thinks are spam unless 
@@ -2671,17 +2730,17 @@ function student_registration_func() {
 		$content			.= "<p>You are signed-up as follows:
 								<table style='width:900px;'>
 								<tr><td><b>Callsign<br />$inp_callsign</b></td>
-									<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-									<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-									<td><b>Email</b><br />$student_email</td></tr>
-								<tr><td><b>City</b><br />$student_city</td>
-									<td><b>State</b><br />$student_state</td>
-									<td><b>Zip Code</b><br />$student_zip_code</td>
-									<td><b>Country</b><br />$student_country</td></tr>
-								<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-									<td><b>Telegram</b><br />$student_telegram</td>
-									<td><b>Signal</b><br />$student_signal</td>
-									<td><b>Messenger</b><br />$student_messenger</td></tr>
+									<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+									<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+									<td><b>Email</b><br />$user_email</td></tr>
+								<tr><td><b>City</b><br />$user_city</td>
+									<td><b>State</b><br />$user_state</td>
+									<td><b>Zip Code</b><br />$user_zip_code</td>
+									<td><b>Country</b><br />$user_country</td></tr>
+								<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+									<td><b>Telegram</b><br />$user_telegram</td>
+									<td><b>Signal</b><br />$user_signal</td>
+									<td><b>Messenger</b><br />$user_messenger</td></tr>
 								<tr><td><b>Level: </b>$inp_level</td>
 									<td><b>Language: </b>$inp_class_language</td>
 									<td colspan='2'><b>Semester: </b>$inp_semester</td></tr>";
@@ -2799,37 +2858,52 @@ function student_registration_func() {
 						$student_action_log		= "$student_action_log /removed student from advisor: $student_assigned_advisor 
 													class: $student_assigned_advisor_class and emailed advisor ";
 						// get the advisor email address
-						$advisorEmail	= $wpdb->get_var("select user_email from $userMasterTableName 
-															where user_call_sign='$student_assigned_advisor'");
-						if ($advisorEmail === NULL) {		// no record found
-							sendErrorEmail("$jobname pass 8 delete student record. Retrieving email address for advisor $student_assigned_advisor failed");
-							$advisorEmail	= 'rolandksmith@gmail.com';
-						}
-						// send email to the advisor, cc roland and bob
-						$theSubject		= "CW Academy -- Student Deleted Registration";
-						$theContent		= "<p>Student $student_call_sign deleted his registration after being assigned to 
-											$student_assigned_advisor class $student_assigned_advisor_class at level 
-											$student_level. Consequently, the student has been removed from your class.</p>
-											<p>If you would like the system to look for a replacement student, please email 
-											 <a href='mailto:kcgator@gmail.com'>Bob Carter WR7Q</a>.</p>
-											 <p>73,<br />CW Academy</p>";
-						if ($testMode) {
-							$mailCode	= 2;
-							$increment	= 1;
-							$theSubject	= "TESTMODE $theSubject";
+						$advisorEmail = '';
+						$advisorEmailData = $user_dal->get_user-master_by_callsign($student_assigned_advisor,$operatingMode);
+						if ($advisorEmailData === FALSE) {
+							if ($doDebug) {
+								echo "attempting to get user_master for $student_assigned_advisor returned FALSE<br />";
+							}
 						} else {
-							$mailCode	= 11;
-							$increment	= 0;
+							foreach($advisorEmailData as $key => $value) {
+								foreach($value as $thisField => $thisValue) {
+									if ($thisField == 'user_email') {
+										$advisorEmail = $thisValue;
+									}
+								}
+							}
 						}
-						$mailResult		= emailFromCWA_v2(array('theRecipient'=>$advisorEmail,
-																	'theSubject'=>$theSubject,
-																	'theContent'=>$theContent,
-																	'theCc'=>'',
-																	'mailCode'=>$mailCode,
-																	'jobname'=>$jobname,
-																	'increment'=>$increment,
-																	'testMode'=>$testMode,
-																	'doDebug'=>$doDebug));
+						if ($advisorEmail != '') {
+							// send email to the advisor, cc roland and bob
+							$theSubject		= "CW Academy -- Student Deleted Registration";
+							$theContent		= "<p>Student $student_call_sign deleted his registration after being assigned to 
+												$student_assigned_advisor class $student_assigned_advisor_class at level 
+												$student_level. Consequently, the student has been removed from your class.</p>
+												<p>If you would like the system to look for a replacement student, please email 
+												 <a href='mailto:kcgator@gmail.com'>Bob Carter WR7Q</a>.</p>
+												 <p>73,<br />CW Academy</p>";
+							if ($testMode) {
+								$mailCode	= 2;
+								$increment	= 1;
+								$theSubject	= "TESTMODE $theSubject";
+							} else {
+								$mailCode	= 11;
+								$increment	= 0;
+							}
+							$mailResult		= emailFromCWA_v2(array('theRecipient'=>$advisorEmail,
+																		'theSubject'=>$theSubject,
+																		'theContent'=>$theContent,
+																		'theCc'=>'',
+																		'mailCode'=>$mailCode,
+																		'jobname'=>$jobname,
+																		'increment'=>$increment,
+																		'testMode'=>$testMode,
+																		'doDebug'=>$doDebug));
+						} else {
+							if ($doDebug) {
+								echo "Attempting to get user_email for $student_assigned_advisor failed<br />";
+							}
+						}
 					}
 				}
 				
@@ -2842,24 +2916,16 @@ function student_registration_func() {
 						$student_excluded_advisor	= "$student_excluded_advisor|$student_assigned_advisor";
 					}
 				}
-				$studentUpdateData		= array('tableName'=>$studentTableName,
-												'inp_method'=>'update',
-												'inp_data'=>array('student_action_log'=>$student_action_log,
-																  'student_response'=>'R',
-																  'student_status'=>'',
-																  'student_excluded_advisor'=>$student_excluded_advisor),
-												'inp_format'=>array('%s','%s','%s','%s'),
-												'jobname'=>$jobname,
-												'inp_id'=>$student_ID,
-												'inp_callsign'=>$student_call_sign,
-												'inp_semester'=>$student_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-				$updateResult	= updateStudent($studentUpdateData);
-				if ($updateResult[0] === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-					$content		.= "Unable to update content in $studentTableName<br />";
+				$inp_data = array('student_action_log'=>$student_action_log,
+								  'student_response'=>'R',
+								  'student_status'=>'',
+								  'student_excluded_advisor'=>$student_excluded_advisor);
+				$updateResult = $student_dal->update($student_id,$inp_data,$operatingMode);
+				if ($updateResult === FALSE) {
+					if ($doDebug) {
+						echo "Attempting to update student_response returned FALSE<br />";
+					}
+					$content		.= "Unable to update student_response<br />";
 				} else {
 					if ($doDebug) {
 						echo "student record updated<br />";
@@ -2878,64 +2944,66 @@ function student_registration_func() {
 					if ($doDebug) {
 						echo "student_response was R. Changing to empty<br />";
 					}
-					$updateParams[]			= "student_response||s";
+					$updateParams['student_response'] = '';
 					$doUpdate				= TRUE;
 				}
 				if ($inp_semester != $student_semester) {
-					$updateParams[]			= "student_semester|$inp_semester|s";
+					$updateParams['student_semester'] = $inp_semester;
 					$doUpdate				= TRUE;
 					$updateLog				.= "semester changed to $inp_semester. ";
 					$student_semester		= $inp_semester;
 					$semesterChanged		= TRUE;
-					$updateParams[]			= "student_first_class_choice|None|s";
-					$updateParams[]			= "student_second_class_choice|None|s";
-					$updateParams[]			= "student_third_class_choice|None|s";
-					$updateParams[]			= "student_first_class_choice_utc|None|s";
-					$updateParams[]			= "student_second_class_choice_utc|None|s";
-					$updateParams[]			= "student_third_class_choice_utc|None|s";
-					$updateParams[]			= "student_catalog_options||s";
-					$updateParams[]			= "student_flexible||s";
+					$updateParams['student_first_class_choice'] = 'None';
+					$updateParams['student_second_class_choice'] = 'None';
+					$updateParams['student_third_class_choice'] = 'None';
+					$updateParams['student_first_class_choice_utc'] = 'None';
+					$updateParams['student_second_class_choice_utc'] = 'None';
+					$updateParams['student_third_class_choice_utc'] = 'None';
+					$updateParams['student_catalog_options'] = '';
+					$updateParams['student_flexible'] = '';
+					$updateParams['student_response'] = '';
+					$updateParams['student_status'] = '';
 				}
 				if ($inp_level != $student_level) {
-					$updateParams[]			= "student_level|$inp_level|s";
-					$doUpdate				= TRUE;
+					$updateParams['student_level'] = $inp_level;
+					$doUpdate = TRUE;
 					$updateLog				.= "level changed to $inp_level. ";
 					$student_level			= $inp_level;
 					$levelChanged			= TRUE;
 				}
 				if ($inp_class_language != $student_class_language) {
-					$updateParams[]			= "student_class_language|$inp_class_language|s";
+					$updateParams['student_class_language'] = $inp_class_language;
 					$doUpdate				= TRUE;
 					$updateLog				.= "class language changed to $inp_class_language. ";
 					$student_class_language	= $inp_class_language;
 				}
 				if ($semesterChanged || $levelChanged) {						
-					$updateParams[]			= "student_email_sent_date||s";
-					$updateParams[]			= "student_email_number|0|s";
-					$updateParams[]			= "student_response||s";
-					$updateParams[]			= "student_response_date||s";
-					$updateParams[]			= "student_welcome_date||s";
+					$updateParams['student_email_sent_date'] = '';
+					$updateParams['student_email_number'] = '';
+					$updateParams['student_response'] = '';
+					$updateParams['student_response_date'] = '';
+					$updateParams['student_welcome_date'] = '';
 				}
 				if ($inp_youth != $student_youth) {
-					$updateParams[]			= "student_youth|$inp_youth|s";
+					$updateParams['student_youth'] = $inp_youth;
 					$doUpdate				= TRUE;
 					$updateLog				.= "youth changed from $student_youth to $inp_youth. ";
 					$student_youth			= $inp_youth;
 				}
 				if ($inp_age != $student_age) {
-					$updateParams[]			= "student_age|$inp_age|s";
+					$updateParams['student_age'] = $inp_age;
 					$doUpdate				= TRUE;
 					$updateLog				.= "age changed from $student_age to $inp_age. ";
 					$student_age			= $inp_age;
 				}
 				if ($inp_student_parent != $student_parent) {
-					$updateParams[]			= "student_parent|$inp_student_parent|s";
+					$updateParams['student_parent'] = $inp_student_parent;
 					$doUpdate				= TRUE;
 					$updateLog				.= "student_parent changed from $student_student_parent to $inp_student_parent. ";
 					$student_student_parent	= $inp_student_parent;
 				}
 				if ($inp_student_parent_email != $student_parent_email) {
-					$updateParams[]			= "student_parent_email|$inp_student_parent_email|s";
+					$updateParams['student_parent_email'] = $inp_student_parent_email;
 					$doUpdate				= TRUE;
 					$updateLog				.= "student_parent_email changed from $student_student_parent_email to $inp_student_parent_email. ";
 					$student_student_parent_email	= $inp_student_parent_email;
@@ -2955,14 +3023,14 @@ function student_registration_func() {
 					if ($doDebug) {
 						echo "converted $new_semester to $thisNewDate<br />";
 					}
-					$dateTimeZoneLocal 	= new DateTimeZone($student_timezone_id);
+					$dateTimeZoneLocal 	= new DateTimeZone($user_timezone_id);
 					$dateTimeZoneUTC 	= new DateTimeZone("UTC");
 					$dateTimeLocal 		= new DateTime($thisNewDate,$dateTimeZoneLocal);
 					$dateTimeUTC		= new DateTime($thisNewDate,$dateTimeZoneUTC);
 					$php2 				= $dateTimeZoneLocal->getOffset($dateTimeUTC);
 					$offset 			= $php2/3600;
 					if ($offset != $student_timezone_offset) {
-						$updateParams[]						= "student_timezone_offset|$offset|s";
+						$updateParams['student_timezone_offset'] = $offset;
 						$doUpdate							= TRUE;
 						if ($doDebug) {
 							echo "changed offset from $student_timezone_offset to $offset<br />";
@@ -2975,7 +3043,7 @@ function student_registration_func() {
 						
 			if ($doUpdate) {
 				$student_action_log					= "$student_action_log / $actionDate STDREG $updateLog";
-				$updateParams[]						= "student_action_log|$student_action_log|s";
+				$updateParams['student_action_log'] = $student_action_log;
 
 				if ($doDebug) {
 					echo "updateParams before filtering:<br /><pre>";
@@ -2984,37 +3052,22 @@ function student_registration_func() {
 				}
 
 				// filter out any duplicate updates (take the last one)
-				$thisArray						= array();
+				$newParams = array();
 				foreach($updateParams as $thisKey => $thisValue) {
-					$myArray					= explode("|",$thisValue);
-					$thisArray[$myArray[0]]		= $thisValue;
-				}
-				$newParams						= array();
-				foreach($thisArray as $thisKey => $thisValue) {
-					$newParams[] 				= $thisValue;
+					$newParams[$thisKey] = $thisValue;
 				}
 			
 				if ($doDebug) {
-					echo "Updating record for $inp_callsign<br />";
-					foreach($newParams as $myKey=>$myValue) {
-						echo "$myKey = $myValue<br />";
-					}
+					echo "Updating record for $inp_callsign<br /><pre>";
+					print_r($newParams);
+					echo "</pre><br />";
+					
 				}
-			
-				$studentUpdateData		= array('tableName'=>$studentTableName,
-												'inp_data'=>$newParams,
-												'inp_format'=>array(''),
-												'inp_method'=>'update',
-												'jobname'=>$jobname,
-												'inp_id'=>$student_ID,
-												'inp_callsign'=>$student_call_sign,
-												'inp_semester'=>$student_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-				$updateResult	= updateStudent($studentUpdateData);
-				if ($updateResult[0] === FALSE) {
-					handleWPDBError($jobname,$doDebug);
+				$updateResult = $student_dal->update($student_id,$newParams,$operatingMode);
+				if ($updateResult === FALSE) {
+					if ($doDebug) {
+						echo "attempting toupdate $student_id returned FALSE";
+					}
 				} else {
 					$theMessage		= "";
 				}
@@ -3101,7 +3154,7 @@ function student_registration_func() {
 										<input type='hidden' name='inp_mode' value='$inp_mode'>
 										<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 										<input type='hidden' name='result_option' value='$result_option'>
-										<input type='hidden' name='student_ID' value='$student_ID'>
+										<input type='hidden' name='student_id' value='$student_id'>
 										<input type='hidden' name='inp_callsign' value='$student_call_sign'>
 										<input type='hidden' name='inp_verify' value='$inp_verify'>
 										<input type='hidden' name='token' value='$token'>
@@ -3118,7 +3171,7 @@ function student_registration_func() {
 			}
 		} else {
 			if ($doDebug) {
-				echo "no record found for the student_ID<br />";
+				echo "no record found for the student_id<br />";
 			}
 			$content		.= "<p>Fatal Error: No record found to update</p>";
 		} 		
@@ -3161,7 +3214,7 @@ function student_registration_func() {
 		if ($doDebug) {
 			echo "Have the following information:
 				inp_callsign: $inp_callsign<br />
-				student_ID: $student_ID<br />
+				student_id: $student_id<br />
 				inp_verify: $inp_verify<br />";
 		}
 		
@@ -3182,9 +3235,9 @@ function student_registration_func() {
 				}
 				if ($student_no_catalog != 'Y') {
 					$student_no_catalog					= 'Y';
-					$updateParams[]						= "student_no_catalog|Y|s";
+					$updateParams['student_no_catalog'] = 'Y';
 					$actionLogUpdates					.= "Set no_catalog to Y, ";
-					$doUpdateStudent						= TRUE;
+					$doUpdateStudent					= TRUE;
 				}
 				if (count($inp_sked_times) > 0) {
 					$myStr					 			= "";
@@ -3211,7 +3264,7 @@ function student_registration_func() {
 					if ($haveAny) {
 						if ($student_flexible != 'Y') {
 							$student_flexible			= 'Y';
-							$updateParams[]				= 'student_flexible|Y|s';
+							$updateParams['student_flexible'] = 'Y';
 							$actionLogUpdates			.= "Set flexible to Y, ";
 							$doUpdateStudent			= TRUE;
 							$student_flexible			= "Y";
@@ -3220,7 +3273,7 @@ function student_registration_func() {
 					} else {
 						if ($student_flexible != 'N') {
 							$student_flexible			= 'N';
-							$updateParams[]				= 'student_flexible|N|s';
+							$updateParams['student_flexible'] = 'N';
 							$actionLogUpdates			.= "Set flexible to N, ";
 							$doUpdateStudent			= TRUE;
 							$student_flexible			= "N";
@@ -3228,7 +3281,7 @@ function student_registration_func() {
 					}
 					if ($student_catalog_options != '$myStr') {
 						$student_catalog_options		= $myStr;
-						$updateParams[]					= "student_catalog_options|$student_catalog_options|s";
+						$updateParams['student_catalog_options'] = $student_catalog_options;
 						$actionLogUpdates				.= "set catalog_options to $student_catalog_options, ";
 						$doUpdateStudent				= TRUE;
 					}
@@ -3239,18 +3292,18 @@ function student_registration_func() {
 				}
 				if ($student_no_catalog != 'N') {
 					$student_no_catalog 	= 'N';
-					$updateParams[]			= 'student_no_catalog|N|s';
+					$updateParams['student_no_catalog'] = 'N';
 					$actionLogUpdates		.= "Set no_catalog to N, ";
 				}
-				$updateParams[]				= "student_abandoned|N|s";
+				$updateParams['student_abandoned'] = 'N';
 				$doUpdateStudent			= TRUE;
 
 				if ($inp_flex == 'ANY') {
-					$updateParams[]			= "student_flexible|Y|s";
+					$updateParams['student_flexible'] = 'Y';
 					$actionLogUpdates		.= "set flexible to Y ";
 					$doUpdateStudent		= TRUE;
 				} else {
-					$updateParams[]			= "student_flexible|N|s";
+					$updateParams['student_flexible'] = 'N';
 					$actionLogUpdates		.= "set flexible to N ";
 					$doUpdateStudent		= TRUE;
 				}
@@ -3262,8 +3315,8 @@ function student_registration_func() {
 				} else {
 					$myArray			= explode("|",$inp_sked1);
 					if (count($myArray) == 2) {
-						$updateParams[]		= "student_first_class_choice|$myArray[0]|s";
-						$updateParams[]		= "student_first_class_choice_utc|$myArray[1]|s";
+						$updateParams['student_first_class_choice'] = $myArray[0];
+						$updateParams['student_first_class_choice_utc'] = $myArray[1];
 						$doUpdateStudent	= TRUE;
 						$firstChoice 		= $myArray[0];
 						$actionLogUpdates	.= "set first_class_choice to $myArray[0] ";
@@ -3275,40 +3328,40 @@ function student_registration_func() {
 					if ($inp_sked2 !== 'None') {
 						$myArray			= explode("|",$inp_sked2);
 						if (count($myArray) == 2) {
-							$updateParams[]		= "student_second_class_choice|$myArray[0]|s";
-							$updateParams[]		= "student_second_class_choice_utc|$myArray[1]|s";
+							$updateParams['student_second_class_choice'] = $myArray[0];
+							$updateParams['student_second_class_choice_utc'] = $myArray[1];
 							$doUpdateStudent	= TRUE;
 							$secondChoice	 	= $myArray[0];
 							$actionLogUpdates	.= "set second_class_choice to $myArray[0] ";
 						} else {
-							$updateParams[]		= "second_class_choice|None|s";
-							$updateParams[]		= "second_class_choice_utc|None|s";
+							$updateParams['second_class_choice'] = 'None';
+							$updateParams['second_class_choice_utc'] = 'None';
 							$doUpdateStudent	= TRUE;
 							$secondChoice 		= 'None';
 						}
 					} else {
-							$updateParams[]		= "student_second_class_choice|None|s";
-							$updateParams[]		= "student_second_class_choice_utc|None|s";
+							$updateParams['student_second_class_choice'] = 'None';
+							$updateParams['student_second_class_choice_utc'] = 'None';
 							$doUpdateStudent	= TRUE;
 							$secondChoice 		= 'None';
 					}
 					if ($inp_sked3 !== 'None') {
 						$myArray			= explode("|",$inp_sked3);
 						if (count($myArray) == 2) {
-							$updateParams[]		= "student_third_class_choice|$myArray[0]|s";
-							$updateParams[]		= "student_third_class_choice_utc|$myArray[1]|s";
+							$updateParams['student_third_class_choice'] = $myArray[0];
+							$updateParams['student_third_class_choice_utc'] = $myArray[1];
 							$thirdChoice 		= $myArray[0];
 							$doUpdateStudent	= TRUE;
 							$actionLogUpdates	.= "set third_class_choice to $myArray[0] ";
 						} else {
-							$updateParams[]		= "student_third_class_choice|None|s";
-							$updateParams[]		= "student_third_class_choice_utc|None|s";
+							$updateParams['student_third_class_choice'] = 'None';
+							$updateParams['student_third_class_choice_utc'] = 'None';
 							$doUpdateStudent	= TRUE;
 							$thirdChoice 		= 'None';
 						}						
 					} else {
-							$updateParams[]		= "student_third_class_choice|None|s";
-							$updateParams[]		= "student_third_class_choice_utc|None|s";
+							$updateParams['student_third_class_choice'] = 'None';
+							$updateParams['student_third_class_choice_utc'] = 'None';
 							$doUpdateStudent	= TRUE;
 							$thirdChoice 		= 'None';
 					}
@@ -3323,8 +3376,8 @@ function student_registration_func() {
 					if ($student_first_class_choice != '') {
 						$student_first_class_choice			= '';
 						$student_first_class_choice_utc		= '';
-						$updateParams[]						= "student_first_class_choice|$student_first_class_choice|s";
-						$updateParams[]						= "student_first_class_choice_utc|$student_first_class_choice_utc|s";
+						$updateParams['student_first_class_choice'] = $student_first_class_choice;
+						$updateParams['student_first_class_choice_utc'] = $student_first_class_choice_utc;
 						$doUpdateStudent					= TRUE;
 						$actionLogUpdates					.= "Removed first class choices, ";
 						$firstChoice						= "None";
@@ -3332,8 +3385,8 @@ function student_registration_func() {
 					if ($student_second_class_choice != '') {
 						$student_second_class_choice		= '';
 						$student_second_class_choice_utc	= '';
-						$updateParams[]						= "student_second_class_choice|$student_second_class_choice|s";
-						$updateParams[]						= "student_second_class_choice_utc|$student_second_class_choice_utc|s";
+						$updateParams['student_second_class_choice'] = $student_second_class_choice;
+						$updateParams['student_second_class_choice_utc'] = $student_second_class_choice_utc;
 						$actionLogUpdates					.= "Removed second class choices, ";
 						$doUpdateStudent					= TRUE;
 						$secondChoice						= "None";
@@ -3341,27 +3394,27 @@ function student_registration_func() {
 					if ($student_third_class_choice != '') {
 						$student_third_class_choice			= '';
 						$student_third_class_choice_utc		= '';
-						$updateParams[]						= "student_third_class_choice|$student_third_class_choice|s";
-						$updateParams[]						= "student_third_class_choice_utc|$student_third_class_choice_utc|s";
+						$updateParams['student_third_class_choice'] = $student_third_class_choice;
+						$updateParams['student_third_class_choice_utc'] = $student_third_class_choice_utc;
 						$actionLogUpdates					.= "Removed third class choices, ";
 						$doUpdateStudent					= TRUE;
 						$thirdChoice						= "None";
 					}
 					if ($student_flexible != 'N') {
 						$student_flexible					= "N";
-						$updateParams[]						= 'student_flexible|N|s';
+						$updateParams['student_flexible'] = 'N';
 						$actionLogUpdates					.= "set flexible to N, ";
 						$doUpdateStudent					= TRUE;
 					}
 					if ($student_no_catalog != 'N') {
 						$student_no_catalog					= 'N';
-						$updateParams[]						= 'student_no_catalog|N|s';
+						$updateParams['student_no_catalog'] = 'N';
 						$actionLogUpdates					.= "set no_catalog to N, ";
 						$doUpdateStudent					= TRUE;
 					}
 					if ($student_waiting_list != 'Y') {	
 						$student_waiting_list				= 'Y';
-						$updateParams[]						= 'student_waiting_list|Y|s';
+						$updateParams['student_waiting_list'] = 'Y';
 						$actionLogUpdates					.= "set waiting_list to Y, ";
 						$doUpdateStudent					= TRUE;
 					}
@@ -3372,8 +3425,8 @@ function student_registration_func() {
 					if ($student_first_class_choice != $this_first_class_choice) {
 						$student_first_class_choice		= $this_first_class_choice;
 						$student_first_class_choice_utc	= $this_first_class_choice_utc;
-						$updateParams[]					= "student_first_class_choice|$student_first_class_choice|s";
-						$updateParams[]					= "student_first_class_choice_utc|$student_first_class_choice_utc|s";
+						$updateParams['student_first_class_choice'] = $student_first_class_choice;
+						$updateParams['student_first_class_choice_utc'] = $student_first_class_choice_utc;
 						$doUpdateStudent				= TRUE;
 						$actionLogUpdates				.= "Updated first class choices, ";
 						$firstChoice					= $student_first_class_choice;
@@ -3381,52 +3434,52 @@ function student_registration_func() {
 					if ($student_second_class_choice != 'None') {
 						$student_second_class_choice		= 'None';
 						$student_second_class_choice_utc	= 'None';
-						$updateParams[]						= "student_second_class_choice|$student_second_class_choice|s";
-						$updateParams[]						= "student_second_class_choice_utc|$student_second_class_choice_utc|s";
-						$actionLogUpdates					.= "Set second class choices to None, ";
+						$updateParams['student_second_class_choice'] = $student_second_class_choice;
+						$updateParams['student_second_class_choice_utc'] = $student_second_class_choice_utc;
+						$actionLogUpdates					.= "Set second class choices to $student_second_class_choice ";
 						$doUpdateStudent						= TRUE;
 						$secondChoice						= "None";
 					}
 					if ($student_third_class_choice != 'None') {
 						$student_third_class_choice			= 'None';
 						$student_third_class_choice_utc		= 'None';
-						$updateParams[]						= "vthird_class_choice|$student_third_class_choice|s";
-						$updateParams[]						= "student_third_class_choice_utc|$student_third_class_choice_utc|s";
-						$actionLogUpdates					.= "Set third class choices to None, ";
+						$updateParams['third_class_choice'] = $student_third_class_choice;
+						$updateParams['student_third_class_choice_utc'] = $student_third_class_choice_utc;
+						$actionLogUpdates					.= "Set third class choices to $student_third_class_choice ";
 						$doUpdateStudent					= TRUE;
 						$thirdChoice						= "None";
 					}
 					if ($student_flexible != 'N') {
 						$student_flexible					= "N";
-						$updateParams[]						= 'student_flexible|N|s';
+						$updateParams['student_flexible'] = 'N';
 						$actionLogUpdates					.= "Set flexible to N, ";
 						$doUpdateStudent					= TRUE;
 					}
 					if ($student_no_catalog != 'N') {
 						$student_no_catalog					= 'N';
-						$updateParams[]						= 'student_no_catalog|N|s';
+						$updateParams['student_no_catalog'] = 'N';
 						$actionLogUpdates					.= "Set no_catalog to N, ";
 						$doUpdateStudent					= TRUE;
 					}
 				}
 				if ($student_response != 'Y') {
-					$updateParams[]							= 'student_response|Y|s';
+					$updateParams['student_response'] = 'Y';
 					$myStr									= date('Y-m-d H:i:s');
-					$updateParams[]							= "student_response_date|$myStr|s";
+					$updateParams['student_response_date'] = $myStr;
 					$actionLogUpdates						.= "set response to Y and set response_date, ";
 					$doUpdateStudent						= TRUE;
 				}
 			}
 			if ($student_abandoned == 'Y') {
-				$updateParams[]					= 'student_abandoned|N|s';
+				$updateParams['student_abandoned'] = 'N';
 				$doUpdateStudent				= TRUE;
 				$actionLogUpdates				.= "Set abandoned to N, ";
 			}
 			if ($inp_verify == 'Y') {
-				$updateParams[]					= "student_response|Y|s";
+				$updateParams['student_response'] = 'Y';
 				$doUpdateStudent				= TRUE;
 			} elseif ($student_response == '' && $validEmailPeriod) {
-				$updateParams[]					= "student_response|Y|s";
+				$updateParams['student_response'] = 'Y';
 				$doUpdateStudent				= TRUE;
 			}
 
@@ -3437,21 +3490,13 @@ function student_registration_func() {
 				}
 				$actionLogUpdates		= substr($actionLogUpdates,0,$myInt);
 				$student_action_log		= "$student_action_log / $actionDate $userName STDREG $actionLogUpdates";
-				$updateParams[]			= "student_action_log|$student_action_log|s";
-				$studentUpdateData		= array('tableName'=>$studentTableName,
-												'inp_method'=>'update',
-												'inp_data'=>$updateParams,
-												'inp_format'=>array(''),
-												'jobname'=>$jobname,
-												'inp_id'=>$student_ID,
-												'inp_callsign'=>$student_call_sign,
-												'inp_semester'=>$student_semester,
-												'inp_who'=>$userName,
-												'testMode'=>$testMode,
-												'doDebug'=>$doDebug);
-				$updateResult	= updateStudent($studentUpdateData);
-				if ($updateResult[0] === FALSE) {
-					handleWPDBError($jobname,$doDebug);
+				$updateParams['student_action_log'] = $student_action_log;
+	
+				$updateResult = $student_dal->update($student_id,$updateParams,$operatingMode);
+				if ($updateResult === FALSE) {
+					if ($doDebug) {
+						echo "attempting to update $student_id returned FALSE<br />";
+					}
 					$content		.= "Unable to update content in $studentTableName<br />";
 				} else {
 
@@ -3461,286 +3506,151 @@ function student_registration_func() {
 					if ($doDebug) {
 						echo "checking to see if student is also signed up as an advisor<br />";
 					}
-					$sql				= "select * from $advisorTableName 
-											left join $userMasterTableName on user_call_sign = advisor_call_sign
-											where advisor_call_sign='$inp_callsign' 
-											and advisor_verify_response != 'R' 
-											and advisor_semester='$student_semester'";
-					$wpw1_cwa_advisor		= $wpdb->get_results($sql);
+					$criteria = [
+						'relation' => 'AND',
+						'clauses' => [
+							['field' => 'advisor_call_sign','value' => $inp_callsign,'compare' => '='], 
+							['field' => 'adviso_verify_response','value' => 'R','compare' => '!='], 
+							['field' => 'advisor_semester','value' => $student_semester,'compare' => '='] 
+						]
+					];
+					$wpw1_cwa_advisor = $advisor_dal->get_advisor($criteria,$operatingMode);
 					if ($wpw1_cwa_advisor === FALSE) {
-						handleWPDBError($jobname,$doDebug);
-					} else {
-						$numARows									= $wpdb->num_rows;
 						if ($doDebug) {
-							echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
+							echo "getting the advisor info returned FALSE<br />";
 						}
-						if ($numARows > 0) {
-							foreach ($wpw1_cwa_advisor as $advisorRow) {
-								$advisor_master_ID 					= $advisorRow->user_ID;
-								$advisor_master_call_sign			= $advisorRow->user_call_sign;
-								$advisor_first_name 				= $advisorRow->user_first_name;
-								$advisor_last_name 					= $advisorRow->user_last_name;
-								$advisor_email 						= $advisorRow->user_email;
-								$advisor_phone 						= $advisorRow->user_phone;
-								$advisor_city 						= $advisorRow->user_city;
-								$advisor_state 						= $advisorRow->user_state;
-								$advisor_zip_code 					= $advisorRow->user_zip_code;
-								$advisor_country_code 				= $advisorRow->user_country_code;
-								$advisor_whatsapp 					= $advisorRow->user_whatsapp;
-								$advisor_telegram 					= $advisorRow->user_telegram;
-								$advisor_signal 					= $advisorRow->user_signal;
-								$advisor_messenger 					= $advisorRow->user_messenger;
-								$advisor_master_action_log 			= $advisorRow->user_action_log;
-								$advisor_timezone_id 				= $advisorRow->user_timezone_id;
-								$advisor_languages 					= $advisorRow->user_languages;
-								$advisor_survey_score 				= $advisorRow->user_survey_score;
-								$advisor_is_admin					= $advisorRow->user_is_admin;
-								$advisor_role 						= $advisorRow->user_role;
-								$advisor_master_date_created 		= $advisorRow->user_date_created;
-								$advisor_master_date_updated 		= $advisorRow->user_date_updated;
-			
-								$advisor_ID							= $advisorRow->advisor_id;
-								$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-								$advisor_semester 					= $advisorRow->advisor_semester;
-								$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-								$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-								$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-								$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-								$advisor_action_log 				= $advisorRow->advisor_action_log;
-								$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-								$advisor_control_code 				= $advisorRow->advisor_control_code;
-								$advisor_date_created 				= $advisorRow->advisor_date_created;
-								$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-								$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-								$advisor_user_action_log					= "$advisor_action_log / $actionDate $userName STDREG student signed up as advisor in the same semester. Set advisor survey_score to 13 ";
-								$userMasterUpdate			= $wpdb->update($userMasterTableName, 
-																			array('user_action_log'=>$advisor_user_action_log,
-																				  'user_survey_score'=>13),
-																			array('user_ID'=>$advisor_user_id),
-																			array('%s','%d'),
-																			array('%d'));
-								if ($userMasterUpdate === FALSE) {
-									handleWPDBError($jobname,$doDebug);
-								} else {
-									if ($doDebug) {
-										echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
-									}
+					} else {
+						if (count($wpw1_cwa_advisor) > 0) {
+							// student is also signed up as an advisor. Set the user_master survey score to 13
+							$user_result = $user_dal->get_user_master_by_callsign($inp_callsign,$operatingMode);
+							if ($user_result === NULL) {
+								sendErrorEmail("$jobname Pass4 Bad Actor Attempting to get user_master by callsign for $inp_callsign returned NULL");
+							} else {
+								foreach($user_result as $key => $value) {
+									$$key = $value;
 								}
-							}
-						} 
+								$user_action_log .= " / $actionDate $userName STDREG student signed up as advisor in the same semester. Set advisor survey_score to 13 ";
+								$updateParams = array('user_action_log'=>$user_action_log,
+													  'user_survey_score'=>13);
+								$userUpdateResult = $user_dal->	update($user_ID,$updateParams,$operatingMode);
+								if ($userUpdateResult === FALSE) {
+									sendErrorMessage("$jobname Pass4 BAD ACTOR Attempting to update user_master for $inp_callsign returned FALSE");
+								}
+							}						
+						}
 					}
 				}
 			}
 			$content	 		.= "<h3>CWA Student Sign-up Completed</h3>";
 
 			// read the data again
-			$sql				= "select * from $studentTableName 
-									left join $userMasterTableName on user_call_sign = student_call_sign 
-								   where student_id=$student_ID";
-			$wpw1_cwa_student	= $wpdb->get_results($sql);
+			$wpw1_cwa_student = $student_dal->get_student_by_id($student_id,$operatingMode);
 			if ($wpw1_cwa_student === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numSRows									= $wpdb->num_rows;
 				if ($doDebug) {
-					echo "retrieved $numSRows rows from $studentTableName table<br >";
+					echo "attempting to get student id $student_id returned FALSE<br />";
 				}
-				if ($numSRows > 0) {
-					foreach ($wpw1_cwa_student as $studentRow) {
-						$student_master_ID 					= $studentRow->user_ID;
-						$student_master_call_sign 			= $studentRow->user_call_sign;
-						$student_first_name 				= $studentRow->user_first_name;
-						$student_last_name 					= $studentRow->user_last_name;
-						$student_email 						= $studentRow->user_email;
-						$student_phone 						= $studentRow->user_phone;
-						$student_city 						= $studentRow->user_city;
-						$student_state 						= $studentRow->user_state;
-						$student_zip_code 					= $studentRow->user_zip_code;
-						$student_country_code 				= $studentRow->user_country_code;
-						$student_whatsapp 					= $studentRow->user_whatsapp;
-						$student_telegram 					= $studentRow->user_telegram;
-						$student_signal 					= $studentRow->user_signal;
-						$student_messenger 					= $studentRow->user_messenger;
-						$student_master_action_log 			= $studentRow->user_action_log;
-						$student_timezone_id 				= $studentRow->user_timezone_id;
-						$student_languages 					= $studentRow->user_languages;
-						$student_survey_score 				= $studentRow->user_survey_score;
-						$student_is_admin					= $studentRow->user_is_admin;
-						$student_role 						= $studentRow->user_role;
-						$student_master_date_created 		= $studentRow->user_date_created;
-						$student_master_date_updated 		= $studentRow->user_date_updated;
-	
-						$student_ID								= $studentRow->student_id;
-						$student_call_sign						= $studentRow->student_call_sign;
-						$student_time_zone  					= $studentRow->student_time_zone;
-						$student_timezone_offset				= $studentRow->student_timezone_offset;
-						$student_youth  						= $studentRow->student_youth;
-						$student_age  							= $studentRow->student_age;
-						$student_parent 						= $studentRow->student_parent;
-						$student_parent_email  					= strtolower($studentRow->student_parent_email);
-						$student_level  						= $studentRow->student_level;
-						$student_class_language					= $studentRow->student_class_language;
-						$student_waiting_list 					= $studentRow->student_waiting_list;
-						$student_request_date  					= $studentRow->student_request_date;
-						$student_semester						= $studentRow->student_semester;
-						$student_notes  						= $studentRow->student_notes;
-						$student_welcome_date  					= $studentRow->student_welcome_date;
-						$student_email_sent_date  				= $studentRow->student_email_sent_date;
-						$student_email_number  					= $studentRow->student_email_number;
-						$student_response  						= strtoupper($studentRow->student_response);
-						$student_response_date  				= $studentRow->student_response_date;
-						$student_abandoned  					= $studentRow->student_abandoned;
-						$student_status  						= strtoupper($studentRow->student_status);
-						$student_action_log  					= $studentRow->student_action_log;
-						$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-						$student_selected_date  				= $studentRow->student_selected_date;
-						$student_no_catalog  					= $studentRow->student_no_catalog;
-						$student_hold_override  				= $studentRow->student_hold_override;
-						$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-						$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-						$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-						$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-						$student_class_priority  				= $studentRow->student_class_priority;
-						$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-						$student_promotable  					= $studentRow->student_promotable;
-						$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-						$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-						$student_available_class_days  			= $studentRow->student_available_class_days;
-						$student_intervention_required  		= $studentRow->student_intervention_required;
-						$student_copy_control  					= $studentRow->student_copy_control;
-						$student_first_class_choice  			= $studentRow->student_first_class_choice;
-						$student_second_class_choice  			= $studentRow->student_second_class_choice;
-						$student_third_class_choice  			= $studentRow->student_third_class_choice;
-						$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-						$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-						$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-						$student_catalog_options				= $studentRow->student_catalog_options;
-						$student_flexible						= $studentRow->student_flexible;
-						$student_date_created 					= $studentRow->student_date_created;
-						$student_date_updated			  		= $studentRow->student_date_updated;
-	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$student_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$student_country		= "UNKNOWN";
-							$student_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$student_country		= $countryRow->country_name;
-									$student_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$student_country			= "Unknown";
-								$student_ph_code			= "";
-							}
-						}
+			} else {
+				foreach($wpw1_cwa_student as $thisField => $thisValue) {
+					$$thisField = $thisValue;
+				}
 			
-						if ($student_intervention_required == 'H' and $student_hold_reason_code == 'B') {
-							$content			.= "<h3>CWA Student Sign-up</h3>
-													<h4>Record Updated</h4>
-													<p>Your sign-up is on hold pending a discussion with the appropriate 
-													person at <a href='https://cwops.org/cwa-class-resolution/' target='_blank'>CWA Class Resolution</a>.";
-						} else {
-							$waitListMsg				= "";
-							$nocatalogMsg				= "";
-							if ($student_no_catalog == 'Y') {
-								$content			.= "<p><b>NOTE:</b> You will 
-															receive an email from CW Academy about 45 days before the start of the $inp_semester semester 
-															asking you to review and select your class date and time preferences. You <span style='color:red;'><b>MUST</b></span> respond to 
-															that email in order to be considered for assignment to a class.</p>";
-							}
-							if ($student_waiting_list == 'Y') {
-								$content			.= "<table style='border:4px solid red;'><tr><td>
-														<span style='font-size:12pt;'>Note that Student assignment to classes has already occurred for 
-														the $inp_semester semester. You are on the waiting list. Students do drop 
-														out and CW Academy pulls replacement students from the waiting list. If you aren't selected 
-														from the waiting list, your registration will be automatically moved to the next  
-														semester and you will be given heightened priority for assignment to a class.</span></td></tr></table>";
-							} 
-							$content	 			.= "<p><p>Your registration update has been saved. <b>Most communications from CW Academy will be by 
-														email, so make sure these emails are not marked as spam</b>. In most email programs you do 
-														that by adding <u>cwacademy@cwa.cwops.org</u> to your contact list in your email program. More 
-														information is available at <a href='https://www.whitelist.guide/' target='_blank'>Email 
-														Whitelist Guide</a>.</p>
-														<button onClick=\"window.print()\">Click to print this<br />page for your records</button>";
+				if ($student_intervention_required == 'H' and $student_hold_reason_code == 'B') {
+					$content			.= "<h3>CWA Student Sign-up</h3>
+											<h4>Record Updated</h4>
+											<p>Your sign-up is on hold pending a discussion with the appropriate 
+											person at <a href='https://cwops.org/cwa-class-resolution/' target='_blank'>CWA Class Resolution</a>.";
+				} else {
+					$waitListMsg				= "";
+					$nocatalogMsg				= "";
+					if ($student_no_catalog == 'Y') {
+						$content			.= "<p><b>NOTE:</b> You will 
+													receive an email from CW Academy about 45 days before the start of the $inp_semester semester 
+													asking you to review and select your class date and time preferences. You <span style='color:red;'><b>MUST</b></span> respond to 
+													that email in order to be considered for assignment to a class.</p>";
+					}
+					if ($student_waiting_list == 'Y') {
+						$content			.= "<table style='border:4px solid red;'><tr><td>
+												<span style='font-size:12pt;'>Note that Student assignment to classes has already occurred for 
+												the $inp_semester semester. You are on the waiting list. Students do drop 
+												out and CW Academy pulls replacement students from the waiting list. If you aren't selected 
+												from the waiting list, your registration will be automatically moved to the next  
+												semester and you will be given heightened priority for assignment to a class.</span></td></tr></table>";
+					} 
+					$content	 			.= "<p><p>Your registration update has been saved. <b>Most communications from CW Academy will be by 
+												email, so make sure these emails are not marked as spam</b>. In most email programs you do 
+												that by adding <u>cwacademy@cwa.cwops.org</u> to your contact list in your email program. More 
+												information is available at <a href='https://www.whitelist.guide/' target='_blank'>Email 
+												Whitelist Guide</a>.</p>
+												<button onClick=\"window.print()\">Click to print this<br />page for your records</button>";
+				}
+				$content			.= "<p>You are signed-up as follows:
+										<table style='width:900px;'>
+										<tr><td><b>Callsign<br />$student_call_sign</b></td>
+											<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+											<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+											<td><b>Email</b><br />$user_email</td></tr>
+										<tr><td><b>City</b><br />$user_city</td>
+											<td><b>State</b><br />$user_state</td>
+											<td><b>Zip Code</b><br />$user_zip_code</td>
+											<td><b>Country</b><br />$user_country</td></tr>
+										<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+											<td><b>Telegram</b><br />$user_telegram</td>
+											<td><b>Signal</b><br />$user_signal</td>
+											<td><b>Messenger</b><br />$user_messenger</td></tr>
+										<tr><td><b>Level: </b>$student_level</td>
+											<td><b>Language: </b>$student_class_language</td>
+											<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
+				if ($student_no_catalog == 'Y') {
+					$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
+					if ($student_flexible == 'Y') {
+						$content	.= "My time is flexible</td></tr>";
+					} else {
+						$myArray	= explode(",",$student_catalog_options);
+						foreach($myArray as $thisData) {
+							$myStr		= $catalogOptions[$thisData];
+							$content	.= "$myStr<br />";
 						}
-						$content			.= "<p>You are signed-up as follows:
-												<table style='width:900px;'>
-												<tr><td><b>Callsign<br />$student_call_sign</b></td>
-													<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-													<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-													<td><b>Email</b><br />$student_email</td></tr>
-												<tr><td><b>City</b><br />$student_city</td>
-													<td><b>State</b><br />$student_state</td>
-													<td><b>Zip Code</b><br />$student_zip_code</td>
-													<td><b>Country</b><br />$student_country</td></tr>
-												<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-													<td><b>Telegram</b><br />$student_telegram</td>
-													<td><b>Signal</b><br />$student_signal</td>
-													<td><b>Messenger</b><br />$student_messenger</td></tr>
-												<tr><td><b>Level: </b>$student_level</td>
-													<td><b>Language: </b>$student_class_language</td>
-													<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
-						if ($student_no_catalog == 'Y') {
-							$content	.= "<tr><td colspan='5'><b>Class Preferences</b><br />";
-							if ($student_flexible == 'Y') {
-								$content	.= "My time is flexible</td></tr>";
-							} else {
-								$myArray	= explode(",",$student_catalog_options);
-								foreach($myArray as $thisData) {
-									$myStr		= $catalogOptions[$thisData];
-									$content	.= "$myStr<br />";
-								}
-								$content		.= "</td></tr>";
-							}
-						} else {
-							$content		.= "<tr><td><b>First Class Choice</b><br />$firstChoice</td>
-													<td><b>Second Class Choice</b><br />$secondChoice</td>
-													<td><b>Third Class Choice</b><br />$thirdChoice</td>
-													<td>All times local time</td></tr>";
-						}
-						if ($student_youth == 'Yes') {
-							$content	.= "<tr><td style='text-align:center;'>Youth<br />$student_youth</td>
-												<td style='text-align:center;'>Age<br />$student_age</td>
-												<td>Parent / Guardian<br />$student_student_parent</td>
-												<td>Parent / Guardian Email<br />$student_student_parent_email</td></tr>";
-						}
-						$content		.= "</table></p>
-											<p>If circumstances or your information changes, you can update this information up to 
-												three weeks before the start of the $inp_semester semester by returning to the 
-												<a href='$theURL'>CW Academy Student Registration</a> page and 
-												entering your call sign, email address, and phone number.</p>
-												<p>Please print this page for your reference.<br /><br />
-												73,<br />
-												CW Academy</p>
-												<br /><br />You may close this window";
-		
-						if ($token != '') {
-							if ($doDebug) {
-								echo "going to resolve_reminder<br />";
-							}
-							$result		= resolve_reminder($student_call_sign,$token,$testMode,$doDebug);
-							if ($result === FALSE) {
-								if ($doDebug) {
-									echo "resolve_reminder failed<br />";
-								}
-							}
-						}
+						$content		.= "</td></tr>";
 					}
 				} else {
-					$content		.= "<p>Fatal Error. No record found for student id $student_ID. System Admin has been notified.</p>";
-					sendErrorEmail("$jobname Pass 9. Updates done, but no record found for id $student_ID");
+					$content		.= "<tr><td><b>First Class Choice</b><br />$firstChoice</td>
+											<td><b>Second Class Choice</b><br />$secondChoice</td>
+											<td><b>Third Class Choice</b><br />$thirdChoice</td>
+											<td>All times local time</td></tr>";
+				}
+				if ($student_youth == 'Yes') {
+					$content	.= "<tr><td style='text-align:center;'>Youth<br />$student_youth</td>
+										<td style='text-align:center;'>Age<br />$student_age</td>
+										<td>Parent / Guardian<br />$student_student_parent</td>
+										<td>Parent / Guardian Email<br />$student_student_parent_email</td></tr>";
+				}
+				$content		.= "</table></p>
+									<p>If circumstances or your information changes, you can update this information up to 
+										three weeks before the start of the $inp_semester semester by returning to the 
+										<a href='$theURL'>CW Academy Student Registration</a> page and 
+										entering your call sign, email address, and phone number.</p>
+										<p>Please print this page for your reference.<br /><br />
+										73,<br />
+										CW Academy</p>
+										<br /><br />You may close this window";
+
+				if ($token != '') {
+					if ($doDebug) {
+						echo "going to resolve_reminder<br />";
+					}
+					$result		= resolve_reminder($student_call_sign,$token,$testMode,$doDebug);
+					if ($result === FALSE) {
+						if ($doDebug) {
+							echo "resolve_reminder failed<br />";
+						}
+					}
 				}
 			}
+		} else {
+			if ($doDebug) {
+				echo "No student record ... should never happen<br />";
+			}
+			$content .= "FATAL ERROR. Should never happen!";
 		}
 
 
@@ -3812,29 +3722,9 @@ function student_registration_func() {
 					$student_action_log	.= " / $actionDate STDREG $student_call_sign removed student_response of R ";
 					$updateParams		= array('student_action_log'=>$student_action_log,
 												'student_status'=>'');
-					sendErrorEmail("STDREG $student_call_sign removed student_status of R");
-					$updateFormat		= array('%s','%s');
-					$studentUpdateData		= array('tableName'=>$studentTableName,
-													'inp_method'=>'update',
-													'inp_data'=>$updateParams,
-													'inp_format'=>$updateFormat,
-													'jobname'=>$jobname,
-													'inp_id'=>$student_ID,
-													'inp_callsign'=>$student_call_sign,
-													'inp_semester'=>$student_semester,
-													'inp_who'=>$userName,
-													'testMode'=>$testMode,
-													'doDebug'=>$doDebug);
-					$updateResult	= updateStudent($studentUpdateData);
-					if ($updateResult[0] === FALSE) {
-						$myError	= $wpdb->last_error;
-						$mySql		= $wpdb->last_query;
-						$errorMsg	= "$jobname Processing $student_call_sign in $studentTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-						if ($doDebug) {
-							echo $errorMsg;
-						}
-						sendErrorEmail($errorMsg);
-						$content		.= "Unable to update content in $studentTableName<br />";
+					$updateResult = $student_dal->update($student_id,$updateParams,$operatingMode);
+					if ($updateResult === FALSE) {
+						$content		.= "Unable to update content<br />";
 					} else {
 						if ($doDebug) {
 							echo "response of R removed from $student_call_sign<br />";
@@ -3846,17 +3736,17 @@ function student_registration_func() {
 				$content			.= "<p>You are signed-up as follows:
 										<table style='width:900px;'>
 										<tr><td><b>Callsign<br />$student_call_sign</b></td>
-											<td><b>Name</b><br />$student_last_name, $student_first_name</td>
-											<td><b>Phone</b><br />+$student_ph_code $student_phone</td>
-											<td><b>Email</b><br />$student_email</td></tr>
-										<tr><td><b>City</b><br />$student_city</td>
-											<td><b>State</b><br />$student_state</td>
-											<td><b>Zip Code</b><br />$student_zip_code</td>
-											<td><b>Country</b><br />$student_country</td></tr>
-										<tr><td><b>WhatsApp</b><br />$student_whatsapp</td>
-											<td><b>Telegram</b><br />$student_telegram</td>
-											<td><b>Signal</b><br />$student_signal</td>
-											<td><b>Messenger</b><br />$student_messenger</td></tr>
+											<td><b>Name</b><br />$user_last_name, $user_first_name</td>
+											<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
+											<td><b>Email</b><br />$user_email</td></tr>
+										<tr><td><b>City</b><br />$user_city</td>
+											<td><b>State</b><br />$user_state</td>
+											<td><b>Zip Code</b><br />$user_zip_code</td>
+											<td><b>Country</b><br />$user_country</td></tr>
+										<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
+											<td><b>Telegram</b><br />$user_telegram</td>
+											<td><b>Signal</b><br />$user_signal</td>
+											<td><b>Messenger</b><br />$user_messenger</td></tr>
 										<tr><td><b>Level: </b>$student_level</td>
 											<td><b>Language: </b>$student_class_language</td>
 											<td colspan='2'><b>Semester: </b>$student_semester</td></tr>";
@@ -3999,58 +3889,11 @@ function student_registration_func() {
 
 			// get the user_master data
 			if (!$haveMasterData) {
-				if ($doDebug) {
-					echo "getting the user_master record for $userName<br />";
-				}
-				$sql			= "select * from $userMasterTableName 
-									where user_call_sign = '$userName'";
-				$sqlResult		= $wpdb->get_results($sql);
-				if ($sqlResult === FALSE) {
-					handleWPDBError($jobname,$doDebug);
-				} else {
-					$numRows	= $wpdb->num_rows;
-					if ($doDebug) {
-						echo "ran $sql<br />and retrieved $numRows rows<br />";
-					}
-					if ($numRows > 0) {
-						$haveMasterData		= TRUE;
-						foreach ($sqlResult as $studentRow) {
-							$student_master_ID 					= $studentRow->user_ID;
-							$student_master_call_sign 			= $studentRow->user_call_sign;
-							$student_first_name 				= $studentRow->user_first_name;
-							$student_last_name 					= $studentRow->user_last_name;
-							$student_email 						= $studentRow->user_email;
-							$student_ph_code					= $studentRow->user_ph_code;
-							$student_phone 						= $studentRow->user_phone;
-							$student_city 						= $studentRow->user_city;
-							$student_state 						= $studentRow->user_state;
-							$student_zip_code 					= $studentRow->user_zip_code;
-							$student_country_code 				= $studentRow->user_country_code;
-							$student_country 					= $studentRow->user_country;
-							$student_whatsapp 					= $studentRow->user_whatsapp;
-							$student_telegram 					= $studentRow->user_telegram;
-							$student_signal 					= $studentRow->user_signal;
-							$student_messenger 					= $studentRow->user_messenger;
-							$student_master_action_log 			= $studentRow->user_action_log;
-							$student_timezone_id 				= $studentRow->user_timezone_id;
-							$student_languages 					= $studentRow->user_languages;
-							$student_survey_score 				= $studentRow->user_survey_score;
-							$student_is_admin					= $studentRow->user_is_admin;
-							$student_role 						= $studentRow->user_role;
-							$student_prev_callsign				= $studentRow->user_prev_callsign;
-							$student_master_date_created 		= $studentRow->user_date_created;
-							$student_master_date_updated 		= $studentRow->user_date_updated;
-						}
-					} else {
-						$haveMasterData			= FALSE;
-						if ($doDebug) {
-							echo "no master data found for $userName. Should not happen<br />";
-						}
-						sendErrorEmail("$jobname Pass 100 reading master data for $userName failed. Should not happen.");
-					}
-				}		
-			}
-			if ($haveMasterData) {
+				// this is a problem. There should always be a user_master
+				$content .= "<p>FATAL ERROR. SysAdmin has been notified<br />";
+				error_log("$jobname Pass 100 FATAL ERROR There should be a user_master record");
+				sendErrorEmail("$jobname Pass 100 FATAL ERROR There should be a user_master record");
+			} else {
 				//Build language selection
 				$languageOptions			= '';
 				$firstTime					= TRUE;
@@ -4104,7 +3947,7 @@ function student_registration_func() {
 											<p>To ensure a successful learning experience, please make sure you have the following:
 											<ul>
 											<li><b>High-speed broadband internet access</b>
-											<li><b>Computing device</b> (desktop or laptop)
+											<li><b>Computing device</b> (desktop or laptop. Tablet or SmartPhone strongly discouraged)
 											<li><b>Webcam</b> (built-in or USB add-on, with camera and microphone)
 											<li><b>Key paddle</b> (single or dual lever; straight keys or bugs are not permitted)
 											<li><b>Keyer with sidetone</b> or a radio with a built-in keyer and sidetone
@@ -4125,9 +3968,9 @@ function student_registration_func() {
 											<tr><td style='width:150px;vertical-align:top;'><b>Call Sign</b></td>
 												<td>$userName</td></tr>
 											<tr><td><b>Name</b></td>
-												<td>$student_last_name, $student_first_name</td></tr>
+												<td>$user_last_name, $user_first_name</td></tr>
 											<tr><td><b>Email Address</b></td>
-												<td>$student_email</td></tr>
+												<td>$user_email</td></tr>
 											<tr><td colspan='2'><b>If any of this information is incorrect,</b> go back to 
 												your Student Portal, update your information, and then start the sign-up</td></tr>
 											<tr><td style='vertical-align:top;'><b>What Class Level Do You Want?</b></td>
@@ -4142,13 +3985,6 @@ function student_registration_func() {
 											<tr><td colspan='2'>'<input class='formInputButton' type='submit' onclick=\"return validate_form(this.form);\" value='Next' /></td></tr></table>
 											</form>";
 			}
-//		} else {
-//			if ($doDebug) {
-//				echo "no master data found. Should not happen. Abort<br />";
-//			}
-//			$content		.= "<p>No Master Data record found. This is a program error. The sysadmin 
-//								has been notified.</p>";
-//			sendErrorEmail("$jobname pass100 no user master data found for $userName. Should not happen");
 		}
 	}
 		
@@ -4193,100 +4029,55 @@ function student_registration_func() {
 		$lastPromotable	= "";
 		$lastSemester	= "";
 		// get the last class 
-		$sql		= "select * from $studentTableName 
-						where student_call_sign = '$inp_callsign' 
-						order by student_date_created DESC 
-						limit 1";
-		$wpw1_cwa_student		= $wpdb->get_results($sql);
+		$criteria = [
+			'relation' => 'AND',
+			'clauses' => [
+				['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '=' ]
+			]
+		];
+		$wpw1_cwa_student = $student_dal->get_student($criteria,'student_date_created','DESC',$operatingMode);
 		if ($wpw1_cwa_student === FALSE) {
-			handleWPDBError($jobname,$doDebug);
 			$content		.= "Unable to obtain content from $studentTableName<br />";
 		} else {
-			$numSRows			= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and found $numSRows rows<br />";
-			}
-			if ($numSRows > 0) {
-				foreach ($wpw1_cwa_student as $studentRow) {
-					$student_ID								= $studentRow->student_id;
-					$student_call_sign						= $studentRow->student_call_sign;
-					$student_time_zone  					= $studentRow->student_time_zone;
-					$student_timezone_offset				= $studentRow->student_timezone_offset;
-					$student_youth  						= $studentRow->student_youth;
-					$student_age  							= $studentRow->student_age;
-					$student_parent 						= $studentRow->student_parent;
-					$student_parent_email  					= strtolower($studentRow->student_parent_email);
-					$student_level  						= $studentRow->student_level;
-					$student_class_language					= $studentRow->student_class_level;
-					$student_waiting_list 					= $studentRow->student_waiting_list;
-					$student_request_date  					= $studentRow->student_request_date;
-					$student_semester						= $studentRow->student_semester;
-					$student_notes  						= $studentRow->student_notes;
-					$student_welcome_date  					= $studentRow->student_welcome_date;
-					$student_email_sent_date  				= $studentRow->student_email_sent_date;
-					$student_email_number  					= $studentRow->student_email_number;
-					$student_response  						= strtoupper($studentRow->student_response);
-					$student_response_date  				= $studentRow->student_response_date;
-					$student_abandoned  					= $studentRow->student_abandoned;
-					$student_status  						= strtoupper($studentRow->student_status);
-					$student_action_log  					= $studentRow->student_action_log;
-					$student_pre_assigned_advisor  			= $studentRow->student_pre_assigned_advisor;
-					$student_selected_date  				= $studentRow->student_selected_date;
-					$student_no_catalog  					= $studentRow->student_no_catalog;
-					$student_hold_override  				= $studentRow->student_hold_override;
-					$student_assigned_advisor  				= $studentRow->student_assigned_advisor;
-					$student_advisor_select_date  			= $studentRow->student_advisor_select_date;
-					$student_advisor_class_timezone 		= $studentRow->student_advisor_class_timezone;
-					$student_hold_reason_code  				= $studentRow->student_hold_reason_code;
-					$student_class_priority  				= $studentRow->student_class_priority;
-					$student_assigned_advisor_class 		= $studentRow->student_assigned_advisor_class;
-					$student_promotable  					= $studentRow->student_promotable;
-					$student_excluded_advisor  				= $studentRow->student_excluded_advisor;
-					$student_survey_completion_date	= $studentRow->student_survey_completion_date;
-					$student_available_class_days  			= $studentRow->student_available_class_days;
-					$student_intervention_required  		= $studentRow->student_intervention_required;
-					$student_copy_control  					= $studentRow->student_copy_control;
-					$student_first_class_choice  			= $studentRow->student_first_class_choice;
-					$student_second_class_choice  			= $studentRow->student_second_class_choice;
-					$student_third_class_choice  			= $studentRow->student_third_class_choice;
-					$student_first_class_choice_utc  		= $studentRow->student_first_class_choice_utc;
-					$student_second_class_choice_utc  		= $studentRow->student_second_class_choice_utc;
-					$student_third_class_choice_utc  		= $studentRow->student_third_class_choice_utc;
-					$student_catalog_options				= $studentRow->student_catalog_options;
-					$student_flexible						= $studentRow->student_flexible;
-					$student_date_created 					= $studentRow->student_date_created;
-					$student_date_updated			  		= $studentRow->student_date_updated;
-
-					if ($doDebug) {
-						echo "found Level: $student_level, Promotable: $student_promotable<br />
-								Response: $student_response, Status: $student_student_status<br />";
-					}
-											
-					if ($student_response != 'R') {
-						if ($student_student_status == 'Y' || $student_student_status == 'S') {
-							if ($student_promotable == '') {
-								$content	.= "<h3>Student Sign-up for $inp_callsign</h3>
-												<p>If you are trying to register for the $nextSemester semester, your advisor needs to 
-												complete your end-of-semester evaluation before you can register.</p>";
-								$doProceed		= FALSE;
-								$allowSignup	= FALSE;
-								if ($doDebug) {
-									echo "doProceed and allowSignup set to FALSE as end-of-semester evaluation not yet done<br />";
-								}
-							} else {
-								$lastLevel		= $student_level;
-								$lastPromotable	= $student_promotable;
-								$lastSemester	= $student_semester;
-								if ($doDebug) {
-									echo "Set lastLevel to $lastLevel, lastPromotable to $lastPromotable, and lastSemester to $lastSemester<br />";
-								}
-							}
-						} 
-					}
+			$myFirst =TRUE;
+			$haveLastClass = FALSE;
+			foreach ($wpw1_cwa_student as $studentRow) {
+				foreach($studentRow as $thisField => $thisValue) {
+					$thisField .= "_fix";
+					$$thisField = $thisValue;
 				}
-			} else {
+				$haveLastClass = TRUE;
+				if ($myFirst) {
+					$myFirst = FALSE;
+					break;
+				}
+			}
+			if ($haveLastClass) {
 				if ($doDebug) {
-					echo "numSRows of $numSRows was not greater than zero<br />";
+					echo "found Level: $student_level_fix, Promotable: $student_promotable_fix<br />
+							Response: $student_response_fix, Status: $student_student_status_fix<br />";
+				}
+										
+				if ($student_response_fix != 'R') {
+					if ($student_status_fix == 'Y' || $student_status_fix == 'S') {
+						if ($student_promotable_fix == '') {
+							$content	.= "<h3>Student Sign-up for $inp_callsign</h3>
+											<p>If you are trying to register for the $nextSemester semester, your advisor needs to 
+											complete your end-of-semester evaluation before you can register.</p>";
+							$doProceed		= FALSE;
+							$allowSignup	= FALSE;
+							if ($doDebug) {
+								echo "doProceed and allowSignup set to FALSE as end-of-semester evaluation not yet done<br />";
+							}
+						} else {
+							$lastLevel		= $student_level_fix;
+							$lastPromotable	= $student_promotable_fix;
+							$lastSemester	= $student_semester_fix;
+							if ($doDebug) {
+								echo "Set lastLevel to $lastLevel, lastPromotable to $lastPromotable, and lastSemester to $lastSemester<br />";
+							}
+						}
+					} 
 				}
 			}
 		}
@@ -4501,7 +4292,7 @@ function student_registration_func() {
 						allowSignup: $allowSignup<br />";
 			}
 			$needsAssessment = FALSE;
-			$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$student_phone&inp_ph_code=$inp_ph_code&inp_email=$student_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level&inp_class_language=$inp_class_language";
+			$stringToPass 	= "inp_method=studentreg&inp_callsign=$inp_callsign&inp_phone=$user_phone&inp_ph_code=$inp_ph_code&inp_email=$user_email&inp_semester=$inp_semester&inp_mode=$inp_mode&inp_verbose=$inp_verbose&thisOption=$thisOption&firsttime=$firsttime&timezone=$timezone&allowSignup=$allowSignup&inp_level=$inp_level&inp_class_language=$inp_class_language";
 			$enstr			= base64_encode($stringToPass);
 			$thisDate		= date('Y-m-d H:i:s');
 			// save the enstr info in the temporary table
