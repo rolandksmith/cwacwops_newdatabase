@@ -2,14 +2,14 @@ function updateExcludedAdvisor($excludedAdvisors,$newExcludedAdvisor,$direction,
 
 /*	Either adds a new excluded advisor or deletes an excluded advisor
 
-	Called with:	current list of excluded advisors
-					the advisor to be added or removed
-					add / delete	(action to be taken)
-					doDebug
-					
-	returns:		new list of excluded advisors
-					or
-					FALSE if something didn't work
+	@param string $excludedAdvisor 	current list of excluded advisors
+	@param string $newExcludedAdvisor	the advisor to be added or removed
+	@param string $direction	add|delete	(action to be taken)
+	@param Bool    $doDebug				
+	@return string|FALSE	new list of excluded advisors
+							or
+							FALSE if something didn't work
+
 */
 
 	if ($doDebug) {
@@ -19,13 +19,15 @@ function updateExcludedAdvisor($excludedAdvisors,$newExcludedAdvisor,$direction,
 				action: $direction<br />";
 	}
 	
+	$excludedAdvisors = str_replace('|','&',$excludedAdvisors);
+	
 	if ($direction != 'add' && $direction != 'delete') {
 		if ($doDebug) {
 			echo "direction of $direction invalid<br />";
 		}
 	} else {
 		if ($direction == 'add') {
-			$newExcludedAdvisorList			= '';
+			$newExcludedAdvisorList	= '';
 			if ($excludedAdvisors == '') {
 				$newExcludedAdvisorList		= $newExcludedAdvisor;
 				if ($doDebug) {
@@ -36,44 +38,40 @@ function updateExcludedAdvisor($excludedAdvisors,$newExcludedAdvisor,$direction,
 				}
 				return $newExcludedAdvisorList;
 			} else {
-//				if (str_contains($excludedAdvisors,'&')) {
-//					if ($doDebug) {
-//						echo "current list contains more than one advisor<br />";
-//					}
-					if (str_contains($excludedAdvisors,$newExcludedAdvisor)) {  // already there
-						// compress and return
-						if ($doDebug) {
-							echo "new advisor already in the current list<br />";
+				if (str_contains($excludedAdvisors,$newExcludedAdvisor)) {  // already there
+					// compress and return
+					if ($doDebug) {
+						echo "new advisor already in the current list<br />";
+					}
+					$myArray 				= explode('&',$excludedAdvisors);
+					$newExcluded			= array_unique($myArray);
+					foreach($newExcluded as $thisKey => $thisValue) {
+						if ($thisValue == '') {
+							unset($newExcluded[$thisKey]);
 						}
-						$myArray 				= explode('&',$excludedAdvisors);
-						$newExcluded			= array_unique($myArray);
-						foreach($newExcluded as $thisKey => $thisValue) {
-							if ($thisValue == '') {
-								unset($newExcluded[$thisKey]);
-							}
+					}
+					$newExcludedAdvisorList	= implode('&',$newExcluded);
+					if ($doDebug) {
+						echo "returning<br />";
+					}
+					return $newExcludedAdvisorList;
+				} else {
+					if ($doDebug) {
+						echo "new advisor not in the current list. Adding.<br />";
+					}
+					$myArray 				= explode('&',$excludedAdvisors);
+					$newExcluded			= array_unique($myArray);
+					foreach($newExcluded as $thisKey => $thisValue) {
+						if ($thisValue == '') {
+							unset($newExcluded[$thisKey]);
 						}
-						$newExcludedAdvisorList	= implode('&',$newExcluded);
-						if ($doDebug) {
-							echo "returning<br />";
-						}
-						return $newExcludedAdvisorList;
-					} else {
-						if ($doDebug) {
-							echo "new advisor not in the current list. Adding.<br />";
-						}
-						$myArray 				= explode('&',$excludedAdvisors);
-						$newExcluded			= array_unique($myArray);
-						foreach($newExcluded as $thisKey => $thisValue) {
-							if ($thisValue == '') {
-								unset($newExcluded[$thisKey]);
-							}
-						}
-						$newExcluded[]			= $newExcludedAdvisor;
-						$newExcludedAdvisorList	= implode('&',$newExcluded);
-						if ($doDebug) {
-							echo "returning<br />";
-						}
-						return $newExcludedAdvisorList;
+					}
+					$newExcluded[]			= $newExcludedAdvisor;
+					$newExcludedAdvisorList	= implode('&',$newExcluded);
+					if ($doDebug) {
+						echo "returning<br />";
+					}
+					return $newExcludedAdvisorList;
 					
 					}
 //				}
