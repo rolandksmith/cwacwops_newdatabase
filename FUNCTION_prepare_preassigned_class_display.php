@@ -8,6 +8,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 			showVerified: 'Y' (show the verified field) or 'N' (don't show verified field)
 			header: TRUE: show advisor header or FALSE: no advisor header
 			doPreAssigned: TRUE: do pre_assigned as well as assigned or FALSE: do assigned only
+			doFind: not used but required
 			
 	Returns an array(TRUE/FALSE,Display Data or Error,classes count,student count)
 
@@ -119,7 +120,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 						}
 						$jj++;
 						if ($jj > 1) {
-							$ontent .= "<tr><td colspan='7'><hr></td></tr>";
+							$content .= "<tr><td colspan='7'><hr></td></tr>";
 						}
 						$content .= "<tr><td colspan='7'><b>Advisor Class #$jj</b><br />
 											<b>Class Size:</b> $advisorclass_class_size &nbsp;&nbsp;&nbsp;&nbsp;
@@ -136,29 +137,23 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 							$criteria = [
 								'relation' => 'AND',
 								'clauses' => [
-									// field1 = $value1
-									['field' => 'advisor_call_sign', 'value' => 'K1ABC', 'compare' => '='],
-									
-									// (field2 = $value2 OR field2 = $value3)
-									[
-										'relation' => 'OR',
-										'clauses' => [
-											['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],
-											['field' => 'student_pre_assigned_advisor', 'value' => $advisor_call_sign, 'compare' => '='],
-											['field' => 'student_assigned_advisor_class', 'value' => $advisorclass_sequence, 'compare' => '='],
-											['field' => 'student_assigned_advisor', 'value' => '', 'compare' => '='],
-											['field' => 'student_response', 'value' => 'Y', 'compare' => '=']
-										]
-									]
+									['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '='],
+									['field' => 'student_pre_assigned_advisor', 'value' => $advisor_call_sign, 'compare' => '='],
+									['field' => 'student_assigned_advisor_class', 'value' => $advisorclass_sequence, 'compare' => '='],
+									['field' => 'student_assigned_advisor', 'value' => '', 'compare' => '='],
+									['field' => 'student_response', 'value' => 'Y', 'compare' => '=']
 								]
 							];
-							$preResult = student_dal->get_student( $criteria, 'student_call_sign', 'ASC', $operatingMode );
+							$requestInfo = array('criteria' => $criteria,
+												 'orderby' => 'student_call_sign',
+												 'order' => 'ASC');
+							$preResult = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug) ;
 							if ($preResult === FALSE || $preResult === NULL) {
 								if ($doDebug) {
 									echo "getting preResult returned FALSE|NULL<br/>";
 								}
 							} else {
-								if (! empty($repResult)) {
+								if (! empty($preResult)) {
 									$ii = 0;
 									foreach($preResult as $key => $value) {
 										foreach($value as $thisField => $thisValue) {
@@ -185,29 +180,90 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 										}											
 										
 										if ($useThisStudent) {
-											if ($doDebug) {
-												echo "using student $student_call_sign<br />";
-											}
-											// look for an empty student slot
-											$gotASpot = FALSE;
-											$ii= 1;
-											while (!$gotASpot) {
-												$strnum = str_pad($ii,2,'0',STR_PAD_LEFT);
+											$studentCount++;
+											$ii++;
+											$classCount++;
+											$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
+											$myStr = "";
+											$content	.= "<tr><td style='vertical-align:top;'><b>Student $ii</b><br />$user_last_name, $user_first_name ($studentLink)</td>
+																<td style='vertical-align:top;'><b>Email</b><br />$user_email<br />$student_first_class_choice_utc</td>
+																<td style='vertical-align:top;'><b>Phone</b><br />$user_ph_code $user_phone<br />$student_second_class_choice_utc</td>
+																<td style='vertical-align:top;'><b>State</b><br />$user_state<br />$student_third_class_choice_utc</td>
+																<td style='vertical-align:top;'><b>Country</b><br/>$user_country</td>
+																<td style='vertical-align:top;'><b>Language</b><br />$student_class_language</td>
+																<td style='vertical-align:top;'><b>Status<br />$myStr<td></tr>";
+// 										
+											/// check to see if there are assessment records for this student
+											$hasAssessment			= FALSE;
+											$assessment_count	= $wpdb->get_var("select count(record_id) 
+																	   from $audioAssessmentTableName 
+																		where call_sign='$student_call_sign'");
+											if ($assessment_count > 0) {
+												$hasAssessment	= TRUE;
 												if ($doDebug) {
-													echo "testing slot advisorclass_student$strnum<br />";
+													echo "have assessment records<br />";
 												}
-												if (${'advisorclass_student' . $strnum} == '') {
-													${'advisorclass_student' . $strnum} = $student_call_sign;
-													if ($doDebug) {
-														echo "put $student_call_sign into advisorclass_student$strnum<br />";
-													}
-													$gotASpot = TRUE;
-												} else {
-													$ii++;
-													if ($ii > 30) {
-														break;
-													}
+											}
+											$newAssessmentCount		= $wpdb->get_var("select count(record_id) 
+																	   from $newAssessmentData 
+																		where callsign='$student_call_sign'");
+																		
+											if ($newAssessmentCount > 0) {
+												$hasAssessment	= TRUE;
+												if ($doDebug) {
+													echo "have assessment records<br />";
 												}
+											}
+											$extras							= "Additional contact options: ";
+											$haveExtras						= FALSE;
+											if ($user_whatsapp != '' ) {
+												$extras						.= "WhatsApp: $user_whatsapp ";
+												$haveExtras					= TRUE;
+											}
+											if ($user_signal != '' ) {
+												$extras						.= "Signal: $user_signal ";
+												$haveExtras					= TRUE;
+											}
+											if ($user_telegram != '' ) {
+												$extras						.= "Telegram: $user_telegram ";
+												$haveExtras					= TRUE;
+											}
+											if ($user_messenger != '' ) {
+												$extras						.= "Messenger: $user_messenger ";
+												$haveExtras					= TRUE;
+											}
+									
+
+											if ($haveExtras) {
+												$content					.= "<tr><td colspan='7'>$extras</td></tr>";
+											}
+											$thisParent			= '';
+											$thisParentEmail	= '';
+											if ($student_youth == 'Yes') {
+												if ($student_age < 18) { 
+													if ($student_parent == '') {
+														$thisParent	= 'Not Given';
+													} else {
+														$thisParent	= $student_parent;
+													}
+													if ($student_parent_email == '') {
+														$thisParentEmail = 'Not Given';
+													} else {
+														$thisParentEmail = $student_parent_email;
+													}
+													$content	.= "<tr><td colspan='7'>The student has registered as a youth under the age of 18. The student's 
+																	parent or guardian is $thisParent at email address $thisParentEmail.</td></tr>";
+												}
+											}
+
+											if ($hasAssessment) {
+												$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$student_call_sign");
+												$content	.= "<tr><td colspan='7' style='border-bottom-style:solid;'>Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to review $student_call_sign's self assessment</td></tr>";
+											} else {
+												$content	.= "<tr><td colspan='7' style='border-bottom-style:solid;'></td></tr>";
+											}
+											if ($doDebug) {
+												echo "student added to display<br />";
 											}
 										} else {
 											if ($doDebug) {
@@ -217,7 +273,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 									}
 								} else {
 									if ($doDebug) {
-										echo "No unassigned pre-assigned found<br />";
+										echo "No pre-assigned found<br />";
 									}
 								}
 							}
