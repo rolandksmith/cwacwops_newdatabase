@@ -2,7 +2,7 @@ function display_data_log_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -91,6 +91,14 @@ function display_data_log_func() {
 			if ($str_key 		== "inp_callsign") {
 				$inp_callsign	 = strtoupper($str_value);
 				$inp_callsign	 = filter_var($inp_callsign,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_record_id") {
+				$inp_record_id	 = strtoupper($str_value);
+				$inp_record_id	 = filter_var($inp_record_id,FILTER_UNSAFE_RAW);
+			}
+			if ($str_key 		== "inp_jobsince") {
+				$inp_jobsince	 = strtoupper($str_value);
+				$inp_jobsince	 = filter_var($inp_jobsince,FILTER_UNSAFE_RAW);
 			}
 		}
 	}
@@ -184,11 +192,15 @@ function display_data_log_func() {
 	$productionTableNameArray = array('advisor'=>'wpw1_cwa_advisor',
 									  'advisorclass'=>'wpw1_cwa_advisorclass',
 									  'student'=>'wpw1_cwa_student',
-									  'user'=>'wpw1_cwa_user_master');
+									  'user'=>'wpw1_cwa_user_master',
+									  'everything'=>'everything',
+									  'joblog'=>'joblog');
 	$testmodeTableNameArray = array('advisor'=>'wpw1_cwa_advisor2',
 									  'advisorclass'=>'wpw1_cwa_advisorclass2',
 									  'student'=>'wpw1_cwa_student2',
-									  'user'=>'wpw1_cwa_user_master2');
+									  'user'=>'wpw1_cwa_user_master2',
+									  'everything'=>'everything',
+									  'joblog'=>'joblog');
 
 	if ("1" == $strPass) {
 		$content 		.= "<h3>$jobname</h3>
@@ -198,13 +210,18 @@ function display_data_log_func() {
 							<input type='hidden' name='strpass' value='2'>
 							<table style='border-collapse:collapse;'>
 							<tr><td style='vertical-align:top;'>Select Table Name
-								<td><input type='radio' class='formInputButton' name='inp_table_name' value='advisor' required>Advisor<br />
-									<input type='radio' class='formInputButton' name='inp_table_name' value='advisorclass' required>AdvisorClass<br />
-									<input type='radio' class='formInputButton' name='inp_table_name' value='student' required>Student<br />
-									<input type='radio' class='formInputButton' name='inp_table_name' value='user' required>User_Master<br />
-									<input type='radio' class='formInputButton' name='inp_table_name' value='everything' checked required>Everything</td></tr>
+								<td><input type='radio' class='formInputButton' name='inp_table_name' value='advisor' >Advisor<br />
+									<input type='radio' class='formInputButton' name='inp_table_name' value='advisorclass' >AdvisorClass<br />
+									<input type='radio' class='formInputButton' name='inp_table_name' value='student' >Student<br />
+									<input type='radio' class='formInputButton' name='inp_table_name' value='user' >User_Master<br />
+									<input type='radio' class='formInputButton' name='inp_table_name' value='joblog' >Job Log<br />
+									<input type='radio' class='formInputButton' name='inp_table_name' value='everything' checked>Everything</td></tr>
 							<tr><td style='vertical-align:top;'>Callsign to Display</td>
-								<td><input type='text' class='formInputText' size='25' maxlength='25' name='inp_callsign' reqired></td></tr>
+								<td><input type='text' class='formInputText' size='25' maxlength='25' name='inp_callsign'></td></tr>
+							<tr><td style='vertical-align:top;'>Everything since record</td>
+								<td><input type='text' class='formInputText' size='10' maxlength='10' name='inp_record_id' ></td></tr>
+							<tr><td style='vertical-align:top;'>Job Log since</td>
+								<td><input type='text' class='formInputText' size='20' maxlength='20' name='inp_jobsince' value='0000-00-00 00:00:0' ></td></tr>
 							$testModeOption
 							<tr><td>Save this report to the reports achive?</td>
 							<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
@@ -220,6 +237,8 @@ function display_data_log_func() {
 		if ($doDebug) {
 			echo "<br />at pass 2 with inp_table_name $inp_table_name and inp_callsign $inp_callsign<br />";
 		}
+		
+		$theTableName = 'everything';
 		if ($inp_table_name != 'everything') {
 			// get the correct table name
 			if ($testMode) {
@@ -227,23 +246,64 @@ function display_data_log_func() {
 			} else {
 				$theTableName = $productionTableNameArray[$inp_table_name];
 			}
-			$content .= "<h3>$jobname</h3>
-						<h4>Showing Entries for $inp_callsign in Table $theTableName</h4>";
-			$getResults = $wpdb->get_results("select * from $dataLogTableName 
-											where data_call_sign = '$inp_callsign' and data_table_name = '$theTableName'  
-											order by data_date_written ASC");
+		}
+		$content .= "<h3>$jobname</h3>";
+		
+		$sql = '';
+
+		// set up the sql based on what was requested
+		if ($inp_callsign != '') {
+			if ($inp_table_name == 'everything') {
+				$sql = "select * from $dataLogTableName 
+						where data_call_sign = '$inp_callsign' 
+						order by data_date_written ASC";
+			} else {
+				$sql = "select * from $dataLogTableName 
+						where data_call_sign = '$inp_callsign' 
+						and data_table_name = '$theTableName'
+						order by data_date_written ASC";
+			}
+		} elseif ($inp_callsign == '' && $inp_table_name == 'joblog') {
+				$sql = "select * from $dataLogTableName 
+						where data_call_sign = '$inp_callsign' 
+						and data_table_name = '$theTableName' 
+						and data_date_written >= '$inp_jobsince' 
+						order by data_date_written ASC";
+		} else {
+			$myInt = intval($inp_record_id);
+			$sql = "select * from $dataLogTableName 
+					where data_record_id >= $myInt  
+					order by data_record_id ASC";
+		}
+		
+		if ($sql != '') {
+			$getResults = $wpdb->get_results($sql);
 			if ($getResults === FALSE) {
-				$content .= "<p>Attempting to get data from $theTableName for callsign $inp_callsign returned FALSE</p>";
+				$content .= "<p>Attempting to get data from $theTableName returned FALSE</p>";
 			} else {
 				$numRecords = $wpdb->num_rows;
+				$myLastQuery = $wpdb->last_query;
+				if ($doDebug) {
+					echo "ran $myLastQuery<br />and retrieved $numRecords rows<br />";
+				}
 				if ($numRecords > 0) {
-					$content .= "<table>
-								<tr><th style='width:150px;'>Date</th>
+					$content .= "Parameters:<br />
+								 Table Name: $inp_table_name<br />
+								 Call Sign: $inp_callsign<br />
+								 Starting Record ID: $inp_record_id<br />
+								 Joblog Since: $inp_jobsince<br />";
+					$content .= "<table style='width:1200px;'>
+								<tr><th>Record</th>
+									<th>Date</th>
+									<th>User</th>
+									<th>Call Sign</th>
+									<th>Table</th>
 									<th>Action</th>
 									<th>Affected Fields</th></tr>";
 					foreach($getResults as $getResultsRow) {
 						$data_record_id = $getResultsRow->data_record_id;
 						$data_date_written = $getResultsRow->data_date_written;
+						$data_user = $getResultsRow->data_user;
 						$data_call_sign = $getResultsRow->data_call_sign;
 						$data_table_name = $getResultsRow->data_table_name;
 						$data_action = $getResultsRow->data_action;
@@ -260,82 +320,24 @@ function display_data_log_func() {
 							if (preg_match("/action_log/i",$thisField)) {
 								$thisValue = formatActionLog($thisValue);
 							}
-							$fieldsDisplay .= "<b>$thisField changed to:</b> $thisValue<br />";
+							$fieldsDisplay .= "<b>$thisField set to:</b> $thisValue<br />";
 						}
 						
-						$content .= "<tr><td style='vertical-align:top;'>$data_date_written</td>
+						$content .= "<tr><td style='vertical-align:top;'>$data_record_id</td>
+										<td style='vertical-align:top;'>$data_date_written</td>
+										<td style='vertical-align:top;'>$data_user</td>
+										<td style='vertical-align:top;'>$data_call_sign</td>
+										<td style='vertical-align:top;'>$data_table_name</td>
 										<td style='vertical-align:top;'>$data_action</td>
 										<td style='vertical-align:top;'>$fieldsDisplay</td></tr>";
 					}
 					$content .= "</table>";
 				} else {
-					$content .= "<p>No records found in $theTableName for callsign $inp_callsign</p>";
+					$content .= "<p>No records found</p>";
 				}
 			}
-		} else {			// show everything
-			// set up the tablename check
-			$everythingTableNameArray = array();
-			if ($testMode) {
-				foreach($testmodeTableNameArray as $shortName => $tableName) {
-					$everythingTableNameArray[$tableName] = $shortName;
-				}
-			} else {
-				foreach($productionTableNameArray as $shortName => $tableName) {
-					$everythingTableNameArray[$tableName] = $shortName;
-				}
-			}
-			$content .= "<h3>$jobname</h3>
-						<h4>Showing All Entries for $inp_callsign</h4>";
-			$getResults = $wpdb->get_results("select * from $dataLogTableName 
-											where data_call_sign = '$inp_callsign' 
-											order by data_date_written ASC");
-			if ($getResults === FALSE) {
-				$content .= "<p>Attempting to get data from $theTableName for callsign $inp_callsign returned FALSE</p>";
-			} else {
-				$numRecords = $wpdb->num_rows;
-				if ($numRecords > 0) {
-					$content .= "<table>
-								<tr><th style='width:150px;'>Date</th>
-									<th>Type</th>
-									<th>Action</th>
-									<th>Affected Fields</th></tr>";
-					foreach($getResults as $getResultsRow) {
-						$data_record_id = $getResultsRow->data_record_id;
-						$data_date_written = $getResultsRow->data_date_written;
-						$data_call_sign = $getResultsRow->data_call_sign;
-						$data_table_name = $getResultsRow->data_table_name;
-						$data_action = $getResultsRow->data_action;
-						$data_field_values = $getResultsRow->data_field_values;
-
-						// see if we want this record
-						if (array_key_exists($data_table_name, $everythingTableNameArray)) {
-							$shortTableName = $everythingTableNameArray[$data_table_name];
-							$fieldsArray = json_decode($data_field_values,TRUE);
-							if ($doDebug) {
-								echo "fieldsArray:<br /><pre>";
-								print_r($fieldsArray);
-								echo "</pre><br />";
-							}
-							$fieldsDisplay = '';
-							foreach($fieldsArray as $thisField => $thisValue) {
-								if (preg_match("/action_log/i",$thisField)) {
-									$thisValue = formatActionLog($thisValue);
-								}
-								$fieldsDisplay .= "<b>$thisField changed to:</b> $thisValue<br />";
-							}
-							
-							$content .= "<tr><td style='vertical-align:top;'>$data_date_written</td>
-											<td style='vertical-align:top;'>$shortTableName</td>
-											<td style='vertical-align:top;'>$data_action</td>
-											<td style='vertical-align:top;'>$fieldsDisplay</td></tr>";
-						}
-					}
-					$content .= "</table>";
-				} else {
-					$content .= "<p>No records found in $theTableName for callsign $inp_callsign</p>";
-				}
-			}
-		
+		} else {
+			$content .= "<p>Invalid Data Request</p>";
 		}
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
