@@ -1397,61 +1397,61 @@ function display_and_update_advisor_info_func() {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_semester'] = $inp_advisor_semester;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_semester of $advisor_semester to inp_advisor_semester. ";
+						$actionContent .= "Updated advisor_semester of $advisor_semester to $inp_advisor_semester. ";
 					}
 					if ($inp_advisor_welcome_email_date != $advisor_welcome_email_date) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_welcome_email_date'] = $inp_advisor_welcome_email_date;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_welcome_email_date of $advisor_welcome_email_date to inp_advisor_welcome_email_date. ";
+						$actionContent .= "Updated advisor_welcome_email_date of $advisor_welcome_email_date to $inp_advisor_welcome_email_date. ";
 					}
 					if ($inp_advisor_verify_email_date != $advisor_verify_email_date) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_verify_email_date'] = $inp_advisor_verify_email_date;
 						$updateFormat[] = "%2";
-						$actionContent .= "Updated advisor_verify_email_date of $advisor_verify_email_date to inp_advisor_verify_email_date. ";
+						$actionContent .= "Updated advisor_verify_email_date of $advisor_verify_email_date to $inp_advisor_verify_email_date. ";
 					}
 					if ($inp_advisor_verify_email_number != $advisor_verify_email_number) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_verify_email_number'] = $inp_advisor_verify_email_number;
 						$updateFormat[] = "%d";
-						$actionContent .= "Updated advisor_verify_email_number of $advisor_verify_email_number to inp_advisor_verify_email_number. ";
+						$actionContent .= "Updated advisor_verify_email_number of $advisor_verify_email_number to $inp_advisor_verify_email_number. ";
 					}
 					if ($inp_advisor_verify_response != $advisor_verify_response) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_verify_response'] = $inp_advisor_verify_response;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_verify_response of $advisor_verify_response to inp_advisor_verify_response. ";
+						$actionContent .= "Updated advisor_verify_response of $advisor_verify_response to $inp_advisor_verify_response. ";
 					}
 					if ($inp_advisor_class_verified != $advisor_class_verified) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_class_verified'] = $inp_advisor_class_verified;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_class_verified of $advisor_class_verified to inp_advisor_class_verified. ";
+						$actionContent .= "Updated advisor_class_verified of $advisor_class_verified to $inp_advisor_class_verified. ";
 					}
 					if ($inp_advisor_control_code != $advisor_control_code) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_control_code'] = $inp_advisor_control_code;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_control_code of $advisor_control_code to inp_advisor_control_code. ";
+						$actionContent .= "Updated advisor_control_code of $advisor_control_code to $inp_advisor_control_code. ";
 					}
 					if ($inp_advisor_date_created != $advisor_date_created) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_date_created'] = $inp_advisor_date_created;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_date_created of $advisor_date_created to inp_advisor_date_created. ";
+						$actionContent .= "Updated advisor_date_created of $advisor_date_created to $inp_advisor_date_created. ";
 					}
 					if ($inp_advisor_date_updated != $advisor_date_updated) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_date_updated'] = $inp_advisor_date_updated;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_date_updated of $advisor_date_updated to inp_advisor_date_updated. ";
+						$actionContent .= "Updated advisor_date_updated of $advisor_date_updated to $inp_advisor_date_updated. ";
 					}
 					if ($inp_advisor_replacement_status != $advisor_replacement_status) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisor_replacement_status'] = $inp_advisor_replacement_status;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisor_replacement_status of $advisor_replacement_status to inp_advisor_replacement_status. ";
+						$actionContent .= "Updated advisor_replacement_status of $advisor_replacement_status to $inp_advisor_replacement_status. ";
 					}
 					if ($doTheUpdate) {
 						if ($doDebug) {
