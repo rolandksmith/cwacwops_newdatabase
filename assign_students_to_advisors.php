@@ -174,12 +174,16 @@ function assign_students_to_advisors_func() {
 	$arbitraryArray					= array();
 	$preAssignedArray				= array();
 	$overrideArray					= array();
+	$unassignedArray				= array();
 	$defaultClassSize				= $initializationArray['defaultClassSize'];
 	$userName						= $initializationArray['userName'];
 	$studentUpdateURL				= "$siteURL/cwa-display-and-update-student-signup-information/";
-	$advisorUpdateURL				= "$siteURL/cwa-display-and-update-advisor-signup-information/";
+	$advisorUpdateURL				= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$unassignedArraySequence		= 0;
 	$studentTrace					= "";
+	$pass1Assignments				= 0;
+	$pass2Assignments				= 0;
+	
 	
 	$showAdvisorClasses				= TRUE;
 	
@@ -544,7 +548,7 @@ function assign_students_to_advisors_func() {
 						if (count($thisChoiceArray) > 0) {
 							foreach($thisChoiceArray as $myValue) {
 								if (!$gotAClass) {
-										debugReport("Checking thisChoiceArray entry of $myValue for seats available<br />");
+									debugReport("Checking thisChoiceArray entry of $myValue for seats available<br />");
 									$choiceArray		= explode("|",$myValue);
 									$advisorChoice		= $choiceArray[2];
 									$seqChoice			= $choiceArray[3];
@@ -1595,148 +1599,279 @@ function assign_students_to_advisors_func() {
 //////////	assign students to advisors
 /*	processStudentArray is sorted by level, language, priority, request date and has the first, second,
 		and third class choices in UTC
+	In the first pass through the processStudentArray disregard any student with None, None, None
+		for class preferences
 	for each of the class choices, where there is a class choice
 		run the findAClass function with the student level, languae, class time, class day, excluded advisor
 		if the return is not FALSE, run assignStudentToAdvisor function with student_call_sign,
 			advisor_call_sign, and advisor class sequence
 			count the student as assigned
+			remove the student from the processStudentArray so it doesn't get worked in pass 2
 		if the return is FALSE, do the next class choice
-		If none of the class choices work, do the arbitrary class assignment
-
-	if no class found, make an arbitrary assignment
-		calculate 1900 in student's local time in UTC
-		Look for a class at the student's level, language, utc time, Monday,Thursday
-			if found, assign the student to that class
-				and add the student to the arbitraryArray
-			if not found, add to errorArray
+		If none of the class choices work contiue with the next student
+		
+	On the second pass through the processStudentArray
+		if the student is None, None, None, set first class choice to 1900 Monday,Thursday
+			local time have findAClass look for a class
+			If a class is found, assign the student
+			otherwise add the student tothe unassigned array and go to the next student
+	
+		If the student has at least one class choice, 
+			move +3 hours and try findAClass
+			If no class move -3 hours and try findAClass
+			
+			Do that for each unique class choice that isn't None
+			If no class found, add the student to the unassigned array 
+				and go on to the next student
 
 */
 
 		debugReport("<br /><b>Assigning Students</b><br />");
-		foreach($processStudentArray as $studentValue) {
-			$myArray					= explode("|",$studentValue);
-			$studentLevel				= $myArray[0];
-			$studentLanguage			= $myArray[1];
-			$studentPriority			= $myArray[2];
-			$studentReqDate				= $myArray[3];
-			$studentCallSign			= $myArray[4];
-			$studentFirstClassChoice	= $myArray[5];		// times and days are in UTC
-			$studentSecondClassChoice	= $myArray[6];
-			$studentThirdClassChoice	= $myArray[7];
-			$studentTimeZone			= $myArray[8];
-			$studentExcludedAdvisor		= $myArray[9];
-			
-			debugReport("<br />Processing $studentCallSign $studentLevel<br />
-						language: $studentLanguage<br />
-						first choice: $studentFirstClassChoice<br />
-						second choice: $studentSecondClassChoice<br />
-						third choice: $studentThirdClassChoice<br />
-						time zone: $studentTimeZone<br />");						
+		for($passii=1; $passii <3; $passii++) {
+			debugReport("<br />starting $passii on processStudentArray<br />");
+			foreach($processStudentArray as $processStudentArrayKey => $studentValue) {
+				$myStr = "<br />processStudentArray Values:<br /><pre>";
+				$myStr .= print_r($studentValue,TRUE);
+				$myStr .= "</pre><br />";
+				debugReport("passii $passii: $myStr");
+				$myArray					= explode("|",$studentValue);
+				$studentLevel				= $myArray[0];
+				$studentLanguage			= $myArray[1];
+				$studentPriority			= $myArray[2];
+				$studentReqDate				= $myArray[3];
+				$studentCallSign			= $myArray[4];
+				$studentFirstClassChoice	= $myArray[5];		// times and days are in UTC
+				$studentSecondClassChoice	= $myArray[6];
+				$studentThirdClassChoice	= $myArray[7];
+				$studentTimeZone			= $myArray[8];
+				$studentExcludedAdvisor		= $myArray[9];
+				
+				$gotAClass = FALSE;
+				
+				debugReport("<br />pass $passii Processing $studentCallSign $studentLevel<br />
+							language: $studentLanguage<br />
+							first choice: $studentFirstClassChoice<br />
+							second choice: $studentSecondClassChoice<br />
+							third choice: $studentThirdClassChoice<br />
+							time zone: $studentTimeZone<br />");						
+				
+				// check the choices to make sure they're all unique
+				if ($studentSecondClassChoice != 'None' && 
+					($studentSecondClassChoice == $studentFirstClassChoice or 
+					 $studentSecondClassChoice == $studentThirdClassChoice)) {
+					 	$studentSecondClassChoice = 'None';
+				}
+				if ($studentThirdClassChoice != 'None' && 
+					($studentThirdClassChoice == $studentFirstClassChoice or 
+					 $studentThirdClassChoice == $studentSecondClassChoice)) {
+					 	$studentThirdClassChoice = 'None';
+				}
+				$doThisStudent = FALSE;			
+				if ($passii == 1) {
+					if ($studentFirstClassChoice != 'None' || 
+						$studentSecondClassChoice != 'None' || 
+						$studentThirdClassChoice != 'None') {}
+					$doThisStudent = TRUE;	
+					debugReport("passii $passii $studentCallSign studentchoices not None. doThisStudent is TRUE<br />");				
+				} elseif ($passii == 2) {
+					$doThisStudent = TRUE;
+					debugReport("passii $passii  doThisStudent is TRUE<br />");				
+				} else {
+					debugReport("<b>BIG ERROR!</b> Too many passes pasii is $passii<br />");
+					$doThisStudent = FALSE;
+				}
+				
+				if ($doThisStudent) { 
+					if ($passii == 2) {
+						// see if this is a None, None, None student
+						// if so, set first choice local to 1900 Monday,Thursday
+						// and calculate the UTC
+						if ($studentFirstClassChoice == 'None' && 
+							$studentSecondClassChoice == 'None' && 
+							$studentThirdClassChoice == 'None') {
 
-			$gotAClass			= FALSE;
-			$studentTrace		.= "<br /><b>$studentCallSign</b><br />";
-			debugReport("Look for a class for student choices<br />");
-			$thisResult		= findAClass($studentLevel,$studentLanguage,$studentFirstClassChoice,$studentSecondClassChoice,$studentThirdClassChoice,$studentExcludedAdvisor);
-			if ($thisResult[0] !== FALSE) {
-				$gotAClass	= TRUE;
-				$studentTrace		.= $thisResult[3];
-				debugReport("Got a class: $thisResult[1]<br />");
-			} else {
-				$studentTrace		.= $thisResult[3];
-				$thisStr			= "No class match. Options checked:<br /><pre>";
-				$thisStr			.= print_r($thisResult[2],TRUE);
-				$thisStr			.=  "</pre><br />";
-				debugReport($thisStr);
-			}
+							debugReport("<br />passii 2: student ($studentCallSign) is None, None, None. Attempting 1900 Monday,Thursday local<br />");
 
-			if (!$gotAClass) {	
-				debugReport("<br />no classes found. Attempting arbitrary assignment<br />");
-				/// if still no match, look at a number of  options
-				$studentTrace		.= "Attempting arbitrary assignment<br />";
-				// figure out what 1900 in local time is in UTC
-				$thisUTC			= 1900 - ($studentTimeZone * 100);
-				if ($thisUTC == 2400) {
-					$thisUTC		= 0;
-				}
-				if ($thisUTC > 2400) {
-					$thisUTC		= $thisUTC - 2400;
-				} elseif ($thisUTC < 0) {
-					$thisUTC		= $thisUTC + 2400;
-				}
-				$firstUTC			= str_pad($thisUTC,4,'0',STR_PAD_LEFT);
+							$studentTrace		.= "Attempting 1900 Monday,Thursday<br />";
 
-				// figure out what 2000 in local time is in UTC
-				$thisUTC			= 2000 - ($studentTimeZone * 100);
-				if ($thisUTC == 2400) {
-					$thisUTC		= 0;
-				}
-				if ($thisUTC > 2400) {
-					$thisUTC		= $thisUTC - 2400;
-				} elseif ($thisUTC < 0) {
-					$thisUTC		= $thisUTC + 2400;
-				}
-				$secondUTC			= str_pad($thisUTC,4,'0',STR_PAD_LEFT);
-
-				// figure out what 1800 in local time is in UTC
-				$thisUTC			= 1800 - ($studentTimeZone * 100);
-				if ($thisUTC == 2400) {
-					$thisUTC		= 0;
-				}
-				if ($thisUTC > 2400) {
-					$thisUTC		= $thisUTC - 2400;
-				} elseif ($thisUTC < 0) {
-					$thisUTC		= $thisUTC + 2400;
-				}
-				$thirdUTC			= str_pad($thisUTC,4,'0',STR_PAD_LEFT);
-				debugReport("Attempting arbitrary assignment. TZ of $studentTimeZone at 1900 converted to UTC is $thisUTC<br />");
-				foreach($daysTestArray as $myValue) {
-					$schedule1		= "$firstUTC $myValue";
-					$schedule2		= "$secondUTC $myValue";
-					$schedule3		= "$thirdUTC $myValue";
-					$thisResult			= findAClass($studentLevel,$studentLanguage,$schedule1,$schedule2,$schedule3,$studentExcludedAdvisor);
-					if ($thisResult[0] !== FALSE) {
-						$gotAClass		= TRUE;
-						$studentTrace		.= $thisResult[3];
-						debugReport("findAClass matched $thisResult[1]<br />");
-						$arbitraryArray[]		= $studentCallSign;
-						$arbitraryAssignedCount++;
-						break;
+							// figure out what 1900 in local time is in UTC
+							$newUTC = utcConvert('toutc',$studentTimeZone,'1900','Monday,Thursday',$doDebug);
+							if ($newUTC[0] === 'FAIL') {
+								if ($doDebug) {
+									$myStr = $newUTC[3];
+									debugReport("utcConvert failed. Error: $myStr<br />");
+								}
+							} else {
+								$thisUTC = $newUTC[1];
+								$thisUTC = str_pad($thisUTC,4,'0',STR_PAD_LEFT);
+								$studentFirstChoice = "$thisUTC $newUTC[2]";
+								
+								// see if we get a class
+								debugReport("passii $passii: attempting to get a class for $studentFirstChoice<br />");
+								$studentTrace .= "<br />$studentCallSign passii: $passii looking for a class for None, None, None<br />";
+								debugReport("Look for a class for student choices<br />");
+								$thisResult		= findAClass($studentLevel,$studentLanguage,$studentFirstChoice,'None','None',$studentExcludedAdvisor);
+								if ($thisResult[0] !== FALSE) {
+									$gotAClass	= TRUE;
+									$studentTrace		.= $thisResult[3];
+									debugReport("Got a class: $thisResult[1]<br />");
+								} else {
+									$studentTrace		.= $thisResult[3];
+									$thisStr			= "No class match. Options checked:<br /><pre>";
+									$thisStr			.= print_r($thisResult[2],TRUE);
+									$thisStr			.=  "</pre><br />";
+									debugReport($thisStr);
+								}
+							}
+						} else {
+							// student is not a None, None, None but what class 
+							// times he had didn't matchup with a class
+							// so do +- three hours on each class choice
+							debugReport("passii $passii: moving choices ahead three hours<br/>");
+							if ($studentFirstClassChoice != 'None') {
+								// move the choice forward three hours
+								$myArray = explode(" ",$studentFirstClassChoice);
+								$myTime = $myArray[0];
+								$myDays = $myArray[1];
+								$myChoice = moveThreeHours('forward',$myTime,$myDays);
+								$newFirstChoice = "$myChoice[0] $myChoice[1]";
+							}
+							if ($studentSecondClassChoice != 'None') {
+								// move the choice forward three hours
+								$myArray = explode(" ",$studentSecondClassChoice);
+								$myTime = $myArray[0];
+								$myDays = $myArray[1];
+								$myChoice = moveThreeHours('forward',$myTime,$myDays);
+								$newSecondChoice = "$myChoice[0] $myChoice[1]";
+							}
+							if ($studentThirdClassChoice != 'None') {
+								// move the choice forward three hours
+								$myArray = explode(" ",$studentThirdClassChoice);
+								$myTime = $myArray[0];
+								$myDays = $myArray[1];
+								$myChoice = moveThreeHours('forward',$myTime,$myDays);
+								$newThirdChoice = "$myChoice[0] $myChoice[1]";
+							}
+							$studentTrace		.= "<br /><b>$studentCallSign passii: $passii </b><br />";
+							debugReport("Look for a class for student choices $newFirstChoice, $newSecondChoice, $newThirdChoice<br />");
+							$thisResult		= findAClass($studentLevel,$studentLanguage,$newFirstChoice,$newSecondChoice,$newThirdChoice,$studentExcludedAdvisor);
+							if ($thisResult[0] !== FALSE) {
+								$gotAClass	= TRUE;
+								$studentTrace		.= $thisResult[3];
+								debugReport("Got a class: $thisResult[1]<br />");
+							} else {
+								$studentTrace		.= $thisResult[3];
+								$thisStr			= "No class match. Options checked:<br /><pre>";
+								$thisStr			.= print_r($thisResult[2],TRUE);
+								$thisStr			.=  "</pre><br />";
+								debugReport($thisStr);
+							}
+							if($gotAClass === FALSE) {
+								// try three hours earlier
+								debugReport("passii $passii: no class found. Moving back three hours<br/>");
+								if ($studentFirstClassChoice != 'None') {
+									// move the choice backward three hours
+									$myArray = explode(" ",$studentFirstClassChoice);
+									$myTime = $myArray[0];
+									$myDays = $myArray[1];
+									$myChoice = moveThreeHours('forward',$myTime,$myDays);
+									$newFirstChoice = "$myChoice[0] $myChoice[1]";
+								} else {
+									$newFirstChoice = 'None';
+								}
+								if ($studentSecondClassChoice != 'None') {
+									// move the choice backward three hours
+									$myArray = explode(" ",$studentSecondClassChoice);
+									$myTime = $myArray[0];
+									$myDays = $myArray[1];
+									$myChoice = moveThreeHours('forward',$myTime,$myDays);
+									$newSecondChoice = "$myChoice[0] $myChoice[1]";
+								} else {
+									$newSecondChoice = 'None';
+								}
+								if ($studentThirdClassChoice != 'None') {
+									// move the choice backward three hours
+									$myArray = explode(" ",$studentThirdClassChoice);
+									$myTime = $myArray[0];
+									$myDays = $myArray[1];
+									$myChoice = moveThreeHours('forward',$myTime,$myDays);
+									$newThirdChoice = "$myChoice[0] $myChoice[1]";
+								} else {
+									$newThirdChoice = 'None';
+								}
+								$studentTrace		.= "<br /><b>$studentCallSign passii: $passii </b><br />";
+								debugReport("Look for a class for student choices $newFirstChoice, $newSecondChoice, $newThirdChoice<br />");
+								$thisResult		= findAClass($studentLevel,$studentLanguage,$newFirstChoice,$newSecondChoice,$newThirdChoice,$studentExcludedAdvisor);
+								if ($thisResult[0] !== FALSE) {
+									$gotAClass	= TRUE;
+									$studentTrace		.= $thisResult[3];
+									debugReport("Got a class: $thisResult[1]<br />");
+								} else {
+									$studentTrace		.= $thisResult[3];
+									$thisStr			= "No class match. Options checked:<br /><pre>";
+									$thisStr			.= print_r($thisResult[2],TRUE);
+									$thisStr			.=  "</pre><br />";
+									debugReport($thisStr);
+								}
+							}
+						}
+					} else {				/// passii is 1
+						$studentTrace		.= "<br /><b>$studentCallSign passii: $passii </b><br />";
+						debugReport("passii $passii: Look for a class for student choices $studentFirstClassChoice, $studentSecondClassChoice, $studentThirdClassChoice<br />");
+						$thisResult		= findAClass($studentLevel,$studentLanguage,$studentFirstClassChoice,$studentSecondClassChoice,$studentThirdClassChoice,$studentExcludedAdvisor);
+						if ($thisResult[0] !== FALSE) {
+							$gotAClass	= TRUE;
+							$studentTrace		.= $thisResult[3];
+							debugReport("Got a class: $thisResult[1]<br />");
+						} else {
+							$studentTrace		.= $thisResult[3];
+							$thisStr			= "No class match. Options checked:<br /><pre>";
+							$thisStr			.= print_r($thisResult[2],TRUE);
+							$thisStr			.=  "</pre><br />";
+							debugReport($thisStr);
+						}
+					}		// finished with findAClass for passii of 1 and pasii of 2		
+					if ($gotAClass) { 		// assign the class and remove from processStudentArray
+						debugReport("got a class<br /><pre>");
+						$myStr1 = print_r($thisResult,TRUE);
+						debugReport($myStr1);
+						debugReport("</pre><br />");
+						$myStr = $thisResult[1];
+						$myArray			= explode("|",$myStr);
+						$advisorCallSign	= $myArray[0];
+						
+						if (! array_key_exists(1, $myArray)) {
+							debugReport("<b>ERRORXX</b> here is the missing array key error<br />");
+						}
+						
+						$advisorSequence	= $myArray[1];
+						$thisResult			= assignStudentToAdvisor($studentCallSign,$advisorCallSign,$advisorSequence);
+						if ($thisResult) {
+							debugReport("Student assigned to $advisorCallSign, $advisorSequence<br />");
+							unset($processStudentArray[$processStudentArrayKey]);
+							if ($passii == 2) {			// add to arbitrary array
+								$pass2Assignments++;
+								$arbitraryArray[] = $studentCallSign;
+							} else {
+								$pass1Assignments++;
+							}
+						} else {
+							debugReport("passii $passii: no class found. leaving for pass 2<br />");
+						}
 					} else {
-						$studentTrace		.= $thisResult[3];
-						$thisStr	=  "No arbitrary class choice match. Options checked:<br /><pre>";
-						$thisStr	.= print_r($thisResult[2],TRUE);
-						$thisStr	.=  "</pre><br />";
-						debugReport($thisStr);
+						if ($passii == 2) {
+							$unassignedArraySequence++;
+							$unassignedArray[$studentLevel][$unassignedArraySequence]	= $studentCallSign;
+							debugReport("passii $passii: $studentCallSign no class found. Added to unassigned array<br />");
+						}
 					}
 				}
-			}
-			
-			
-			if (!$gotAClass) { 		// now what: stick in unassigned array
-				debugReport("No class option found for $studentCallSign ($studentLevel). Adding to unassignedArray<br />");
-				$unassignedArraySequence++;
-				$unassignedArray[$studentLevel][$unassignedArraySequence]	= $studentCallSign;
-			} else {			//// assign student to the class
-				$myArray			= explode("|",$thisResult[1]);
-				$advisorCallSign	= $myArray[0];
-				$advisorSequence	= $myArray[1];
-				$thisResult			= assignStudentToAdvisor($studentCallSign,$advisorCallSign,$advisorSequence);
-				if ($thisResult) {
-					debugReport("Student assigned to $advisorCallSign, $advisorSequence<br />");
-				} else {
-					debugReport("ERROR No class for $studentCallSign ($studentLevel). Added to errorArray<br />");
-					$errorArray[]		= "Attempt to assign student $studentUpdateLink with level $student_level to $advisorCallSign at sequence $advisorSequence failed. Advisor does not have that class<br />";
-					$unassignedArraySequence++;
-					$unassignedArray[$studentLevel][$unassignedArraySequence]	= $studentCallSign;
-				}
-			}
-			
-		}				// done with the processStudent array
-				
+			}				// done with the processStudent array
+		}
 		////// dump the arrays
 
 		sort($arbitraryArray);
-		ksort($studentAssignedAdvisorArray);
+//		ksort($studentAssignedAdvisorArray);
 		ksort($unassignedArray);
 		
 		$thisStr	=  "<br />advisor Class Array:<br /><pre>";
@@ -1795,7 +1930,8 @@ function assign_students_to_advisors_func() {
 		}
 		$content				.= "<h2>$jobname</h2>
 									<p><a href='#report1'>Go to the Advisor Classes and Assigned Students Report</a><br />
-									<a href='#report3'>Go to the Unassigned Students Report</a><br />
+									<a href='#report3'>Go to the Unassigned Students With Class Choices Report</a><br />
+									<a href='#reportNone'>Go to the Unassigned Students with No Class ChoicesReport</a><br />
 									<a href='#report2'>Go to the Student Assignment Information Report</a><br />
 									<a href='#reportA'>Go to the Arbitrarily Assigned Students Report</a><br />
 									<a href='#reportS'>Go to the Advisors with Small Classes Report</a><br />
@@ -2141,7 +2277,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 // goto Bypass;
 
-////////////	Unassigned students report
+////////////	Unassigned students report with class choice
 		debugReport("Doing Unassigned Students Report<br />");
 //	unassignedArray[studentLevel][sequence]	= student_call_sign
 
@@ -2152,13 +2288,13 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 		$advCount		= 0;
 		$orderArray = array('Beginner','Fundamental','Intermediate','Advanced');
 		
-		$content		.= "<a name='report3'><br /><h3>Unassigned Students Report</h3></a>";
+		$content		.= "<a name='report3'><br /><h3>Unassigned Students with Class Choices Report</h3></a>";
 		$unassignedCount = 0;
 		ksort($unassignedArray);
 		foreach($orderArray as $reportLevel) {
 			$myStr = ucwords($reportLevel);
 			$levelCount = 0;
-			$content .= "<br /><h4>Unassigned $myStr Students</h4>
+			$content .= "<br /><h4>Unassigned $myStr Students with Class Choices</h4>
 						 <table style = 'width:1000px;'>
 						 <tr><th>Student<br />First Choice</th>
 						 	<th>Email<br />Second Choice</th>
@@ -2191,35 +2327,140 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 				$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
 				$student_excluded_advisor	= $studentArray[$thisStudent]['excluded advisor'];
 				
-				$student_excluded_advisor = str_replace('&',' ',$student_excluded_advisor);
-			
-				$studentUpdateLink = "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
-				$findClassLink = "<a href='$studentManagementURL?strpass=70&inp_student_callsign=$studentCallSign&inp_mode=$inp_mode' target='_blank'><b>Find Class</b></a>";
-
-				$unassignedCount++;
-				$levelCount++;
-				switch ($reportLevel) {
-					case "Beginner":
-						$begCount++;
-						break;
-					case "Fundamental":
-						$funCount++;
-						break;
-					case "Intermediate":
-						$intCount++;
-						break;
-					case "Advanced":
-						$advCount++;
-						break;
+				if ($student_first_choice == 'None' && 
+				    $student_second_choice == 'None' && 
+				    $student_third_choice == 'None') { 
+				    
+				    $myInt = 1;
+				} else {
+					$student_excluded_advisor = str_replace('&',' ',$student_excluded_advisor);
+				
+					$studentUpdateLink = "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
+					$findClassLink = "<a href='$studentManagementURL?strpass=70&inp_student_callsign=$studentCallSign&inp_mode=$inp_mode' target='_blank'><b>Find Class</b></a>";
+	
+					$unassignedCount++;
+					$levelCount++;
+					switch ($reportLevel) {
+						case "Beginner":
+							$begCount++;
+							break;
+						case "Fundamental":
+							$funCount++;
+							break;
+						case "Intermediate":
+							$intCount++;
+							break;
+						case "Advanced":
+							$advCount++;
+							break;
+					}
+					$content .= "<tr><td style='vertical-align:top;'>$student_last_name, $student_first_name ($studentUpdateLink) <br />
+																	$student_first_choice utc</td>
+									<td style='vertical-align:top;'>$student_email<br />$student_second_choice utc</td>
+									<td style='vertical-align:top;'>$student_phone<br />$student_third_choice utc</td>
+									<td style='vertical-align:top;'>$student_state</td>
+									<td style='vertical-align:top;'>$student_country</td>
+									<td style='vertical-align:top;'>$student_language</td>
+									<td style='vertical-align:top;'>$student_excluded_advisor<br />($findClassLink)</td></tr>";	
 				}
-				$content .= "<tr><td style='vertical-align:top;'>$student_last_name, $student_first_name ($studentUpdateLink) <br />
-																$student_first_choice utc</td>
-								<td style='vertical-align:top;'>$student_email<br />$student_second_choice utc</td>
-								<td style='vertical-align:top;'>$student_phone<br />$student_third_choice utc</td>
-								<td style='vertical-align:top;'>$student_state</td>
-								<td style='vertical-align:top;'>$student_country</td>
-								<td style='vertical-align:top;'>$student_language</td>
-								<td style='vertical-align:top;'>$student_excluded_advisor<br />($findClassLink)</td></tr>";	
+			}
+			$content .= "<tr><td colspan='10'>$levelCount Students<br /><hr></td></tr></table>";
+		}
+		$content			.= "<tr><td colspan='10'>$levelCount $reportLevel Students<br /><hr></td></tr></table>
+								<p>$begCount Unassigned Beginner Students<br />
+								$funCount Unassigned Fundamental Students<br />
+								$intCount Unassigned Intermediate Students<br />
+								$advCount Unassigned Advanced students<br />
+								$unassignedCount Total Unassigned Students</p>";
+
+//////////////	end of unassigned report
+
+// goto Bypass;
+
+////////////	Unassigned students report with no choice
+		debugReport("Doinng no class choice Unassigned Students Report<br />");
+//	unassignedArray[studentLevel][sequence]	= student_call_sign
+
+		$levelCount		= 0;
+		$begCount		= 0;
+		$funCount		= 0;
+		$intCount		= 0;
+		$advCount		= 0;
+		$orderArray = array('Beginner','Fundamental','Intermediate','Advanced');
+		
+		$content		.= "<a name='reportNone'><br /><h3>Unassigned Students with No Class Choices Report</h3></a>";
+		$unassignedCount = 0;
+		ksort($unassignedArray);
+		foreach($orderArray as $reportLevel) {
+			$myStr = ucwords($reportLevel);
+			$levelCount = 0;
+			$content .= "<br /><h4>Unassigned $myStr Students with  No Class Choices</h4>
+						 <table style = 'width:1000px;'>
+						 <tr><th>Student<br />First Choice</th>
+						 	<th>Email<br />Second Choice</th>
+						 	<th>Phone<br />Third Choice</th>
+						 	<th>City</th>
+						 	<th>Country</th>
+						 	<th>Language</th>
+						 	<th>Excl Advisors<br /></th></tr>";
+			foreach($unassignedArray[$reportLevel] as $thisSequence => $thisStudent) {
+				$studentCallSign		= $thisStudent;
+				$student_level			= $reportLevel;
+			
+			
+				$student_first_name		= $studentArray[$thisStudent]['first name'];
+				$student_last_name		= $studentArray[$thisStudent]['last name'];
+				$student_email			= $studentArray[$thisStudent]['email'];
+				$student_phone			= $studentArray[$thisStudent]['phone'];
+				$student_text_message	= $studentArray[$thisStudent]['text message'];
+				$student_city			= $studentArray[$thisStudent]['city'];
+				$student_state			= $studentArray[$thisStudent]['state'];
+				$student_country		= $studentArray[$thisStudent]['country'];
+				$student_language		= $studentArray[$thisStudent]['language'];
+				$student_time_zone		= $studentArray[$thisStudent]['time_zone'];
+				$student_response		= $studentArray[$thisStudent]['response'];
+				$student_status			= $studentArray[$thisStudent]['status'];
+				$student_youth			= $studentArray[$thisStudent]['youth'];
+				$student_parent_email	= $studentArray[$thisStudent]['parent email'];
+				$student_first_choice	= $studentArray[$thisStudent]['first choice utc'];
+				$student_second_choice	= $studentArray[$thisStudent]['second choice utc'];
+				$student_third_choice	= $studentArray[$thisStudent]['third choice utc'];
+				$student_excluded_advisor	= $studentArray[$thisStudent]['excluded advisor'];
+				
+				if ($student_first_choice == 'None' && 
+				    $student_second_choice == 'None' && 
+				    $student_third_choice == 'None') {
+
+					$student_excluded_advisor = str_replace('&',' ',$student_excluded_advisor);
+				
+					$studentUpdateLink = "<a href='$studentUpdateURL?request_type=callsign&request_info=$studentCallSign&strpass=2&inp_depth=all&doDebug=$doDebug&testMode=0' target='_blank'>$studentCallSign</a>";
+					$findClassLink = "<a href='$studentManagementURL?strpass=70&inp_student_callsign=$studentCallSign&inp_mode=$inp_mode' target='_blank'><b>Find Class</b></a>";
+	
+					$unassignedCount++;
+					$levelCount++;
+					switch ($reportLevel) {
+						case "Beginner":
+							$begCount++;
+							break;
+						case "Fundamental":
+							$funCount++;
+							break;
+						case "Intermediate":
+							$intCount++;
+							break;
+						case "Advanced":
+							$advCount++;
+							break;
+					}
+					$content .= "<tr><td style='vertical-align:top;'>$student_last_name, $student_first_name ($studentUpdateLink) <br />
+																	$student_first_choice utc</td>
+									<td style='vertical-align:top;'>$student_email<br />$student_second_choice utc</td>
+									<td style='vertical-align:top;'>$student_phone<br />$student_third_choice utc</td>
+									<td style='vertical-align:top;'>$student_state</td>
+									<td style='vertical-align:top;'>$student_country</td>
+									<td style='vertical-align:top;'>$student_language</td>
+									<td style='vertical-align:top;'>$student_excluded_advisor<br />($findClassLink)</td></tr>";	
+				}
 			}
 			$content .= "<tr><td colspan='10'>$levelCount Students<br /><hr></td></tr></table>";
 		}
@@ -2557,7 +2798,8 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 
 
 		$content				.= "<p><a href='#report1'>Go to the Advisor Classes and Assigned Students Report</a><br />
-									<a href='#report3'>Go to the Unassigned Students Report</a><br />
+									<a href='#report3'>Go to the Unassigned Students With Class Choices Report</a><br />
+									<a href='#reportNone'>Go to the Unassigned Students with No Class ChoicesReport</a><br />
 									<a href='#report2'>Go to the Student Assignment Information Report</a><br />
 									<a href='#reportA'>Go to the Arbitrarily Assigned Students Report</a><br />
 									<a href='#reportS'>Go to the Advisors with Small Classes Report</a><br />
@@ -2565,7 +2807,9 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 									<a href='#reportH'>Go to the Students on Hold Report</a><br />
 									<a href='#reportO'>Go to the Advisor Class Size Overridden Report</a><br />
 									<a href='#reportE'>Go to the Errors Report</a><br />
-									</p>";
+									</p>
+									<br /><br /><p>$pass1Assignments in pass 1<br />
+									$pass2Assignments in pass2</p><br />";
 
 
 
@@ -2662,7 +2906,7 @@ Please log into <a href='$siteURL/program-list'>CW Academy</a> to obtain your st
 								Last Name: $thisLastName<br />
 								First Choice: $thisFirstChoice<br />
 								Level: $thisLevel<br />
-								Language: $thislanguage<br />
+								Language: $thisLanguage<br />
 								TZ: $thisTZ<br />
 								Email: $thisEmail<br />
 								Advisor class schedule: $thisClassTimeUTC $thisClassDaysUTC<br />
@@ -2730,7 +2974,7 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 			}
 		}
 	}
-// Bypass:
+ Bypass:
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
 	debugReport("<br />Testing to save report: $inp_report<br />");
@@ -2755,7 +2999,6 @@ Resolution</a> for assistance.</span></p></td></tr></table>";
 		}
 	}
 
-	Bypass:
 
 	$endingMicroTime = microtime(TRUE);
 	$elapsedTime	= $endingMicroTime - $startingMicroTime;
