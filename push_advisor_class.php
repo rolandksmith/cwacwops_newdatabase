@@ -1,48 +1,9 @@
 function push_advisor_class_func() {
 
-/*
-	edited by Roland on 2020-01-03 10:30 to select the semester for the display
-	edited by Roland on 2019-12-15 20:47 to fix the data passed to pass 3
-	Original version significantly revised on 17Aug2020. Simplified the logic,
-		made the look and feel like other programs that display advisor classes,
-		and got the "all" function to work correctly
-
-	modified 10Dec2020 by Roland to properly handle student assigned with a 
-		different time zone.
-	Modified 26Dec2020 by Roland to add student state and advisor class times to the report
-	Modified 4Mar21 by Roland to change Joe Fisher's email address
-	Modified 13Mar21 by Roland to add a message to the advisor
-	Modified 3Aug21 by Roland to use new advisor and advisorClass pods
-	Modified 20Dec21 by Roland to select only students assigned to the advisor if only one advisor is being requested
-	Modified 31Dec21 by Roland to use the mysql tables instead of pods
-	Modified 17Apr23 by Roland to fix action_log
-	Modified 20Jul23 by Roland to use consolidated tables
-	Modified 22Nov23 by Roland for the advisor portal. This was a significant upgrade. 
-		version number changd to 3.
-	Modified 24Oct24 by Roland for new database
-	
-	studentArray[] = student_assigned_advisor|student_assigned_advisor_class|student_level|student_id|student_call_sign
-	
-	studentDataArray[student_call_sign]['name']
-									   ['city']
-									   ['state']
-									   ['country']
-									   ['email']
-									   ['phone']
-									   ['messaging']
-									   ['youth']
-									   ['age']
-									   ['parent']
-									   ['parent email']
-	
-	
-	
-	
-*/	
 
 	global $wpdb;
 
-	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$initializationArray 	= data_initialization_func();
 	if ($doDebug) {
@@ -180,6 +141,7 @@ function push_advisor_class_func() {
 		$audioAssessmentTableName	= 'wpw1_cwa_audio_assessment2';
 		$userMasterTableName		= 'wpw1_cwa_user_master2';
 		$thisMode					= 'TM';
+		$operatingMode				= 'Testmode';
 		$theStatement				= "<p>Function is running in TEST MODE using test files.</p>";
 	} else {
 		$studentTableName			= 'wpw1_cwa_student';
@@ -188,11 +150,15 @@ function push_advisor_class_func() {
 		$audioAssessmentTableName	= 'wpw1_cwa_audio_assessment';
 		$userMasterTableName		= 'wpw1_cwa_user_master';
 		$thisMode					= 'PM';
+		$operatingMode				= 'Production';
 		$theStatement				= "";
 	}
 
-
-
+	$advisor_dal = new CWA_Advisor_DAL();
+	$advisorclass_dal = new CWA_Advisorclass_DAL();
+	$student_dal = new CWA_Student_DAL();
+	$user_dal = new CWA_User_Master_DAL();
+	
 	$content = "<style type='text/css'>
 				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
 				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
@@ -334,13 +300,15 @@ function push_advisor_class_func() {
 											<input type='hidden' name='request_info' value='$request_info'>";
 			foreach($requestArray as $advisorCallSign) {
 				$prepareResult			= prepare_preassigned_class_display($advisorCallSign,
-																		$inp_semester,
-																		$request_type,
-																		FALSE,
-																		FALSE,
-																		FALSE,
+																		$inp_semester,			// semester
+																		$request_type,			// Full|sonly
+																		TRUE,					// showVerified
+																		TRUE,					// header
+																		FALSE,					// doPreAssigned
+																		FALSE,					// doFind
 																		$testMode,
 																		$doDebug);
+																		
 				if ($prepareResult[0] == FALSE) {
 					$content			.= "Getting data to displayfailed. $prepareResult[1]<br/>";
 					$myStr				= "Production";
@@ -391,29 +359,20 @@ function push_advisor_class_func() {
 		}
 		$advisor_subject			= "CW Academy Action Required: Class Makeup Has Changed";
 		foreach($sendEmail as $advisorCallSign) {
-
-			$sql						 	= "select user_email,
-													user_first_name,
-													user_last_name,
-													user_timezone_id   
-												from $userMasterTableName 
-												where user_call_sign = '$advisorCallSign'";
-			$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-			if ($wpw1_cwa_advisor === FALSE) {
-				handleWPDBError($jobname,$doDebug);
-			} else {
-				$numARows			= $wpdb->num_rows;
+			// get the user_master info to send email and set up the reminder
+			$userData = $user_dal->get_user_master_by_callsign( $advisorCallSign, $operatingMode );
+			if ($userData === FALSE) {
 				if ($doDebug) {
-					echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
+					echo "get_user_master_by_callsign for $uadvisorCallSign returned FALSE<br />";
 				}
-				if ($numARows > 0) {
-					foreach ($wpw1_cwa_advisor as $advisorRow) {
-						$advisor_email		= $advisorRow->user_email;
-						$advisor_first_name	= $advisorRow->user_first_name;
-						$advisor_last_name	= $advisorRow->user_last_name;
-						$advisor_timezone_id = $advisorRow->user_timezone_id;
-						
-						$email_to_advisor 	= "To: $advisor_last_name, $advisor_first_name ($advisorCallSign):
+			} else {
+				if (! empty($userData)) {
+					foreach($userData as $key => $value) {
+						foreach($value as $thisField => $thisValue)  {
+							$$thisField = $thisValue;
+						}
+
+						$email_to_advisor 	= "To: $user_last_name, $user_first_name ($advisorCallSign):
 $inp_msg
 <p>The makeup of your class has changed. Please log into 
 <a href='$siteURL/login'>CW Academy</p> and follow the instructions 
@@ -429,7 +388,7 @@ Resolution</a> for assistance.</b></span><br /></p>";
 							$advisor_subject		= "TESTMODE $advisor_subject";
 							$increment++;
 						} else {
-							$email_to				= $advisor_email;
+							$email_to				= $user_email;
 							$mailCode				= 21;
 						}
 						$mailResult		= emailFromCWA_v2(array('theRecipient'=>$email_to,
@@ -445,7 +404,7 @@ Resolution</a> for assistance.</b></span><br /></p>";
 							if ($doDebug) {
 								echo "An email for $advisorCallSign was sent to $email_to<br />";
 							}
-							$content .= "An email for $advisorCallSign was sent to $advisor_last_name, $advisor_first_name ($advisorCallSign) at $email_to<br /><br />";
+							$content .= "An email for $advisorCallSign was sent to $user_last_name, $user_first_name ($advisorCallSign) at $email_to<br /><br />";
 							$myCount++;
 						} else {
 							$content .= "The mail send function to $email_to failed.<br /><br />";
@@ -466,12 +425,12 @@ Resolution</a> for assistance.</b></span><br /></p>";
 								echo "ran $reminderSQL<br />and retrieved $numRRows rows<br />";
 							} 
 							if ($numRRows == 0) {
-								$returnArray		= wp_to_local($advisor_timezone_id, 0, 5);
+								$returnArray		= wp_to_local($user_timezone_id, 0, 5);
 								if ($returnArray === FALSE) {
 									if ($doDebug) {
-										echo "called wp_to_local with $advisor_timezone_id 0, 5 which returned FALSE<br />";
+										echo "called wp_to_local with $user_timezone_id 0, 5 which returned FALSE<br />";
 									} else {
-										sendErrorEmail("$jobname calling wp_to_local with $advisor_timezone_id, 0, 5 returned FALSE");
+										sendErrorEmail("$jobname calling wp_to_local with $user_timezone_id, 0, 5 returned FALSE");
 									}
 									$effective_date		= date('Y-m-d 00:00:00');
 									$closeStr			= strtotime("+5 days");
@@ -534,7 +493,7 @@ to perform this task.";
 						}
 					}
 				} else {
-					$content	.= "No $advisorTableName record found for $advisorCallSign<br />";
+					$content	.= "No user_master record found for $advisorCallSign<br />";
 				}
 			}
 		}
