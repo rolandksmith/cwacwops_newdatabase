@@ -289,9 +289,11 @@ function getTheReason($strReasonCode) {
 
 		$doPreAssigned				= FALSE;
 		$preAssignedStr				= 'FALSE';
+		$preStr						= '';
  		if ($inp_type == 'pre-assigned') {
  			$doPreAssigned			= TRUE;
  			$preAssignedStr			= 'TRUE';
+ 			$preStr					= "<h4>Showing Pre-assigned Students Which Haven&apos;t Been Assigned</h4>";
  		}
  		if ($doDebug) {
  			echo "Using inp_semester: $inp_semester<br />
@@ -300,6 +302,7 @@ function getTheReason($strReasonCode) {
  
 		$content .= "<h2>$jobname</h2>\n
 					$theStatement
+					$preStr
 					<p><a href='#report1'>Go to the Advisor Assignment Information Report</a><br />\n
 					<a href='#report2'>Go to the Students Assignment Information</a><br />\n
 					<a href='#reportW'>Go to the Students Who Withdrew</a><br />\n
