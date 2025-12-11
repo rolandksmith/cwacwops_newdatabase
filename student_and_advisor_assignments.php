@@ -725,6 +725,8 @@ function getTheReason($strReasonCode) {
 										<th>Language</th>
 										<th>Status</th>
 										<th>Former<br />Advisor</th></tr>";
+
+					$numSRows = count($studentData);
 					foreach($studentData as $key => $value) {
 						foreach($value as $thisField => $thisValue) {
 							$$thisField = $thisValue;
@@ -786,21 +788,40 @@ function getTheReason($strReasonCode) {
 						foreach($value as $thisField => $thisValue) {
 							$$thisField = $thisValue;
 						}
-	
-						// see if we can use this advisor
-						$doProceed				= TRUE;
-						if (in_array($advisorclass_call_sign,$badAdvisors)) {
+						// get the user_master for this advisorclass record
+						$userData = $user_dal->get_user_master_by_callsign( $advisorclass_call_sign, $operatingMode );
+						if ($userData === FALSE) {
 							if ($doDebug) {
-								echo "can not use $advisorclass_call_sign due to bad survey score<br />";
+								echo "get_user_master_by_callsign for $advisorclass_call_sign returned FALSE<br />";
 							}
-							$doProceed			= FALSE;
-						}
-						if ($doProceed) {						
-							if ($doDebug) {
-								echo "processing advisorclass $advisorclass_call_sign; class $advisorclass_sequence<br />";
+						} else {
+							if (! empty($userData)) {
+								foreach($userData as $key => $value) {
+									foreach($value as $thisField => $thisValue) {
+										$$thisField = $thisValue;
+									}
+									// see if we can use this advisor
+									$doProceed				= TRUE;
+									if (in_array($advisorclass_call_sign,$badAdvisors)) {
+										if ($doDebug) {
+											echo "can not use $advisorclass_call_sign due to bad survey score<br />";
+										}
+										$doProceed			= FALSE;
+									}
+									if ($doProceed) {						
+										if ($doDebug) {
+											echo "processing advisorclass $advisorclass_call_sign; class $advisorclass_sequence<br />";
+										}
+										$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorclass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>($advisorclass_call_sign)</a>";
+										$advisorArray[]		= "$advisorclass_level|$advisorclass_call_sign|$user_last_name, $user_first_name|$theLink|$advisorclass_sequence|$advisorclass_timezone_offset|$advisorclass_class_size|$advisorclass_class_schedule_days|$advisorclass_class_schedule_times|$advisorclass_class_schedule_days_utc|$advisorclass_class_schedule_times_utc|$advisorclass_number_students|$advisorclass_language";
+									}
+								}
+							} else {
+								if ($doDebug) {
+									echo "no user_master data found for $advisorclass_call_sign<br />";
+								}
+								$doProceed = FALSE;
 							}
-							$theLink			= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$advisorclass_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>($advisorclass_call_sign)</a>";
-							$advisorArray[]		= "$advisorclass_level|$advisorclass_call_sign|$user_last_name, $user_first_name|$theLink|$advisorclass_sequence|$advisorclass_timezone_offset|$advisorclass_class_size|$advisorclass_class_schedule_days|$advisorclass_class_schedule_times|$advisorclass_class_schedule_days_utc|$advisorclass_class_schedule_times_utc|$advisorclass_number_students|$advisorclass_language";
 						}
 					}
 					if ($doDebug) {
