@@ -1,0 +1,122 @@
+Generate a wordpress php function to validate the information stored in a table. While generating the function, verify that the field names in any of the rules match the spelling of the field names in the table definition. Field names are denoted with ``.
+
+The function takes an integer $student_id and gets the record with `student_id` = $student_id from the table wpw1_cwa_student. The table has the following SQL definition:
+CREATE TABLE `wpw1_cwa_student` (
+  `student_id` int NOT NULL AUTO_INCREMENT,
+  `student_call_sign` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_time_zone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '-99' COMMENT 'Browser Timezone ID',
+  `student_timezone_offset` float(6,2) DEFAULT '-99.00',
+  `student_youth` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
+  `student_age` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_parent` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `student_parent_email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `student_level` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_class_language` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'English',
+  `student_waiting_list` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'N',
+  `student_request_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_semester` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `student_welcome_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_email_sent_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_email_number` tinyint NOT NULL DEFAULT '0',
+  `student_response` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_response_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_abandoned` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+  `student_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `student_action_log` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `student_pre_assigned_advisor` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_selected_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_no_catalog` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'Y',
+  `student_hold_override` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_messaging` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_assigned_advisor` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_advisor_select_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_advisor_class_timezone` tinyint NOT NULL DEFAULT '-99',
+  `student_hold_reason_code` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_class_priority` tinyint NOT NULL DEFAULT '0',
+  `student_assigned_advisor_class` tinyint(1) NOT NULL DEFAULT '0',
+  `student_promotable` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_excluded_advisor` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `student_survey_completion_date` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `student_available_class_days` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_intervention_required` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_copy_control` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_first_class_choice` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_second_class_choice` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_third_class_choice` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_first_class_choice_utc` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_second_class_choice_utc` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_third_class_choice_utc` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `student_catalog_options` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_flexible` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `student_date_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ALTER TABLE `wpw1_cwa_student`
+  ADD PRIMARY KEY (`student_id`),
+  ADD KEY `studentcallsign` (`student_call_sign`) USING BTREE;
+  
+set $initializationArray =  data_initialization_func();
+
+The purpose of this function is to validate the data stored in the table for the specific $student_id. The validation rules are:
+
+1. The following fields must not be empty:
+`student_call_sign`
+`student_time_zone`
+`student_timezone_offset`
+`student_level`
+`student_class_language`
+`student_semester`
+`student_first_class_choice`
+`student_second_class_choice`
+`student_third_class_choice`
+
+2. The valid contents of the following fields are:
+`student_youth` = '' or 'Y' or 'N' or 'Yes' or 'No'
+`student_level` = 'Beginner' or 'Fundamental' or 'Intermediate' or 'Advanced'
+`student_class_language` is in the array $initializationArray['languageArray']
+`student_waiting_list` = '' or 'Y' or 'N'
+`student_semester` matches regex ^\d{4}\s[A-Z][a-z]{2}\/[A-Z][a-z]{2}$
+`student_email_number` = 0 or 1 or 2 or 3 or 4
+`student_response` = '' or 'Y' or 'R'
+`student_abandoned` = '' or 'Y' or 'N'
+`student_status` = '' or 'C' or 'N' or 'R' or 'S' or 'V' or 'Y'
+`student_hold_reason_code` = '' or 'X' or 'E' or 'H' or 'Q' or 'W' or 'M' or 'B' or 'N' or 'L'
+`student_promotable` = '' or 'P' or 'N' or 'Q' or 'W'
+`student_intervention_required` = '' or 'H'
+`student_hold_override` = '', 'Y'
+`student_abandoned` = '' or 'Y' or 'N'
+`student_flexible` = '' or 'Y' or 'N'
+
+3. The following fields must match 
+3.1 If `student_pre_assigned_advisor` is not empty, the the value must match `advisor_call_sign` in the table 'wpw1_cwa_advisor' where `advisor_call_sign` = `student_pre_assigned_advisor` and `advisor_semester` = `student_semester`
+
+3.2 If `student_assigned_advisor` is not empty, the the value must match `advisor_call_sign` in the table 'wpw1_cwa_advisor' where `advisor_call_sign` = `student_assigned_advisor` and `advisor_semester` = `student_semester`
+
+4. The following conditions need to be met:
+4.1 if `student_internvention_required` = 'H' then `student_hold_reason_code` must not be empty
+
+4.2 if `student_hold_reason_code` is not empty then `student_intervention_required` must be 'H'
+
+4.3 if `student_status` = 'S' or 'Y' or 'V' then `student_assigned_advisor` must not be empty
+
+4.4 if `student_assigned_advisor` is not empty then `student_status` must be 'Y' or 'S' or 'V'
+
+4.5 if `student_time_zone` = '??' then `student_timezone_offset` should be -99.0
+
+4.6 if `student_timezone_offset` = -99.0 then `student_time_zone` should be '??'
+
+4.7 if `student_assigned_advisor` is not empty then `student_advisor_select_date` should not be empty
+
+4.8 if `student_advisor_select_date` is not empty then `student_assigned_advisor` should not be empty
+
+4.9 if `student_assigned_advisor` is not empty then `student_assigned_advisor_class` should be greater than 0
+
+4.10 if `student_assigned_advisor_class` is greater than 0 then either `student_assigned_advisor` or `student_pre_assigned_advisor`must not be blank
+
+4.11 if `student_pre_assigned_advisor` is not blank then `student_assigned_advisor_class` must be greater than 0
+
+end of validation rules
+
+The function should return an array of validation errors. If no errors, the array should be empty.
+ 
