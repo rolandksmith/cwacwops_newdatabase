@@ -711,36 +711,41 @@ function program_list_func() {
 							<h4>Student Management Functions</h4>
 							<ul>
 							<li><strong>Useful Functions Before Students are Assigned to Advisors</strong>
-								<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
+							<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
+							
 								<li><a href='$siteURL/cwa-student-management/?strpass=2' target='_blank'>Pre-assign Student to an Advisor</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=5' target='_blank'>Delete Student's Pre-assigned Advisor</a>
-								<li><a href='$siteURL/cwa-student-and-advisor-color-chart-v2/' target='_blank'><b>Color Chart</b> - Display Student and Advisor Statistics</a>
+								<li><a href='$siteURL/cwa-student-management/?strpass=5' target='_blank'>Delete Student&apos;s Pre-assigned Advisor</a>
+								<li><a href='$siteURL/cwa-student-and-advisor-color-chart' target='_blank'><b>Color Chart</b> - Display Student and Advisor Statistics</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=7' target='_blank'>List Students Needing Intervention</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=25' target='_blank'>Resolve Student Hold</a>
+								<li><a href='$siteURL/cwa-student-management/?strpass=25' target='_blank'>Resolve Student Hold<a/>
 								<li><a href='$siteURL/cwa-student-management/?strpass=100' target='_blank'>Verify One or More Students</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=110' target='_blank'>Add Excluded Advisor to a Student</a>
 								<li><a href='$siteURL/cwa-student-management/?strpass=120' target='_blank'>Remove Excluded Advisor from a Student</a>
 								</ol>
-							<li><strong>Useful Functions Any Time</strong>
+							
+								<li><strong>Useful Functions Any Time</strong>
 								<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
-								<li><a href='$siteURL/cwa-show-detailed-history-for-student/' target='_blank'>Show Detailed History for a Student</a>
-								<li><a href='$siteURL/cwa-move-student-to-different-semester/' target='_blank'>Change unassigned student's semester</a>
-								<li><a href='$siteURL/cwa-update-unassigned-student-information/' target='_blank'>Update Unassigned Student Info</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=60' target='_blank'>Unassign and Remove a Student</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=20' target='_blank'>Exclude an Advisor from being Assigned to a Specific Student</a>
-								</ol>
-							<li><strong>Useful Functions After Students Have Been Assigned</strong>
+								
+									<li><a href='$siteURL/cwa-show-detailed-history-for-student/' target='_blank'>Show Detailed History for a Student</a>
+									<li><a href='$siteURL/cwa-move-student-to-different-semester/' target='_blank'>Change unassigned student's semester</a>
+									<li><a href='$siteURL/cwa-update-unassigned-student-information/' target='_blank'>Update Unassigned Student Info</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=60' target='_blank'>Unassign and Remove a Student</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=20' target='_blank'>Exclude an Advisor from being Assigned to a Specific Student</a>
+									</ol>
+								
+								<li><strong>Useful Functions After Students Have Been Assigned to Advisors</strong>
 								<ol style='list-style-type: lower-alpha; padding-bottom: 0;'>
-								<li><a href='$siteURL/cwa-student-management/?strpass=35' target='_blank'>Move Student to a Different Level and Unassign</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=40' target='_blank'>Add Unassigned Student to an Advisor's Class</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=50' target='_blank'>Unassign a Student Regardless of Status</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=55' target='_blank'>Re-assign a Student to Another Advisor</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=70' target='_blank'>Find Possible Classes for a Student</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=80' target='_blank'>Find Possible Students for an Advisor's Class</a>
-								<li><a href='$siteURL/cwa-student-management/?strpass=90' target='_blank'>Assign a Student to an Advisor</a> regardless of status or semester
-								<li><a href='$siteURL/cwa-student-management/?strpass=85' target='_blank'>Confirm Attendance for One or More Students</a>
-								</ol>
-							</ul>
+								
+									<li><a href='$siteURL/cwa-student-management/?strpass=35' target='_blank'>Move Student to a Different Level and Unassign</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=40' target='_blank'>Add Unassigned Student to an Advisor's Class</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=50' target='_blank'>Unassign a Student Regardless of Status</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=55' target='_blank'>Re-assign a Student to Another Advisor</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=70' target='_blank'>Find Possible Classes for a Student</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=80' target='_blank'>Find Possible Students for an Advisor's Class</a>
+									<li><a href='$siteURL/cwa-student-management/?strpass=90' target='_blank'>Assign a Student to an Advisor</a> regardless of status or semester
+									<li><a href='$siteURL/cwa-student-management/?strpass=85' target='_blank'>Confirm Attendance for One or More Students</a>
+									</ol>
+								</ul>
 				
 							<h4>Other Utilities Programs</h4>
 							<ul>
