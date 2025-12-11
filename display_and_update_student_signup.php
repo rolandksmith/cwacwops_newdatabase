@@ -2,7 +2,7 @@ function display_and_update_student_signup_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -670,7 +670,7 @@ function display_and_update_student_signup_func() {
 				} else {
 					$myInt = count($student_data);
 					if ($doDebug) {
-						echo "have $count student records available to display<br />";
+						echo "have $myInt student records available to display<br />";
 					}
 					if ($myInt > 0) {
 						$doOnce = TRUE;
@@ -680,6 +680,16 @@ function display_and_update_student_signup_func() {
 						foreach($student_data as $key => $value) {
 							foreach($value as $thisField => $thisValue) {
 								$$thisField = $thisValue;
+							}
+
+							// check the student record for errors
+							$studentDataErrors = cwa_validate_student_record($student_id );
+							if (! empty($studentDataErrors)) {
+								$content .= "<h4>Data Errors Found in $student_call_sign ($student_id) Record</h4>";
+								foreach($studentDataErrors as $thisError) {
+									$content .= "$thisError<br />";
+								}
+								$content .= "<br />";
 							}
 							// display the student data
 							$student_action_log	= formatActionLog($student_action_log);
