@@ -183,7 +183,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 											$studentCount++;
 											$ii++;
 											$classCount++;
-											$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
+											$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
 											$myStr = "";
 											$content	.= "<tr><td style='vertical-align:top;'><b>Student $ii</b><br />$user_last_name, $user_first_name ($studentLink)</td>
 																<td style='vertical-align:top;'><b>Email</b><br />$user_email<br />$student_first_class_choice_utc</td>
@@ -347,7 +347,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 												}
 												$studentCount++;
 												$classCount++;
-												$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
+												$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug&testMode' target='_blank'>$student_call_sign</a>";
 												$myStr = "";
 												if ($showVerified) {
 													if ($student_status == 'S') {
