@@ -45,7 +45,7 @@ if ( ! class_exists( 'CWA_Advisorclass_DAL' ) ) {
             'advisorclass_student03',
             'advisorclass_student04',
             'advisorclass_student05',
-            'advisorclass_student06',
+            class_size'advisorclass_student06',
             'advisorclass_student07',
             'advisorclass_student08',
             'advisorclass_student09',
