@@ -6,7 +6,7 @@ function student_management_func() {
 
 	global $wpdb, $studentTableName, $advisorTableName, $advisorClassTableName, $theSemester, $doDebug;
 
-	$doDebug					= TRUE;
+	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$initializationArray 		= data_initialization_func();
 	$userName 					= $initializationArray['userName'];
@@ -426,6 +426,9 @@ function getTheReason($strReasonCode) {
 	if ($strReasonCode == 'B') {
 		return "(B) Student is a Bad Actor";
 	}
+	if ($strReaasonCode === 'L') {
+		return "(L) Student wants a class in a language that is not available";
+	}
 	return "($strReasonCode) unknown";
 }	
 
@@ -832,6 +835,13 @@ function getTheReason($strReasonCode) {
 				$content			.= "<p>Student $inp_student_callsign responded 'refused' to the verification request. Pre-assignement refused.</p>";
 				$gotError			= TRUE;
 			}
+			if ($str_contains($student_excluded_advisor,$inp_advisor_callsign)) {
+				if ($doDebug) {
+					echo "$inp_advisor_callsign is excluded<br />";
+				}
+				$content .= "<p>$inp_advisor_callsign is an excluded advisor</p>";
+				$gotError = TRUE;
+			}
 			if (!$gotError) {
 				if ($doDebug) {
 					echo "no errors. Checking advisor<br />";
@@ -1024,26 +1034,34 @@ function getTheReason($strReasonCode) {
 			$thisTime			= date('H:i:s');
 
 			if ($haveStudent) {	
-				$myPreAssignedAdvisor = $student['student_pre_assigned_advisor'];
-				$myPreAssignedClass = $student['student_assigned_advisor_class'];
+				// actualize the student data
+				foreach($student as $key => $value) {
+					$$key = $value;
+				}
 				if ($doDebug) {
 					echo "Retrieved $inp_student_callsign with pre-assigned advisor of $myPreAssignedAdvisor<br />";
 				}
-				$student_action_log = $student['student_action_log'];
-				$student_action_log .= " / $actionDate MGMT2 $userName deleted pre-assigned advisor $myPreAssignedAdvisor ";
-				$updateParams							= array();
-				$updateParams['student_intervention_required']	= '';
-				$updateParams['student_pre_assigned_advisor']	= '';
-				$updateParams['student_assigned_advisor_class']	= '0';
-				$updateParams['student_action_log']	= $student_action_log;
-				$myStudentid = $student['student_id'];
-				$updateResult = $student_dal->update( $myStudentid, $updateParams, $operatingMode );		
-				if ($updateResult === FALSE || $updateResult === NULL) {
-					if ($doDebug) {
-						echo "attempting to update $inp_student_callsign ($my_studentid) returned FALSE|NULL<br />";
+				
+				// don't do anything if there is an assigned_advisor
+				if ($student_assigned_advisor != '') {
+					$student_action_log .= " / $actionDate MGMT2 $userName deleted pre-assigned advisor $myPreAssignedAdvisor ";
+					$updateParams							= array();
+					$updateParams['student_intervention_required']	= '';
+					$updateParams['student_pre_assigned_advisor']	= '';
+					$updateParams['student_assigned_advisor_class']	= '0';
+					$updateParams['student_action_log']	= $student_action_log;
+					$updateResult = $student_dal->update( $myStudentid, $updateParams, $operatingMode );		
+					if ($updateResult === FALSE || $updateResult === NULL) {
+						if ($doDebug) {
+							echo "attempting to update $inp_student_callsign ($my_studentid) returned FALSE|NULL<br />";
+						}
+					} else {
+						$content	.= "<p>Pre-assigned advisor removed from student $inp_student_callsign</p>";
 					}
 				} else {
-					$content	.= "<p>Pre-assigned advisor removed from student $inp_student_callsign</p>";
+					$content .= "<p>Student $inp_student_callsign has an assigned advisor of 
+								$student_assigned_advisor. Pre-assigning an advisor is no longer
+								useful and was not done</p>";
 				}
 			} else {
 				$content	.= "No student with call sign $inp_student_callsign found<br />";
@@ -1151,6 +1169,10 @@ function getTheReason($strReasonCode) {
 										if ($student_hold_reason_code == 'W') {
 											$IRType			= "H: Student on Hold";
 											$IRReason		= "(W) Student withdrew but asking for next class level";
+										}
+										if ($student_hold_reason_code == 'L') {
+											$IRType			= "H: Student on Hold";
+											$IRReason		= "(L) Student wants a class in a language that is not available";
 										}
 										$thisAdvisor		= '';
 										if ($student_assigned_advisor != '') {
@@ -1767,7 +1789,7 @@ function getTheReason($strReasonCode) {
 										Please unassign this advisor before making a new assignment.<p>";
 				$gotError			= TRUE;
 			}
-			if ($user_email_number == 4 && $student_response != 'Y') {
+			if ($student_email_number == 4 && $student_response != 'Y') {
 				if ($doDebug) {
 					echo "Student has been dropped<br />";
 				}
@@ -1815,9 +1837,9 @@ function getTheReason($strReasonCode) {
 									foreach($value as $thisField => $thisValue) {
 										$$thisField = $thisValue;
 									}
-									$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorclass' value='$advisorclass_sequence'> $advisorclass_call_sign $advisorclass_level Class nbr $advisorclass_sequence at $advisorclass_class_schedule_times on $advisorclass_class_schedule_days<br />";
+									$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorclass' value='$advisorclass_sequence' required> $advisorclass_call_sign $advisorclass_level Class nbr $advisorclass_sequence at $advisorclass_class_schedule_times on $advisorclass_class_schedule_days<br />";
 									if ($doDebug) {
-										echo "making class $advisorClass_sequence available<br />";
+										echo "making class $advisorclass_sequence available<br />";
 									}
 								}
 								if ($optionList != '') {
@@ -1889,16 +1911,21 @@ function getTheReason($strReasonCode) {
 // $testMode	= TRUE;
 // $doDebug	= TRUE;
 		$jobname						= "Student Management Add Student to Advisor Class";
+		
 		if ($doDebug) {
 			echo "inp_student_callsign: $inp_student_callsign<br />
 			      inp_advisor_callsign: $inp_advisor_callsign<br />
-			      inp_advisorClass: $inp_advisorClass<br />
+			      inp_advisorClass: $inp_advisorclass<br />
 			      inp_semester: $inp_semester<br />
 			      inp_level: $inp_level<br />";
 		}
 		$content .= "<h3>$jobname</h3>";
 
 		if ($haveStudent) {
+			// actualize student info
+			foreach($student as $key => $value) {
+				$$key = $value;
+			}
 			if ($doDebug) {
 				echo "Processing $student_call_sign:<br />
 					  &nbsp&nbsp;&nbsp;with a level of $student_level<br />
@@ -1908,7 +1935,7 @@ function getTheReason($strReasonCode) {
 			$inp_data			= array('inp_student'=>$student_call_sign,
 										'inp_semester'=>$inp_semester,
 										'inp_assigned_advisor'=>$inp_advisor_callsign,
-										'inp_assigned_advisor_class'=>$inp_advisorClass,
+										'inp_assigned_advisor_class'=>$inp_advisorclass,
 										'inp_remove_status'=>'',
 										'inp_arbitrarily_assigned'=>'',
 										'inp_method'=>'add',
@@ -1926,7 +1953,7 @@ function getTheReason($strReasonCode) {
 				sendErrorEmail("$jobname Attempting to add $student_call_sign to $inp_advisor_callsign class failed:<br />$thisReason");
 				$content		.= "Attempting to add $student_call_sign to $inp_advisor_callsign class failed:<br />$thisReason<br />";
 			} else {
-				$content		.= "Student added to $inp_advisor_callsign class $inp_advisorClass<br />
+				$content		.= "Student added to $inp_advisor_callsign class $inp_advisorclass<br />
 									<p>Click 'Push' to push the information to the advisor:<br />
 									<form method='post' action='$pushURL' 
 									name='selection_form_41' ENCTYPE='multipart/form-data'>
@@ -1986,6 +2013,14 @@ function getTheReason($strReasonCode) {
 		$jobname		= "Student Management Unassign a Student";
 		$isSuccessful	= TRUE;
 		$content .= "<h3>$jobname $inp_student_callsign</h3>";
+		
+		if ($haveStudent) {
+			// actualize the student data fields
+			foreach($student as $key => $value) {
+				$$key = $value;
+			}
+		}
+		
 
 		// get the student info and process
 		if ($haveStudent) {
@@ -2086,6 +2121,22 @@ function getTheReason($strReasonCode) {
 		$jobname			= "Student Management Reassign Student to Another Advisor";
 		$content			.= "<h3>$jobname</h3>";
 		
+		if ($haveStudent) {
+			// actualize the student data
+			foreach($student as $key => $value) {
+				$$key = $value;
+			}
+		}
+		if ($haveAdvisor) {
+			$advisor_semester = $advisor['advisor_semester'];
+//			echo "have advisor_semester of $advisor_semester<br />";
+		
+			// actualize the receiving advisor information
+			foreach($advisor as $key => $value) {
+				$$key = $value;
+//				echo "set $key to $value<br />";
+			}
+		}
 		if ($haveStudent && $student_semester == $proximateSemester) {
 			$gotError				= FALSE;
 			if ($student_response == 'R') {
@@ -2123,72 +2174,73 @@ function getTheReason($strReasonCode) {
 					if ($doDebug) {
 						echo "looking for matching class records<br />";
 					}
-					$optionList				= '';							
-					$sql					= "select* from $advisorClassTableName 
-												where advisorclass_semester='$proximateSemester' 
-													and advisorclass_call_sign='$inp_advisor_callsign' 
-													and advisorclass_level='$student_level'";
-					$wpw1_cwa_advisorclass				= $wpdb->get_results($sql);
-					if ($wpw1_cwa_advisorclass === FALSE) {
-						handleWPDBError("$jobname MGMT 56",$doDebug);
-					} else {
-						$numACRows			= $wpdb->num_rows;
+					$optionList = '';
+					$criteria = [
+						'relation' => 'AND',
+						'clauses' => [
+							['field' => 'advisorclass_call_sign', 'value' => $inp_advisor_callsign, 'compare' => '=' ],
+							['field' => 'advisorclass_semester', 'value' => $proximateSemester, 'compare' => '=' ],
+							['field' => 'advisorclass_level', 'value' => $student_level, 'compare' => '=' ]
+						]
+					];
+					$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );						
+					if ($advisorclassData === FALSE) {
 						if ($doDebug) {
-							echo "ran $sql<br />and retrieved $numACRows rows<br />";
+							echo "get_advisorclasses_by_order for $inp_advisor_callsign returned FALSE<br />";
 						}
-						if ($numACRows > 0) {
-							foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-								$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-								$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-								$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-								$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-								$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-								$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-								$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-								$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-								$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-								$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-								$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-								$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-								$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-								$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-								$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-
-	
-								$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorClass_sequence'> Class nbr $advisorClass_sequence $advisorClass_level at $advisorClass_class_schedule_times on $advisorClass_class_schedule_days<br />";
+						$content .= "<p>No advisorclass records found for advisor $inp_advisor_callsign</p>";
+					} else {
+						if (! empty($advisorclassData)) {
+							$myInt = count($advisorclassData);
+							foreach($advisorclassData as $key => $value) {
+								foreach($value as $thisField => $thisValue) {
+									$$thisField = $thisValue;	
+								}
+								if ($myInt == 1) {
+									$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorclass_sequence' checked> Class nbr $advisorclass_sequence $advisorclass_level at $advisorclass_class_schedule_times on $advisorclass_class_schedule_days<br />";
+								} else {
+										$optionList	.= "<input type='radio' class='formInputButton' name='inp_advisorClass' value='$advisorclass_sequence' > Class nbr $advisorclass_sequence $advisorclass_level at $advisorclass_class_schedule_times on $advisorclass_class_schedule_days<br />";
+								}
 							}
-							$content	.= "<p>Select the class to which the student $inp_student_callsign is to  be assigned and click 'Next'</p>
-											<p><form method='post' action='$theURL' 
-											name='selection_form' ENCTYPE='multipart/form-data''>
-											<input type='hidden' name='strpass' value='57'>
-											<input type='hidden' name='theSemester' value='$proximateSemester'>
-											<input type='hidden' name='inp_mode' value='$inp_mode'>
-											<input type='hidden' name='inp_verbose' value='$inp_verbose'>
-											<input type='hidden' name='inp_student_callsign' value='$inp_student_callsign'>
-											<input type='hidden' name='inp_advisor_callsign' value='$inp_advisor_callsign'>
-											<input type='hidden' name='inp_prev_advisor' value='$student_assigned_advisor'>
-											<input type='hidden' name='inp_prev_advisor_class' value='$student_assigned_advisor_class'>
-											<input type='hidden' name='studentid' value='$student_id'>
-											<input type='hidden' name='inp_additional' value='$inp_additional'>
-											<table style='border-collapse:collapse;'>
-											<tr><th colspan='2'>Re-assign Student to Advisor $inp_advisor_callsign's Class</th></tr>
-											<tr><td style='width:150px;'>Advisor Class(es)</td><td>
-											$optionList
-											</td></tr>
-											<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Next' /></td></tr></table>
-											</form></p>";
+							if ($optionList != '') {
+								if ($doDebug) {
+									echo "options set up<br />";
+								}
+								$content	.= "<p>Select the class to which the student $inp_student_callsign is to  be assigned and click 'Next'</p>
+												<p><form method='post' action='$theURL' 
+												name='selection_form' ENCTYPE='multipart/form-data''>
+												<input type='hidden' name='strpass' value='57'>
+												<input type='hidden' name='theSemester' value='$proximateSemester'>
+												<input type='hidden' name='inp_mode' value='$inp_mode'>
+												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
+												<input type='hidden' name='inp_student_callsign' value='$inp_student_callsign'>
+												<input type='hidden' name='inp_advisor_callsign' value='$inp_advisor_callsign'>
+												<input type='hidden' name='inp_prev_advisor' value='$student_assigned_advisor'>
+												<input type='hidden' name='inp_prev_advisor_class' value='$student_assigned_advisor_class'>
+												<input type='hidden' name='studentid' value='$student_id'>
+												<input type='hidden' name='inp_additional' value='$inp_additional'>
+												<table style='border-collapse:collapse;'>
+												<tr><th colspan='2'>Re-assign Student to Advisor $inp_advisor_callsign's Class</th></tr>
+												<tr><td style='width:150px;'>Advisor Class(es)</td><td>
+												$optionList
+												</td></tr>
+												<tr><td>&nbsp;</td><td><input class='formInputButton' type='submit' value='Next' /></td></tr></table>
+												</form></p>";
+							} else {
+								if ($doDebug) {
+									echo "optionList is empty<br />";
+								}
+								$content .= "<p>No matching classes found</p>";
+							}
 						} else {
 							if ($doDebug) {
 								echo "No advisorClass records found with the call sign $inp_advisor_callsign at level $student_level in the $proximateSemester semester<br />";
 							}
-							$content	.= "Advisor $inp_advisor_callsign is not signed up for a $student_level level class in the $proximateSemester semester.";
+							$content	.= "<p>No advisorClass records found with the call sign $inp_advisor_callsign at level $student_level in the $proximateSemester semester</p>";
 						}
 					}
 				} else {
-					if ($doDebug) {
-						echo "No advisor record found with the call sign $inp_advisor_callsign at level $student_level in the $proximateSemester semester<br />";
-					}
-					$content	.= "Advisor $inp_advisor_callsign is not signed up for a $student_level level class in the $proximateSemester semester.";
+					$content .= "<p>No advisor record found for $inp_advisor_callsign in semester $proximateSemester</p>";
 				}
 			}
 		} else {		// no student found
@@ -2205,7 +2257,8 @@ function getTheReason($strReasonCode) {
 // $doDebug	= TRUE;
 		if ($doDebug) {
 			echo "<br />at pass 57 with inp_student_callsign of $inp_student_callsign<br />
-					inp_advisor_callsign of $inp_advisor_callsign<br />";
+					inp_advisor_callsign of $inp_advisor_callsign<br />
+					inp_prev_advisor_class of $inp_prev_advisor_class<br />";
 			if ($haveStudent) {
 				echo "haveStudent is TRUE<br />";
 			} else {
@@ -2230,13 +2283,24 @@ function getTheReason($strReasonCode) {
 				  inp_prev_advisor_class: $inp_prev_advisor_class<br />";
 		}
 
+		if ($haveStudent) {
+			// actualize the student info
+			foreach($student as $key => $value) {
+				$$key = $value;
+			}
+		}
+		if ($haveAdvisor) {			/// this is the new advisor
+			// actualize the advisor info
+			$advisor_semester = $advisor['advisor_semester'];
+			
+		}
 
 		//	get the student record in the next semester along with the new advisor
 		// 	if either doesn't exist, don't do anything
 		if ($haveStudent && $student_semester == $proximateSemester) {
 			if ($haveAdvisor && $advisor_semester == $proximateSemester) {
 				if ($doDebug) {
-					echo "have everything needed to remove the student and reassign<br />";
+					echo "have everything needed to reassign the student<br />";
 				}			
 				// if there was a previous advisor, remove the student from that class
 				if ($inp_prev_advisor != '') {
@@ -2255,12 +2319,11 @@ function getTheReason($strReasonCode) {
 												'testMode'=>$testMode,
 												'doDebug'=>$doDebug);
 							
-					$addResult			= add_remove_student($inp_data);
-					if ($addResult[0] === FALSE) {
+					$removeResult			= add_remove_student($inp_data);
+					if ($removeResult[0] === FALSE) {
 						handleWPDBError("$jobname MGMT 57",$doDebug);
 					} else {
 						$content		.= "Student $inp_student_callsign successfully removed from $inp_prev_advisor class $inp_prev_advisor_class<br />";
-				
 						// add the student to the advisor's class
 						$inp_data			= array('inp_student'=>$inp_student_callsign,
 													'inp_semester'=>$theSemester,
@@ -2393,6 +2456,13 @@ function getTheReason($strReasonCode) {
 		}
 
 		$jobname			= "Student Management Unassign and Remove a Student";
+		if ($haveStudent) {
+			// actualize the student data
+			foreach($student as $key => $value) {
+				$$key = $value;
+			}
+		}
+		
 		$content 			.= "<h3>$jobname</h3>";
 		if ($haveStudent && $student_semester == $proximateSemester) {
 			if ($doDebug) {
@@ -2539,20 +2609,9 @@ function getTheReason($strReasonCode) {
 		$doActions				= TRUE;
 		
 		// actualize some variables
-		$student_call_sign = $student['student_call_sign'];
-		$student_semester = $student['student_semester'];
-		$student_response = $student['student_response'];
-		$student_status = $student['student_status'];
-		$student_class_language = $student['student_class_language'];
-		$student_intervention_required = $student['student_intervention_required'];
-		$student_first_class_choice_utc = $student['student_first_class_choice_utc'];
-		$student_second_class_choice_utc = $student['student_second_class_choice_utc'];
-		$student_third_class_choice_utc = $student['student_third_class_choice_utc'];
-		$student_action_log = $student['student_action_log'];
-		$student_id = $student['student_id'];
-		$student_timezone_offset = $student['student_timezone_offset'];
-		$student_level = $student['student_level'];
-		$student_excluded_advisor = $student['student_excluded_advisor'];
+		foreach($student as $key => $value) {
+			$$key = $value;
+		}
 		
 		if ($haveStudent && $student_semester == $proximateSemester) {						
 			if ($doDebug) {
@@ -2743,6 +2802,10 @@ function getTheReason($strReasonCode) {
 										$thisUserSurveyScore = $advisorData['user_survey_score'];
 										$thisAdvisorVerifyResponse = $advisorData['advisor_verify_response'];
 										$thisAdvisorEmailNumber = $advisorData['advisor_verify_email_number'];
+										$thisAdvisorLastName = $advisorData['user_last_name'];
+										$thisAdvisorFirstName = $advisorData['user_first_name'];
+										$thisAdvisorState = $advisorData['user_state'];
+										$thisAdvisorCountry = $advisorData['user_country'];
 
 										if ($thisAdvisorVerifyResponse == 'R') {
 											if ($doDebug) {
@@ -2787,7 +2850,7 @@ function getTheReason($strReasonCode) {
 													} else {
 														$displayTimes			= $result[1];
 														$displayDays			= $result[2];
-														$classAvailableArray[]	= "1|$advisorclass_call_sign|$user_last_name, $user_first_name<br />$user_state, $advisor_country|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
+														$classAvailableArray[]	= "1|$advisorclass_call_sign|$thisAdvisorFirstName, $thisAdvisorLastName<br />$thisAdvisorState, $thisAdvisorCountry|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
 														if ($doDebug) {
 															echo "Got a match. Added $advisorclass_call_sign|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
 														}
@@ -2818,7 +2881,7 @@ function getTheReason($strReasonCode) {
 														$displayTimes			= $result[1];
 														$displayDays			= $result[2];
 //														$studentCount			= getStudentCount($advisorclass_call_sign,$advisorclass_sequence);
-														$classAvailableArray[]	= "2|$advisorclass_call_sign|$user_last_name, $user_first_name|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Second|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
+														$classAvailableArray[]	= "2|$advisorclass_call_sign|$thisAdvisorFirstName, $thisAdvisorLastName<br />$thisAdvisorState, $thisAdvisorCountry|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
 														if ($doDebug) {
 															echo "Got a match. Added 2|$advisorclass_call_sign|$user_last_name, $user_first_name<br />$user_state, $advisor_country|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Second|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
 														}
@@ -2848,7 +2911,7 @@ function getTheReason($strReasonCode) {
 													} else {
 														$displayTimes			= $result[1];
 														$displayDays			= $result[2];
-														$classAvailableArray[]	= "3|$advisorclass_call_sign|$user_last_name, $user_first_name<br />$user_state, $advisor_country|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Third|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
+														$classAvailableArray[]	= "3|$advisorclass_call_sign|$thisAdvisorFirstName, $thisAdvisorLastName<br />$thisAdvisorState, $thisAdvisorCountry|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
 														if ($doDebug) {
 															echo "Got a match. Added $advisorclass_call_sign|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Third|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
 														}
@@ -3176,7 +3239,8 @@ function getTheReason($strReasonCode) {
 									['field' => 'student_semester', 'value' => $proximateSemester, 'compare' => '=' ],
 									['field' => 'student_level', 'value' => $advisorclass_level, 'compare' => '=' ],
 									['field' => 'student_response', 'value' => 'Y', 'compare' => '=' ],
-									['field' => 'student_status', 'value' => '', 'compare' => '=' ]
+									['field' => 'student_status', 'value' => '', 'compare' => '=' ],
+									['field' => 'student_class_language', 'value' => $advisorclass_language, 'compare' => '=' ]
 								]
 							];
 							$orderby = 'student_class_priority,$student_request_date';
@@ -3193,7 +3257,8 @@ function getTheReason($strReasonCode) {
 										'clauses' => [
 											['field' => 'student_level', 'value' => $advisorclass_level, 'compare' => '='],
 											['field' => 'student_response', 'value' => 'Y', 'compare' => '='],
-											['field' => 'student_status', 'value' => '', 'compare' => '=']
+											['field' => 'student_status', 'value' => '', 'compare' => '='],
+											['field' => 'student_class_language', 'value' => $advisorclass_language, 'compare' => '=']
 										]
 									]
 								]
@@ -3206,7 +3271,7 @@ function getTheReason($strReasonCode) {
 											 'order' => $order);
 						$studentResult = get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
 						if ($studentResult === FALSE) {
-							if ($deDebug) {
+							if ($doDebug) {
 								echo "get_student_and_user_master returned FALSE<br />";
 							}
 						} else {
@@ -3297,7 +3362,7 @@ function getTheReason($strReasonCode) {
 	
 													
 														/// add the student to the studentsFirstChoiceMatch array
-														$studentsFirstChoiceMatch[]		= "$student_semester|$student_first_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_first_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays";
+														$studentsFirstChoiceMatch[]		= "$student_semester|$student_first_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_first_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays|$student_class_language";
 														if ($doDebug) {
 															echo "Found a match. Added $student_semester|$student_first_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_first_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays to studentsFirstChoiceMatch array<br />";
 														}
@@ -3342,9 +3407,9 @@ function getTheReason($strReasonCode) {
 															$displayDays			= $result[2];
 														}
 														/// add the student to the studentsSecondChoiceMatch array
-														$studentsSecondChoiceMatch[]		= "$student_semester|$student_second_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_second_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays";
+														$studentsSecondChoiceMatch[]		= "$student_semester|$student_second_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_second_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays|$student_class_language";
 														if ($doDebug) {
-															echo "Found a match. Added $student_semester|$student_second_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_second_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays to studentsSecondChoiceMatch array<br />";
+															echo "Found a match. Added $student_semester|$student_second_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_second_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays|$student_class_language to studentsSecondChoiceMatch array<br />";
 														}
 														$gotMatch					= TRUE;
 													} else {
@@ -3387,9 +3452,9 @@ function getTheReason($strReasonCode) {
 															$displayDays			= $result[2];
 														}
 														/// add the student to the studentsThirdChoiceMatch array
-														$studentsThirdChoiceMatch[]		= "$student_semester|$student_third_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_third_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays";
+														$studentsThirdChoiceMatch[]		= "$student_semester|$student_third_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_third_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays|$student_class_language";
 														if ($doDebug) {
-															echo "Found a match. Added $student_semester|$student_third_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_third_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays to studentsThirdChoiceMatch array<br />";
+															echo "Found a match. Added $student_semester|$student_third_class_choice_utc|$student_request_date|$student_call_sign|$user_last_name, $user_first_name|$student_timezone_offset|$student_third_class_choice|$user_email|$user_phone|$student_class_priority|$displayTimes|$displayDays|$student_class_language to studentsThirdChoiceMatch array<br />";
 														}
 													} else {
 														if ($doDebug) {
@@ -3448,8 +3513,8 @@ function getTheReason($strReasonCode) {
 							}
 						}		//// display the result
 									
-//						studentsFirstChoiceMatch student_semester|student_first_class_choice_utc|student_request_date|student_call_sign|user_last_name, user_first_name|student_time_zone|student_first_class_choice|user_email|user_phone|student_class_priority|$displayTimes|$displayDays
-//												 0                1                              2                    3                 4                                     5                 6                          7             8				9                      10             11
+//						studentsFirstChoiceMatch student_semester|student_first_class_choice_utc|student_request_date|student_call_sign|user_last_name, user_first_name|student_time_zone|student_first_class_choice|user_email|user_phone|student_class_priority|$displayTimes|$displayDays|$student_class_language
+//												 0                1                              2                    3                 4                               5                 6                          7          8		   9                      10             11          12
 									
 						sort($studentsFirstChoiceMatch);
 						sort($studentsSecondChoiceMatch);
@@ -3458,7 +3523,7 @@ function getTheReason($strReasonCode) {
 						if ($daysToSemester > 0 && $daysToSemester <= 19) {
 							$noPreAssign		= TRUE;
 						}
-						$content		.= "<h3>Find Possible Students for $inp_advisor_callsign's $advisorclass_level Class Number $advisorclass_sequence</h3>
+						$content		.= "<h3>Find Possible Students for $inp_advisor_callsign's $advisorclass_language  $advisorclass_level Class Number $advisorclass_sequence</h3>
 											<p>Search type: $inp_search<br />
 											Search Range: $searchBegin - $searchEnd $searchDays<br />
 											Advisor Time Zone: $advisorclass_timezone_offset<br />
@@ -3472,7 +3537,7 @@ function getTheReason($strReasonCode) {
 												<th>Semester</th>
 												<th>Email</th>
 												<th>Phone</th>
-												<th>Register Date</th>
+												<th>Language</th>
 												<th>Priority</th>
 												<th>Student Choice UTC</th>
 												<th>Student Choice Local</th>
@@ -3493,13 +3558,14 @@ function getTheReason($strReasonCode) {
 								$thisSemester		= $myArray[0];
 								$thisRequestDate	= $myArray[2];
 								$thisClassPriority	= $myArray[9];
+								$thisLanguage		= $myArray[12];
 								$content			.= "<tr><td><a href='$updateStudentInfoURL?request_type=callsign&request_info=$thisCallSign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$thisCallSign</a></td>
 															<td>$thisName</td>
 															<td>$thisTimeZone</td>
 															<td>$thisSemester</td>
 															<td>$thisEmail</td>
 															<td>$thisPhone</td>
-															<td>$thisRequestDate</td>
+															<td>$thisLanguage</td>
 															<td>$thisClassPriority</td>
 															<td>$thisClassChoice</td>
 															<td>$thisClassLocal</td>";
@@ -3658,7 +3724,7 @@ function getTheReason($strReasonCode) {
 				} else {
 					if (! empty($studentData)) {
 						foreach($studentData as $key => $value) {
-							$$thisField = $thisValue;
+							$$key = $value;
 						}
 						if ($doDebug) {
 							echo "have student record for $student_call_sign:<br />
@@ -3730,8 +3796,7 @@ function getTheReason($strReasonCode) {
 					will show a list of classes matching the student's level (if only one class, the function 
 					will proceed with the assignment). Otherwise, click the 'Assign' 
 					button.</p>
-					<p>The student must currently be unassigned (student status not Y)<br />
-					The student will be pulled into the current semester, if necessary<br />
+					<p>The student will be pulled into the current semester, if necessary<br />
 					The student level will be changed, if necessary<br />
 					The student response will be set to Y<br />
 					The student status will be set to S (awaiting verification)<br />
