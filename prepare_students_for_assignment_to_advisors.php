@@ -31,6 +31,9 @@ function prepare_students_for_assignment_to_advisors_func() {
  *			if so and taking the same level class again, mark the stuent's hold_reason_code 
  *				with an 'X' and put the previous advisor in th exlcuded_advisor_field
  *
+ *		if a student is asking for a language other than English, check to see if there is
+ *			a class in that language at that level. If not, put the student on hold
+ *
  *		Check each advisor to see if the advisor has taught the previous
  *		semester. If so, and evaluations are not complete, set the score to 9.
  *		Otherwise, set the score to 1. If the advisor has not taught in the
@@ -60,7 +63,7 @@ function prepare_students_for_assignment_to_advisors_func() {
  
  	global $wpdb;
  
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
@@ -456,6 +459,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 											echo "<br />Processing student $user_last_name, $user_first_name ($student_call_sign)<br />
 												   &nbsp;&nbsp;&nbsp;Youth: $student_youth; age: $student_age<br />
 												   &nbsp;&nbsp;&nbsp;Requesting a $student_level class<br />
+												   &nbsp;&nbsp;&nbsp;Requesting a class in $student_class_language<br />
 												   &nbsp;&nbsp;&nbsp;Intervention Required: $student_intervention_required<br />
 												   &nbsp;&nbsp;&nbsp;Hold Override: $student_hold_override<br />";
 										}
@@ -863,6 +867,61 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 											}					// finished with the intervention required loop
 										}
 									}						// finished with the hold_override loop
+									
+									// if the student is asking for a class in a language other than English,
+									// check to see if there is a class in that language at that level.
+									// if not. put the student on hold
+									$hasClass = FALSE;
+									if ($student_class_language != 'English') {
+										if ($student_hold_override == '') {
+											if ($doDebug) {
+												echo "student is asking for a class in $student_class_language. Checking to see if it is available<br />";
+											}
+											// get the advisorclass records for student level and language
+											$criteria = [
+												'relation' => 'AND',
+												'clauses' => [
+													['field' => 'advisorclass_semester', 'value' => $student_semester, 'compare' => '=' ],
+													['field' => 'advisorclass_level', 'value' => $student_level, 'compare' => '=' ],
+													['field' => 'advisorclass_language', 'value' => $student_class_language, 'compare' => '=' ],
+												]
+											];
+											$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+											if ($advisorclassData === FALSE || $advisorclassData === 'NULL') {
+												if ($doDebug) {
+													echo "get_advisorclass returned FALSE|NULL<br />";
+												}
+											} else {
+												if ($doDebug) {
+													echo "advisorclassData returned: <br /><pre>";
+													print_r($advisorclassData);
+													echo "</pre><br />";
+												}
+												if (! empty($advisorclassData)) {
+													if (count($advisorclassData) > 0) {
+														$hasClass = TRUE;		// there is a class in that language at that level
+														if ($doDebug) {
+															echo "there is a class available<br />";
+														}
+													}
+												}
+											}
+											if (! $hasClass) {
+											
+												$updateStudent = TRUE;
+												$studentUpdateParams['student_intervention_required'] = 'H';
+												$studentUpdateParams['student_hold_reason_code'] = 'L';
+												$possContent 	.= "&nbsp;&nbsp;&nbsp;Student asking for a $student_level class in $student_class_language<br />
+																	&nbsp;&nbsp;&nbsp;No class is available in that language at that level<br />
+																	&nbsp;&nbsp;&nbsp;<b>Student placed on hold</b><br />";
+												$updateLog .= " / Student asking for a $student_level class in $student_class_language. Class is not available. ";
+												$doContent		= TRUE;
+											}
+										}
+									}
+									
+									
+									
 									// see if should send an email
 									if ($sendEmail) {
 										$doEmail		= FALSE;
