@@ -133,6 +133,7 @@ function add_remove_student($inp_data = array()) {
 		$updateStudent				= FALSE;
 		$updateAdvisor				= FALSE;
 		$updateAdvisorclass			= FALSE;
+		$actionDate					= date('Y-m-d H:i:s');
 		$content					= '';
 	
 		foreach($inp_data as $thisKey=>$thisData) {
@@ -147,7 +148,7 @@ function add_remove_student($inp_data = array()) {
 		}
 
 		if ($doDebug) {
-			echo "<br /><b>FUNCTION</b> add_remove_student<br />
+			echo "<br /><b>FUNCTION</b> add_remove_student --- Test 2<br />
 				  inp_data:<br /><pre>";
 				  print_r($inp_data);
 				  echo "</pre><br />";
@@ -200,6 +201,9 @@ function add_remove_student($inp_data = array()) {
 						$$thisField = $thisValue;
 					}
 					$haveStudentData = TRUE;
+					if ($doDebug) {
+						echo "student $student_call_sign is available<br />";
+					}
 				}
 			}
 			if ($doProceed) {
@@ -222,6 +226,9 @@ function add_remove_student($inp_data = array()) {
 							$$thisField = $thisValue;
 						}
 						$haveAdvisorData = TRUE;
+						if ($doDebug) {
+							echo "advisor $advisor_call_sign is available<br />";
+						}
 					}
 				}
 				
@@ -236,28 +243,55 @@ function add_remove_student($inp_data = array()) {
 						['field' => 'advisorclass_semester', 'value' => $inp_semester, 'compare' => '=' ]
 					]
 				];
-				$advisorclass_data = $advisorclass_dal->get_advisor_classes($criteria,$operatingMode);
+				$advisorclass_data = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 				if ($advisorclass_data === FALSE) {
 					$errors .= "Attempting to retrieve advisorclass $inp_assigned_advisor class $inp_assigned_advisor_class returned FALSE";
 					$gotError = TRUE;
 					$doProceed = FALSE;
+
 				} else {
-					foreach($advisorclass_data as $key => $value) {
-						foreach($value as $thisField => $thisValue) {
-							$$thisField = $thisValue;
+					if (! empty($advisorclass_data)) {
+						foreach($advisorclass_data as $key => $value) {
+							foreach($value as $thisField => $thisValue) {
+								$$thisField = $thisValue;
+							}
+							$haveAdvisorclassData = TRUE;
+							if ($doDebug) {
+								echo "advisorclass record for $advisorclass_call_sign sequence $advisorclass_sequence is availabe<br />";
+							}
 						}
-						$haveAdvisorclassData = TRUE;
+					} else {
+						if ($doDebug) {
+							echo "getting advisorclass returned no records<br />";
+						}
 					}
 				}
 			}
-			
+
+if ($doDebug) {
+	if ($haveStudentData) {
+		echo "haveStudentData is TRUE<br />";
+	} else {
+		echo "haveStudentData is FALSE<br />";
+	}
+	if ($haveAdvisorData) {
+		echo "haveAdvisorData is TRUE<br />";
+	} else {
+		echo "haveAdvisorData is FALSE<br />";
+	}
+	if ($haveAdvisorclassData) {
+		echo "haveAdvisorclassData is TRUE<br />";
+	} else {
+		echo "haveAdvisorclassData is FALSE<br />";
+	}
+}
 			if ($haveStudentData && $haveAdvisorData && $haveAdvisorclassData) {
 				if ($inp_method == 'add') {
 					// only add if student_assigned_advisor is blank
 					if ($student_assigned_advisor == '') {
 						// add student to advisors class
 						if ($doDebug) {
-							echo "Preparing to add $inp_student at id $student_ID to $inp_assigned_advisor $inp_assigned_advisor_class class<br />";
+							echo "Preparing to add $inp_student at id $student_id to $inp_assigned_advisor $inp_assigned_advisor_class class<br />";
 						}
 						$student_action_log = "$student_action_log / $actionDate Add_Remove $userName $jobname Student assigned to $inp_assigned_advisor $inp_assigned_advisor_class class";
 						if ($inp_arbitrarily_assigned == 'Y') {
@@ -271,6 +305,9 @@ function add_remove_student($inp_data = array()) {
 						$studentUpdateParams['student_advisor_select_date']	= date('Y-m-d H:i:s');
 						$studentUpdateParams['student_status'] = 'S';
 						$updateStudent = TRUE;
+						if ($doDebug) {
+							echo "student $student_call_sign updateParams set to update student record with the add<br />";
+						}
 					} else {
 						if ($doDebug) {
 							echo "student_assigned_advisor already set to $student_assigned_advisor<br />";
@@ -281,15 +318,15 @@ function add_remove_student($inp_data = array()) {
 					}					
 				} else {					/// remove the student
 					if ($doDebug) {
-						echo "Preparing to remove $inp_student at id $student_ID from $inp_assigned_advisor $inp_assigned_advisor_class class<br />";
+						echo "Preparing to remove $inp_student at id $student_id from $inp_assigned_advisor $inp_assigned_advisor_class class<br />";
 					}
 					// only remove if student_assigned_advisor is $inp_assigned_advisor
 					if ($student_assigned_advisor == $inp_assigned_advisor) {
-						$student_action_log						= "$student_action_log / $actionDate Add_Remove $userName $jobname Student removed from $inp_assigned_advisor $inp_assigned_advisor_class class";
+						$student_action_log	.= " / $actionDate Add_Remove $userName $jobname Student removed from $inp_assigned_advisor $inp_assigned_advisor_class class";
 						if ($student_no_catalog == 'Y') {
 							$studentUpdateParams['student_no_catalog']			= '';
 						}
-						$studentUpdateParams['student_action_log']				= $student_action_log;
+						$studentUpdateParams['student_action_log'] = $student_action_log;
 				
 						if ($inp_remove_status == '') {					//// put in unassigned pool
 							$studentUpdateParams['student_status'] = '';
@@ -307,6 +344,9 @@ function add_remove_student($inp_data = array()) {
 							}
 							$studentUpdateParams['student_class_priority'] = 1;
 							$updateStudent = TRUE;
+							if ($doDebug) {
+								echo "student $student_call_sign removal data set<br />";
+							}
 						} else {
 							// student_remove_status is not blank
 							$studentUpdateParams['student_status'] = $inp_remove_status;
@@ -324,6 +364,9 @@ function add_remove_student($inp_data = array()) {
 								$studentUpdateParams['student_hold_reason_code']		= 'X';
 							}
 							$updateStudent = TRUE;
+							if ($doDebug) {
+								echo "student $student_call_sign removal data set<br />";
+							}
 						}
 					} else {
 						if ($doDebug) {
@@ -347,20 +390,22 @@ function add_remove_student($inp_data = array()) {
 							} else {
 								$strSnum= strval($snum);
 							}
-							$theInfo= ${'advisorClass_student' . $strSnum};
+							$theInfo= ${'advisorclass_student' . $strSnum};
 							if ($doDebug) {
 								echo "Looking at snum $snum strSnum $strSnum with a value of $theInfo<br />";
 							}
 							if ($theInfo == '') {       // have an open slot
-								$advisorClass_action_log		= "$advisorClass_action_log / $actionDate $userName $inp_student added to this class ";
+								$advisorclass_action_log .= " / $actionDate $jobname $userName $inp_student added to this class ";
+								$advisorclassUpdateParams['advisorclass_action_log'] = $advisorclass_action_log;
 								$advisorclassUpdateParams["advisorclass_student$strSnum"] = $inp_student;
-								$advisorClass_number_students++;
-								$advisorclassUpdateParams['advisorclass_number_students']= $advisorClass_number_students;
+								$advisorclass_number_students++;
+								$advisorclassUpdateParams['advisorclass_number_students']= $advisorclass_number_students;
 								$addedStudent					= TRUE;
 								if ($doDebug) {
 									echo "added student to an open slot $strSnum for $inp_student<br />";
 								}
 								$updateAdvisorclass = TRUE;
+								break;
 							} else {
 								if ($theInfo == $inp_student) {
 									if ($doDebug) {
@@ -375,17 +420,17 @@ function add_remove_student($inp_data = array()) {
 						}
 						if (!$addedStudent) {
 							if ($doDebug) {
-								echo "Could not find an open slot for student $inp_student in $advisorClass_call_sign class $advisorClass_sequence<br />";
+								echo "Could not find an open slot for student $inp_student in $advisorclass_call_sign class $advisorclass_sequence<br />";
 							}
 							$gotError = TRUE;
-							$errors .= "Could not find an open slot for student $inp_student in $advisorClass_call_sign class $advisorClass_sequence<br />";
+							$errors .= "Could not find an open slot for student $inp_student in $advisorclass_call_sign class $advisorclass_sequence<br />";
 							$doProceed = FALSE;
 						} else {
 							// clear out the class_verified data in the advisor record
 							if ($doDebug) {
 								echo "setting advisor_class_verified to N<br />";
 							}
-							$advisorUpdateParams = array('advisor_class_verified' => 'N');
+							$advisorUpdateParams['advisor_class_verified'] = 'N';
 							$updateAdvisor = TRUE; 
 						}
 					} else {				/// removing a student
@@ -402,7 +447,7 @@ function add_remove_student($inp_data = array()) {
 							} else {
 								$strSnum = strval($snum);
 							}
-							$foundCallSign = ${'advisorClass_student' . $strSnum};
+							$foundCallSign = ${'advisorclass_student' . $strSnum};
 							if ($foundCallSign != '') {
 								$lastEntry = $strSnum;
 								$numberStudents = $snum;
@@ -418,13 +463,13 @@ function add_remove_student($inp_data = array()) {
 							}
 							$updateAdvisorclass = TRUE;
 							if ($foundLocation == $lastEntry) {
-								$advisorclassUpdateParams["advisorClass_student$lastEntry"] = '';
+								$advisorclassUpdateParams["advisorclass_student$lastEntry"] = '';
 								if ($doDebug) {
 									echo "found $inp_student at lastEntry $lastEntry and deleted<br />";
 								}
 							} else {
-								$advisorclassUpdateParams["advisorClass_student$foundLocation"]	= ${'advisorClass_student' . $lastEntry};
-								$advisorclassUpdateParams["advisorClass_student$lastEntry"]		= '';
+								$advisorclassUpdateParams["advisorclass_student$foundLocation"]	= ${'advisorclass_student' . $lastEntry};
+								$advisorclassUpdateParams["advisorclass_student$lastEntry"]		= '';
 								if ($doDebug) {
 									echo "moved last entry $lastEntry to found location $foundLocation, wiped out last entry $lastEntry<br />";
 								}
@@ -433,7 +478,12 @@ function add_remove_student($inp_data = array()) {
 							if ($doDebug) {
 								echo "numberStudents: $numberStudents<br />";
 							}
-							$advisorclassUpdateParams['advisorclass_number_students']					= $numberStudents;
+							$advisorclassUpdateParams['advisorclass_number_students'] = $numberStudents;
+							if ($doDebug) {
+								echo "advisorclass record update parameters set<br />";
+							}
+							$advisorclass_action_log .= " / $actionDate $userName, $jobname removed $inp_student from this class ";
+							$advisorclassUpdateParams['advisorclass_action_log'] = $advisorclass_action_log;
 						} else {
 							if ($doDebug) {
 								echo "$inp_student not found\n";
