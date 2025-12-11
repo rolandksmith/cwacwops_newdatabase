@@ -93,7 +93,7 @@ function get_user_master_for_display($get_type,$get_info,$admin,$operatingMode,$
 	}
 	
 	// run the query
-	$user_data = $user_master_dal->get_user_master($criteria,$operatingMode);
+	$user_data = $user_master_dal->get_user_master($criteria, 'user_call_sign', 'ASC', $operatingMode);
 	if ($user_data === FALSE) {
 		return FALSE;
 	}
