@@ -125,7 +125,7 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
             } else {
             	if (empty($results)) {
 					$myQuery = $this->wpdb->last_query;
-					error_log("CWA_Advisor_DAL INFORMATION No data retrieved with $myQuery");
+					error_log("CWA_Advisor_DAL INFORMATION No data retrieved in operatingMode $operatingMode with $myQuery");
             	}
             }
             return $results;
