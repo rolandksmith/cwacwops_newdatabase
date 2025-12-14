@@ -1855,13 +1855,21 @@ function student_registration_func() {
 				echo "verifying what can be changed<br />daysToGo: $daysToGo<br />assigned advisor: $student_assigned_advisor<br />";
 			}
 			if ($daysToGo < 21) {								// student asking for upcoming semester
-//				if ($student_assigned_advisor != '') {			// student is assigned to an advisor
+				if ($student_assigned_advisor != '') {			// student is assigned to an advisor
 					$canChangeAnything	= FALSE;				// limited changes only
 					if ($doDebug) {
 						echo "daysToGo is less than 21 <br />canChangeAnything set to FALSE<br />";
 					}
-//				}
-			} else {			// if assigned advisor, something is wrong
+				}
+			}
+			if ($daysToGo < 21 && $student_assigned_advisor == '') {	// less than 21 days and no assigned advisor
+				// this is possible if the student signed up late and no advisor is available
+				$canChangeAnything	= TRUE;					// can change anything
+				if ($doDebug) {
+					echo "daysToGo is less than 21 and no assigned advisor<br />canChangeAnything set to TRUE<br />";
+				}	
+			}
+			if ($daustToGo >= 21) {							// more than 21 days to semester
 				if ($student_assigned_advisor != '') {
 					if ($student_assigned_advisor != 'AC6AC') {
 						sendErrorEmail("$jobname Student $student_call_sign more than 21 days to the semester and student has $student_assigned_advisor assigned as an advisor. Program being run by $userName");
@@ -1869,6 +1877,8 @@ function student_registration_func() {
 					} else {
 						$canChangeAnything 	= FALSE;
 					}
+				} else {
+					$canChangeAnything	= TRUE;
 				}
 			}
 
