@@ -809,7 +809,7 @@ function display_and_update_advisor_info_func() {
 			}
 		} else {
 			if ($doDebug) {
-				echo "request_type of $request_type no valid<br />";
+				echo "request_type of $request_type not valid<br />";
 			}
 			$content			.= "<p>request_type not valid</p>";
 			$goOn				= FALSE;
