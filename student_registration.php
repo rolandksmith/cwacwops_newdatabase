@@ -1869,7 +1869,7 @@ function student_registration_func() {
 					echo "daysToGo is less than 21 and no assigned advisor<br />canChangeAnything set to TRUE<br />";
 				}	
 			}
-			if ($daustToGo >= 21) {							// more than 21 days to semester
+			if ($daysToGo >= 21) {							// more than 21 days to semester
 				if ($student_assigned_advisor != '') {
 					if ($student_assigned_advisor != 'AC6AC') {
 						sendErrorEmail("$jobname Student $student_call_sign more than 21 days to the semester and student has $student_assigned_advisor assigned as an advisor. Program being run by $userName");
