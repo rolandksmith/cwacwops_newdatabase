@@ -2,10 +2,13 @@ function get_the_user_ip_data() {
 $parser = new WhichBrowser\Parser(getallheaders());
 $thisBrowser = $parser->browser->name;
 $thisVersion = $parser->browser->version->toString();
-$thisOS = $parser->os->name;
-$thisMfgr = $parser->device->manufacturer;
-if ($thisMfgr === NULL) {
-	$thisMfgr = '';
+$thisOS = '';
+if (isset($parser->os->name)) {
+	$thisOS = $parser->os->name;
+}
+$thisMfgr = '';
+if (isset($parser->device->manufacturer)) {
+	$thisMfgr = $parser->device->manufacturer;
 }
 $thisDevice = $parser->device->type;
 $returnArray['browser'] = $thisBrowser;
