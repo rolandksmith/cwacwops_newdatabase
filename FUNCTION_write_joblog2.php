@@ -128,7 +128,7 @@ function write_joblog2_func($dataToWrite=array()) {
 	$result							= $wpdb->insert($joblogTableName,
 													$updateParams,
 													$updateFormat);
-	if ($result === FALSE) {
+	if ($result === FALSE || $result === NULL) {
 		if ($doDebug) {
 			echo "Inserting $dataToWrite failed<br />
 				  wpdb->last_query: " . $wpdb->last_query . "<br />
@@ -146,20 +146,21 @@ function write_joblog2_func($dataToWrite=array()) {
 			print_r($updateParams);
 			echo "</pre><br />";
 		}
-		// now add this info to the data_log
-		$fields_json = json_encode($updateParams);
-		$dateWritten = date('Y-m-d H:i:s');
-		$dataLogResult = $wpdb->insert('wpw1_cwa_data_log', 
-								array('data_date_written' => $dateWritten,
-									  'data_user' => $jobwho,
-									  'data_call_sign' => '',
-									  'data_table_name' => 'joblog',
-									  'data_action' => 'insert',
-									  'data_field_values' => $fields_json),
-								array('%s','%s','%s','%s','%s','%s'));
-		if ($dataLogResult === FALSE) {
-			handleWPDBError("FUNCTION_write_joblog2 ($jobname) insert returned FALSE");
-		}
+//		// now add this info to the data_log
+//		$fields_json = json_encode($updateParams);
+//		$dateWritten = date('Y-m-d H:i:s');
+//		$dataLogResult = $wpdb->insert('wpw1_cwa_data_log', 
+//								array('data_date_written' => $dateWritten,
+//									  'data_user' => $jobwho,
+//									  'data_call_sign' => '',
+//									  'data_table_name' => 'joblog',
+//									  'data_action' => 'insert',
+//									  'data_field_values' => $fields_json),
+//								array('%s','%s','%s','%s','%s','%s'));
+//		if ($dataLogResult === FALSE || $dataLogResult === NULL) {
+//			handleWPDBError("FUNCTION_write_joblog2 ($jobname) insert returned FALSE");
+//			return FALSE;
+//		}
 		return TRUE;
 	}
 
