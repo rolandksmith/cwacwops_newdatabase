@@ -2,12 +2,6 @@ function decline_student_reassignment_func() {
 
 /*	function for a reassigned student to decline the assignment (incoming info only)
 
-	modified 4Mar21 by Roland to change Joe Fisher's email address
-	Modified 22Oct22 by Roland for new timezone table format
-	Modified 15Apr23 by Roland for action_log
-	Modified 12Jul23 by Roland to use consolidated tables
-	Modified 31Aug23 by Roland to turn off dodebug and testmode if validUser is N
-	Modified 12Oct24 by Roland for new database
 */
 
 	global $wpdb;
@@ -71,6 +65,9 @@ function decline_student_reassignment_func() {
 		}
 	}
 
+	if (! isset($program_action)) {
+		$program_action	= '';
+	}	
 	if ($program_action != 'valid') {
 		return "You're not authorized. Goodbye";
 	}
@@ -252,9 +249,24 @@ target='_blank' rel='noopener noreferrer'>CW Academy Student Signup</a> to regis
 	if ($testMode) {
 		$thisStr		= 'Testmode';
 	}
-	$result			= write_joblog_func("Decline Student Reassignment|$nowDate|$nowTime|$student_call_sign|Time|$thisStr|0: $elapsedTime");
-	if ($result == 'FAIL') {
-		$content	.= "<p>writing to joblog.txt failed</p>";
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> $doDebug);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		$content	.= "<p>writing to joblog failed</p>";
 	}
 	return $content;	
 }	
