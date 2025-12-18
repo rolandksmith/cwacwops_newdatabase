@@ -212,12 +212,13 @@ if ( ! class_exists( 'CWA_Advisorclass_DAL' ) ) {
 				if ($newOrderBy != '') {
 					$sql .= " ORDER BY $newOrderBy ";
 					
-					if ($order == 'ASC') {
-						$sql .= 'ASC ';
-					} else {
-						$sql .= 'DESC ';
-					}
-				}
+					$regex = '/^(ASC|DESC)(?:\s+(?:LIMIT|Limit|limit)\s+([1-9]\d{0,3}))?$/i';
+                    if (preg_match($regex, trim($order))) {
+                        $sql .= $order;
+                    } else {
+                        $sql .= 'ASC';
+                    }
+                }
 			}
 			
             if ( ! empty( $params ) ) {
