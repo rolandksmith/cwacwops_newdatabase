@@ -1781,10 +1781,14 @@ function getTheReason($strReasonCode) {
 				$$thisField = $thisValue;
 			}
 			$gotError				= FALSE;
-			if ($student_assigned_advisor != '') {
+			if ($student_assigned_advisor === '') {
 				if ($doDebug) {
-					echo "Student has an assigned advisor already<br />";
+					echo "Student does not have an assigned advisor<br />";
 				}
+		} else {
+				if ($doDebug) {
+					echo "Student already has an assigned advisor of $student_assigned_advisor<br />";
+				}	
 				$content			.= "<p>Student $inp_student_callsign already has an assigned advisor of $student_assigned_advisor. 
 										Please unassign this advisor before making a new assignment.<p>";
 				$gotError			= TRUE;
@@ -3893,9 +3897,9 @@ function getTheReason($strReasonCode) {
 									$$thisField = $thisValue;
 								}
 	
-								if ($inp_advisorClass == $advisorClass_sequence) {
-									$class_ID							= $advisorClass_ID;	
-									$class_sequence					 	= $advisorClass_sequence;
+								if ($inp_advisorClass == $advisorclass_sequence) {
+									$class_ID							= $advisorclass_id;	
+									$class_sequence					 	= $advisorclass_sequence;
 									$assignMatch						= TRUE;
 									if ($doDebug) {
 										echo "Have a class match. Saving id: $class_ID; sequence: $class_sequence<br />";
@@ -3982,7 +3986,7 @@ function getTheReason($strReasonCode) {
 					
 								$addResult			= add_remove_student($inp_data);
 								if ($addResult[0] === FALSE) {
-									$thisReason		= $removeResult[1];
+									$thisReason		= $addResult[1];
 									if ($doDebug) {
 										echo "attempting to add $student_call_sign to $student_assigned_advisor class failed:<br />$thisReason<br />";
 									}
