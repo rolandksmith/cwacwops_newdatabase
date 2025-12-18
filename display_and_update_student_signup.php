@@ -681,7 +681,16 @@ function display_and_update_student_signup_func() {
 							foreach($value as $thisField => $thisValue) {
 								$$thisField = $thisValue;
 							}
-
+							if ($doDebug) {
+								echo "student_assigned_advisor:<br /><pre>";
+								var_dump($student_assigned_advisor);
+								echo "</pre><br />";							
+							}		
+							if ($doOnce) {
+								$doOnce = FALSE;
+							} else {
+								$content .= "<hr />";
+							}
 							// check the student record for errors
 							$studentDataErrors = cwa_validate_student_record($student_id );
 							if (! empty($studentDataErrors)) {
