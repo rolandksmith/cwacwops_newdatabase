@@ -145,11 +145,12 @@ if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
 				if ($newOrderBy != '') {
 					$sql .= " ORDER BY $newOrderBy ";
 					
-					if ($order == 'ASC') {
-						$sql .= 'ASC ';
-					} else {
-						$sql .= 'DESC ';
-					}
+					$regex = '/^(ASC|DESC)(?:\s+(?:LIMIT|Limit|limit)\s+([1-9]\d{0,3}))?$/i';
+                    if (preg_match($regex, trim($order))) {
+                        $sql .= $order;
+                    } else {
+                        $sql .= 'ASC';
+                    }
 				}
 			}
 			
@@ -337,6 +338,7 @@ if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
         
         public function run_sql($SQL, $operatingMode) {
             $tables = $this->_get_table_names( $operatingMode );
+
 			$SQL = str_replace('TABLENAME',$tables['primary'],$SQL);
 			
 			$result = $this->wpdb->get_results($SQL, ARRAY_A); 
