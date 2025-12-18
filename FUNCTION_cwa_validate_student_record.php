@@ -129,7 +129,7 @@ function cwa_validate_student_record( int $student_id ): array {
 
     // 3.1 & 3.2: Helper function for checking advisor call sign validity
     $check_advisor_exists = function( $call_sign_field, $call_sign, $semester ) use ( $wpdb, $table_advisor, &$errors ) {
-        if ( ! empty( $call_sign ) ) {
+        if ( $call_sign != '') {
             $advisor_exists = $wpdb->get_var( $wpdb->prepare(
                 "SELECT advisor_call_sign FROM {$table_advisor} 
                  WHERE advisor_call_sign = %s AND advisor_semester = %s",
