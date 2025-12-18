@@ -382,7 +382,7 @@ function selectCountry($inp_country) {
 			$strPass					= "2";
 			$runByUser					= TRUE;	// job run from link on user's portal
 			$request_type				= 'callsign';
-			$request_info				= $strtoupper($userName);
+			$request_info				= strtoupper($userName);
 		}
 	}
 
@@ -533,7 +533,9 @@ function selectCountry($inp_country) {
 		if ($doProceed) {
 			// get the user_master information
 			if ($doDebug) {
-				echo "calling user_dal->get_user_master<br />";
+				echo "calling user_dal->get_user_master. criteria:<br /><pre>";
+				print_r($criteria);
+				echo "</pre><br />";	
 			}
 			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
 			if ($doDebug) {
