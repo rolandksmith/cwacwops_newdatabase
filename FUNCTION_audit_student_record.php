@@ -2,16 +2,17 @@ function audit_student_record($inp_value='',$doDebug=FALSE) {
 
 /*	Audit Student Record
 
-	inp_value: either the id of a student record or the student's callsign
-	Returns: array(TRUE/FALSE,
-					errors found);
+	@param integer|string $inp_value either a student_id or a student callsign
+	@param b 
+	@Return array TRUE/FALSE,
+					errors found if return is FALSE
 					
 	created: 23Mar2025 by Roland
 	
 */
 
 	global $wpdb;
-$doDebug = TRUE;	
+// $doDebug = TRUE;	
 	if ($doDebug) {
 		echo "<br /><b>Audit Student Record</b> inp_value: $inp_value<br />";
 	}
