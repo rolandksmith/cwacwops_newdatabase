@@ -6,12 +6,12 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 	Function formats the data to call write_joblog2_func
 	
 	returns:
-		TRUE if successful
-		FALSE if not successful
+		OK if successful
+		FAIL if not successful
 
 */
 	global $wpdb;
-//	$doDebug				= FALSE;
+	$doDebug				= TRUE;
 
 	$job_name				= "";
 	$job_date				= "";
@@ -73,6 +73,15 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 		echo "</pre><br />";
 	}
 	$result		= write_joblog2_func($updateParams);
-	return $result;
+	if ($doDebug) {
+		echo "joblog2 result:<br /><pre>";	
+		print_r($result);
+		echo "</pre><br />";	
+	}
+	if ($result) {
+		return 'OK';
+	} else {
+		return 'FAIL';
+	}
 }
 add_action('write_joblog_func','write_joblog_func');
