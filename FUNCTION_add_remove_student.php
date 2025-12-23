@@ -369,12 +369,18 @@ if ($doDebug) {
 							}
 						}
 					} else {
-						if ($doDebug) {
-							echo "$student_assigned_advisor is not $inp_assigned_advisor. No removal is possible<br />";
+						if ($student_assigned_advisor === '') {
+							if ($doDebug) {
+								echo "$inp_student is not assigned to any advisor. Continuing the class removal<br />";
+							}
+						} else {
+							if ($doDebug) {
+								echo "$student_assigned_advisor is not $inp_assigned_advisor. No removal is possible<br />";
+							}
+							$gotError		= TRUE;
+							$errors			.= "$student_assigned_advisor is not $inp_assigned_advisor. No removal is possible<br />";
+							$doProceed		= FALSE;
 						}
-						$gotError		= TRUE;
-						$errors			.= "$student_assigned_advisor is not $inp_assigned_advisor. No removal is possible<br />";
-						$doProceed		= FALSE;
 					}
 				}
 				if ($doProceed) {					
@@ -486,17 +492,18 @@ if ($doDebug) {
 							$advisorclassUpdateParams['advisorclass_action_log'] = $advisorclass_action_log;
 						} else {
 							if ($doDebug) {
-								echo "$inp_student not found\n";
+								echo "$inp_student not found<br >";
 							}
-							$gotError = TRUE;
-							$errors .= "$inp_student not found in advisorClass to remove<br />";
-							$doProceed = FALSE;
+							$updateAdvisorclass = FALSE;	
 						}
 					}
 				}
 				if ($doProceed) {
 					// all updates staged and no errors. Update the files
 					if ($updateStudent) {
+						if ($doDebug) {
+							echo "updateStudent is set<br />";
+						}
 						// update the student record
 						$updateResult = $student_dal->update($student_id,$studentUpdateParams,$operatingMode);
 						if($updateResult === FALSE) {
@@ -508,7 +515,7 @@ if ($doDebug) {
 							$doProceed = FALSE;
 						} else {
 							if ($doDebug) {
-								echo "student $inp_student updated. Updating advisorClass record<br />";
+								echo "student $inp_student updated<br />";
 							}
 							if ($inp_method == 'add') {
 								$content .= "<p>$inp_student student record updated to show student is assigned to $inp_assigned_advisor class $inp_assigned_advisor_class</p> ";
@@ -520,6 +527,9 @@ if ($doDebug) {
 				}
 				if ($doProceed) {
 					if ($updateAdvisor) {
+						if ($doDebug) {
+							echo "updateAdvisor is set<br />";
+						}
 						// update the advisor record
 						$updateResult = $advisor_dal->update($advisor_id,$advisorUpdateParams,$operatingMode);
 						if($updateResult === FALSE) {
@@ -536,6 +546,9 @@ if ($doDebug) {
 				}
 				if ($doProceed) {
 					if ($updateAdvisorclass) {
+						if ($doDebug) {
+							echo "updateAdvisorclass is set<br />";
+						}	
 						// updating advisorclass
 						$updateResult = $advisorclass_dal->update($advisorclass_id,$advisorclassUpdateParams,$operatingMode);
 						if($updateResult === FALSE) {
