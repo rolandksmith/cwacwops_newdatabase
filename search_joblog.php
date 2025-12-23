@@ -293,7 +293,8 @@ function search_joblog_func() {
 								<p>Search Criteria: $searchWhere<br />
 								Showing next 25 records starting at record $begin</p>
 								<table style='width:1200px;'>
-								<tr><th>Program Name</th>
+								<tr><th>ID</th>
+									<th>Program Name</th>
 									<th>Date</th>
 									<th>Who</th>
 									<th>Mode</th>
@@ -305,6 +306,7 @@ function search_joblog_func() {
 									<th>Title</th>
 									<th>Date Created</td></tr>";
 				foreach($wpw1_cwa_joblog as $joblogRow) {
+					$record_id		= $joblogRow->record_id;
 					$job_name		= $joblogRow->job_name;
 					$job_date		= $joblogRow->job_date;
 					$job_time		= $joblogRow->job_time;
@@ -317,7 +319,8 @@ function search_joblog_func() {
 					$job_comments	= $joblogRow->job_comments;
 					$job_title		= $joblogRow->job_title;
 					$job_date_created	= $joblogRow->job_date_created;
-					$content	.= "<tr><td style='vertical-align:top;'>$job_name</td>
+					$content	.= "<tr><td style='vertical-align:top;'>$record_id</td>
+										<td style='vertical-align:top;'>$job_name</td>
 										<td style='vertical-align:top;'>$job_date $job_time</td>
 										<td style='vertical-align:top;'>$job_who</td>
 										<td style='vertical-align:top;'>$job_mode</td>
