@@ -29,8 +29,8 @@ function data_initialization_func($attrib='') {
 
 
 	// determine if current user is a valid user
-	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL','KF7WX','kf7wx'); 
-	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q','KF7WX','kf7wx');
+	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL','KF7WX','kf7wx', 'N9EEE', 'n9eee'); 
+	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q','KF7WX','kf7wx', 'N9EEE', 'N9EEE');
 	$current_user 				= wp_get_current_user();
 	
 //	echo "current_user:<br /><pre>";
