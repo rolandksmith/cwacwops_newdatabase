@@ -129,7 +129,7 @@ function display_debug_reports_func() {
 		
 		// get list of filenames
 
-		$directory = '/home/cwacwops/public_html/wp-content/uploads/';
+		$directory = '/home/cwacwops/public_html/wp-content/daily_cron_logs/';
 		$matchingFiles = [];
 		
 		// Get all files in the directory
