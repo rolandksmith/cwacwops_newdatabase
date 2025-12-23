@@ -317,6 +317,7 @@ function manage_advisor_class_assignments_func() {
 					if ($doDebug) {
 						echo "$student_call_sign assigned advisor of $student_assigned_advisor is not $inp_callsign<br />";
 					}
+					error_log("ERROR manage_advisor_class_assignments_func(): Advisor $inp_callsign assigned student $student_call_sign does not have $userName as assigned advisor");
 				} else {
 					/////////// 	if student status is already C, R, or V, no sense in going further
 					if ($student_status == 'C' || $student_status == 'R' || $student_status == 'V') {
@@ -611,8 +612,8 @@ function manage_advisor_class_assignments_func() {
 												$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr Replacement requested ";
 												$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM advisor does not want $student_call_sign. $myStr Replacement requested ";
 												$studentUpdateParams['student_action_log'] = $student_action_log;
-												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
-												$studentUpdateParams['student_hold_reason_code'] = 'X';
+//												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
+//												$studentUpdateParams['student_hold_reason_code'] = 'X';
 												$advisorUpdateParams['advisor_action_log'] = $advisor_action_log;
 												$studentUpdateParams['student_status'] = 'R';
 												$confirmationMsg		= "Student $student_call_sign confirmed as not attending and no replacement was requested.<br />";
@@ -640,11 +641,11 @@ function manage_advisor_class_assignments_func() {
 												$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign 
 student will not attend due to schedule. Advisor comments: $inp_comment_attend. Unassigned from $student_assigned_advisor class $student_assigned_advisor_class. 
 No replacement requested.  ";
-												$newStudentExcludedAdvisor	= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
+//												$newStudentExcludedAdvisor	= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
 												$studentUpdateParams['student_action_log'] = $student_action_log;
 												$studentUpdateParams['student_hold_reason_code'] = 'X';
 												$studentUpdateParams['student_class_priority'] = 2;
-												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
+//												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
 												$studentUpdateParams['student_intervention_required'] = 'H';
 												$student_remove_status		= '';
 												$removeStudent				= TRUE;
@@ -657,7 +658,7 @@ No replacement requested. ";
 												if ($doDebug) {
 													echo "Doing Class; Replacement No<br />";
 												}
-												$myStr					= "";
+												$myStr					= " No advisor comments. ";
 												if ($inp_comment1 != '') {
 													$myStr				= "Advisor comments: $inp_comment1 ";
 												}
@@ -673,15 +674,15 @@ No replacement requested. ";
 													echo "Doing advisor; Replacement No<br />";
 												}
 												$newStudentExcludedAdvisor		= updateExcludedAdvisor($student_excluded_advisor,$advisor_call_sign,'add',$doDebug);
-												$myStr					= "";
+												$myStr					= " No advisor comments. ";
 												if ($inp_comment2 != '') {
 													$myStr				= "Advisor comments: $inp_comment2 ";
 												}
 												$student_action_log		= "$student_action_log / $actionDate CONFIRM $advisor_call_sign advisor does not want the student. $myStr No replacement requested. Student set to unassigned ";
 												$advisor_action_log		= "$advisor_action_log / $actionDate CONFIRM advisor does not want $student_call_sign. $myStr No replacement requested ";
 												$studentUpdateParams['student_action_log'] = $student_action_log;
-												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
-												$studentUpdateParams['student_hold_reason_code'] = 'X';
+//												$studentUpdateParams['student_excluded_advisor'] = $newStudentExcludedAdvisor;
+//												$studentUpdateParams['student_hold_reason_code'] = 'X';
 												$advisorUpdateParams['advisor_action_log'] = $advisor_action_log;
 												$student_remove_status	= '';
 												$removeStudent			= TRUE;
@@ -690,7 +691,7 @@ No replacement requested. ";
 												if ($doDebug) {
 													echo "Doing Other; Replacement No<br />";
 												}
-												$myStr					= "";
+												$myStr					= " No advisor coments. ";
 												if ($inp_comment3 != '') {
 													$myStr				= "Advisor comments: $inp_comment3 ";
 												}
