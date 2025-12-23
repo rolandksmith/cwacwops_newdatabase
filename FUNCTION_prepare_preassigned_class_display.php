@@ -324,6 +324,13 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 														&nbsp;&nbsp;&nbsp;&nbsp;Promotable: $student_promotable<br />";
 											}
 											$processStudent			= TRUE;
+											if ($student_status != 'S' && $student_status != 'Y') {
+												$processStudent		= FALSE;
+												sendErrorEmail("student $thisStudent needs to be removed from $advisorclass_call_sign class $advisorclass_sequence");
+												if ($doDebug) {
+													echo "<b>ERROR</b>student status is $student_status so not processing<br />";
+												}
+											}	
 											if ($student_promotable == 'W') {
 												$processStudent		= FALSE;
 											}
@@ -408,7 +415,7 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 										
 
 												if ($haveExtras) {
-													$content					.= "<tr><td colspan='7'>$extras</td></tr>";
+													$content					.= "<tr><td colspan='8'>$extras</td></tr>";
 												}
 												$thisParent			= '';
 												$thisParentEmail	= '';
@@ -431,9 +438,9 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 
 												if ($hasAssessment) {
 													$enstr		= base64_encode("advisor_call_sign=$student_assigned_advisor&inp_callsign=$student_call_sign");
-													$content	.= "<tr><td colspan='7' style='border-bottom-style:solid;'>Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to review $student_call_sign's self assessment</td></tr>";
+													$content	.= "<tr><td colspan='8' style='border-bottom-style:solid;'>Click <a href='$siteURL/cwa-view-a-student-assessment/?strpass=2&enstr=$enstr' target='_blank'>HERE</a> to review $student_call_sign's self assessment</td></tr>";
 												} else {
-													$content	.= "<tr><td colspan='7' style='border-bottom-style:solid;'></td></tr>";
+													$content	.= "<tr><td colspan='8' style='border-bottom-style:solid;'></td></tr>";
 												}
 												if ($doDebug) {
 													echo "student added to display<br />";
