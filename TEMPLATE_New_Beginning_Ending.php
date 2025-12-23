@@ -1,6 +1,6 @@
 function this_is_a_function_func() {
 
-	global $wpdb;
+	global $wpdb, $doDebug, $debugLog;
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
@@ -8,11 +8,6 @@ function this_is_a_function_func() {
 	$validUser 						= $initializationArray['validUser'];
 
 	$versionNumber				 	= "1";
-	if ($doDebug) {
-		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
-		echo "</pre><br />";
-	}
 	$userName			= $initializationArray['userName'];
 	$currentTimestamp	= $initializationArray['currentTimestamp'];
 	$validTestmode		= $initializationArray['validTestmode'];
@@ -51,16 +46,29 @@ function this_is_a_function_func() {
 	$inp_semester				= '';
 	$inp_rsave					= '';
 	$jobname					= "FIX THIS V$versionNumber";
+	$debugLog					= "";
+	
+	function debugReport($message) {
+		global $debugLog, $doDebug;
+		$timestamp = date('Y-m-d H:i:s');
+		$debugLog .= "$message ($timestamp)<br />";
+		if ($doDebug) {
+			echo "$message<br />";
+		}
+	}
+	
+	debugReport("Initialization Array:<br /><pre>");
+	$myStr = print_r($initializationArray, TRUE);
+	debugReport("</pre>");
+	
 
 // get the input information
 	if (isset($_REQUEST)) {
 		foreach($_REQUEST as $str_key => $str_value) {
-			if ($doDebug) {
-				if (!is_array($str_value)) {
-					echo "Key: $str_key | Value: $str_value <br />\n";
-				} else {
-					echo "Key: $str_key (array)<br />\n";
-				}
+			if (!is_array($str_value)) {
+				debugReport("Key: $str_key | Value: $str_value");
+			} else {
+				debugReport("Key: $str_key (array)");
 			}
 			if ($str_key 		== "strpass") {
 				$strPass		 = $str_value;
@@ -154,24 +162,64 @@ function this_is_a_function_func() {
 		td:first-child {
 		 padding-left: 10px;
 		}
-
+		
 		th:last-child,
 		td:last-child {
 			padding-right: 5px;
 		}
+		
+		.info-asterisk {
+			cursor: help; /* Changes cursor to a question mark/help icon */
+			color: #d9534f;
+			font-weight: bold;
+			padding: 0 4px;
+			position: relative;
+		}
+		
+		/* The actual tooltip box */
+		.hover-popup {
+			position: absolute;
+			background: #333;
+			color: #fff;
+			padding: 6px 12px;
+			border-radius: 4px;
+			font-size: 12px;
+			white-space: nowrap;
+			z-index: 1000;
+			bottom: 125%; /* Position above the asterisk */
+			left: 50%;
+			transform: translateX(-50%);
+			opacity: 0;
+			transition: opacity 0.2s;
+			pointer-events: none;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+		}
+		
+		/* Show the tooltip on hover */
+		.info-asterisk:hover .hover-popup {
+			opacity: 1;
+		}
+		
 		</style>";	
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
 		if ($doDebug) {
-			echo "<p><strong>Operating in Test Mode.</strong></p>";
+			debugReport("<p><strong>Operating in Test Mode.</strong></p>");
 		}
 		$extMode					= 'tm';
 		$TableName					= "wpw1_cwa_";
+		$operatingMode				= 'Testmode';
 	} else {
 		$extMode					= 'pd';
 		$TableName					= "wpw1_cwa_";
+		$operatingMode				= 'Production';
 	}
+
+	$student_dal = new CWA_Student_DAL();
+	$advisor_dal = new CWA_Advisor_DAL();
+	$advisorclass_dal = new CWA_Advisorclass_DAL();
+	$user_dal = new CWA_User_Master_DAL();
 
 
 
@@ -202,9 +250,7 @@ function this_is_a_function_func() {
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
 /*
 	///// uncomment if the code to save a report is needed
-	if ($doDebug) {
-		echo "<br '>Checking to see if the report is to be saved. inp_rsave: $inp_rsave<br />";
-	}
+	debugReport("<br '>Checking to see if the report is to be saved. inp_rsave: $inp_rsave";)
 	if ($inp_rsave == 'Y') {
 		if ($doDebug) {
 			echo "Calling function to save the report as Current Student and Advisor Assignments<br />";
@@ -215,7 +261,18 @@ function this_is_a_function_func() {
 			$reportID	= $storeResult[2];
 			$content	.= "<br />Report stored in reports as $reportName<br />
 							Go to'Display Saved Reports' or url<br/>
-							$siteURL/cwa-display-saved-report/?strpass=3&token=&inp_id=$reportID<br /><br />";
+							<a href='$siteURL/cwa-display-saved-report/?strpass=3&token=&inp_id=$reportID' 'target='_blank'>Display Report</a>";
+							
+			// store the debug report
+			$storeResult	= storeReportData_v2("$jobname Debug",$content);
+			if ($storeResult[0] !== FALSE) {
+				$reportName	= $storeResult[1];
+				$reportID	= $storeResult[2];
+				$content	.= "<br />Report stored in reports as $reportName<br />
+								Go to'Display Saved Reports' or url<br/>
+								<a href='$siteURL/cwa-display-saved-report/?strpass=3&token=&inp_id=$reportID' 'target='_blank'>Display Report</a>";
+							
+							
 		} else {
 			$content	.= "<br />Storing the report in the reports pod failed";
 		}
