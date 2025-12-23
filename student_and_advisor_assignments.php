@@ -983,7 +983,7 @@ function getTheReason($strReasonCode) {
 					$advisorCount++;
 					$slotsAvailable		= $advisorClass_class_size - $advisorClass_number_students;
 					$totalAvailable		= $totalAvailable + $slotsAvailable;
-					$theLink	= "$advisor_name <a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$inp_mode' target='_blank'>($advisor_call_sign)</a>";
+					$theLink	= "<a href='$studentManagementURL?strpass=81&inp_advisor_callsign=$advisor_call_sign&inp_advisorClass=$advisorClass_sequence&inp_search=standard&inp_mode=$inp_mode' target='_blank'>($advisor_call_sign)</a>";
 					$content	.= "<tr><td style='vertical-align:top;'>$advisor_name $theLink</td>
 										<td style='vertical-align:top;'>$advisorClass_sequence</td>
 										<td style='vertical-align:top;'>$advisorClass_level</td>
