@@ -421,7 +421,7 @@ function doTheReplacement($studentCallSign, $studentid, $replacedStudent, $advis
 			$advisorData = get_advisor_and_user_master($advisorCallSign, 'callsign', $proximateSemester, $operatingMode, $doDebug);
 			debugLog("returned from get advisor and user master data for $advisorCallSign");
 			if ($advisorData === FALSE) {
-				debugLog("get_advisor_and_user_master for $student_assigned_advisor returned FALSE");
+				debugLog("get_advisor_and_user_master for $advisorCallSign returned FALSE");
 			} else {
 				if (! empty($advisorData)) {
 					foreach($advisorData as $key => $value) {
@@ -587,6 +587,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 														}	
 													} else {
 														debugLog("student_action_log not set in replaced student data for $replacedStudent. Unable to update student record");
+														error_log("$jobname $userName ERROR action_log for student being replaced ($replacedStudent) not found");
 													}
 												}
 											} else {
@@ -1045,6 +1046,8 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 												if (! isset($advisorclass_call_sign)) {
 													debugLog("<b>ERROR</b> advisorclass_call_sign is not set<br />");	
 												}
+
+
 												// now call findAReplacement function
 												$replacementInfo = array('advisorCallSign'=>$student_assigned_advisor,
 																			'advisorClass'=>$student_assigned_advisor_class,
@@ -1056,7 +1059,8 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 													debugLog("findAReplacement returned FALSE for $student_call_sign");
 													// notify the advisor add the replqcement request to the oustanding requests table
 													debugLog("No replacement found");
-
+													$content	.= "<br />REPLACE Request: No replacement found for student <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																	target='_blank'>$student_call_sign</a> for $advisorclass_call_sign $advisorclass_sequence class.<br />";
 													//// format email to the advisor
 													$email_content = "<p>Unfortunately, no students are available for assignment that meet the criteria for your class.<p>";
 													$notReplacedCount++;
@@ -1096,7 +1100,31 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 															$newID			= $wpdb->insert_id;
 															$myStr			= $wpdb->last_query;
 															debugLog("ran $myStr<br />and inserted $newID into Replacement Requests<br />");
-															
+
+															// remove student from the advisor class and set the student status to C
+															$inp_data			= array('inp_student'=>$student_call_sign,
+																						'inp_semester'=>$student_semester,
+																						'inp_assigned_advisor'=>$student_assigned_advisor,
+																						'inp_assigned_advisor_class'=>$student_assigned_advisor_class,
+																						'inp_remove_status'=>'C',
+																						'inp_arbitrarily_assigned'=>$student_no_catalog,
+																						'inp_method'=>'remove',
+																						'jobname'=>$jobname,
+																						'userName'=>$userName,
+																						'testMode'=>$testMode,
+																						'doDebug'=>$doDebug);
+																			
+															$removeResult		= add_remove_student($inp_data);
+															if ($removeResult[0] === FALSE) {
+																$thisReason		= $removeResult[1];
+																debugLog("attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />");
+																sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+																$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
+															} else {
+																debugLog("student $student_call_sign status set to C successfully");
+																$content		.= "&nbsp;&nbsp;&nbsp;&nbsp;Student status set to C<br />";
+															}
+
 															///// send the email to the advisor
 															$theSubject			= "CW Academy Replacement Student Information for your Class";
 															if ($testMode) {
@@ -1104,7 +1132,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 																$theSubject				= "TESTMODE $theSubject";
 																$mailCode				= 2;
 															} else {
-																$theRecipient			= $user_email;
+																$theRecipient			= $advisor_user_email;
 																$mailCode				= 14;
 															}
 															$strSemester				= $currentSemester;
@@ -1183,7 +1211,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 						Total current replacement requests fulilled: $replacedCount<br />");
 			$content	.= "<br /><h4>$jobname processing complete</h4>
 						Total outstanding replacement requests processed: $numBARows<br />
-						Total outstanding replacement requests fulfiller: $outstandingFulfilled<br />
+						Total outstanding replacement requests fulfilled: $outstandingFulfilled<br />
 						Total current replacement requests processed: $numRequests<br />
 						Total current replacement requests fulilled: $replacedCount<br />";
 			$nowDate		= date('Y-m-d');
