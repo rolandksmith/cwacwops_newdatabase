@@ -157,9 +157,11 @@ function cwa_validate_student_record( int $student_id ): array {
         $errors[] = "Rule 4.1 Failure: If `student_intervention_required` is 'H', then `student_hold_reason_code` must not be empty.";
     }
 
-    // 4.2 if student_hold_reason_code is not empty then student_intervention_required must be 'H'
-    if ( ! empty( $data['student_hold_reason_code'] ) && $data['student_intervention_required'] !== 'H' ) {
-        $errors[] = "Rule 4.2 Failure: If `student_hold_reason_code` is not empty, then `student_intervention_required` must be 'H'.";
+    // 4.2 if student_hold_reason_code is not empty and not 'X' then student_intervention_required must be 'H'
+    if ($data['student_hold_reason_code'] != 'X') {
+        if ( ! empty( $data['student_hold_reason_code'] ) && $data['student_intervention_required'] !== 'H' ) {
+         $errors[] = "Rule 4.2 Failure: If `student_hold_reason_code` is not empty and not 'X', then `student_intervention_required` must be 'H'.";
+        }
     }
     
     // 4.3 if student_status = 'S' or 'Y' or 'V' then student_assigned_advisor must not be empty
@@ -167,9 +169,9 @@ function cwa_validate_student_record( int $student_id ): array {
         $errors[] = "Rule 4.3 Failure: If `student_status` is 'S', 'Y', or 'V', then `student_assigned_advisor` must not be empty.";
     }
 
-    // 4.4 if student_assigned_advisor is not empty then student_status must be 'Y' or 'S' or 'V'
-    if ( ! empty( $data['student_assigned_advisor'] ) && ! in_array( $data['student_status'], ['Y', 'S', 'V'], true ) ) {
-        $errors[] = "Rule 4.4 Failure: If `student_assigned_advisor` is not empty, then `student_status` must be 'Y', 'S', or 'V'.";
+    // 4.4 if student_assigned_advisor is not empty then student_status must be 'Y' or 'S' or 'V' or 'R' or 'C'
+    if ( ! empty( $data['student_assigned_advisor'] ) && ! in_array( $data['student_status'], ['Y', 'S', 'V', 'R', 'C'], true ) ) {
+        $errors[] = "Rule 4.4 Failure: If `student_assigned_advisor` is not empty, then `student_status` must be 'Y', 'S', 'R', 'C',  or 'V'.";
     }
     
     // 4.5 & 4.6: Timezone and Offset cross-check
