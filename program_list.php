@@ -398,11 +398,14 @@ function program_list_func() {
 							<li><a href='$siteURL/cwa-assign-students-to-advisors/' target='_blank'>Assign Students to Advisors</a>
 							<li><a href='$siteURL/cwa-automatic-student-backfill-v1/' target='_blank'>Automatic Student Backfill V1</a>
 							<li><a href='$siteURL/bad-actors/' target='_blank'>Bad Actors</a>
+							<li><a href='$siteURL/cwa-calculate-cwops-yield/' target='_blank'>Calculate CWOps Yield</a>
+							<li><a href='$siteURL/cwa-calculate-marketing-statistics/' target='_blank'>Calculate Marketing Statistics</a>
 							<li><a href='$siteURL/cwa-check-student-status/' target='_blank'>Check Student Status</a>
 							<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 							<li><a href='$siteURL/cwa-daily-backups-cron/' target='_blank'>Daily Backups Cron</a>
 							<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 							<li><a href='$siteURL/cwa-daily-cron-process/' target='_blank'>Daily Cron Process</a>
+							<li><a href='$siteURL/cwa-daily-replacement-cron/' target='_blank'>Daily Replacement Cron</a>
 							<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
 							<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
 							<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Clenup</a>
@@ -525,6 +528,8 @@ function program_list_func() {
 							<ul>
 							<li><a href='$siteURL/cwa-advisor-statistics/' target='_blank'>Advisor Statistics</a>
 							<li><a href='$siteURL/cwa-display-advisor-evaluation-statistics/' target='_blank'>Display Advisor Evaluation Statistics</a>
+							<li><a href='$siteURL/cwa-calculate-cwops-yield/' target='_blank'>Calculate CWOps Yield</a>
+							<li><a href='$siteURL/cwa-calculate-marketing-statistics/' target='_blank'>Calculate Marketing Statistics</a>
 							<li><a href='$siteURL/cwa-gather-and-display-student-statistics/' target='_blank'>Gather and Display Student Statistics</a>
 							<li><a href='$siteURL/cwa-generate-advisor-overall-statistics/' target='_blank'>Generate Advisor Overall Statistics</a>
 							<li><a href='$siteURL/cwa-how-students-progressed-report/' target='_blank'>How Students Progressed Report</a>
@@ -688,6 +693,7 @@ function program_list_func() {
 							<li><a href='$siteURL/cwa-daily-advisor-cron-process/' target='_blank'>Daily Advisor Cron Process</a>
 							<li><a href='$siteURL/cwa-daily-catalog-cron-process/' target='_blank'>Daily Catalog Cron Process</a>
 							<li><a href='$siteURL/cwa-daily-student-cron/' target='_blank'>Daily Student Cron</a>
+							<li><a href='$siteURL/cwa-daily-replacement-cron/' target='_blank'>Daily Replacement Cron</a>
 							<li><a href='$siteURL/cwa-new-usernames-report/' target='_blank'>New Usernames Report</a>
 							<li><a href='$siteURL/cwa-daily-temp-data-cleanup/' target='_blank'>Daily Temp Data Cleanup</a>
 							<li><a href='$siteURL/cwa-daily-uploads-cleanup/' target='_blank'>Daily Uploads Clenup</a>
