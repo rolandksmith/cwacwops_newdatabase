@@ -2158,7 +2158,7 @@ function getTheReason($strReasonCode) {
 			}
 			if ($student_status == 'C' || $student_status == 'R' || $student_status == 'V') {
 				if ($doDebug) {
-					echo "Student status is C, R, or V<br />";
+					echo "Student status is ($student_status) C, R, or V<br />";
 				}
 				$content			.= "<p>Student $inp_student_callsign has a status of $student_status (replaced).</p>";
 				$gotError			= TRUE;
@@ -2503,9 +2503,6 @@ function getTheReason($strReasonCode) {
 				} else {
 					if ($doDebug) {
 						echo "<br />&nbsp;&nbsp;&nbsp;Student has been removed:<br />";
-						foreach($updateArray as $myKey=>$myValue) {
-							echo "$myKey = $myValue<br />";
-						}
 					}
 					$content	.= "<p>Student $student_call_sign has been removed and unassigned</p>
 									<p>Click 'Push' to push the information to the advisor:<br />
