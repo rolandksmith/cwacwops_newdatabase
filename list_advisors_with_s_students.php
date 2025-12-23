@@ -336,7 +336,7 @@ function list_advisors_with_s_students_func() {
 
 
 					if ($doDebug) {
-						echo "Processing class record $advisor_call_sign sequence $advisorClass_sequence<br />";
+						echo "Processing class record $advisorClass_call_sign sequence $advisorClass_sequence<br />";
 					}
 					$gotAnyS				= FALSE;
 					$gotAllS				= TRUE;
@@ -349,22 +349,24 @@ function list_advisors_with_s_students_func() {
 								$strSnum		= strval($snum);
 							}
 							$theInfo			= ${'advisorClass_student' . $strSnum};
-							// get the student_status
-							$student_status		= $wpdb->get_var("select student_status from $studentTableName 
-																 where student_call_sign = '$theInfo' 
-																	and student_semester = '$theSemester'");
-							if ($student_status == NULL) {
-								$errorArray[]		= "$advisorClass_call_sign has a student $theInfo in 
+							if ($theInfo !== '') {
+								// get the student_status
+								$student_status		= $wpdb->get_var("select student_status from $studentTableName 
+																	 where student_call_sign = '$theInfo' 
+																		and student_semester = '$theSemester'");
+								if ($student_status === NULL) {
+									$errorArray[]		= "$advisorClass_call_sign has a student ($theInfo number $strSnum) in 
 	class $advisorClass_sequence not found in $studentTableName table";
-							} else {
-								if ($student_status == '' || $student_status == ' ') {
-									$errorArray[]	= "$advisorClass_call_sign has a student $theInfo in 
-	class $advisorClass_sequence with an empty student_status";
 								} else {
-									if ($student_status != 'S') {
-										$gotAllS		= FALSE;
+									if ($student_status == '' || $student_status == ' ') {
+										$errorArray[]	= "$advisorClass_call_sign has a student $theInfo in 
+	class $advisorClass_sequence with an empty student_status";
 									} else {
-										$gotAnyS		= TRUE;
+										if ($student_status != 'S') {
+											$gotAllS		= FALSE;
+										} else {
+											$gotAnyS		= TRUE;
+										}
 									}
 								}
 							}
