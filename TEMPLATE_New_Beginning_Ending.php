@@ -168,38 +168,59 @@ function this_is_a_function_func() {
 			padding-right: 5px;
 		}
 		
+		
 		.info-asterisk {
-			cursor: help; /* Changes cursor to a question mark/help icon */
+			cursor: help;
 			color: #d9534f;
 			font-weight: bold;
 			padding: 0 4px;
-			position: relative;
+			position: relative; /* Keeps the tooltip anchored to this element */
+			display: inline-block;
 		}
 		
-		/* The actual tooltip box */
+		/* The updated tooltip box */
 		.hover-popup {
 			position: absolute;
 			background: #333;
 			color: #fff;
-			padding: 6px 12px;
+			padding: 8px 12px;
 			border-radius: 4px;
-			font-size: 12px;
-			white-space: nowrap;
+			font-size: 13px;
 			z-index: 1000;
-			bottom: 125%; /* Position above the asterisk */
-			left: 50%;
-			transform: translateX(-50%);
+			
+			/* Position logic */
+			bottom: 150%;      /* Places it above the asterisk */
+			left: 0;           /* Aligns the left edge of the box with the asterisk */
+			
+			/* Responsive width logic */
+			width: max-content; 
+			max-width: 250px;   /* Prevents it from being too wide */
+			white-space: normal; /* Allows text to wrap if it hits max-width */
+			word-wrap: break-word;
+		
+			/* Smooth entry */
 			opacity: 0;
-			transition: opacity 0.2s;
-			pointer-events: none;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+			visibility: hidden;
+			transition: opacity 0.2s ease-in-out;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 		}
 		
-		/* Show the tooltip on hover */
+		/* Add a small arrow pointing down */
+		.hover-popup::after {
+			content: '';
+			position: absolute;
+			top: 100%; 
+			left: 10px; /* Aligns arrow with the start of the text */
+			border-width: 5px;
+			border-style: solid;
+			border-color: #333 transparent transparent transparent;
+		}
+		
+		/* Show on hover */
 		.info-asterisk:hover .hover-popup {
 			opacity: 1;
-		}
-		
+			visibility: visible;
+		}		
 		</style>";	
 
 	if ($testMode) {
@@ -250,7 +271,7 @@ function this_is_a_function_func() {
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
 /*
 	///// uncomment if the code to save a report is needed
-	debugReport("<br '>Checking to see if the report is to be saved. inp_rsave: $inp_rsave";)
+	debugReport("<br />Checking to see if the report is to be saved. inp_rsave: $inp_rsave");
 	if ($inp_rsave == 'Y') {
 		if ($doDebug) {
 			echo "Calling function to save the report as Current Student and Advisor Assignments<br />";
@@ -271,7 +292,7 @@ function this_is_a_function_func() {
 				$content	.= "<br />Report stored in reports as $reportName<br />
 								Go to'Display Saved Reports' or url<br/>
 								<a href='$siteURL/cwa-display-saved-report/?strpass=3&token=&inp_id=$reportID' 'target='_blank'>Display Report</a>";
-							
+			}				
 							
 		} else {
 			$content	.= "<br />Storing the report in the reports pod failed";
