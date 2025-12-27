@@ -308,6 +308,60 @@ function display_and_update_user_master_func() {
 		td:last-child {
 			padding-right: 5px;
 		}
+		
+		.info-asterisk {
+			cursor: help;
+			color: #d9534f;
+			font-weight: bold;
+			padding: 0 4px;
+			position: relative; /* Keeps the tooltip anchored to this element */
+			display: inline-block;
+		}
+		
+		/* The updated tooltip box */
+		.hover-popup {
+			position: absolute;
+			background: #333;
+			color: #fff;
+			padding: 8px 12px;
+			border-radius: 4px;
+			font-size: 13px;
+			z-index: 1000;
+			
+			/* Position logic */
+			bottom: 150%;      /* Places it above the asterisk */
+			left: 0;           /* Aligns the left edge of the box with the asterisk */
+			
+			/* Responsive width logic */
+			width: max-content; 
+			max-width: 250px;   /* Prevents it from being too wide */
+			white-space: normal; /* Allows text to wrap if it hits max-width */
+			word-wrap: break-word;
+		
+			/* Smooth entry */
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 0.2s ease-in-out;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+		}
+		
+		/* Add a small arrow pointing down */
+		.hover-popup::after {
+			content: '';
+			position: absolute;
+			top: 100%; 
+			left: 10px; /* Aligns arrow with the start of the text */
+			border-width: 5px;
+			border-style: solid;
+			border-color: #333 transparent transparent transparent;
+		}
+		
+		/* Show on hover */
+		.info-asterisk:hover .hover-popup {
+			opacity: 1;
+			visibility: visible;
+		}		
+
 		</style>";	
 
 	if ($testMode) {
@@ -316,20 +370,10 @@ function display_and_update_user_master_func() {
 			echo "<p><strong>Operating in Test Mode</strong></p>";
 		}
 		$extMode					= 'tm';
-		$userMasterTableName		= "wpw1_cwa_user_master2";
-		$studentTableName			= "wpw1_cwa_student2";
-		$countryCodesTableName		= 'wpw1_cwa_country_codes';
-		$advisorClassTableName		= 'wpw1_cwa_advisorclass2';
-		$advisorTableName			= 'wpw1_cwa_advisor2';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history2';
 		$operatingMode				= 'Testmode';
 	} else {
 		$extMode					= 'pd';
-		$userMasterTableName		= "wpw1_cwa_user_master";
-		$studentTableName			= "wpw1_cwa_student";
-		$countryCodesTableName		= 'wpw1_cwa_country_codes';
-		$advisorClassTableName		= 'wpw1_cwa_advisorclass';
-		$advisorTableName			= 'wpw1_cwa_advisor';
 		$userHistoryTableName		= 'wpw1_cwa_user_master_history';
 		$operatingMode				= 'Production';
 	}
@@ -617,7 +661,7 @@ function selectCountry($inp_country) {
 															]
 												];
 									
-							$student_data = $student_dal->get_student($studentCriteria,'student_date_created','DESC',$operatingMode);
+							$student_data = $student_dal->get_student_by_order($studentCriteria,'student_date_created','DESC',$operatingMode);
 							if (count($student_data) > 0) {
 								foreach($student_data as $key => $value) {
 									foreach($value as $thisField => $thisValue) {
@@ -637,7 +681,7 @@ function selectCountry($inp_country) {
 									]
 								]
 							];
-							$advisor_result = $advisor_dal->get_advisor($advisorCriteria,$operatingMode);
+							$advisor_result = $advisor_dal->get_advisor_by_order($advisorCriteria, 'advisor_call_sign', 'ASC', $operatingMode);
 							if (count($advisor_result) > 0) {
 								foreach($advisor_result as $key=>$value) {
 									foreach($value as $thisField=>$thisValue) {
@@ -1239,7 +1283,7 @@ function selectCountry($inp_country) {
 								]
 							]
 						];
-						$student_data = $student_dal->get_student($criteria, 'student_call_sign', 'ASC', $operatingMode);
+						$student_data = $student_dal->get_student_by_order($criteria, 'student_call_sign', 'ASC', $operatingMode);
 						if (count($student_data) > 0) {
 							foreach($student_data as $key=>$value) {
 								foreach($value as $thisField => $thisValue) {
@@ -1301,7 +1345,7 @@ function selectCountry($inp_country) {
 								]
 							]
 						];
-						$advisorClassResult = $advisorclass_dal->get_advisorclasses($criteria,$operatingMode);
+						$advisorClassResult = $advisorclass_dal->get_advisorclasses_by_order($criteria, 'advisorclass_call_sign', 'ASC', $operatingMode);
 						if (count($advisorClassResult) > 0) {
 							foreach($advisorClassResult as $key => $value) {
 								foreach($value as $thisField=>$thisValue) {
