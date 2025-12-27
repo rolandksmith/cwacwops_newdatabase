@@ -1232,7 +1232,7 @@ function student_registration_func() {
 				]
 			];
 			$orderby = 'student_call_sign';
-			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,'ASC',$operatingMode);
 			if ($student_data !== FALSE) {
 				foreach($student_data as $key => $vaue) {
 					foreach($value as $thisField => $thisValue) {
@@ -1267,7 +1267,7 @@ function student_registration_func() {
 				]
 			];
 			$orderby = 'student_call_sign';
-			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,'ASC',$operatingMode);
 			if ($student_data !== FALSE) {
 				foreach($student_data as $key => $vaue) {
 					foreach($value as $thisField => $thisValue) {
@@ -1303,7 +1303,7 @@ function student_registration_func() {
 				]
 			];
 			$orderby = 'student_call_sign';
-			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,'ASC',$operatingMode);
 			if ($student_data !== FALSE) {
 				$myInt = count($student_data);
 				if ($myInt > 0) {
@@ -1353,7 +1353,7 @@ function student_registration_func() {
 				]
 			];
 			$orderby = 'student_call_sign';
-			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,'ASC',$operatingMode);
 			if ($student_data !== FALSE) {
 				if (! empty($student_data)) {
 					foreach($student_data as $key => $value) {
@@ -1397,7 +1397,7 @@ function student_registration_func() {
 				]
 			];
 			$orderby = 'student_call_sign';
-			$student_data = $student_dal->get_student($criteria,$orderby,'ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,'ASC',$operatingMode);
 			if ($student_data !== FALSE) {
 				foreach($student_data as $key => $vaue) {
 					foreach($value as $thisField => $thisValue) {
@@ -2641,7 +2641,7 @@ function student_registration_func() {
 						['field' => 'advisor_semester','value' => $student_semester,'compare' => '='] 
 					]
 				];
-				$wpw1_cwa_advisor = $advisor_dal->get_advisor($criteria,$operatingMode);
+				$wpw1_cwa_advisor = $advisor_dal->get_advisor_by_order($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 				if ($wpw1_cwa_advisor === FALSE) {
 					handleWPDBError($jobname,$doDebug);
 				} else {
@@ -3524,7 +3524,7 @@ function student_registration_func() {
 							['field' => 'advisor_semester','value' => $student_semester,'compare' => '='] 
 						]
 					];
-					$wpw1_cwa_advisor = $advisor_dal->get_advisor($criteria,$operatingMode);
+					$wpw1_cwa_advisor = $advisor_dal->get_advisor_by_order($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 					if ($wpw1_cwa_advisor === FALSE) {
 						if ($doDebug) {
 							echo "getting the advisor info returned FALSE<br />";
@@ -4045,7 +4045,7 @@ function student_registration_func() {
 				['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '=' ]
 			]
 		];
-		$wpw1_cwa_student = $student_dal->get_student($criteria,'student_date_created','DESC',$operatingMode);
+		$wpw1_cwa_student = $student_dal->get_student_by_order($criteria,'student_date_created','DESC',$operatingMode);
 		if ($wpw1_cwa_student === FALSE) {
 			$content		.= "Unable to obtain content from $studentTableName<br />";
 		} else {
