@@ -1,412 +1,418 @@
 /**
- * CWA_User_Master_DAL (Data Access Layer)
- *
- * Manages all MySQL database interactions for the CWA User Master tables.
- *
- * This class is STATELESS. The $operatingMode ('Production' or 'Testmode')
- * must be passed into every public method to determine which
- * set of tables (live or test) to use for that specific operation.
+ * CWA User Master Data Access Layer
+ * 
+ * Handles all database operations for user master records with proper
+ * security, validation, and error handling.
  */
-
 if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
-
     class CWA_User_Master_DAL {
-
-        /**
-         * The WordPress database global object.
-         * @var wpdb
-         */
         private $wpdb;
-
+        
         /**
-         * A list of all valid column names for the user_master table.
-         * Used to sanitize input data and prevent SQL injection.
-         * @var array
+         * Valid database columns for user_master table
          */
         private $valid_columns = [
-            'user_ID',
-            'user_call_sign',
-            'user_first_name',
-            'user_last_name',
-            'user_email',
-            'user_ph_code',
-            'user_phone',
-            'user_city',
-            'user_state',
-            'user_zip_code',
-            'user_country_code',
-            'user_country',
-            'user_whatsapp',
-            'user_telegram',
-            'user_signal',
-            'user_messenger',
-            'user_action_log',
-            'user_timezone_id',
-            'user_languages',
-            'user_survey_score',
-            'user_is_admin',
-            'user_role',
-            'user_prev_callsign',
-            'user_date_created',
-            'user_date_created',
+				'user_ID', 
+				'user_call_sign', 
+				'user_first_name', 
+				'user_last_name', 
+				'user_email', 
+				'user_ph_code', 
+				'user_phone', 
+				'user_city', 
+				'user_state', 
+				'user_zip_code', 
+				'user_country_code', 
+				'user_country', 
+				'user_whatsapp', 
+				'user_telegram', 
+				'user_signal', 
+				'user_messenger', 
+				'user_action_log', 
+				'user_timezone_id', 
+				'user_languages', 
+				'user_survey_score', 
+				'user_is_admin', 
+				'user_role', 
+				'user_prev_callsign', 
+				'user_date_created', 
+				'user_date_updated'
         ];
+        
+        /**
+         * Valid comparison operators for WHERE clauses
+         */
+        private $valid_operators = [
+            '=',
+            '!=',
+            '>',
+            '<',
+            '>=',
+            '<=',
+            'LIKE',
+            'NOT LIKE',
+            'IN',
+            'NOT IN'
+        ];
+        
+        /**
+         * Valid modes for table selection
+         */
+        private $valid_modes = ['Production', 'Testing', 'Testmode'];
 
         /**
-         * Constructor.
-         * Only initializes the $wpdb object.
+         * Constructor
          */
         public function __construct() {
             global $wpdb;
             $this->wpdb = $wpdb;
         }
 
-        // ---------------------------------------------------------------------
-        // Public Methods
-        // ---------------------------------------------------------------------
-
         /**
-         * 1. Inserts a new user record and logs the action.
-         *
-         * @param array  $data          Associative array of [field_name => value] to insert.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false The new user_ID on success, false on error.
+         * Insert a new user master record
+         * 
+         * @param array $data User master data to insert
+         * @param string $mode Database mode (Production or Testing)
+         * @return int|false Insert ID on success, false on failure
          */
-        public function insert( $data, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $clean_data = $this->_filter_data( $data );
-
-            if ( empty( $clean_data ) ) {
-            	error_log("CWA_User_Master_DAL ERROR No valid data submitted for an insert");
-                return false; // No valid data provided
+        public function insert( $data, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return false;
             }
-
-            // $wpdb->insert handles data sanitization
-            $result = $this->wpdb->insert( $tables['primary'], $clean_data );
-
+            
+            $tables = $this->_get_table_names( $mode );
+            $clean = $this->_sanitize_data( $data );
+            
+            if ( empty( $clean ) ) {
+                return false;
+            }
+            
+            $result = $this->wpdb->insert( $tables['primary'], $clean );
+            
             if ( $result ) {
                 $new_id = $this->wpdb->insert_id;
-                
-                // Log the 'create' action
-                $call_sign = isset( $clean_data['user_call_sign'] ) ? $clean_data['user_call_sign'] : 'UNKNOWN';
-                $this->_log_change(
-                    $call_sign,
+                $this->_log(
+                    $clean['user_call_sign'] ?? 'UNKNOWN',
                     'create',
-                    $clean_data,
-                    $tables['primary'],
-                    $tables['log']
+                    $clean,
+                    $tables
                 );
-                
                 return $new_id;
             }
-            $myStr = $this->wpdb->last_query;
-			error_log("CWA_User_Master_DAL ERROR attempt to insert a record returned FALSE\nSQL: $myStr");
+            
             return false;
         }
 
         /**
-         * 2. Gets user master records based on specified criteria.
-         *
-         * @param array  $criteria      Criteria for the WHERE clause (supports nested AND/OR).
-         * @param string $orderby		Field(s) to sequence the output
-         * @param string ASC|DESC		Whether output is in ascending or descending order
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return array|null Array of objects on success, NULL on error.
+         * Update an existing user master record
+         * 
+         * @param int $id User master ID
+         * @param array $data Data to update
+         * @param string $mode Database mode
+         * @return int|false Number of rows updated, or false on failure
          */
-        public function get_user_master( $criteria, $orderby, $order, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $sql = "SELECT * FROM {$tables['primary']}";
-            $params = [];
+        public function update( $id, $data, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) || ! $this->_validate_id( $id ) ) {
+                return false;
+            }
             
-            if ( ! empty( $criteria ) ) {
-                $where_parts = $this->_build_where_clause_recursive( $criteria );
+            $tables = $this->_get_table_names( $mode );
+            $clean = $this->_sanitize_data( $data );
+            
+            if ( empty( $clean ) ) {
+                return false;
+            }
+            
+            $result = $this->wpdb->update(
+                $tables['primary'],
+                $clean,
+                ['user_id' => $id],
+                null,
+                ['%d']
+            );
+            
+            if ( $result !== false ) {
+                $call_sign = $this->wpdb->get_var(
+                    $this->wpdb->prepare(
+                        "SELECT user_call_sign FROM {$tables['primary']} WHERE user_id = %d",
+                        $id
+                    )
+                );
                 
-                if ( ! empty( $where_parts['sql'] ) ) {
-                    $sql .= " WHERE " . $where_parts['sql'];
-                    $params = $where_parts['params'];
-                }
+                $this->_log(
+                    $call_sign ?? 'UNKNOWN',
+                    'update',
+                    $clean,
+                    $tables
+                );
             }
-
-  			// check orderby 
-			if ($orderby != '') {
-				$orderby = filter_var($orderby,FILTER_UNSAFE_RAW);
-				$orderbyArray = explode(",",$orderby);
-				$myFirst = true;
-				$newOrderBy = '';
-				foreach($orderbyArray as $columnName) {
-					if ( $this->_is_valid_column($columnName)) {
-						if ($myFirst) {
-							$myFirst = false;
-							$newOrderBy = $columnName;
-						} else {
-							$newOrderBy .= ",$columnName";
-						}
-					}
-				}
-				if ($newOrderBy != '') {
-					$sql .= " ORDER BY $newOrderBy ";
-					
-					$regex = '/^(ASC|DESC)(?:\s+(?:LIMIT|Limit|limit)\s+([1-9]\d{0,3}))?$/i';
-                    if (preg_match($regex, trim($order))) {
-                        $sql .= $order;
-                    } else {
-                        $sql .= 'ASC';
-                    }
-				}
-			}
-			
-          if ( ! empty( $params ) ) {
-                $prepared_sql = $this->wpdb->prepare( $sql, $params );
-                $results = $this->wpdb->get_results( $prepared_sql, ARRAY_A );
-            } else {
-                $results = $this->wpdb->get_results( $sql, ARRAY_A );
-            }
-            if ($results === FALSE || $results === NULL) {
-            	$myStr = $this->wpdb->last_query;
-            	error_log("CWA_User_Master_DAL ERROR get_user_master returned FALSE/NULL\nSQL: $myStr");
-             } else {
-            	if (empty($results)) {
-					$myQuery = $this->wpdb->last_query;
-					error_log("CWA_User_Master_DAL INFORMATION No data retrieved with $myQuery");
-            	}
-           }            
-            return $results;
+            
+            return $result;
         }
 
         /**
-         * 3. Gets user master records by user_ID.
-         *
-         * @param int    $user_ID       The ID of the user to retrieve.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return array|null A list of objects (should be 0 or 1), or null on error.
+         * Delete a user master record (moves to deleted table)
+         * 
+         * @param int $id User master ID
+         * @param string $mode Database mode
+         * @return int|false Number of rows deleted, or false on failure
          */
-        public function get_user_master_by_id( $user_ID, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            
-            if ( ! is_numeric( $user_ID ) ) {
-            	error_log("CWA_User_Master_DAL ERROR user_ID of $user_ID supplied for get_user_master_by_id is not numeric");
-                return null;
+        public function delete( $id, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) || ! $this->_validate_id( $id ) ) {
+                return false;
             }
-
-            $sql = $this->wpdb->prepare(
-                "SELECT * FROM {$tables['primary']} WHERE user_ID = %d",
-                $user_ID
+            
+            $tables = $this->_get_table_names( $mode );
+            
+            $record = $this->wpdb->get_row(
+                $this->wpdb->prepare(
+                    "SELECT * FROM {$tables['primary']} WHERE user_id = %d",
+                    $id
+                ),
+                ARRAY_A
             );
             
-            // Per your request: "return a list of objects"
+            if ( ! $record ) {
+                return false;
+            }
+            
+            // Archive to deleted table
+            $this->wpdb->insert( $tables['deleted'], $record );
+            
+            // Log the deletion
+            $this->_log(
+                $record['user_call_sign'] ?? 'UNKNOWN',
+                'delete',
+                ['id' => $id],
+                $tables
+            );
+            
+            // Delete from primary table
+            return $this->wpdb->delete(
+                $tables['primary'],
+                ['user_id' => $id],
+                ['%d']
+            );
+        }
+
+        /**
+         * Get user master records with optional filtering and ordering
+         * 
+         * @param array $criteria Search criteria
+         * @param string $orderby Column to order by
+         * @param string $order ASC or DESC
+         * @param string $mode Database mode
+         * @return array|null Results array or null on error
+         */
+        public function get_user_master( $criteria, $orderby, $order, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $mode );
+            $sql = "SELECT * FROM {$tables['primary']}";
+            $params = [];
+            
+            // Build WHERE clause
+            if ( ! empty( $criteria ) ) {
+                $where = $this->_build_where( $criteria );
+                if ( ! empty( $where['sql'] ) && $where['sql'] !== '1=1' ) {
+                    $sql .= " WHERE " . $where['sql'];
+                    $params = $where['params'];
+                }
+            }
+            
+            // Add ORDER BY if valid
+            if ( ! empty( $orderby ) && in_array( $orderby, $this->valid_columns ) ) {
+                $order = strtoupper( $order ) === 'DESC' ? 'DESC' : 'ASC';
+                $sql .= " ORDER BY {$orderby} {$order}";
+            }
+            
+            // Execute query
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
+            }
+            
             return $this->wpdb->get_results( $sql, ARRAY_A );
         }
 
         /**
-         * 4. Gets user master records by callsign.
+         * Get user master records by callsign
          *
-         * @param string    $user_call_sign       The callsign of the user to retrieve.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return array|null A list of objects (should be 0 or 1), or null on error.
+         * @param string $user_call_sign The callsign of the user to retrieve
+         * @param string $operating_mode Database mode (Production, Testing, or Testmode)
+         * @return array|null Array of matching records or null on error
          */
-        public function get_user_master_by_callsign( $user_call_sign, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
+        public function get_user_master_by_callsign( $user_call_sign, $operating_mode ) {
+            if ( ! $this->_validate_mode( $operating_mode ) ) {
+                return null;
+            }
+            
+            // Validate callsign is not empty
+            if ( empty( $user_call_sign ) || ! is_string( $user_call_sign ) ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $operating_mode );
             
             $sql = $this->wpdb->prepare(
                 "SELECT * FROM {$tables['primary']} WHERE user_call_sign = %s",
                 $user_call_sign
             );
             
-            // Per your request: "return a list of objects"
-            return $this->wpdb->get_results( $sql,ARRAY_A );
+            return $this->wpdb->get_results( $sql, ARRAY_A );
         }
 
-
         /**
-         * 5. Updates a user record by its ID and logs the action.
-         *
-         * @param int    $user_ID       The ID of the record to update.
-         * @param array  $data          Associative array of [field_name => value] to update.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false Number of rows updated, or false on error.
+         * Run a custom SQL query
+         * 
+         * @param string $sql SQL query with TABLENAME placeholder
+         * @param string $mode Database mode
+         * @param array $params Parameters for prepared statement
+         * @return array|null Query results or null on error
          */
-        public function update( $user_ID, $data, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $clean_data = $this->_filter_data( $data );
-            
-            if ( empty( $clean_data ) || ! is_numeric( $user_ID ) ) {
-            	error_log("CWA_User_Master_DAL ERROR invalid data supplied for update");
-                return false; // No valid data or ID
+        public function run_sql( $sql, $mode, $params = [] ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
             }
-
-            // --- Step 1: Get the call sign for logging ---
-            $call_sign_for_log = $this->wpdb->get_var(
-                $this->wpdb->prepare(
-                    "SELECT user_call_sign FROM {$tables['primary']} WHERE user_ID = %d",
-                    $user_ID
-                )
-            );
-
-            if ( is_null( $call_sign_for_log ) ) {
-            	error_log("CWA_User_Master_DAL ERROR getting callsign from user_ID ($user_ID) returned NULL");
-                $call_sign_for_log = 'UNKNOWN'; // Record not found, but we still log the attempt
-            }
-
-            // --- Step 2: Log the change ---
-            $this->_log_change(
-                $call_sign_for_log,
-                'update',
-                $clean_data,
-                $tables['primary'],
-                $tables['log']
-            );
             
-            // --- Step 3: Perform the update ---
-            $result = $this->wpdb->update(
-                $tables['primary'],
-                $clean_data,
-                [ 'user_ID' => $user_ID ], // WHERE
-                null,    // format for $data (auto-detected)
-                [ '%d' ] // format for $where
-            );
- 		
- 			if ($result === FALSE || $result === NULL) {
- 				$myStr = $this->wpdb->last_query;
- 				error_log("CWA_User_Master_DAL ERROR update returned NULL|FALSE\nSQL: $myStr");
- 			}           
-            return $result;
+            $tables = $this->_get_table_names( $mode );
+            $sql = str_replace( 'TABLENAME', $tables['primary'], $sql );
+            
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
+            }
+            
+            return $this->wpdb->get_results( $sql, ARRAY_A );
         }
 
         /**
-         * 6. Deletes a user record by its ID.
-         * The record is copied to the deleted log table before being removed.
-         *
-         * @param int    $user_ID       The ID of the record to delete.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false Number of rows deleted, or false on error.
+         * Get a single value from a custom SQL query
+         * 
+         * @param string $sql SQL query with TABLENAME placeholder
+         * @param string $mode Database mode
+         * @param array $params Parameters for prepared statement
+         * @return string|null Single value or null
          */
-        public function delete( $user_ID, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-
-            if ( ! is_numeric( $user_ID ) ) {
-             	error_log("CWA_User_Master_DAL ERROR user_ID of $user_ID supplied for get_user_master_by_id is not numeric");
-               return false;
+        public function get_single_value( $sql, $mode, $params = [] ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
             }
-
-            // --- Step 1: Get the full record to be deleted ---
-            $record_to_delete = $this->wpdb->get_row(
-                $this->wpdb->prepare(
-                    "SELECT * FROM {$tables['primary']} WHERE user_ID = %d",
-                    $user_ID
-                ),
-                ARRAY_A // Get as associative array
-            );
-
-            if ( ! $record_to_delete ) {
-            	error_log("CWA_User_Master_DAL INFORMATION No user_master record found for $user_ID to delete");
-                return false; // Record not found, nothing to delete
-            }
-
-            // --- Step 2: Copy the record to the deleted table ---
-            $copied = $this->wpdb->insert( $tables['deleted'], $record_to_delete );
-
-            if ( ! $copied ) {
-                // Failed to copy (e.g., table doesn't exist). Abort delete.
-            	error_log("CWA_User_Master_DAL INFORMATION deleting $student_id no record found to delete");
-                return false;
-            }
-
-            // --- Step 3: Delete the original record ---
-            $result = $this->wpdb->delete(
-                $tables['primary'],
-                [ 'user_ID' => $user_ID ], // WHERE
-                [ '%d' ] // Format for WHERE
-            );
             
-            if ($result === FALSE) {
-            	$myStr = $this->wpdb->last_query;
-            	error_log("CWA_User_Master_DAL ERROR Deleting user_id ($user_id) returned FALSE\nSQL: $myStr");
+            $tables = $this->_get_table_names( $mode );
+            $sql = str_replace( 'TABLENAME', $tables['primary'], $sql );
+            
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
             }
-
-            return $result;
-        }
-        
-        /**
-        * 7. Execute supplied SQL
-        *
-        * NOTE: This function will fill in the correct table name replacing TABLENAME 
-        *	for example: select distinct(user_name) from TABLENAME where....
-        *
-        * @param string $SQL 	the sql to be run
-        * @param string $operatingMode Production|Testmode
-        * @return array|false results of get_results
-        */
-        
-        public function run_sql($SQL, $operatingMode) {
-            $tables = $this->_get_table_names( $operatingMode );
-
-			$SQL = str_replace('TABLENAME',$tables['primary'],$SQL);
-			
-			$result = $this->wpdb->get_results($SQL, ARRAY_A); 
-			
-			if($result === FALSE) {
-				$myStr = $this->wpdb->last_query;
-				error_log("CWA_User_Master_DAL ERROR run_sql returned FALSE\nSQL: $myStr");
-			}       
-        
-        	return $result;
+            
+            return $this->wpdb->get_var( $sql );
         }
 
-
-        // ---------------------------------------------------------------------
-        // Private Helper Functions
-        // ---------------------------------------------------------------------
+        /**
+         * Validate database mode
+         * 
+         * @param string $mode Mode to validate
+         * @return bool True if valid
+         */
+        private function _validate_mode( $mode ) {
+            return in_array( $mode, $this->valid_modes, true );
+        }
 
         /**
-         * Gets the correct set of table names based on the operating mode.
-         *
-         * @param string $mode 'Production' or 'Testmode'.
-         * @return array Associative array of table names.
+         * Validate user master ID
+         * 
+         * @param mixed $id ID to validate
+         * @return bool True if valid
+         */
+        private function _validate_id( $id ) {
+            return is_numeric( $id ) && $id > 0;
+        }
+
+        /**
+         * Sanitize input data against valid columns
+         * 
+         * @param array $data Data to sanitize
+         * @return array Sanitized data
+         */
+        private function _sanitize_data( $data ) {
+            if ( ! is_array( $data ) ) {
+                return [];
+            }
+            
+            return array_intersect_key(
+                $data,
+                array_flip( $this->valid_columns )
+            );
+        }
+
+        /**
+         * Get table names based on mode
+         * 
+         * @param string $mode Database mode
+         * @return array Table names
          */
         private function _get_table_names( $mode ) {
-            if ( 'Production' === $mode ) {
-                return [
-                    'primary' => $this->wpdb->prefix . 'cwa_user_master',
-                    'log'     => $this->wpdb->prefix . 'cwa_data_log',
-                    'deleted' => $this->wpdb->prefix . 'cwa_user_master_deleted',
-                ];
-            } else {
-                return [
-                    'primary' => $this->wpdb->prefix . 'cwa_user_master2',
-                    'log'     => $this->wpdb->prefix . 'cwa_data_log2',
-                    'deleted' => $this->wpdb->prefix . 'cwa_user_master_deleted2',
-                ];
-            }
+            $suffix = ( $mode === 'Production' ) ? '' : '2';
+            
+            return [
+                'primary' => $this->wpdb->prefix . 'cwa_user_master' . $suffix,
+                'log'     => $this->wpdb->prefix . 'cwa_data_log' . $suffix,
+                'deleted' => $this->wpdb->prefix . 'cwa_deleted_user_master' . $suffix
+            ];
         }
 
         /**
-         * Logs an action to the appropriate data log table.
-         *
-         * @param string $call_sign          The user's call sign.
-         * @param string $action             The action (e.g., 'create', 'update').
-         * @param array  $data               The data array to be logged as JSON.
-         * @param string $primary_table_name The name of the table action was on.
-         * @param string $log_table_name     The name of the log table to use.
+         * Log database action
+         * 
+         * @param string $call_sign User call sign
+         * @param string $action Action performed
+         * @param array $data Data involved in action
+         * @param array $tables Table names
          */
-        private function _log_change( $call_sign, $action, $data, $primary_table_name, $log_table_name ) {
-            
-			$currentUser = $this->get_current_user_login();
+        private function _log( $call_sign, $action, $data, $tables ) {
+            $user = wp_get_current_user();
             
             $log_data = [
-                'data_date_written' => current_time( 'mysql' ),
-                'data_user'			=> $currentUser,
-                'data_call_sign'    => $call_sign,
-                'data_table_name'   => $primary_table_name,
-                'data_action'       => $action,
-                'data_field_values' => wp_json_encode( $data )
+                'data_date_written'  => current_time( 'mysql' ),
+                'data_user'          => ( $user->ID > 0 ) ? $user->user_login : 'Guest',
+                'data_call_sign'     => $call_sign,
+                'data_table_name'    => $tables['primary'],
+                'data_action'        => $action,
+                'data_field_values'  => wp_json_encode( $data )
             ];
             
-            $this->wpdb->insert( $log_table_name, $log_data );
+            $this->wpdb->insert( $tables['log'], $log_data );
         }
-        
-        /**
-         * Recursively builds a WHERE clause from a criteria array.
+
+
+         /**
+         * Gets the correct $wpdb->prepare placeholder for a value.
          */
-        private function _build_where_clause_recursive( $criteria ) {
+        private function _get_placeholder_for_value( $value ) {
+            if ( is_int( $value ) ) {
+                return '%d';
+            }
+            if ( is_float( $value ) ) {
+                return '%f';
+            }
+            return '%s';
+        }
+
+        /**
+         * Checks if a given string is a valid, known column name.
+         */
+        private function _is_valid_column( $column_name ) {
+            return in_array( $column_name, $this->valid_columns, true );
+        }
+
+        /**
+         * Build WHERE clause from criteria
+         * 
+         * @param array $criteria Criteria array
+         * @return array SQL string and parameters
+         */
+        private function _build_where( $criteria ) {
             $sql_chunks = [];
             $params = [];
             
@@ -437,7 +443,7 @@ if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
                 
                 } 
                 else if ( ! empty( $clause['relation'] ) ) {
-                    $nested_parts = $this->_build_where_clause_recursive( $clause );
+                    $nested_parts = $this->_build_where( $clause );
                     
                     if ( ! empty( $nested_parts['sql'] ) ) {
                         $sql_chunks[] = "( " . $nested_parts['sql'] . " )";
@@ -452,55 +458,5 @@ if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
             ];
         }
 
-        /**
-         * Gets the correct $wpdb->prepare placeholder for a value.
-         */
-        private function _get_placeholder_for_value( $value ) {
-            if ( is_int( $value ) ) {
-                return '%d';
-            }
-            if ( is_float( $value ) ) {
-                return '%f';
-            }
-            return '%s';
-        }
-
-        /**
-         * Filters an associative array to only include valid, known columns.
-         */
-        private function _filter_data( $data ) {
-            return array_intersect_key( $data, array_flip( $this->valid_columns ) );
-        }
-
-        /**
-         * Checks if a given string is a valid, known column name.
-         */
-        private function _is_valid_column( $column_name ) {
-            return in_array( $column_name, $this->valid_columns, true );
-        }
-
-        
-		/**
-		 * Retrieves the username of the currently logged-in WordPress user.
-		 * @return string The user_login string or 'Guest'.
-		 */
-		private function get_current_user_login(): string {
-			// Ensure this runs after WordPress has loaded user data
-			if ( ! function_exists( 'wp_get_current_user' ) ) {
-				return 'System_Check_Error';
-			}
-			
-			$current_user = wp_get_current_user();
-	
-			// Check if a user is logged in (ID > 0)
-			if ( $current_user->ID > 0 ) {
-				return $current_user->user_login;
-			}
-	
-			// Return a default value if the user is not logged in
-			return 'Guest'; 
-		}
-
-    } // end class CWA_User_master_DAL
-
-} // end if ! class_exists
+    }
+}
