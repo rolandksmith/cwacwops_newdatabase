@@ -3,23 +3,10 @@ function display_and_update_advisor_info_func() {
 /*
 	Function to display and update Advisor information
  
-
-	mod 15feb20 Bob c - add find by email
-	update semester - bc 20aug20 
- 	Modified 23June2021 by Roland for the new advisor and advisorClass layout/
- 	Modified 15Dec21 by Roland to be able to add additional advisor classes and moved 
-		to V2
-	Modified 14Jan2022 by Roland to use advisor and advisorClass tables
-	Modified 23May22 by Roland to move records to advisor_deleted rather than just delete the record
-	Modified 28Sep22 by Roland for the updated database information
-	Modified 22Feb23 by Roland to have the same advisorclass format in current and past semesters
-	Modified 15Apr23 by Roland to fix action_log
-	Modified 13Jul23 by Roland to use consolidated tables
-	Modifed 28Aug23 by Roland to add replacement_status field
-	Modified 13Oct24 by Roland to use user_master process
 */
 
-	global $wpdb;
+	global $wpdb, $doDebug, $debugLog;
+	
 	$doDebug 						= FALSE;
 	$testMode						= FALSE;
 
@@ -28,13 +15,9 @@ function display_and_update_advisor_info_func() {
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	if ($doDebug) {
-		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
-		echo "</pre><br />";
-	}
-		ini_set('display_errors','1');
-		error_reporting(E_ALL);	
+	
+	ini_set('display_errors','1');
+	error_reporting(E_ALL);	
 
 	$siteURL			= $initializationArray['siteurl'];
 	$languageArray		= $initializationArray['languageArray'];
@@ -58,7 +41,7 @@ function display_and_update_advisor_info_func() {
 	$jobname						= "Display and Update Advisor Signup Info";
 	$request_table					= '';
 	$updateMaster					= "$siteURL/cwa-display-and-update-user-master-information/";
-	$advisorclassid					= '';
+	$advisorclass_id					= '';
 	$studentUpdateURL				= "$siteURL/cwa-display-and-update-student-signup/";
 	
     $inp_advisor_first_name = '';
@@ -141,12 +124,30 @@ function display_and_update_advisor_info_func() {
     $inp_advisorclass_action_log = '';
     $inp_advisorclass_language = '';
     
+    function debugReport($message) {
+    
+    global $wpdb, $doDebug, $debugLog;
+    
+    	$thisTime = date('Y-m-d H:i:s');
+    	$debugLog .= "$message ($thisTime)<br >";
+    	if ($doDebug) {
+    		echo "$message <br />";
+    	}
+    }
+    
+		debugReport("Initialization Array:<pre>");
+		$myStr = print_r($initializationArray, TRUE);
+		debugReport("$myStr</pre>");
+
+    
 	
 // get the input information
 	if (isset($_REQUEST)) {
 		foreach($_REQUEST as $str_key => $str_value) {
-			if ($doDebug) {
-				echo "Key: $str_key | Value: $str_value <br />\n";
+			if (!is_array($str_value)) {
+				debugReport("Key: $str_key | Value: $str_value");
+			} else {
+				debugReport("Key: $str_key (array)");
 			}
 			if ($str_key 		== "strpass") {
 				$strPass		 = $str_value;
@@ -198,6 +199,10 @@ function display_and_update_advisor_info_func() {
 				$trueRecordCount = filter_var($trueRecordCount,FILTER_UNSAFE_RAW);
 			}
 
+			if ($str_key == 'inp_advisor_call_sign') {
+				$inp_advisor_call_sign = $str_value;
+				$inp_advisor_call_sign = filter_var($inp_advisor_call_sign,FILTER_UNSAFE_RAW);
+			}
 			if ($str_key == 'inp_advisor_semester') {
 				$inp_advisor_semester = $str_value;
 				$inp_advisor_semester = filter_var($inp_advisor_semester,FILTER_UNSAFE_RAW);
@@ -435,13 +440,13 @@ function display_and_update_advisor_info_func() {
 				$inp_advisorclass_copy_control = $str_value;
 				$inp_advisorclass_copy_control = filter_var($inp_advisorclass_copy_control,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key == 'advisorid') {
-				$advisorid = $str_value;
-				$advisorid = filter_var($advisorid,FILTER_UNSAFE_RAW);
+			if ($str_key == 'advisor_id') {
+				$advisor_id = $str_value;
+				$advisor_id = filter_var($advisor_id,FILTER_UNSAFE_RAW);
 			}
-			if ($str_key == 'advisorclassid') {
-				$advisorclassid = $str_value;
-				$advisorclassid = filter_var($advisorclassid,FILTER_UNSAFE_RAW);
+			if ($str_key == 'advisorclass_id') {
+				$advisorclass_id = $str_value;
+				$advisorclass_id = filter_var($advisorclass_id,FILTER_UNSAFE_RAW);
 			}
 			if ($str_key == 'inp_advisorclass_action_log') {
 				$inp_advisorclass_action_log = $str_value;
@@ -547,18 +552,10 @@ function display_and_update_advisor_info_func() {
 
 	if ($testMode) {
 		$content						.= "<p><b>Operating in testMode</b></p>";
-		$advisorTableName				= 'wpw1_cwa_advisor2';
-		$advisorClassTableName			= 'wpw1_cwa_advisorclass2';
-		$advisorDeletedTableName		= 'wpw1_cwa_deleted_advisor2';
-		$advisorClassDeletedTableName	= 'wpw1_cwa_deleted_advisorclass2';
-		$userMasterTableName			= 'wpw1_cwa_user_master2';
+		$operatingMode					= 'Testmode';
 	} else {
 		$content						.= "<p><b>Operating in Production Mode</b></p>";
-		$advisorTableName				= 'wpw1_cwa_advisor';
-		$advisorClassTableName			= 'wpw1_cwa_advisorclass';
-		$advisorDeletedTableName		= 'wpw1_cwa_deleted_advisor';
-		$advisorClassDeletedTableName	= 'wpw1_cwa_deleted_advisorclass';
-		$userMasterTableName			= 'wpw1_cwa_user_master';
+		$operatingMode					= 'Production';
 	}
 
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
@@ -590,7 +587,7 @@ function display_and_update_advisor_info_func() {
 					<table style='border-collapse:collapse;'>
 					<tr><td style='width:150px;'>Request Type</td>
 						<td><input class='formInputButton' type='radio' name='request_type' value='callsign' checked>Call Sign<br />
-							<input class='formInputButton' type='radio' name='request_type' value='advisorid'>AdvisorID<br />
+							<input class='formInputButton' type='radio' name='request_type' value='advisor_id'>AdvisorID<br />
 							<input class='formInputButton' type='radio' name='request_type' value='surname'>Surname<br />
 							<input class='formInputButton' type='radio' name='request_type' value='givenname'>Given Name<br />
 							<input class='formInputButton' type='radio' name='request_type' value='email'>Email</td></tr>
@@ -612,9 +609,9 @@ function display_and_update_advisor_info_func() {
 			$request_info = strtoupper($request_info);
 		}
 		if ($doDebug) {
-			echo "<br />at pass 2<br />Supplied input: <br />
+			debugReport("<br />at pass 2<br />Supplied input: <br />
 					Request Type: $request_type; <br />
-					Request Info: $request_info <br />";
+					Request Info: $request_info");
 		}
 
 		$content				.= "<h3>$jobname</h3>";
@@ -626,7 +623,7 @@ function display_and_update_advisor_info_func() {
 		$haveUserMaster		= FALSE;
 		// get the user_master info and format it
 		if ($doDebug) {
-			echo "getting the user_master data<br />";
+			debugReport("getting the user_master data");
 		}
 		if ($request_type == 'callsign') {
 			$request_info	= strtoupper($request_info);
@@ -641,7 +638,7 @@ function display_and_update_advisor_info_func() {
 				]
 			];
 			if ($doDebug) {
-				echo "set up the criteria for a callsign request type<br />";
+ 				debugReport("set up the criteria for a callsign request type");
 			}
 		} elseif ($request_type == 'id') {
 			$criteria = [
@@ -669,7 +666,7 @@ function display_and_update_advisor_info_func() {
 				]
 			];
 			if ($doDebug) {
-				echo "set up the criteria for a surname request type<br />";
+				debugReport("set up the criteria for a surname request type");
 			}
 		} elseif ($request_type == 'given') {
 			$criteria = [
@@ -683,7 +680,7 @@ function display_and_update_advisor_info_func() {
 				]
 			];
 			if ($doDebug) {
-				echo "set up the criteria for a given name request type<br />";
+				debugReport("set up the criteria for a given name request type");
 			}
 		} elseif ($request_type == 'email') {
 			$criteria = [
@@ -697,11 +694,11 @@ function display_and_update_advisor_info_func() {
 				]
 			];
 			if ($doDebug) {
-				echo "set up the criteria for an email request type<br />";
+				debugReport("set up the criteria for an email request type");
 			}
 		} else {
 			if ($doDebug) {
-				echo "invalid request_type of $request_type<br />";
+				debugReport("invalid request_type of $request_type");
 			}
 			$content	.= "<p>Sorry. Invalid method entered</p>";
 			$doProceed	= FALSE;
@@ -710,15 +707,15 @@ function display_and_update_advisor_info_func() {
 		if ($doProceed) {
 			// get the user_master information
 			if ($doDebug) {
-				echo "calling user_dal->get_user_master. criteria:<br /><pre>";
-				print_r($criteria);
-				echo "</pre><br />";	
+				debugReport("calling user_dal->get_user_master. criteria:<pre>");
+				$myStr = print_r($criteria, TRUE);
+				debugReport("$myStr</pre>");
 			}
 			$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
 			if ($doDebug) {
-				echo "returned from get_user_master. user_data:<br /><pre>";
-				print_r($user_data);
-				echo "</pre><br />";
+				debugReport("returned from get_user_master. user_data:<pre>");
+				$myStr = print_r($user_data,TRUE);
+				debugReport("$myStr</pre>");
 			}
 			if ($user_data === FALSE) {
 				$content		.= "Attempting to retrieve $request_info failed<br />";
@@ -740,10 +737,10 @@ function display_and_update_advisor_info_func() {
 
 	if ($strPass == '2A') {
 		if ($doDebug) {
-			echo "<br />at pass 2A<br />
+			debugReport("<br />at pass 2A<br />
 					request_type: $request_type<br />
 					request_info: $request_info<br />
-					trueRecordCount: $trueRecordCount<br />";
+					trueRecordCount: $trueRecordCount<br />");
 		}
 		// build the select list
 		$selectList	= "<select name='inp_list' class='formInputSelect'>";
@@ -778,11 +775,11 @@ function display_and_update_advisor_info_func() {
 	}
 	if ($strPass == '2B') {
 		if ($doDebug) {
-			echo "<br />at pass 2B<br />
+			debugReport("<br />at pass 2B<br />
 					request_type: $request_type<br />
 					request_info: $request_info<br />
 					inp_depth: $inp_depth<br />
-					inp_list: $inp_list<br />";
+					inp_list: $inp_list");
 		}
 // $thisCallsign|$thisLastName, $thisFirstName|$thisID
 		$myArray	= explode("|",$inp_list);
@@ -802,9 +799,9 @@ function display_and_update_advisor_info_func() {
 		];
 		$user_data = $user_dal->get_user_master($criteria,'user_call_sign','ASC',$operatingMode);
 		if ($doDebug) {
-			echo "returned from get_user_master. user_data:<br /><pre>";
-			print_r($user_data);
-			echo "</pre><br />";
+			debugReport("returned from get_user_master. user_data:<pre>");
+			$myStr = print_r($user_data,TRUE);
+			debugReport("$myStr</pre>");
 		}
 		if ($user_data === FALSE) {
 			$content		.= "Attempting to retrieve $request_info failed<br />";
@@ -816,7 +813,7 @@ function display_and_update_advisor_info_func() {
 					}
 					if (! isset($user_call_sign)) {
 						if ($doDebug) {
-							echo "loaded user_data but user_call_sing not set<br />";
+							debugReport("loaded user_data but user_call_sing not set");
 						}
 					} else {
 						// make sure we have all the data to continue
@@ -826,7 +823,7 @@ function display_and_update_advisor_info_func() {
 				}
 			} else {
 				if ($doDebug) {
-					echo "no user_data returned<br />";
+					debugReport("no user_data returned");
 				}
 			}
 		}
@@ -834,10 +831,10 @@ function display_and_update_advisor_info_func() {
 	}
 	if ($strPass == '2C') {
 		if ($doDebug) {
-			echo "<br />at pass 2C<br />
+			debugReport("<br />at pass 2C<br />
 					request_type: $request_type<br />
 					request_info: $request_info<br />
-					haveUserMaster: $haveUserMaster<br />";	
+					haveUserMaster: $haveUserMaster");	
 		}	
 		$content .= "<h3>$jobname</h3>";
 		$admin = 'N';
@@ -878,7 +875,7 @@ function display_and_update_advisor_info_func() {
 						}
 						if (! isset($advisor_call_sign)) {
 						if ($doDebug) {
-								echo "looking for advisor record but advisor_call_sign is not set<br />";
+								debugReport("looking for advisor record but advisor_call_sign is not set");
 							}
 						}		
 						$newActionLog		= formatActionLog($advisor_action_log);
@@ -886,7 +883,9 @@ function display_and_update_advisor_info_func() {
 						$tableCount++;
 						$content .= "<form method='post' action='$theURL' 
 									name='update_advisor_form' ENCTYPE='multipart/form-data'>
-									<input type='hidden' name='advisorid' value='$advisor_ID'>
+									<input type='hidden' name='advisor_id' value='$advisor_id'>
+									<input type='hidden' name='inp_advisor_call_sign' value='$inp_advisor_call_sign'>
+									<input type='hidden'name='inp_advisor_semester' value='$inp_advisor_semester'>
 									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
@@ -933,7 +932,7 @@ function display_and_update_advisor_info_func() {
 									}
 									if (! isset($advisorclass_call_sign)) {
 										if ($doDebug) {
-											echo "looking for advisorclass record but advisorclass_call_sign is not set<br />";
+											debugReport("looking for advisorclass record but advisorclass_call_sign is not set");
 										}
 									}
 									$classCount++;
@@ -1085,7 +1084,7 @@ function display_and_update_advisor_info_func() {
 					}
 				} else {
 					if ($doDebug) {
-						echo "no matching advisor records found<br />";
+						debugReport("no matching advisor records found");
 					}
 					$content	.= "<p>No advisor record found for $user_call_sign</p>";
 				}
@@ -1095,44 +1094,28 @@ function display_and_update_advisor_info_func() {
 		
 	} elseif ("3" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 3 with id $advisorid<br />";
+			debugReport("<br />at pass 3 with id $advisor_id");
 		}
 
 		// display the request record to be modified
-		$sql				= "select * from $advisorTableName 
-								where advisor_id='$advisorid'";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$advisorData = $advisor_dal->get_advisor_by_id( $advisor_id, $operatingMode );
+		if ($advisorData === FALSE || $advisorData === NULL) {
+			debugReport("getting advisor by id for $advisor_id returned FALSE|NULL");
 		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-				
+			if (! empty($advisorData)) {
+				foreach($advisorData as $key => $value) {
+					$$key = $value;
+				}
+				if (! isset($advisor_call_sign)) {
+					debugReport("supposedly have advisor record for id $advisor_id but advisor_call_sign not set");
+				} else {				
 					$content	.= "<h3>$jobname</h3>
 									<p><a href='$theURL'>Display another advisor</a></p>
 									<p>Table: $advisorTableName</p>
 									<form method='post' name='updateAdvisor_form' action='$theURL' 
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='4'>
-									<input type='hidden' name='advisorid' value='$advisor_ID'>
+									<input type='hidden' name='advisor_id' value='$advisor_ID'>
 									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
@@ -1172,7 +1155,7 @@ function display_and_update_advisor_info_func() {
 
 				}			// end of the advisor while
 			} else {
-				$content	.= "<p>No record found in $advisorTableName for the record with the id of $advisorid</p>";
+				$content	.= "<p>No record found for the record with the id of $advisor_id</p>";
 			}
 		}
 
@@ -1181,36 +1164,20 @@ function display_and_update_advisor_info_func() {
 
 	} elseif ("4" == $strPass) {
 		if ($doDebug) {
-			echo "<br />arrived at pass 4 with advisor_id of $advisorid to update<br />";
+			debugReport("<br />arrived at pass 4 with advisor_id of $advisor_id to update");
 		}
 		$actionContent			= "";
-		$sql					= "select * from $advisorTableName 
-									where advisor_id='$advisorid'";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$advisorData = $advisor_dal->get_advisor_by_id( $advisor_id, $operatingMode );
+		if ($advisorData === FALSE || $advisorData === NULL) {
+			debugReport("getting advisor by id for $advisor_id returned FALSE|NULL");
 		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-				
+			if (! empty($advisorData)) {
+				foreach($advisorData as $key => $value) {
+					$$key = $value;
+				}
+				if (! isset($advisor_call_sign)) {
+					debugReport("supposedly have advisor record for id $advisor_id but advisor_call_sign not set");
+				} else {								
 					$content		= "<h3>Results $jobname $advisor_ID ($advisor_call_sign)</h3>";
 					$doTheUpdate 						= FALSE;
 					$updateData							= array();
@@ -1288,39 +1255,25 @@ function display_and_update_advisor_info_func() {
 						$updateParams['advisor_action_log'] = $advisor_action_log;
 						$updateFormat[]						= '%s';
 						$actionContent .= "Updated action_log.<br />";
-
-						$advisorUpdateData		= array('tableName'=>$advisorTableName,
-														'inp_method'=>'update',
-														'inp_data'=>$updateParams,
-														'inp_format'=>$updateFormat,
-														'jobname'=>$jobname,
-														'inp_id'=>$advisor_ID,
-														'inp_callsign'=>$advisor_call_sign,
-														'inp_semester'=>$advisor_semester,
-														'inp_who'=>$userName,
-														'testMode'=>$testMode,
-														'doDebug'=>$doDebug);
-						$updateResult	= updateAdvisor($advisorUpdateData);
-						if ($updateResult[0] === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$content		.= "Unable to update content in $advisorTableName<br />";
+						$updateResult = $advisor_dal->update( $advisor_id, $updateParams, $operatingMode );
+						if ($updateResult === FALSE || $updateResult === NULL) {
+							debugReport("attempting to update advisor record $advisor_id returned FALSE|NULL");
 						} else {
 							$content		.= $actionContent;	
-
 						}				///// end of change class loop					
 						$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisor_call_sign&strpass=2&inp_depth=$inp_depth&inp_verbose=$inp_verbose'>HERE</a></p><br />";
 					} else {
 						if ($doDebug) {
-							echo "No updates were entered.<br />";
+							debugReport("No updates were entered.");
 						}
 						$content .= "No updates were requested.<br />";
 					}
 				}
 			} else {
 				if ($doDebug) {
-					echo "No record found in $advisorTableName table for ID $advisorid<br />";
+					debugReport("No record found for ID $advisor_id<br />");
 				}
-				$content	.= "No record found in $advisorTableName table for ID $advisorid<br />";
+				$content	.= "No record found for ID $advisor_id<br />";
 			}
 		}
 			
@@ -1328,73 +1281,21 @@ function display_and_update_advisor_info_func() {
 		
 	} elseif ("5" == $strPass) {
 		if ($doDebug) {
-			echo "Arrived at pass 5 with $inp_advisorclass_id<br />";
+			debugReport("Arrived at pass 5 with $inp_advisorclass_id");
 		}
 
 		// get the advisorClass record
-		$sql					= "select * from $advisorClassTableName 
-									where advisorclass_id=$inp_advisorclass_id";
-		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisorclass === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$advisorclassData = $advisorclass_dal->get_advisorclasses_by_id( $advisorclass_id, $operatingMode );
+		if ($advisorclassData === FALSE || $advisorclassData === NULL) {
+			debugReport("attempt to get advisorclass record $advisorclass_id returned FALSE|NULL");
 		} else {
-			$numACRows						= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and found $numACRows rows<br />";
-			}
-			if ($numACRows > 0) {
-				foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-					$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-					$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-					$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-					$advisorClass_language					= $advisorClassRow->advisorclass_language;
-					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-					$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-					$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-					$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-					$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-					$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-					$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-					$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-					$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-					$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-					$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-					$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-					$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-					$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-					$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-					$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-					$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-					$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-					$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-					$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-					$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-					$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-					$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-					$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-					$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-					$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-					$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-					$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-					$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-					$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-					$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-					$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-					$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-					$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-					$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-					$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-					$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-					$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-					$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-					$advisorClass_copy_control				= $advisorClassRow->advisorclass_copy_control;
-					
+			if (! empty($advisorclassData)) {
+				foreach($advisorclassData as $key => $value) {
+					$$key = $value;
+				}
+				if (! isset($advisorclass_call_sign)) {
+					debugReport("supposely have advisorclass record for advisorclas_id but advisorclass_call_sign not set");
+				} else {					
 					//Build language selection
 					$languageOptions			= '';
 					$firstTime					= TRUE;
@@ -1543,73 +1444,22 @@ function display_and_update_advisor_info_func() {
 
 	} elseif ("6" == $strPass) {
 		if ($doDebug) {
-			echo "<br />Arrived at pass 6 with $inp_advisorclass_id<br />";
+			debugReport("<br />Arrived at pass 6 with $inp_advisorclass_id");
 		}
 		$doTheUpdate			= FALSE;
 		$content				.= "<h3>Results from Updating the Advisor Class Record</h3>";
 		// get the advisorClass record
-		$sql					= "select * from $advisorClassTableName 	
-									where advisorclass_id=$inp_advisorclass_id";
-		$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisorclass === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		$advisorclassData = $advisorclass_dal->get_advisorclasses_by_id( $advisorclass_id, $operatingMode );
+		if ($advisorclassData === FALSE || $advisorclassData === NULL) {
+			debugReport("attempt to get advisorclass record $advisorclass_id returned FALSE|NULL");
 		} else {
-			$numACRows						= $wpdb->num_rows;
-			if ($doDebug) {
-				echo "ran $sql<br />and found $numACRows rows<br />";
-			}
-			if ($numACRows > 0) {
-				foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-					$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-					$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-					$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-					$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-					$advisorClass_language					= $advisorClassRow->advisorclass_language;
-					$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-					$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-					$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-					$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-					$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-					$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-					$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-					$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-					$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-					$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-					$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-					$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-					$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-					$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-					$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-					$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-					$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-					$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-					$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-					$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-					$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-					$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-					$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-					$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-					$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-					$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-					$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-					$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-					$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-					$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-					$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-					$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-					$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-					$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-					$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-					$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-					$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-					$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-					$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-					$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-					$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-					$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-					$advisorClass_copy_control				= $advisorClassRow->advisorclass_copy_control;
+			if (! empty($advisorclassData)) {
+				foreach($advisorclassData as $key => $value) {
+					$$key = $value;
+				}
+				if (! isset($advisorclass_call_sign)) {
+					debugReport("supposely have advisorclass record for advisorclas_id but advisorclass_call_sign not set");
+				} else {					
 
 					$updateParams	= array();
 					$updateFormat	= array();
@@ -1902,12 +1752,12 @@ function display_and_update_advisor_info_func() {
 					
 					if ($updateUTC) {
 						if ($doDebug) {
-							echo "Updating UTC info due to a local time change<br />";
+							debugReport("Updating UTC info due to a local time change");
 						}
 						$utcResult		= utcConvert('toutc',$advisorClass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days,$doDebug);
 						if ($utcResult[0] == 'FAIL') {
 							if ($doDebug) {
-								echo "converting $advisorClass_timezone_offset,$inp_class_schedule_times,$inp_class_schedule_days to UTC failed<br />";
+								debugReport("converting $advisorClass_timezone_offset,$inp_class_schedule_times,$inp_class_schedule_days to UTC failed");
 							}
 						} else {
 							$inp_advisorClass_class_schedule_times_utc				= $utcResult[1];
@@ -1934,7 +1784,7 @@ function display_and_update_advisor_info_func() {
 					}
 					if ($myInt != $advisorClass_number_students) {
 						if ($doDebug) {
-							echo "advisorClass_number_students is $advisorClass_number_students which does not match $myInt actual students<br />";
+							debugReport("advisorClass_number_students is $advisorClass_number_students which does not match $myInt actual students");
 						}
 						$inp_number_students		= $myInt;
 						$doTheUpdate = TRUE;
@@ -1945,9 +1795,9 @@ function display_and_update_advisor_info_func() {
 					
 					if ($doTheUpdate) {
 						if ($doDebug) {
-							echo "Doing the update. Contents of the updateParams array:<br /><pre>";
-							print_r($updateParams);
-							echo "</pre><br />";
+							debugReport("Doing the update. Contents of the updateParams array:<pre>");
+							$myStr = print_r($updateParams,TRUE);
+							debugReport("$myStr</pre>");
 						}
 						if ($advisorClass_action_log != $inp_advisorclass_action_log) { 
 							$advisorClass_action_log	= $inp_advisorclass_action_log;
@@ -1955,34 +1805,15 @@ function display_and_update_advisor_info_func() {
 						$advisorClass_action_log				= "$advisorClass_action_log ADVUPDATE $actionDate $userName $actionContent ";
 						$updateParams['advisorclass_action_log'] = $advisorClass_action_log;
 						$updateFormat[]							= '%s';
-						$classUpdateData			= array('tableName'=>$advisorClassTableName,
-														'inp_method'=>'update',
-														'inp_data'=>$updateParams,
-														'inp_format'=>$updateFormat,
-														'jobname'=>$jobname,
-														'inp_id'=>$advisorClass_ID,
-														'inp_callsign'=>$advisorClass_call_sign,
-														'inp_semester'=>$advisorClass_semester,
-														'inp_sequence'=>$advisorClass_sequence,
-														'inp_who'=>$userName,
-														'testMode'=>$testMode,
-														'doDebug'=>$doDebug);
-						$updateResult	= updateClass($classUpdateData);
-						if ($updateResult[0] === FALSE) {
-							$myError	= $wpdb->last_error;
-							$mySql		= $wpdb->last_query;
-							$errorMsg	= "$jobname Processing $advisorClass_call_sign in $advisorClassTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-							if ($doDebug) {
-								echo $errorMsg;
-							}
-							sendErrorEmail($errorMsg);
-							$content		.= "Unable to update content in $advisorClassTableName<br />";
+						$updateResult = $advisorclass_dal->update( $advisorclass_id, $updateParams, $operatingMode );
+						if ($updateResult === FALSE || $updateResult === NULL) {
+							debugReport("Updating advisorclass id $advisorclass_id returned FALSE|NULL");
 						} else {
 							$content		.= $actionContent;	
 						}			
 					} else {
 						if ($doDebug) {
-							echo "No updates were entered.<br />";
+							debugReport("No updates were entered");
 						}
 						$content .= "No updates were requested.<br />";
 					}
@@ -1990,7 +1821,7 @@ function display_and_update_advisor_info_func() {
 				$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
 			} else {
 				if ($doDebug) {
-					echo "No record found in $advisorClassTableName pod for  id=$advisorid<br />";
+					debugReport("No record found for id=$advisorclass_id");
 				}
 			}
 		}
@@ -2003,32 +1834,25 @@ function display_and_update_advisor_info_func() {
 
 	} elseif ("10" == $strPass) {
 		if ($doDebug) {
-			echo "Arrived at pass 10 with inp_advisorclass_id=$inp_advisorclass_id<br />";
+			debugReport("<br />Arrived at pass 10 with inp_advisorclass_id=$inp_advisorclass_id");
 		}
 		
 		$content			.= "<h3>Add an advisorClass Record</h3>";
-		////		get the last advisorClass record
-		$sql				= "select * from $advisorClassTableName 
-								where advisorclass_id=$inp_advisorclass_id";
-		$wpw1_cwa_class		= $wpdb->get_results($sql);
-		if ($wpw1_cwa_class === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		// get the advisorClass record
+		$advisorclassData = $advisorclass_dal->get_advisorclasses_by_id( $advisorclass_id, $operatingMode );
+		if ($advisorclassData === FALSE || $advisorclassData === NULL) {
+			debugReport("attempt to get advisorclass record $advisorclass_id returned FALSE|NULL");
 		} else {
-			$numARows			= $wpdb->num_rows;
-			if ($doDebug) {
-				$myStr			= $wpdb->last_query;
-				echo "ran $myStr<br />and found $numARows rows in $advisorTableName table<br />";
-			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_class as $advisorClassRow) {
-					$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-					$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-					$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;
-					$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-
-					$inp_sequence							= $advisorClass_sequence + 1;
+			if (! empty($advisorclassData)) {
+				foreach($advisorclassData as $key => $value) {
+					$$key = $value;
+				}
+				if (! isset($advisorclass_call_sign)) {
+					debugReport("supposely have advisorclass record for advisorclas_id but advisorclass_call_sign not set");
+				} else {					
+					$inp_sequence = $advisorClass_sequence + 1;
 					if ($doDebug) {
-						echo "preping to add sequence $inp_sequence to $advisorClass_call_sign $advisorClass_semester semester<br />";
+						debugReport("preping to add sequence $inp_sequence to $advisorClass_call_sign $advisorClass_semester semester");
 					}
 
 					//Build language selection
@@ -2127,7 +1951,7 @@ function display_and_update_advisor_info_func() {
 									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />"; 
 				}			// end of the advisorClass while
 			} else {
-				$content	.= "<p>No record found in $advisorTableName for $inp_advisor_call_sign</p>";
+				$content	.= "<p>No record found for $inp_advisor_call_sign</p>";
 			}
 		}
 
@@ -2135,7 +1959,7 @@ function display_and_update_advisor_info_func() {
 
 	} elseif ("11" == $strPass) {				//// do the advisorClass add
 		if ($doDebug) {
-			echo "Arrived at pass 11 with inp_advisorclass_call_sign=$inp_advisorclass_call_sign<br />";
+			debugReport("<br />Arrived at pass 11 with inp_advisorclass_call_sign=$inp_advisorclass_call_sign");
 		}
 		
 		$content				.= "<h3>Adding advisorClass Sequence $inp_sequence for Advisor $inp_advisorclass_call_sign</h3>";
@@ -2159,42 +1983,25 @@ Error: $result[3]<br />";
 
 		$log_actionDate				= date('Y-m-d H:i:s');
 		$advisorclass_action_log	= "$log_actionDate Class record added by $userName using Display and Update Advisor Info ";
-		$insertParams				= array("advisorclass_call_sign|$inp_advisorclass_call_sign|s",		// 0
-										   "advisorclass_sequence|$inp_sequence|d",							// 4
-										   "advisorclass_semester|$inp_advisorclass_semester|s",							// 5
-										   "advisorclass_timezone_offset|$inp_advisorclass_timezone_offset|f",			// 7
-										   "advisorclass_level|$inp_advisorclass_level|s",								// 8
-										   "advisorclass_language|$inp_advisorclass_language|s",							// 9
-										   "advisorclass_action_log|$advisorclass_action_log|s",							// 10
-										   "advisorclass_class_size|$inp_advisorclass_class_size|d",						// 11
-										   "advisorclass_class_schedule_days|$inp_advisorclass_class_schedule_days|s",	// 12
-										   "advisorclass_class_schedule_times|$inp_times|s",					// 13
-										   "advisorclass_class_schedule_days_utc|$displayDays|s",			// 14
-										   "advisorclass_class_schedule_times_utc|$displayTimes|s",			// 15
-											"advisorclass_number_students|$inp_advisorclass_number_students|d",			// 46
-											"advisorclass_evaluation_complete|N|s",	// 47
-											"advisorclass_class_comments|$inp_advisorclass_class_comments|s");				// 48
-		$classUpdateData		= array('tableName'=>$advisorClassTableName,
-										'inp_method'=>'add',
-										'inp_data'=>$insertParams,
-										'jobname'=>$jobname,
-										'inp_id'=>0,
-										'inp_callsign'=>$inp_advisorclass_call_sign,
-										'inp_semester'=>$inp_advisorclass_semester,
-										'inp_sequence'=>$inp_sequence,
-										'inp_who'=>$userName,
-										'testMode'=>$testMode,
-										'doDebug'=>$doDebug);
-		$updateResult	= updateClass($classUpdateData);
-		if ($updateResult[0] === FALSE) {
-			$myError	= $wpdb->last_error;
-			$mySql		= $wpdb->last_query;
-			$errorMsg	= "$jobname  pass 11 Processing $inp_advisorclass_call_sign in $advisorClassTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-			if ($doDebug) {
-				echo $errorMsg;
-			}
-			sendErrorEmail($errorMsg);
-			$content		.= "Unable to update content in $advisorClassTableName<br />";
+		
+		$insertParams=array('advisorclass_call_sign => $inp_advisorclass_call_sign',
+							'advisorclass_sequence => $inp_sequence',
+							'advisorclass_semester => $inp_advisorclass_semester',
+							'advisorclass_timezone_offset => $inp_advisorclass_timezone_offset', 
+							'advisorclass_level => $inp_advisorclass_level',
+							'advisorclass_language => $inp_advisorclass_language',
+							'advisorclass_action_log => $advisorclass_action_log',
+							'advisorclass_class_size => $inp_advisorclass_class_size',
+							'advisorclass_class_schedule_days => $inp_advisorclass_class_schedule_days',
+							'advisorclass_class_schedule_times => $inp_times',
+							'advisorclass_class_schedule_days_utc => $displayDays',
+							'advisorclass_class_schedule_times_utc => $displayTimes',
+							'advisorclass_number_students => $inp_advisorclass_number_students',
+							'advisorclass_evaluation_complete => N',
+							'advisorclass_class_comments => $inp_advisorclass_class_comments');
+		$updateResult = $advisorclass_dal->insert( $insertParams, $operatingMode );									
+		if ($updateResult === FALSE || $updateResult === NULL) {
+			debugReport("addin gnew advisor class returned FALSE|NULL");
 		} else {
 			$advisorClass_call_sign					= $inp_advisorclass_call_sign;
 			$advisorClass_sequence					= $inp_sequence;
@@ -2243,219 +2050,108 @@ Error: $result[3]<br />";
 
 	} elseif ("15" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 15 Delete this advisor and classes<br />";
+			debugReport("<br />at pass 15 Delete this advisor and classes");
 		}
 		
 		$content			= "<h3>$jobname</h3>";
 		
-		// get the advisor record and delete it
-		$sql				= "select * from $advisorTableName 
-								where advisor_id = '$advisorid'";
-		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
-		if ($wpw1_cwa_advisor === FALSE) {
-			handleWPDBError($jobname,$doDebug);
+		// delete the advisor record
+		$deleteResult = $advisor_dal->delete( $advisor_id, $operatingMode );
+		if ($deleteResult === FALSE || $deleteResult === NULL) {
+			debugReport("deleting advisor id $advisor_id returned FALSE|NULL");
 		} else {
-			$numARows			= $wpdb->num_rows;
+			$content .= "<p>Advisor record has been deleted</p>";
 			if ($doDebug) {
-				echo "ran $sql<br />and found $numARows rows in $advisorTableName table<br />";
+				debugReport("advisor record deleted. now delete the class records");
 			}
-			if ($numARows > 0) {
-				foreach ($wpw1_cwa_advisor as $advisorRow) {
-					$advisor_ID							= $advisorRow->advisor_id;
-					$advisor_call_sign 					= strtoupper($advisorRow->advisor_call_sign);
-					$advisor_semester 					= $advisorRow->advisor_semester;
-					$advisor_welcome_email_date 		= $advisorRow->advisor_welcome_email_date;
-					$advisor_verify_email_date 			= $advisorRow->advisor_verify_email_date;
-					$advisor_verify_email_number 		= $advisorRow->advisor_verify_email_number;
-					$advisor_verify_response 			= strtoupper($advisorRow->advisor_verify_response);
-					$advisor_action_log 				= $advisorRow->advisor_action_log;
-					$advisor_class_verified 			= $advisorRow->advisor_class_verified;
-					$advisor_control_code 				= $advisorRow->advisor_control_code;
-					$advisor_date_created 				= $advisorRow->advisor_date_created;
-					$advisor_date_updated 				= $advisorRow->advisor_date_updated;
-					$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
-
-					//// delete the record
-					$advisorUpdateData		= array('tableName'=>$advisorTableName,
-													'inp_method'=>'delete',
-													'jobname'=>$jobname,
-													'inp_id'=>$advisor_ID,
-													'inp_callsign'=>$advisor_call_sign,
-													'inp_semester'=>$advisor_semester,
-													'inp_who'=>$userName,
-													'testMode'=>$testMode,
-													'doDebug'=>$doDebug);
-					$updateResult	= updateAdvisor($advisorUpdateData);
-					if ($updateResult[0] === FALSE) {
-						$myError	= $wpdb->last_error;
-						$mySql		= $wpdb->last_query;
-						$errorMsg	= "$jobname Processing $advisor_call_sign in $advisorTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-						if ($doDebug) {
-							echo $errorMsg;
+			/// delete the class records
+			$criteria = [
+				'relation' => 'AND',
+				'clauses' => [
+					 ['field' => 'advisorclass_call_sign', 'value' => $inp_advisor_call_sign, 'compare' => '=' ],
+					['field' => 'advisorclass_semester', 'value' => $inp_advisor_semester, 'compare' => '=' ]
+				]
+			];
+			$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
+			if ($advisorclassData === FALSE || $advisorclassData === NULL) {
+				debugReport("getting advisorclass data for deletion returned FALSE|NULL");
+			} else {
+				if (! empty($advisorclassData)) {
+					foreach($advisorclassData as $key => $value) {
+						foreach($value as $thisField => $thisValue) {
+							$$thisField = $thisValue;
 						}
-						sendErrorEmail($errorMsg);
-						$content		.= "Unable to update content in $advisorTableName<br />";
-					} else {
-						if ($doDebug) {
-							echo "now delete the class records<br />";
-						}
-						/// delete the class records
-						$sql				= "select * from $advisorClassTableName 
-												where advisorclass_call_sign = '$advisor_call_sign' 
-												 and advisorclass_semester='$advisor_semester' 
-												order by advisorclass_sequence";
-						$wpw1_cwa_advisorclass	= $wpdb->get_results($sql);
-						if ($wpw1_cwa_advisorclass === FALSE) {
-							handleWPDBError($jobname,$doDebug);
+						if (! isset($advisorclass_call_sign)) {
+							debugReport("supposedly have advisorclass data but advisorclass_call_sign not set");
 						} else {
-							$numACRows			= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $sql<br />and found $numACRows rows<br />";
-							}
-							if ($numACRows > 0) {
-								foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-									$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-									$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-									$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-									$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-									$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-									$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-									$advisorClass_language					= $advisorClassRow->advisorclass_language;
-									$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-									$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-									$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-									$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-									$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-									$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-									$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-									$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-									$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-									$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-									$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-									$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-									$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-									$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-									$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-									$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-									$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-									$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-									$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-									$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-									$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-									$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-									$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-									$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-									$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-									$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-									$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-									$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-									$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-									$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-									$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-									$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-									$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-									$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-									$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-									$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-									$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-									$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-									$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-									$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-									$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-									$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-									$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
-
-
-				
-									// if there are any students, they need to be unassigned
-									if ($advisorClass_number_students > 0) {
-										if ($doDebug) {
-											echo "have to unassign $advisorClass_number_students students<br />";
-										}
-										$content		.= "<p>The class has $advisorClass_number_students students assigned. They 
-															will each be unassigned</p>";
-						
-										for ($snum=1;$snum<31;$snum++) {
-											if ($snum < 10) {
-												$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
-											} else {
-												$strSnum		= strval($snum);
-											}
-											$unassignCallSign	= ${'advisorClass_student' . $strSnum};
-											if ($doDebug) {
-												echo "obtained $unassignCallSign for snum $strSnum<br />";
-											}
-											if ($unassignCallSign != '') {
-												$inp_data			= array('inp_student'=>$unassignCallSign,
-																			'inp_semester'=>$advisorClass_semester,
-																			'inp_assigned_advisor'=>$advisorClass_call_sign,
-																			'inp_assigned_advisor_class'=>$advisorClass_sequence,
-																			'inp_remove_status'=>'',
-																			'inp_arbitrarily_assigned'=>'',
-																			'inp_method'=>'remove',
-																			'jobname'=>$jobname,
-																			'userName'=>$userName,
-																			'testMode'=>$testMode,
-																			'doDebug'=>$doDebug);
-																
-												$removeResult		= add_remove_student($inp_data);
-												if ($removeResult[0] === FALSE) {
-													$thisReason		= $removeResult[1];
-													if ($doDebug) {
-														echo "attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason<br />";
-													}
-													sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
-													$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
-												} else {
-													$content		.= "Student $unassignCallSign removed from class and unassigned<br />";
-						
-												}
-											}
-										}
+							// if there are any students, they need to be unassigned
+							if ($advisorClass_number_students > 0) {
+								if ($doDebug) {
+									debugReport("have to unassign $advisorClass_number_students students");
+								}
+								$content		.= "<p>The class has $advisorClass_number_students students assigned. They 
+													will each be unassigned</p>";	
+								for ($snum=1;$snum<31;$snum++) {
+									if ($snum < 10) {
+										$strSnum 		= str_pad($snum,2,'0',STR_PAD_LEFT);
+									} else {
+										$strSnum		= strval($snum);
 									}
-
-									//// delete the class record
-									$classUpdateData		= array('tableName'=>$advisorClassTableName,
-																	'inp_method'=>'delete',
-																	'jobname'=>$jobname,
-																	'inp_id'=>$advisorClass_ID,
-																	'inp_callsign'=>$advisorClass_call_sign,
+									$unassignCallSign	= ${'advisorClass_student' . $strSnum};
+									if ($doDebug) {
+										debugReport("obtained $unassignCallSign for snum $strSnum");
+									}
+									if ($unassignCallSign != '') {
+										$inp_data			= array('inp_student'=>$unassignCallSign,
 																	'inp_semester'=>$advisorClass_semester,
-																	'inp_sequence'=>$advisorClass_sequence,
-																	'inp_who'=>$userName,
+																	'inp_assigned_advisor'=>$advisorClass_call_sign,
+																	'inp_assigned_advisor_class'=>$advisorClass_sequence,
+																	'inp_remove_status'=>'',
+																	'inp_arbitrarily_assigned'=>'',
+																	'inp_method'=>'remove',
+																	'jobname'=>$jobname,
+																	'userName'=>$userName,
 																	'testMode'=>$testMode,
 																	'doDebug'=>$doDebug);
-									$updateResult	= updateClass($classUpdateData);
-									if ($updateResult[0] === FALSE) {
-										$myError	= $wpdb->last_error;
-										$mySql		= $wpdb->last_query;
-				 						$errorMsg	= "A$jobname Processing $advisorClass_call_sign in $advisorClassTableName failed. Reason: $updateResult[1]<br />SQL: $mySql<br />Error: $myError<br />";
-										if ($doDebug) {
-											echo $errorMsg;
+														
+										$removeResult		= add_remove_student($inp_data);
+										if ($removeResult[0] === FALSE) {
+											$thisReason		= $removeResult[1];
+											if ($doDebug) {
+												echo "attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason<br />";
+											}
+											sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+											$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
+										} else {
+											$content		.= "Student $unassignCallSign removed from class and unassigned<br />";
+				
 										}
-										sendErrorEmail($errorMsg);
-										$content		.= "Unable to update content in $advisorClassTableName<br />";
 									}
 								}
-								$content					.= "<p>The advisor and class records have been deleted.</p>
-																<p>To return to the initial advisor page, click 
-																<a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p>
-																<p>Otherwise, you can close this window</p>";
+							}
+				
+							//// delete the class record
+							$deleteResult = $advisorclass_dal->delete( $advisorclass_id, $operatingMode );
+							if ($deleteResult === FALSE || $deleteResult === NULL) {
+								debugReport("attempt to delete advisorclass id $advisorclass_id returned FALSE|NULL");
+							} else {
+								$content .= "<p>$advisor_call_sign class record $advisorclass_sequence deleted</p>";
 							}
 						}
+						$content					.= "<p>The advisor and class records have been deleted.</p>
+														<p>To return to the initial advisor page, click 
+														<a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p>
+														<p>Otherwise, you can close this window</p>";
 					}
-				}
-			} else {
-				if ($doDebug) {
-					echo "No advisor record found for $advisorid to delete<br />";
+				} else {
+					$content .= "<p>No advisorclass data for $advisor_call_sign</p>";
 				}
 			}
-		}					
-		
+		}
 		
 	} elseif ("20" == $strPass) {
 		if ($doDebug) {
-			echo "<br />at pass 20 Delete this Class<br />";
+			debugReport("<br />at pass 20 Delete this Class");
 		}	
 		$content				.= "<h3>$jobname</h3>
 									<p>You have requested the advisorClass record number $inp_advisorclass_id to be deleted</p>";
