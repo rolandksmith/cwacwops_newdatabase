@@ -1,26 +1,15 @@
 /**
- * CWA_Advisor_DAL (Data Access Layer)
- *
- * Manages all MySQL database interactions for the CWA Advisor tables.
- *
- * This class is STATELESS. The $operatingMode ('Production' or 'Testmode')
- * must be passed into every public method to determine which
- * set of tables (live or test) to use for that specific operation.
+ * CWA Advisor Data Access Layer
+ * 
+ * Handles all database operations for advisor records with proper
+ * security, validation, and error handling.
  */
-
 if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
     class CWA_Advisor_DAL {
-
-        /**
-         * The WordPress database global object.
-         * @var wpdb
-         */
         private $wpdb;
-
+        
         /**
-         * A list of all valid column names for the advisor table.
-         * Used to sanitize input data and prevent SQL injection.
-         * @var array
+         * Valid database columns for advisor table
          */
         private $valid_columns = [
             'advisor_id',
@@ -35,388 +24,354 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
             'advisor_control_code',
             'advisor_date_created',
             'advisor_date_updated',
-            'advisor_replacement_status',
+            'advisor_replacement_status'
         ];
+        
+        /**
+         * Valid comparison operators for WHERE clauses
+         */
+        private $valid_operators = [
+            '=',
+            '!=',
+            '>',
+            '<',
+            '>=',
+            '<=',
+            'LIKE',
+            'NOT LIKE',
+            'IN',
+            'NOT IN'
+        ];
+        
+        /**
+         * Valid modes for table selection
+         */
+        private $valid_modes = ['Production', 'Testing'];
 
         /**
-         * Constructor.
-         * Only initializes the $wpdb object.
+         * Constructor
          */
         public function __construct() {
             global $wpdb;
             $this->wpdb = $wpdb;
         }
 
-        // ---------------------------------------------------------------------
-        // Public Methods
-        // ---------------------------------------------------------------------
-
         /**
-         * 1. Inserts a new advisor record and logs the action.
-         *
-         * @param array  $data          Associative array of [field_name => value] to insert.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false The new advisor_id on success, false on error.
+         * Insert a new advisor record
+         * 
+         * @param array $data Advisor data to insert
+         * @param string $mode Database mode (Production or Testing)
+         * @return int|false Insert ID on success, false on failure
          */
-        public function insert( $data, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $clean_data = $this->_filter_data( $data );
-
-            if ( empty( $clean_data ) ) {
-            	error_log("CWA_Advisor_DAL ERROR No valid data submitted for an insert");
-                return false; // No valid data provided
+        public function insert( $data, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return false;
             }
-
-            // $wpdb->insert handles data sanitization
-            $result = $this->wpdb->insert( $tables['primary'], $clean_data );
-
+            
+            $tables = $this->_get_table_names( $mode );
+            $clean = $this->_sanitize_data( $data );
+            
+            if ( empty( $clean ) ) {
+                return false;
+            }
+            
+            $result = $this->wpdb->insert( $tables['primary'], $clean );
+            
             if ( $result ) {
                 $new_id = $this->wpdb->insert_id;
-                
-                // Log the 'create' action
-                $call_sign = isset( $clean_data['advisor_call_sign'] ) ? $clean_data['advisor_call_sign'] : 'UNKNOWN';
-                $this->_log_change(
-                    $call_sign,
+                $this->_log(
+                    $clean['advisor_call_sign'] ?? 'UNKNOWN',
                     'create',
-                    $clean_data,
-                    $tables['primary'],
-                    $tables['log']
+                    $clean,
+                    $tables
                 );
-                
                 return $new_id;
             }
-
-            $myStr = $this->wpdb->last_query;
-			error_log("CWA_Advisor_DAL ERROR attempt to insert a record returned FALSE\nSQL: $myStr");
+            
             return false;
         }
 
         /**
-         * 2. Gets advisor records based on specified criteria.
-         *
-         * @param array  $criteria      Criteria for the WHERE clause (supports nested AND/OR).
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return array|false Array of objects on success, false on error.
+         * Update an existing advisor record
+         * 
+         * @param int $id Advisor ID
+         * @param array $data Data to update
+         * @param string $mode Database mode
+         * @return int|false Number of rows updated, or false on failure
          */
-        public function get_advisor( $criteria, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $sql = "SELECT * FROM {$tables['primary']}";
-            $params = [];
-            
-            if ( ! empty( $criteria ) ) {
-                $where_parts = $this->_build_where_clause_recursive( $criteria );
-                
-                if ( ! empty( $where_parts['sql'] ) ) {
-                    $sql .= " WHERE " . $where_parts['sql'];
-                    $params = $where_parts['params'];
-                }
-            }
-
-            if ( ! empty( $params ) ) {
-                $prepared_sql = $this->wpdb->prepare( $sql, $params );
-                $results = $this->wpdb->get_results( $prepared_sql, ARRAY_A );
-            } else {
-                $results = $this->wpdb->get_results( $sql, ARRAY_A );
+        public function update( $id, $data, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) || ! $this->_validate_id( $id ) ) {
+                return false;
             }
             
-            if ($results === FALSE || $results === NULL) {
-            	$myStr = $this->wpdb->last_query;
-            	error_log("CWA_Advisor_DAL ERROR get_advisor returned FALSE/NULL\nSQL: $myStr");
-            } else {
-            	if (empty($results)) {
-					$myQuery = $this->wpdb->last_query;
-					error_log("CWA_Advisor_DAL INFORMATION No data retrieved in operatingMode $operatingMode with $myQuery");
-            	}
-            }
-            return $results;
-        }
-
-        /**
-         * 3. Gets advisor records based on specified criteria and order by specified field and order
-         *
-         * @param array  $criteria      Criteria for the WHERE clause (supports nested AND/OR).
-         * @param string $orderby		field(s) to order the output
-         & @param string ASC|DESC		order ascending or descending
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return array|false Array of objects on success, false on error.
-         */
-        public function get_advisor_by_order( $criteria, $orderby, $order, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $sql = "SELECT * FROM {$tables['primary']}";
-            $params = [];
+            $tables = $this->_get_table_names( $mode );
+            $clean = $this->_sanitize_data( $data );
             
-            if ( ! empty( $criteria ) ) {
-                $where_parts = $this->_build_where_clause_recursive( $criteria );
-                
-                if ( ! empty( $where_parts['sql'] ) ) {
-                    $sql .= " WHERE " . $where_parts['sql'];
-                    $params = $where_parts['params'];
-                }
-            }
-
- 			// check orderby 
-			if ($orderby != '') {
-				$orderby = filter_var($orderby,FILTER_UNSAFE_RAW);
-				$orderbyArray = explode(",",$orderby);
-				$myFirst = true;
-				$newOrderBy = '';
-				foreach($orderbyArray as $columnName) {
-					if ( $this->_is_valid_column($columnName)) {
-						if ($myFirst) {
-							$myFirst = false;
-							$newOrderBy = $columnName;
-						} else {
-							$newOrderBy .= ",$columnName";
-						}
-					}
-				}
-				if ($newOrderBy != '') {
-					$sql .= " ORDER BY $newOrderBy ";
-					
-					$regex = '/^(ASC|DESC)(?:\s+(?:LIMIT|Limit|limit)\s+([1-9]\d{0,3}))?$/i';
-                    if (preg_match($regex, trim($order))) {
-                        $sql .= $order;
-                    } else {
-                        $sql .= 'ASC';
-                    }
-				}
-			}
-			
-           if ( ! empty( $params ) ) {
-                $prepared_sql = $this->wpdb->prepare( $sql, $params );
-                $results = $this->wpdb->get_results( $prepared_sql, ARRAY_A );
-            } else {
-                $results = $this->wpdb->get_results( $sql, ARRAY_A );
+            if ( empty( $clean ) ) {
+                return false;
             }
             
-             if ($results === FALSE || $results === NULL) {
-            	$myStr = $this->wpdb->last_query;
-            	error_log("CWA_Advisor_DAL ERROR get_advisor_by_order returned FALSE/NULL\nSQL: $myStr");
-            } else {
-            	if (empty($results)) {
-					$myQuery = $this->wpdb->last_query;
-					error_log("CWA_Advisor_DAL INFORMATION No data retrieved with $myQuery");
-            	}
-            }
-           return $results;
-        }
-
-
-        /**
-         * 4. Gets a single advisor record by its ID.
-         *
-         * @param int    $advisor_id    The ID of the advisor to retrieve.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return object|null A single row object, or null if not found.
-         */
-        public function get_advisor_by_id( $advisor_id, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            
-            if ( ! is_numeric( $advisor_id ) ) {
-              	error_log("CWA_Advisor_DAL ERROR Advisor_id of $advisor_id supplied for get_advisor_by_id is not numeric");
-               return null;
-            }
-
-            $sql = $this->wpdb->prepare(
-                "SELECT * FROM {$tables['primary']} WHERE advisor_id = %d",
-                $advisor_id
-            );
-            
-            return $this->wpdb->get_row( $sql, ARRAY_A );
-        }
-
-        /**
-         * 5. Updates an advisor record by its ID and logs the action.
-         *
-         * @param int    $advisor_id    The ID of the record to update.
-         * @param array  $data          Associative array of [field_name => value] to update.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false Number of rows updated, or false on error.
-         */
-        public function update( $advisor_id, $data, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-            $clean_data = $this->_filter_data( $data );
-            
-            if ( empty( $clean_data ) || ! is_numeric( $advisor_id ) ) {
-            	error_log("CWA_Advisor_DAL update FATAL ERROR either clean data is empty or the advisor_id ($advisor_id) is not numeric");
-                return false; // No valid data or ID
-            }
-
-            // --- Step 1: Get the call sign for logging ---
-            $call_sign_for_log = $this->wpdb->get_var(
-                $this->wpdb->prepare(
-                    "SELECT advisor_call_sign FROM {$tables['primary']} WHERE advisor_id = %d",
-                    $advisor_id
-                )
-            );
-
-            if ( is_null( $call_sign_for_log ) ) {
-            	error_log("CWA_Advisor_DAL update ERROR unable to get call sign from advisor_id of $advisor_id");
-                $call_sign_for_log = 'UNKNOWN'; // Record not found, but we still log the attempt
-            }
-
-             if ( is_null( $call_sign_for_log ) ) {
-             	error_log("CWA_Advisor_DAL ERROR getting callsign from advisor_id ($advisor_id) returned NULL");
-               $call_sign_for_log = 'UNKNOWN'; // Record not found, but we still log the attempt
-            }
-
-           // --- Step 2: Log the change ---
-            $this->_log_change(
-                $call_sign_for_log,
-                'update',
-                $clean_data,
-                $tables['primary'],
-                $tables['log']
-            );
-            
-            // --- Step 3: Perform the update ---
             $result = $this->wpdb->update(
                 $tables['primary'],
-                $clean_data,
-                [ 'advisor_id' => $advisor_id ], // WHERE
-                null,    // format for $data (auto-detected)
-                [ '%d' ] // format for $where
+                $clean,
+                ['advisor_id' => $id],
+                null,
+                ['%d']
             );
- 			if ($result === FALSE || $result === NULL) {
- 				$myStr = $this->wpdb->last_query;
-            	error_log("CWA_Advisor_DAL update FATAL ERROR updating advisor_id of $advisor_id ($advisor_id) failed\nSQL: $mySQL");
+            
+            if ( $result !== false ) {
+                $call_sign = $this->wpdb->get_var(
+                    $this->wpdb->prepare(
+                        "SELECT advisor_call_sign FROM {$tables['primary']} WHERE advisor_id = %d",
+                        $id
+                    )
+                );
+                
+                $this->_log(
+                    $call_sign ?? 'UNKNOWN',
+                    'update',
+                    $clean,
+                    $tables
+                );
             }
+            
             return $result;
         }
 
         /**
-         * 6. Deletes an advisor record by its ID.
-         * The record is copied to the deleted log table before being removed.
-         *
-         * @param int    $advisor_id    The ID of the record to delete.
-         * @param string $operatingMode 'Production' or 'Testmode'.
-         * @return int|false Number of rows deleted, or false on error.
+         * Delete an advisor record (moves to deleted table)
+         * 
+         * @param int $id Advisor ID
+         * @param string $mode Database mode
+         * @return int|false Number of rows deleted, or false on failure
          */
-        public function delete( $advisor_id, $operatingMode ) {
-            $tables = $this->_get_table_names( $operatingMode );
-
-            if ( ! is_numeric( $advisor_id ) ) {
-            	error_log("CWA_Advisor_DAL ERROR delete $advisor_id has non-numeric id");
+        public function delete( $id, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) || ! $this->_validate_id( $id ) ) {
                 return false;
             }
-
-            // --- Step 1: Get the full record to be deleted ---
-            $record_to_delete = $this->wpdb->get_row(
+            
+            $tables = $this->_get_table_names( $mode );
+            
+            $record = $this->wpdb->get_row(
                 $this->wpdb->prepare(
                     "SELECT * FROM {$tables['primary']} WHERE advisor_id = %d",
-                    $advisor_id
+                    $id
                 ),
-                ARRAY_A // Get as associative array
+                ARRAY_A
             );
-
-            if ( ! $record_to_delete ) {
-            	error_log("CWA_Advisor_DAL INFORMATION deleting $advisor_id no record found to delete");
-                return false; // Record not found, nothing to delete
-            }
-
-            // --- Step 2: Copy the record to the deleted table ---
-            $copied = $this->wpdb->insert( $tables['deleted'], $record_to_delete );
-
-            if ( ! $copied ) {
-                // Failed to copy (e.g., table doesn't exist). Abort delete.
-                error_log("CWA_Advisor_DAL ERROR copying $advisor_id to deleted table failed");
+            
+            if ( ! $record ) {
                 return false;
             }
-
-            // --- Step 3: Delete the original record ---
-            $result = $this->wpdb->delete(
-                $tables['primary'],
-                [ 'advisor_id' => $advisor_id ], // WHERE
-                [ '%d' ] // Format for WHERE
+            
+            // Archive to deleted table
+            $this->wpdb->insert( $tables['deleted'], $record );
+            
+            // Log the deletion
+            $this->_log(
+                $record['advisor_call_sign'] ?? 'UNKNOWN',
+                'delete',
+                ['id' => $id],
+                $tables
             );
-
- 			if ($result === FALSE) {
-				$myStr = $this->wpdb->last_query;
-				error_log("CWA_Advisor_DAL ERROR deleting $advisor_id returned FALSE\nSQL: $myStr");
-			}
-           return $result;
+            
+            // Delete from primary table
+            return $this->wpdb->delete(
+                $tables['primary'],
+                ['advisor_id' => $id],
+                ['%d']
+            );
         }
 
         /**
-        * 7. Execute supplied SQL
-        *
-        * NOTE: This function will fill in the correct table name replacing TABLENAME 
-        *	for example: select distinct(user_name) from TABLENAME where....
-        *
-        * @param string $SQL 	the sql to be run
-        * @param string $operatingMode Production|Testmode
-        * @return array|false results of get_results
-        */
-        
-        public function run_sql($SQL, $operatingMode) {
-            $tables = $this->_get_table_names( $operatingMode );
-			$SQL = str_replace('TABLENAME',$tables['primary'],$SQL);
-			
-			$result = $this->wpdb->get_results($SQL, ARRAY_A); 
-			
-			if($result === FALSE) {
-				$myStr = $this->wpdb->last_query;
-				error_log("CWA_User_Master_DAL ERROR run_sql returned FALSE\nSQL: $myStr");
-			}       
-        
-        	return $result;
+         * Get advisors with optional filtering and ordering
+         * 
+         * @param array $criteria Search criteria
+         * @param string $orderby Column to order by
+         * @param string $order ASC or DESC
+         * @param string $mode Database mode
+         * @return array|null Results array or null on error
+         */
+        public function get_advisor_by_order( $criteria, $orderby, $order, $mode ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $mode );
+            $sql = "SELECT * FROM {$tables['primary']}";
+            $params = [];
+            
+            // Build WHERE clause
+            if ( ! empty( $criteria ) ) {
+                $where = $this->_build_where( $criteria );
+                if ( ! empty( $where['sql'] ) && $where['sql'] !== '1=1' ) {
+                    $sql .= " WHERE " . $where['sql'];
+                    $params = $where['params'];
+                }
+            }
+            
+            // Add ORDER BY if valid
+            if ( ! empty( $orderby ) && in_array( $orderby, $this->valid_columns ) ) {
+                $order = strtoupper( $order ) === 'DESC' ? 'DESC' : 'ASC';
+                $sql .= " ORDER BY {$orderby} {$order}";
+            }
+            
+            // Execute query
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
+            }
+            return $this->wpdb->get_results( $sql, ARRAY_A );
         }
 
-        // ---------------------------------------------------------------------
-        // Private Helper Functions
-        // ---------------------------------------------------------------------
+        /**
+         * Run a custom SQL query
+         * 
+         * @param string $sql SQL query with TABLENAME placeholder
+         * @param string $mode Database mode
+         * @param array $params Parameters for prepared statement
+         * @return array|null Query results or null on error
+         */
+        public function run_sql( $sql, $mode, $params = [] ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $mode );
+            $sql = str_replace( 'TABLENAME', $tables['primary'], $sql );
+            
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
+            }
+            
+            return $this->wpdb->get_results( $sql, ARRAY_A );
+        }
 
         /**
-         * Gets the correct set of table names based on the operating mode.
-         *
-         * @param string $mode 'Production' or 'Testmode'.
-         * @return array Associative array of table names.
+         * Get a single value from a custom SQL query
+         * 
+         * @param string $sql SQL query with TABLENAME placeholder
+         * @param string $mode Database mode
+         * @param array $params Parameters for prepared statement
+         * @return string|null Single value or null
+         */
+        public function get_single_value( $sql, $mode, $params = [] ) {
+            if ( ! $this->_validate_mode( $mode ) ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $mode );
+            $sql = str_replace( 'TABLENAME', $tables['primary'], $sql );
+            
+            if ( ! empty( $params ) ) {
+                $sql = $this->wpdb->prepare( $sql, $params );
+            }
+            
+            return $this->wpdb->get_var( $sql );
+        }
+
+        /**
+         * Validate database mode
+         * 
+         * @param string $mode Mode to validate
+         * @return bool True if valid
+         */
+        private function _validate_mode( $mode ) {
+            return in_array( $mode, $this->valid_modes, true );
+        }
+
+        /**
+         * Checks if a given string is a valid, known column name.
+         */
+        private function _is_valid_column( $column_name ) {
+            return in_array( $column_name, $this->valid_columns, true );
+        }
+        /**
+         * Validate advisor ID
+         * 
+         * @param mixed $id ID to validate
+         * @return bool True if valid
+         */
+        private function _validate_id( $id ) {
+            return is_numeric( $id ) && $id > 0;
+        }
+
+        /**
+         * Sanitize input data against valid columns
+         * 
+         * @param array $data Data to sanitize
+         * @return array Sanitized data
+         */
+        private function _sanitize_data( $data ) {
+            if ( ! is_array( $data ) ) {
+                return [];
+            }
+            
+            return array_intersect_key(
+                $data,
+                array_flip( $this->valid_columns )
+            );
+        }
+
+         /**
+         * Gets the correct $wpdb->prepare placeholder for a value.
+         */
+        private function _get_placeholder_for_value( $value ) {
+            if ( is_int( $value ) ) {
+                return '%d';
+            }
+            if ( is_float( $value ) ) {
+                return '%f';
+            }
+            return '%s';
+        }
+
+
+       /**
+         * Get table names based on mode
+         * 
+         * @param string $mode Database mode
+         * @return array Table names
          */
         private function _get_table_names( $mode ) {
-            if ( 'Production' === $mode ) {
-                return [
-                    'primary' => $this->wpdb->prefix . 'cwa_advisor',
-                    'log'     => $this->wpdb->prefix . 'cwa_data_log',
-                    'deleted' => $this->wpdb->prefix . 'cwa_deleted_advisor',
-                ];
-            } else {
-                return [
-                    'primary' => $this->wpdb->prefix . 'cwa_advisor2',
-                    'log'     => $this->wpdb->prefix . 'cwa_data_log2',
-                    'deleted' => $this->wpdb->prefix . 'cwa_deleted_advisor2',
-                ];
-            }
+            $suffix = ( $mode === 'Production' ) ? '' : '2';
+            
+            return [
+                'primary' => $this->wpdb->prefix . 'cwa_advisor' . $suffix,
+                'log'     => $this->wpdb->prefix . 'cwa_data_log' . $suffix,
+                'deleted' => $this->wpdb->prefix . 'cwa_deleted_advisor' . $suffix
+            ];
         }
 
         /**
-         * Logs an action to the appropriate data log table.
-         *
-         * @param string $call_sign          The advisor's call sign.
-         * @param string $action             The action (e.g., 'create', 'update').
-         * @param array  $data               The data array to be logged as JSON.
-         * @param string $primary_table_name The name of the table action was on.
-         * @param string $log_table_name     The name of the log table to use.
+         * Log database action
+         * 
+         * @param string $call_sign Advisor call sign
+         * @param string $action Action performed
+         * @param array $data Data involved in action
+         * @param array $tables Table names
          */
-        private function _log_change( $call_sign, $action, $data, $primary_table_name, $log_table_name ) {
-            
-			$currentUser = $this->get_current_user_login();
+        private function _log( $call_sign, $action, $data, $tables ) {
+            $user = wp_get_current_user();
             
             $log_data = [
-                'data_date_written' => current_time( 'mysql' ),
-                'data_user'			=> $currentUser,
-                'data_call_sign'    => $call_sign,
-                'data_table_name'   => $primary_table_name,
-                'data_action'       => $action,
-                'data_field_values' => wp_json_encode( $data )
+                'data_date_written'  => current_time( 'mysql' ),
+                'data_user'          => ( $user->ID > 0 ) ? $user->user_login : 'Guest',
+                'data_call_sign'     => $call_sign,
+                'data_table_name'    => $tables['primary'],
+                'data_action'        => $action,
+                'data_field_values'  => wp_json_encode( $data )
             ];
             
-            $this->wpdb->insert( $log_table_name, $log_data );
+            $this->wpdb->insert( $tables['log'], $log_data );
         }
-        
+
         /**
-         * Recursively builds a WHERE clause from a criteria array.
+         * Build WHERE clause from criteria
+         * 
+         * @param array $criteria Criteria array
+         * @return array SQL string and parameters
          */
-        private function _build_where_clause_recursive( $criteria ) {
+        private function _build_where( $criteria ) {
             $sql_chunks = [];
             $params = [];
             
@@ -447,7 +402,7 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
                 
                 } 
                 else if ( ! empty( $clause['relation'] ) ) {
-                    $nested_parts = $this->_build_where_clause_recursive( $clause );
+                    $nested_parts = $this->_build_where( $clause );
                     
                     if ( ! empty( $nested_parts['sql'] ) ) {
                         $sql_chunks[] = "( " . $nested_parts['sql'] . " )";
@@ -461,55 +416,5 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
                 'params' => $params
             ];
         }
-
-        /**
-         * Gets the correct $wpdb->prepare placeholder for a value.
-         */
-        private function _get_placeholder_for_value( $value ) {
-            if ( is_int( $value ) ) {
-                return '%d';
-            }
-            if ( is_float( $value ) ) {
-                return '%f';
-            }
-            return '%s';
-        }
-
-        /**
-         * Filters an associative array to only include valid, known columns.
-         */
-        private function _filter_data( $data ) {
-            return array_intersect_key( $data, array_flip( $this->valid_columns ) );
-        }
-
-        /**
-         * Checks if a given string is a valid, known column name.
-         */
-        private function _is_valid_column( $column_name ) {
-            return in_array( $column_name, $this->valid_columns, true );
-        }
-        
-		/**
-		 * Retrieves the username of the currently logged-in WordPress user.
-		 * @return string The user_login string or 'Guest'.
-		 */
-		private function get_current_user_login(): string {
-			// Ensure this runs after WordPress has loaded user data
-			if ( ! function_exists( 'wp_get_current_user' ) ) {
-				return 'System_Check_Error';
-			}
-			
-			$current_user = wp_get_current_user();
-	
-			// Check if a user is logged in (ID > 0)
-			if ( $current_user->ID > 0 ) {
-				return $current_user->user_login;
-			}
-	
-			// Return a default value if the user is not logged in
-			return 'Guest'; 
-		}
-
-    } // end class CWA_Advisor_DAL
-
-} // end if ! class_exists
+    }
+}
