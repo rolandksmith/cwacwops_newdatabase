@@ -857,3 +857,6 @@ $criteria = [
         ['field' => 'advisor_call_sign', 'value' => 'K7OJL', 'compare' => '=' ]
     ]
 ];
+
+/// tool tip
+	<span class="info-asterisk" data-title=''>*</span>
