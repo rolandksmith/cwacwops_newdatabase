@@ -163,7 +163,7 @@ function check_student_status_func() {
 				['field' => 'advisorclass_semester', 'value' => $thesemester, 'compare' => '=' ]
 			]
 		];
-		$advisorclass_data = $advisorclass_dal->get_advisorclasses($criteria,$operatingMode);
+		$advisorclass_data = $advisorclass_dal->get_advisorclasses_by_order($criteria, 'advisorclass_sequence', 'ASC', $operatingMode);
 		if ($advisorclass_data === FALSE) {
 			if ($doDebug) {
 				echo "attempting to get advisorclass for $theCallsign class $theClass returned FALSE<br />";
@@ -373,7 +373,7 @@ function check_student_status_func() {
 			];
 			$orderby = 'student_date_created';
 			$order = 'DESC';
-			$student_data = $student_dal->get_student($criteria,$orderby,$order,$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,$orderby,$order,$operatingMode);
 			if ($student_data === FALSE) {
 				if ($doDebug) {
 					echo "attempting to get student for $inp_callsign returned FALSE<br />";
