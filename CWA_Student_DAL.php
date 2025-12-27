@@ -137,7 +137,7 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
          * @param string $operatingMode 'Production' or 'Testmode'.
          * @return array|NULL Array of objects on success, NULL on error.
          */
-        public function get_student( $criteria, $orderby, $order, $operatingMode ) {
+        public function get_student_by_order( $criteria, $orderby, $order, $operatingMode ) {
             $tables = $this->_get_table_names( $operatingMode );
             $sql = "SELECT * FROM {$tables['primary']}";
             $params = [];
@@ -329,7 +329,8 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
 			}
             return $result;
         }
-
+        
+        
         /**
         * 6. Execute supplied SQL
         *
@@ -338,22 +339,48 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
         *
         * @param string $SQL 	the sql to be run
         * @param string $operatingMode Production|Testmode
+        * @param array $params 	the parameters for the placeholders in the SQL
         * @return array|false results of get_results
         */
-        
-        public function run_sql($SQL, $operatingMode) {
-            $tables = $this->_get_table_names( $operatingMode );
-			$SQL = str_replace('TABLENAME',$tables['primary'],$SQL);
+		public function run_sql($SQL, $operatingMode, $params = []) {
+			$tables = $this->_get_table_names($operatingMode);
+			$SQL = str_replace('TABLENAME', $tables['primary'], $SQL);
+			if(!empty($params)) $SQL = $this->wpdb->prepare($SQL, $params);
 			
-			$result = $this->wpdb->get_results($SQL, ARRAY_A); 
+			$result = $this->wpdb->get_results($SQL, ARRAY_A);
 			
 			if($result === FALSE) {
 				$myStr = $this->wpdb->last_query;
-				error_log("CWA_User_Master_DAL ERROR run_sql returned FALSE\nSQL: $myStr");
-			}       
-        
-        	return $result;
+				error_log("CWA_Student_DAL ERROR run_sql returned FALSE\nSQL: $myStr");
+			}
+			
+			return $result;
+		}
+
+        /**
+        * 7. Get a single value
+        *
+        * NOTE: This function will fill in the correct table name replacing TABLENAME 
+        *	for example: select distinct(user_name) from TABLENAME where....
+        *
+        * @param string $SQL 	the sql to be run
+        * @param string $operatingMode Production|Testmode
+        * @param array $params 	the parameters for the placeholders in the SQL
+        * @return string|int|null	a single value
+        */
+        public function get_single_value($SQL, $operatingMode, $params = []) {
+            $tables = $this->_get_table_names($operatingMode);
+            $SQL = str_replace('TABLENAME', $tables['primary'], $SQL);
+            if(!empty($params)) $SQL = $this->wpdb->prepare($SQL, $params);
+			 $result = $this->wpdb->get_var($SQL);
+		   if($result === FALSE || $result === NULL) {
+				$myStr = $this->wpdb->last_query;
+			   error_log("CWA_Student_DAL ERROR get_single_value returned FALSE|NULL\nSQL: $myStr");
+		   }
+		   return $result;
         }
+
+
 
         // ---------------------------------------------------------------------
         // Private Helper Functions
@@ -406,7 +433,7 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
             $myInsertResult = $this->wpdb->insert( $log_table_name, $log_data );
             if ($myInsertResult === FALSE || $myInsertResult === NULL) {
             	$myStr = $this->wpdb->last_error;
-            	error_log("CWA_Student_DAL ERROR inserting into data_log returned FALSE|NULL. Error: $lastError");
+            	error_log("CWA_Student_DAL ERROR inserting into data_log returned FALSE|NULL. Error: $myStr");
             }
         }
         
@@ -511,4 +538,4 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
 
     } // end class CWA_Student_DAL
 
-} // end if ! class_exists
+} // end 
