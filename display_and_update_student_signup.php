@@ -664,7 +664,7 @@ function display_and_update_student_signup_func() {
 						]
 					]
 				];
-				$student_data = $student_dal->get_student( $criteria, 'student_date_created', 'DESC', $operatingMode );
+				$student_data = $student_dal->get_student_by_order( $criteria, 'student_date_created', 'DESC', $operatingMode );
 				if ($student_data === FALSE) {
 					$content .= "Attempting to get student $theUser_call_sign returned FALSE<br />";
 				} else {
