@@ -2,7 +2,7 @@ function calculate_marketing_statistics_func() {
 
 	global $wpdb, $doDebug, $debugLog;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -380,7 +380,7 @@ function calculate_marketing_statistics_func() {
                 ];
                 $orderby = 'student_date_created';
                 $order = 'ASC';
-                $studentData = $student_dal->get_student( $criteria, $orderby, $order, $operatingMode );
+                $studentData = $student_dal->get_student_by_order( $criteria, $orderby, $order, $operatingMode );
                 if ($studentData === FALSE || $studentData === NULL) {
                     debugReport("getting student data for $student_call_sign returned FALSE|NULL");
                 } else {
