@@ -435,7 +435,7 @@ function prepare_advisors_for_student_assignments_func() {
 									];
 									$orderby = 'student_semester,student_call_sign';
 									$order = 'ASC';
-									$studentData = $student_dal->get_student( $criteria, $orderby, $order, $operatingMode );
+									$studentData = $student_dal->get_student_by_order( $criteria, $orderby, $order, $operatingMode );
 									if ($studentData === FALSE) {
 										if ($doDebug) {
 											echo "get_student returned FALSE<br />";
@@ -476,7 +476,7 @@ function prepare_advisors_for_student_assignments_func() {
 												['field' => 'advisorclass_semester', 'value' => $nextSemester, 'compare' => '=' ]
 											]
 										];
-										$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+										$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 										if ($advisorclassData === FALSE) {
 											if ($doDebug) {
 												echo "get_advisorclasses returned FALSE<br />";
@@ -531,7 +531,7 @@ function prepare_advisors_for_student_assignments_func() {
 											];
 											$orderby = 'student_call_sign';
 											$order = 'ASC';
-											$studentData = $student_dal->get_student( $criteria, $orderby, $order, $operatingMode );
+											$studentData = $student_dal->get_student_by_order( $criteria, $orderby, $order, $operatingMode );
 											if ($studentData === FALSE) {
 												if ($doDebug) {
 													echo "get_student returned FALSE<br />";
