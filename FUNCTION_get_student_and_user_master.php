@@ -87,7 +87,7 @@ function get_student_and_user_master($studentCallSign, $requestType, $requestInf
 			];
 
 		}
-		$studentData = $student_dal->get_student($criteria,'student_call_sign','ASC',$operatingMode);
+		$studentData = $student_dal->get_student_by_order($criteria,'student_call_sign','ASC',$operatingMode);
 		if ($studentData === FALSE || $studentData === NULL) {
 			if ($doDebug) {
 				echo "get_student for $studentCallSign returned FALSE|NULL<br />";
@@ -198,7 +198,7 @@ function get_student_and_user_master($studentCallSign, $requestType, $requestInf
 		}
 
 		if (! $gotError) {
-			$studentData = $student_dal->get_student( $criteria, $orderby, $order, $operatingMode );
+			$studentData = $student_dal->get_student_by_order( $criteria, $orderby, $order, $operatingMode );
 			if ($studentData === FALSE || $studentData === NULL) {
 				if ($doDebug) {
 					echo "get_student by criteria returned FALSE|NULL<br />";
