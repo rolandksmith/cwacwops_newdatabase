@@ -854,7 +854,7 @@ function program_list_func() {
 						['field' => 'advisor_call_sign', 'value' => $userName, 'compare' => '=' ]
 					]
 				];
-				$advisor_data = $advisor_dal->get_advisor($criteria,$operatingMode);
+				$advisor_data = $advisor_dal->get_advisor_by_id($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 				if ($advisor_data === FALSE) {
 					if ($doDebug) {
 						echo "Attempting to get advisor info for $userName returned FALSE<br />";
@@ -977,7 +977,7 @@ function program_list_func() {
 						]
 					]
 				];
-				$studentData = $student_dal->get_student($criteria,'student_call_sign','ASC',$operatingMode);
+				$studentData = $student_dal->get_student_by_order($criteria,'student_call_sign','ASC',$operatingMode);
 				if ($studentData === FAlSE) {
 					if ($doDebug) {
 						echo "Attempting to retrieve student data for $userName returned FALSE<br />";
