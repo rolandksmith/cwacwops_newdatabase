@@ -190,7 +190,7 @@ function add_remove_student($inp_data = array()) {
 					['field' => 'student_semester', 'value' => $inp_semester, 'compare' => '=' ]
 				]
 			];
-			$student_data = $student_dal->get_student($criteria,'student_call_sign','DESC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,'student_call_sign','DESC',$operatingMode);
 			if ($student_data === FALSE) {
 				$errors .= "Attempting to retrieve student $inp_callsing returned FALSE";
 				$gotError = TRUE;
@@ -215,7 +215,7 @@ function add_remove_student($inp_data = array()) {
 						['field' => 'advisor_semester', 'value' => $inp_semester, 'compare' => '=' ]
 					]
 				];
-				$advisor_data = $advisor_dal->get_advisor($criteria,$operatingMode);
+				$advisor_data = $advisor_dal->get_advisor_by_order($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 				if ($advisor_data === FALSE) {
 					$errors .= "Attempting to retrieve advisor $inp_assigned_advisor class $inp_semester returned FALSE";
 					$gotError = TRUE;
