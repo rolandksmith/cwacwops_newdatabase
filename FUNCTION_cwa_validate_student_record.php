@@ -98,7 +98,7 @@ function cwa_validate_student_record( int $student_id ): array {
         'student_email_number'        => [ '0', '1', '2', '3', '4' ], // Stored as tinyint, but often compared as string/int
         'student_response'            => [ '', 'Y', 'R' ],
         'student_abandoned'           => [ '', 'Y', 'N' ],
-        'student_status'              => [ '', 'C', 'N', 'R', 'S', 'V', 'Y' ],
+        'student_status'              => [ '', 'C', 'N', 'R', 'S', 'V', 'Y', 'U'  ],
         'student_hold_reason_code'    => [ '', 'X', 'E', 'H', 'Q', 'W', 'M', 'B', 'N', 'L' ],
         'student_promotable'          => [ '', 'P', 'N', 'Q', 'W' ],
         'student_intervention_required' => [ '', 'H' ],
