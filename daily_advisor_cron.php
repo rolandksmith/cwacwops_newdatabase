@@ -3,23 +3,23 @@ function daily_advisor_cron_process_func() {
 /*		Daily Advisor Cron
   validEmailPeriod is FALSE
    This job is run via a cron curl job to run the associated webpage
-  
+
   	Check to send welcome email to advisor
   		Read the advisor pod. If the welcome_email_date is empty, see if the advisor
   		has already gotten a welcome email. If not, send a welcome email
-  
+
   	Check to send verify email to advisor
   		if within the email period,
   		Read the advisor pod and for each advisor, get all advisor records.
   		If the record has an empty verify_email_date, set that date and set verify_email_number
   			to 1 and send the verification email
-  
-  
+
+
   	Date Formats:
   		Email Sent Date: 		Y-M-D
   		Welcome Date:			Y-M-D
   		Advisor Selected Date:	Y-M-D
-  
+
 */
 
 	global $wpdb;
@@ -28,13 +28,13 @@ function daily_advisor_cron_process_func() {
 	$testMode				= FALSE;
 	$verifyMode				= FALSE;
 	$demoMode				= FALSE;
-	
+
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
-	
+
 	$versionNumber			= '3';
-	
-	
+
+
 	$testEmailTo			= "kcgator@gmail.com,rolandksmith@gmail.com";
 //	$testEmailTo			= "rolandksmith@gmail.com";
 //	$inp_mode				= '';
@@ -49,8 +49,8 @@ function daily_advisor_cron_process_func() {
 			echo "verifyMode and testMode. Have fudged the initializationArray<br />";
 		}
 	}
-	
-	
+
+
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);
@@ -58,7 +58,7 @@ function daily_advisor_cron_process_func() {
 	}
 	$userName				= $initializationArray['userName'];
 	ini_set('display_errors','1');
-	error_reporting(E_ALL);	
+	error_reporting(E_ALL);
 	ini_set('memory_limit','256M');
 
 // Needed variables initialization
@@ -131,8 +131,8 @@ function daily_advisor_cron_process_func() {
 	$log_country  							= '';    // country
 	$log_zip_code							= '';
 	$log_time_zone  						= '';    // time_zone
-	$log_timezone_id  						= '';    
-	$log_timezone_offset 					= '';    
+	$log_timezone_id  						= '';
+	$log_timezone_offset 					= '';
 	$log_whatsapp  							= '';
 	$log_signal  							= '';
 	$log_telegram  							= '';
@@ -188,62 +188,62 @@ function daily_advisor_cron_process_func() {
 	$errorArray					= array();
 	$advisorClassInc			= 0;
 	$doDaysTest					= TRUE;
-	
-	
-	
+
+
+
 	$content = "<style type='text/css'>
 				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
 				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-				
+
 				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
 				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-				
+
 				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
 				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-				
+
 				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
 				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
+
 				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
+
 				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
+
 				input.formInputText {color:#666;background:#fee;padding:2px;
 				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
+
 				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
+
 				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
+
 				input.formInputFile {color:#666;background:#fee;padding:2px;border:
 				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-				
+
 				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
+
 				select.formSelect {color:#666;background:#fee;padding:2px;
 				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-				
+
 				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-				
+
 				input.formInputButton {vertical-align:middle;font-weight:bolder;
 				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
 				cursor:pointer;position:relative;float:left;}
-				
+
 				input.formInputButton:hover {color:#f8f400;}
-				
+
 				input.formInputButton:active {color:#00ffff;}
-				
+
 				tr {color:#333;background:#eee;}
-				
+
 				table{font:'Times New Roman', sans-serif;background-image:none;}
-				
+
 				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-				
+
 				td {padding:5px;font-size:small;}
 				</style>";
 
 $runTheJob	= TRUE;
-		
+
 	if ($userName != '') {
 		$content 		.= "<h3>Daily Cron Advisor Process Executed by $userName</h3>";
 	} else {
@@ -252,7 +252,7 @@ $runTheJob	= TRUE;
 		$runTheJob		= allow_job_to_run($doDebug);
 	}
 	if ($runTheJob) {
-	
+
 		if ($testMode) {
 			$advisorTableName		= 'wpw1_cwa_advisor2';
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
@@ -282,10 +282,10 @@ $runTheJob	= TRUE;
 		$advisorArray		= array();
 		$advisorRecords		= 0;
 		$addlAdvisorRecords	= 0;
-	
+
 		$doAdvisorWelcome	= FALSE;
 		$doAdvisorVerify	= FALSE;
-	
+
 		if ($validEmailPeriod == 'N' || $daysToSemester > 45) {
 			if ($doDebug) {
 				echo "Send Welcome message<br >";
@@ -304,7 +304,7 @@ $runTheJob	= TRUE;
 			'clauses' => [
 				// field1 = $value1
 				['field' => 'advisor_call_sign', 'value' => '', 'compare' => '!='],
-				
+
 				// (field2 = $value2 OR field2 = $value3)
 				[
 					'relation' => 'OR',
@@ -319,8 +319,8 @@ $runTheJob	= TRUE;
 			]
 		];
 		$advisorResult = $advisor_dal->get_advisor_by_order($criteria,'advisor_call_sign','ASC',$operatingMode);
-		if ($advisorResult === FALSE) {
-			$content .= "Attempting to retrieve all advisors for current or future semesters returned FALSE<br />";
+		if ($advisorResult === FALSE || $advisorResult === NULL) {
+			$content .= "Attempting to retrieve all advisors for current or future semesters returned FALSE|NULL<br />";
 		} else {
 			$numARows = count($advisorResult);
 			foreach($advisorResult as $key => $value) {
@@ -347,7 +347,7 @@ $runTheJob	= TRUE;
 					}
 					if ($doProceed) {
 						$user_last_name 	= no_magic_quotes($user_last_name);
-	
+
 						$sendEmail			= FALSE;
 						$doUpdate			= FALSE;
 						$myWelcomeDate		= FALSE;
@@ -376,8 +376,8 @@ $runTheJob	= TRUE;
 						if ($user_messenger == '') {
 							$user_messenger = '--';
 						}
-	
-	
+
+
 						if ($doDebug) {
 							echo "<br />Processing $advisor_call_sign<br />
 								  &nbsp;&nbsp;&nbsp;advisor_welcome_email_date: $advisor_welcome_email_date<br />
@@ -388,7 +388,7 @@ $runTheJob	= TRUE;
 								  &nbsp;&nbsp;&nbsp;advisor_semester:$advisor_semester<br />
 								  &nbsp;&nbsp;&nbsp;user_survey_score:$user_survey_score<br />";
 						}
-	
+
 						// if the advisor has a survey score of 6, bypass the advisor
 						if ($user_survey_score == '6') {
 							if ($doDebug) {
@@ -405,7 +405,7 @@ $runTheJob	= TRUE;
 								$futureSemesterAdvisors++;
 							}
 							// if a welcome email has been sent and the advisor has verified, no action needed
-							if ($advisor_welcome_email_date != '' and $advisor_verify_response !='') {	
+							if ($advisor_welcome_email_date != '' and $advisor_verify_response !='') {
 								if ($doDebug) {
 									echo "Advisor has been welcomed and has verified. Bypassing<br />";
 								}
@@ -420,7 +420,7 @@ $runTheJob	= TRUE;
 								}
 								if ($advisor_verify_response == '') {
 									$unconfirmedClasses++;
-								}					
+								}
 								if ($advisor_welcome_email_date != '') {
 									$myWelcomeDate	= TRUE;
 									$advisorWelcomed++;
@@ -478,7 +478,7 @@ $runTheJob	= TRUE;
 								}
 /*
 * 	Build the output record
-* 	if welcome date is empty 
+* 	if welcome date is empty
 *		set up the welcome email
 *		if advisor semester is next semester
 *			if within verify period set verify_response=Y, verify_date to today, verify_email_number to 0
@@ -507,7 +507,7 @@ $runTheJob	= TRUE;
 															<td style='width:30%;'><b>Telegram</b><br />$user_telegram</td>
 															<td><b>Messenger</b><br />$user_messenger</td></tr></table></tr>
 													</table>";
-	
+
 								// Obtain the class record information
 								$classRecord		= "";
 								$updateClassParams = array();
@@ -519,7 +519,7 @@ $runTheJob	= TRUE;
 									]
 								];
 								$orderby = 'advisorclass_sequence';
-								$order = 'ASC';								
+								$order = 'ASC';
 								$wpw1_cwa_advisorclass = $advisorclass_dal->get_advisorclasses_by_order($criteria,$orderby,$order,$operatingMode);
 								if ($wpw1_cwa_advisorclass === FALSE) {
 									$content .= "Attempting to retrieve advisorclass record for $advisor_call_sign $advisor_semester returned FALSE<br />";
@@ -532,27 +532,27 @@ $runTheJob	= TRUE;
 											if ($doDebug) {
 												echo "have $advisorclass_call_sign class $advisorclass_sequence<br />";
 											}
-										
+
 											/// get the UTC times if these fields are empty for some reason
-											if ($advisorclass_class_schedule_days_utc == '' || $advisorclass_class_schedule_times_utc == '') {									
-												if ($advisorclass_class_incomplete != 'Y') {	
-													$thisResult						= utcConvert('toutc',$advisorclass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days);
+											if ($advisorclass_class_schedule_days_utc == '' || $advisorclass_class_schedule_times_utc == '') {
+												if ($advisorclass_class_incomplete != 'Y') {
+													$thisResult						= utcConvert('toutc',$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days);
 													if ($thisResult[0] == 'FAIL') {
 														if ($doDebug) {
-															echo "utcConvert failed toutc,$advisorclass_timezone,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days<br />Error: $result[3]<br />";
+															echo "utcConvert failed toutc,$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days<br />Error: $thisResult[3]<br />";
 														}
 														$advisorclass_class_schedule_days_utc	= "ERROR";
 														$advisorclass_class_schedule_times_utc	= '';
 														$advisorclass_class_incomplete	= 'Y';
-														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorClass_class_schedule_days_utc;
-														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorClass_class_schedule_times_utc;
+														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorclass_class_schedule_days_utc;
+														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorclass_class_schedule_times_utc;
 														$updateParams['advisorclass_incomplete'] = 'Y';
 														$advisorclass_action_log .= "updated UTC times ";
 													} else {
 														$advisorclass_class_schedule_times_utc	= $thisResult[1];
 														$advisorclass_class_schedule_days_utc	= $thisResult[2];
-														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorClass_class_schedule_days_utc;
-														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorClass_class_schedule_times_utc;
+														$updateClassParams['advisorclass_schedule_days_utc'] = $advisorclass_class_schedule_days_utc;
+														$updateClassParams['advisorclass_schedule_times_utc'] = $advisorclass_class_schedule_times_utc;
 														$advisorclass_action_log .= "updated UTC times ";
 													}
 												} else {
@@ -561,7 +561,7 @@ $runTheJob	= TRUE;
 											}
 											$classScheduleProblem	= "";
 											if ($advisorclass_class_schedule_days_utc == "ERROR" || $advisorclass_class_incomplete == 'Y') {
-												$classScheduleProblem	= "<b>There is an issue with your teaching schedule. Please go to 
+												$classScheduleProblem	= "<b>There is an issue with your teaching schedule. Please go to
 																		   <a href='$advisorRegistrationURL?$enstr'>CWA Advisor Sign-up</a> and correct the problem.";
 											}
 											if ($advisorclass_sequence == 1) {
@@ -595,7 +595,7 @@ $runTheJob	= TRUE;
 										if ($doDebug) {
 											echo "got the advisor and class records and ready to proceed<br />";
 										}
-										if (!$myWelcomeDate) {			/// welcome email needed						
+										if (!$myWelcomeDate) {			/// welcome email needed
 											$updateParams['advisor_welcome_email_date'] = $actionDate;
 											$doUpdate				= TRUE;
 											$sendEmail				= TRUE;
@@ -614,37 +614,37 @@ $runTheJob	= TRUE;
 												$updateParams['advisor_verify_email_number'] = 0;
 												$doUpdate				= TRUE;
 											}
-							
-											// welcome email 
+
+											// welcome email
 											$mySubject					= "CW Academy - Thank You for Registering as an Advisor";
 											$myContent					= "To: $user_last_name, $user_first_name ($advisor_call_sign):<br />
 																			<p>Thank you for registering as a CW Academy advisor! Your registration information:</p>
 																			$advisorInfo
 																			<p>You have registered to be an advisor for the following class(es):</p>
 																			$classRecord
-																			<p>About 20 days before the semester starts, CW Academy will begin the process of 
-																			matching students to advisors. To avoid potential issues, please review your class 
+																			<p>About 20 days before the semester starts, CW Academy will begin the process of
+																			matching students to advisors. To avoid potential issues, please review your class
 																			registration information above.</p>
-																			<p>Your timezone information should be set to the timezone where you live. 
-																			Further, your class start time should be in local time as well. Students 
-																			are given a choice of classes which have been converted from the advisor's timezone to  the 
+																			<p>Your timezone information should be set to the timezone where you live.
+																			Further, your class start time should be in local time as well. Students
+																			are given a choice of classes which have been converted from the advisor's timezone to  the
 																			student's timezone, taking Daylight Savings Time (aka Summer Time) into account.</p>
-																			<p>If for some reason your situation has changed (or changes before the semester starts) or 
-																			you are not able to be an advisor in $nextSemester semester, 
+																			<p>If for some reason your situation has changed (or changes before the semester starts) or
+																			you are not able to be an advisor in $nextSemester semester,
 																			please click <a href='$siteURL/login'>CW Academy</a> to either update or delete your registration.</p>
-																			<p>About 45 days before the semester 
-																			starts, CW Academy will send you another email reviewing your registration information should any 
+																			<p>About 45 days before the semester
+																			starts, CW Academy will send you another email reviewing your registration information should any
 																			changes be necessary.</p>
-																			<p><span style='color:red;font-size:14pt;'><b>Do not reply to this email as the address is not monitored.</b> 
-																			<br />Please refer to the appropriate person at <a href='$classResolutionURL'>CWA Class 
-																			Resolution</a> for assistance.</span></p></td></tr></table></p> 
+																			<p><span style='color:red;font-size:14pt;'><b>Do not reply to this email as the address is not monitored.</b>
+																			<br />Please refer to the appropriate person at <a href='$classResolutionURL'>CWA Class
+																			Resolution</a> for assistance.</span></p></td></tr></table></p>
 																			<p>Thank you for your willingness to be an advisor!<br />
 																			CW Academy</p>
-																			<br /><p>CW Academy has implemented usernames and passwords in order to better protect your personal 
-																			information. All requests for advisor actions will ask you to login to CW Academy where the instructions 
-																			for the specific action will be displayed. Please make sure that CW Academy is 'whitelisted' in 
+																			<br /><p>CW Academy has implemented usernames and passwords in order to better protect your personal
+																			information. All requests for advisor actions will ask you to login to CW Academy where the instructions
+																			for the specific action will be displayed. Please make sure that CW Academy is 'whitelisted' in
 																			your email program.</p>
-																			<p>You can, at any time, log into <a href='$siteURL/login'>CW Academy</a> and see if any actious 
+																			<p>You can, at any time, log into <a href='$siteURL/login'>CW Academy</a> and see if any actious
 																			are outstanding, modify or delete your registration, and check the status of your registration.</p>";
 										} else {
 											if ($doDebug) {
@@ -652,10 +652,10 @@ $runTheJob	= TRUE;
 											}
 										}
 									} else {
-										$classRecord		= "<p>No class information is available. Please update your 
-																sign-up information to include at least one class or delete your registration information. To do so, 
-																go to <a href='$siteURL/logim'>CW Academy</a> and select the program to update your registration. If you have questions 
-																or concerns, please refer to the appropriate person at <a href='$classResolutionURL'>CWA Class 
+										$classRecord		= "<p>No class information is available. Please update your
+																sign-up information to include at least one class or delete your registration information. To do so,
+																go to <a href='$siteURL/logim'>CW Academy</a> and select the program to update your registration. If you have questions
+																or concerns, please refer to the appropriate person at <a href='$classResolutionURL'>CWA Class
 																Resolution</a> for assistance.</p>";
 									}
 									$verifyOption					= FALSE;
@@ -686,7 +686,7 @@ $runTheJob	= TRUE;
 											echo "Setting verifyOption to TRUE<br />";
 										}
 										$verifyOption				= TRUE;
-										if ($doDebug) { 
+										if ($doDebug) {
 											$myStr					 	= "";
 											if ($isNextSemester) {
 												$myStr					.= "isNextSemester is TRUE; ";
@@ -698,17 +698,17 @@ $runTheJob	= TRUE;
 												$updateParams['advisor_welcome_email_date'] = $actionDate;
 												$doUpdate				= TRUE;
 											} else {
-												$myStr					.= "advisor welcome email date is $advisor_welcome_email_date; ";							
+												$myStr					.= "advisor welcome email date is $advisor_welcome_email_date; ";
 											}
 											if ($advisor_verify_response == '') {
 												$myStr					.= "advisor verify response is empty; ";
 											} else {
-												$myStr					.= "advisor verify response is $advisor_verify_response; ";							
+												$myStr					.= "advisor verify response is $advisor_verify_response; ";
 											}
 											echo "$myStr<br />";
 										}
-	
-	
+
+
 										if ($isNextSemester && $verifyOption && $advisor_welcome_email_date != '' && $advisor_verify_response == '') {
 											if ($doDebug) {
 												echo "isNextSemester and verifyOption are true, welcome email date is set and verify response is empty. Doing verify process<br />";
@@ -716,35 +716,35 @@ $runTheJob	= TRUE;
 											$verifyEmailCount++;
 											$mySubject					= "CW Academy Advisor Verification";
 											$myContent					= "To: $user_last_name, $user_first_name ($advisor_call_sign):<br />
-																			<p>This is a confirmation email being sent about 45 days before the start 
-																			of the semester. <b>No action is needed on your part UNLESS your circumstances 
-																			have changed</b>. You can update your registration information by logging into  
-																			<a href='$siteURL/login'>CW Academy</a> and selected the program to update 
+																			<p>This is a confirmation email being sent about 45 days before the start
+																			of the semester. <b>No action is needed on your part UNLESS your circumstances
+																			have changed</b>. You can update your registration information by logging into
+																			<a href='$siteURL/login'>CW Academy</a> and selected the program to update
 																			your registration information.</p>
 																			<p>You have registered as follows:</p>
 																			$advisorInfo
 																			<p>You have registered to be an advisor for the following class(es):</p>
 																			$classRecord
-																			<p><em>If you need to change or update any of the above information, please go to 
-																			<a href='$siteURL/login'>CW Academy</a> and select the program to update your 
+																			<p><em>If you need to change or update any of the above information, please go to
+																			<a href='$siteURL/login'>CW Academy</a> and select the program to update your
 																			registration information.</em></p>
-																			<p>If you are not able to be an advisor in the $nextSemester semester, please log into 
-																			 <a href='$siteURL/login'>CW Academy</a> and select the program to update your 
+																			<p>If you are not able to be an advisor in the $nextSemester semester, please log into
+																			 <a href='$siteURL/login'>CW Academy</a> and select the program to update your
 																			 registration information. You can then delete your registration.</p>
-																			<p>Students will be assigned to advisor classes around the 
-																			10th of next month. At that time you will receive an email listing the students assigned to you. 
-																			You can then let your students know who you are, what your schedule is, and ask them 
-																			to confirm. CW Academy is also asking students to verify their intent to participate 
-																			in $nextSemester semester's class and those who have verified will be eligible for 
+																			<p>Students will be assigned to advisor classes around the
+																			10th of next month. At that time you will receive an email listing the students assigned to you.
+																			You can then let your students know who you are, what your schedule is, and ask them
+																			to confirm. CW Academy is also asking students to verify their intent to participate
+																			in $nextSemester semester's class and those who have verified will be eligible for
 																			assignment to a class. This should save you time in trying to get a confirmation.</p>
 																			<p><hr></p>
 																			<p><table style='border:4px solid red;'><tr><td>
-																			<p><span style='color:red;font-size:14pt;'><b>PLEASE Do not reply to this email as the address is not monitored.</b> 
-																			<br />Instead refer to the appropriate person at <a href='$classResolutionURL'>CWA Class 
+																			<p><span style='color:red;font-size:14pt;'><b>PLEASE Do not reply to this email as the address is not monitored.</b>
+																			<br />Instead refer to the appropriate person at <a href='$classResolutionURL'>CWA Class
 																			Resolution</a> for assistance.</span></p></td></tr></table></p>
 																			<p>Thank you for your willingness to be an advisor!
 																			<br />CW Academy</p>";
-	
+
 											$sendEmail				= TRUE;
 											$advisor_action_log		.= "advisor verify email sent to $advisor_email. ";
 											if ($doDebug) {
@@ -757,7 +757,7 @@ $runTheJob	= TRUE;
 											$advisorFirstCount++;
 											$content				.= "ADVISOR VERIFY $advisor_call_sign Verify Email will be sent to $advisor_email<br />";
 										}
-									}					
+									}
 									if ($doDebug) {
 										if ($sendEmail) {
 											echo "Checking to send email. sendEmail is TRUE. Should send an email<br />";
@@ -770,7 +770,7 @@ $runTheJob	= TRUE;
 											echo "doUpdate is FALSE. No update should be performed<br />";
 										}
 									}
-	
+
 									if ($sendEmail) {
 										if ($testMode) {
 											$myTo 		= $testEmailTo;
@@ -782,7 +782,7 @@ $runTheJob	= TRUE;
 													echo "email content is empty<br />";
 												}
 											}
-										} else 	{	
+										} else 	{
 											$myCode		= 12;
 											$myTo		= $user_email;
 										}
@@ -818,7 +818,7 @@ $runTheJob	= TRUE;
 											$content		.= "Unable to update advisorclass content for $advisorclass_call_sign (id: $advisorclass_id)<br />";
 										} else {
 											if ($doDebug) {
-												echo "Successfully updated $advisor_call_sign record at $advisor_ID<br />";
+												echo "Successfully updated $advisor_call_sign record at $advisor_id<br />";
 											}
 										}
 									}
@@ -830,9 +830,9 @@ $runTheJob	= TRUE;
 			}
 		}
 
-	
 
-///// all processing done. Prepare totals	
+
+///// all processing done. Prepare totals
 		if ($doDebug) {
 			echo "<br />Sending email with the totals<br />";
 		}
@@ -852,13 +852,13 @@ $runTheJob	= TRUE;
 						<tr><td style='text-align:right;'>$verifyEmailCount</td><td>Advisor verify emails to be sent</td></tr>
 						<tr><td style='text-align:right;'>$advisorEmailErrors</td><td>Advisor emails that failed to send</td></tr>
 						<tr><td style='text-align:right;'>$advisorEmails</td><td>Advisor emails actually sent</td></tr>
-						<tr><td style='text-align:right;'>$futureSemesterAdvisors</td><td>Future semester advisors</td></tr>					
+						<tr><td style='text-align:right;'>$futureSemesterAdvisors</td><td>Future semester advisors</td></tr>
 						<tr><td colspan='2'><hr></td></tr>
 						<tr><th colspan='2'>Advisor Welcome Emails</td></tr>
 						<tr><td style='text-align:right;'>$advisorWelcomeCount</td><td>Advisor Welcome emails sent</td></tr>
 						<tr><td colspan='2'><hr></td></tr>
 						</table><br />";
-	
+
 		$thisTime 			= date('Y-m-d H:i:s');
 		$content 			.= "<br /><br /><p>V$versionNumber. Prepared at $thisTime</p>";
 		$endingMicroTime 	= microtime(TRUE);
@@ -926,9 +926,9 @@ $runTheJob	= TRUE;
 		}
 
 		$theSubject	= "CWA Daily Advisor Cron Process";
-		$theContent	= "The daily advisor cron process was run at $nowDate $nowTime, Login to <a href='$siteURL/program-list'>CW Academy</a> to see the 
+		$theContent	= "The daily advisor cron process was run at $nowDate $nowTime, Login to <a href='$siteURL/program-list'>CW Academy</a> to see the
 						report.";
-		if ($testMode) {		
+		if ($testMode) {
 			$theRecipient	= '';
 			$mailCode	= 2;
 			$theSubject = "TESTMODE $theSubject";
