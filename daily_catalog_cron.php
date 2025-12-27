@@ -283,7 +283,7 @@ function daily_catalog_cron_process_func() {
 											['field' => 'advisor_semester', 'value' => $proximateSemester, 'compare' => '=' ]
 										]
 									];
-									$advisorData = $advisor_dal->get_advisor($criteria,$operatingMode);
+									$advisorData = $advisor_dal->get_advisor_by_order($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 									if ($advisorData === FALSE || $advisorData === NULL) {
 										if ($doDebug) {
 											echo "attempting to get advisor returned FALSE|NULL<br />";
