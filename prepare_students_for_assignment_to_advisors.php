@@ -414,7 +414,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 			];
 			$orderby = 'student_call_sign';
 			$order = 'ASC';
-			$studentData = $student_dal->get_student($criteria,$orderby,$order,$operatingMode);
+			$studentData = $student_dal->get_student_by_order($criteria,$orderby,$order,$operatingMode);
 			if ($studentData === FALSE || $studentData === NULL) {
 				if ($doDebug) {
 					echo "get_student returned FALSE|NULL<br />";
@@ -536,7 +536,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 												];
 												$orderby = 'student_date_created';
 												$order = 'DESC';
-												$pastStudentData = $student_dal->get_student($criteria,$orderby,$order,$operatingMode);
+												$pastStudentData = $student_dal->get_student_by_order($criteria,$orderby,$order,$operatingMode);
 												if ($pastStudentData === FALSE || $pastStudentData === NULL) {
 													if ($doDebug) {
 														echo "get_student for past students returned FALSE|NULL<br />";
@@ -886,7 +886,7 @@ function excludeAnAdvisor($nowExcluded='',$toBeExcluded='') {
 													['field' => 'advisorclass_language', 'value' => $student_class_language, 'compare' => '=' ],
 												]
 											];
-											$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+											$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 											if ($advisorclassData === FALSE || $advisorclassData === 'NULL') {
 												if ($doDebug) {
 													echo "get_advisorclass returned FALSE|NULL<br />";
