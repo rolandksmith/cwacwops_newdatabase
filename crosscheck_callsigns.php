@@ -360,7 +360,7 @@ function crosscheck_callsigns_func() {
 					['field' => 'student_call_sign', 'value' => '', 'compare' => '!=' ]
 				]
 			];
-			$student_data = $student_dal->get_student($criteria,'student_call_sign,student_date_created','ASC',$operatingMode);
+			$student_data = $student_dal->get_student_by_order($criteria,'student_call_sign,student_date_created','ASC',$operatingMode);
 			if ($student_data === FALSE) {
 				$content .= "<p>Attempting to get student data returned FALSE</p>";
 			} else {
@@ -420,7 +420,7 @@ function crosscheck_callsigns_func() {
 									['field' => 'student_call_sign', 'value' => $user_call_sign, 'compare' => '=' ]
 								]
 							];
-							$student_data = $student_dal->get_student($criteria,'student_call_sign','ASC',$operatingMode);
+							$student_data = $student_dal->get_student_by_order($criteria,'student_call_sign','ASC',$operatingMode);
 							if ($student_data === FALSE) {
 								$content .= "<p>Attempting to get student data for $user_call_sign returned FALSE</p>";
 							} else {
