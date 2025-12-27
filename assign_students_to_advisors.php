@@ -1009,7 +1009,7 @@ function assign_students_to_advisors_func() {
  									['field' => 'advisor_semester', 'value' => $nextSemester, 'compare' => '=' ]
 								]
 							];
-							$advisorData = $advisor_dal->get_advisor($criteria,$operatingMode);
+							$advisorData = $advisor_dal->get_advisor_by_order($criteria, 'advisor_call_sign', 'ASC', $operatingMode);
 							if ($advisorData === FALSE) {
 								debugReport("get_advisor for $advisorCallSign returned FALSE<br />");
 							} else {
@@ -1214,7 +1214,7 @@ function assign_students_to_advisors_func() {
 		}
 		$orderby = 'student_call_sign';
 		$order = 'ASC';
-		$studentData = $student_dal->get_student($criteria,$orderby,$order,$operatingMode);
+		$studentData = $student_dal->get_student_by_order($criteria,$orderby,$order,$operatingMode);
 		if ($studentData === FALSE) {
 			$debugReport("get_student returned FALSE<br />");
 		} else {
