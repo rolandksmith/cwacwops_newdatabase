@@ -5,7 +5,7 @@ global $wpdb, $testMode, $classesArray, $student_dal, $advisor_dal, $advisorclas
 	$replaceArrayBeginner, $replaceArrayIntermediate, $replaceArrayAdvanced, $replaceArrayFundamental, 
 	$replReqTableName, $doDebug;
 
-	$doDebug				= FALSE;
+	$doDebug				= TRUE;
 	$testMode				= FALSE;
 	$versionNumber			= '1`';
 	
@@ -206,7 +206,7 @@ global $wpdb, $testMode, $classesArray, $student_dal, $advisor_dal, $advisorclas
 				['field' => 'advisorclass_semester', 'value' => $proximateSemester, 'compare' => '=' ]
 			]
 		];
-		$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+		$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 		if ($advisorclassData === FALSE) {
 			debugLog("get_advisorclasses for $replacement_call_sign returned FALSE");
 		} else {
@@ -405,7 +405,7 @@ function doTheReplacement($studentCallSign, $studentid, $replacedStudent, $advis
 	debugLog("Doing the replacement of $replacedStudent with $studentCallSign for $advisorCallSign class $advisorClass");	
 	$studentReplaced		= FALSE;
 	///// get the replacement student record
-	$replacementStudentData = $student_dal-> get_student_by_id( $studentid, $operatingMode ); 
+	$replacementStudentData = $student_dal->get_student_by_id( $studentid, $operatingMode ); 
 	debugLog("got replacement student data for ID $studentid");
 	if ($replacementStudentData === FALSE) {
 		debugLog("get_student_by_id for ID $replacementRecordID returned FALSE");
@@ -439,7 +439,7 @@ function doTheReplacement($studentCallSign, $studentid, $replacedStudent, $advis
 							['field' => 'advisorclass_semester', 'value' => $proximateSemester, 'compare' => '=' ]
 						]
 					];
-					$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+					$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 					debugLog("returned from advisorclass data for $advisorCallSign class $advisorClass");
 					if ($advisorclassData === FALSE) {
 						debugLog("get_advisorclasses for $advisorCallSign returned FALSE");
@@ -456,8 +456,8 @@ function doTheReplacement($studentCallSign, $studentid, $replacedStudent, $advis
 									//// add student to the advisor's class
 									$inp_data			= array('inp_student'=>$student_call_sign, 
 																'inp_semester'=>$proximateSemester, 
-																'inp_assigned_advisor'=>$advisorCallSign, 
-																'inp_assigned_advisor_class'=>$advisorClass, 
+																'inp_assigned_advisor'=>$advisorclass_call_sign, 
+																'inp_assigned_advisor_class'=>$advisorclass_sequence, 
 																'inp_remove_status'=>'',
 																'inp_arbitrarily_assigned'=>'',
 																'inp_method'=>'add',
@@ -470,8 +470,8 @@ function doTheReplacement($studentCallSign, $studentid, $replacedStudent, $advis
 									if ($addResult[0] === FALSE) {
 										$thisReason		= $addResult[1];
 										debugLog("attempting to add $student_call_sign to $advisorCallSign class failed:<br />$thisReason");
-										sendErrorEmail("$jobname Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason");
-										$content		.= "Attempting to add $replace_call_sign to $replacement_call_sign class failed:<br />$thisReason<br />";
+										sendErrorEmail("$jobname Attempting to add $student_call_sign to $advisorclass_call_sign class $advisorclass_sequence failed:<br />$thisReason");
+										$content		.= "Attempting to add $student_call_sign to $$advisorclass_call_sign class $advisorclass_sequence failed:<br />$thisReason<br />";
 									} else {
 										$content	.= "<br />REPLACE Student <a href='$studentUpdateURL?request_type=callsign&request_info=$replacedStudent&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
 														target='_blank'>$replacedStudent</a> was replaced by <a href='$studentUpdateURL?request_type=callsign&request_info=$student_call_sign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
@@ -558,7 +558,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 										$orderby = 'student_call_sign';
 										$orderby = 'ASC';
 										$order = 'ASC';
-										$replacedStudentData = $student_dal-> get_student( $criteria, $orderby, $order, $operatingMode ); 
+										$replacedStudentData = $student_dal->get_student_by_order( $criteria, $orderby, $order, $operatingMode ); 
 										if ($replacedStudentData === FALSE) {
 											debugLog("get_studentfor $replacedStudent returned FALSE");
 										} else {
@@ -570,24 +570,29 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 													if (! isset($student_call_sign)) {
 														debugLog("student_call_sign not set in replaced student data for $replacedStudent");
 													}
-													// now set the replaced student's status to 'C'
-													if (isset($student_action_log)) {
-														$student_action_log .= "|$actionDate - Replaced by $student_call_sign for $advisorclass_call_sign class $advisorclass_sequence and status set to C ";
-														$updateParams['student_status']	= 'C';
-														$updateParams['student_action_log'] = $student_action_log;
-														// update the record
-														$updateResult = $student_dal->update($student_id, $updateParams, $operatingMode);
-														if ($updateResult === FALSE) {
-															debugLog("updating replaced student $replacedStudent status to C failed");
-															$content		.= "Updating replaced student $replacedStudent status to C failed<br />";
-														} else {
-															debugLog("replaced student $replacedStudent status set to C successfully");
-															$content		.= "&nbsp;&nbsp;&nbsp;&nbsp;Replaced student <a href='$studentUpdateURL?request_type=callsign&request_info=$replacedStudent&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-																				target='_blank'>$replacedStudent</a> status set to C successfully.<br />";
-														}	
+													// now remove student from the class and set the replaced student's status to 'C'
+													$inp_data			= array('inp_student'=>$student_call_sign,
+																		'inp_semester'=>$student_semester,
+																		'inp_assigned_advisor'=>$student_assigned_advisor,
+																		'inp_assigned_advisor_class'=>$student_assigned_advisor_class,
+																		'inp_remove_status'=>'C',
+																		'inp_arbitrarily_assigned'=>$student_no_catalog,
+																		'inp_method'=>'remove',
+																		'jobname'=>$jobname,
+																		'userName'=>$userName,
+																		'testMode'=>$testMode,
+																		'doDebug'=>$doDebug);
+															
+													$removeResult		= add_remove_student($inp_data);
+													if ($removeResult[0] === FALSE) {
+														$thisReason		= $removeResult[1];
+														debugReport("attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+														sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
+														$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
 													} else {
-														debugLog("student_action_log not set in replaced student data for $replacedStudent. Unable to update student record");
-														error_log("$jobname $userName ERROR action_log for student being replaced ($replacedStudent) not found");
+														debugLog("replaced student $replacedStudent status set to C successfully");
+														$content		.= "&nbsp;&nbsp;&nbsp;&nbsp;Replaced student <a href='$studentUpdateURL?request_type=callsign&request_info=$replacedStudent&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+																			target='_blank'>$replacedStudent</a> status set to C successfully.<br />";
 													}
 												}
 											} else {
@@ -666,15 +671,15 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 					['field' => 'student_response', 'value' => 'Y', 'compare' => '=' ],
 					['field' => 'student_status', 'value' => '', 'compare' => '=' ],
 					['field' => 'student_intervention_required', 'value' => 'H', 'compare' => '!=' ],
-					['field' => 'student_stats', 'value' => '', 'compare' => '=' ],
+					['field' => 'student_status', 'value' => '', 'compare' => '=' ],
 				]
 			];
 			$requestInfo = array('criteria'=>$criteria,
 								 'orderby'=>'student_level, student_call_sign',
 								 'order'=>'ASC');
-			$studentData =  get_student_and_user_master('$studentCallSign', 'complex', $requestInfo, $operatingMode, $doDebug);
+			$studentData =  get_student_and_user_master('', 'complex', $requestInfo, $operatingMode, $doDebug);
 			if ($studentData === FALSE) {
-				debugLog("get_student_and_user_master for $studentToProcess returned FALSE");
+				debugLog("get_student_and_user_master all unassigned students returned FALSE");
 			} else {
 				if (! empty($studentData)) {
 					$myInt = count($studentData);
@@ -1033,7 +1038,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 									];
 									$myStr = print_r($criteria, TRUE);
 									debugLog("Getting advisorclass data with criteria<br /><pre>$myStr</pre>");
-									$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+									$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 									debugLog("returned from get_advisorclasses for $student_assigned_advisor class $student_assigned_advisor_class");	
 									if ($advisorclassData === FALSE) {
 										debugLog("get_advisorclasses for $student_assigned_advisor returned FALSE");
