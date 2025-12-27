@@ -1098,7 +1098,7 @@ function getTheReason($strReasonCode) {
 				['field' => 'student_hold_reason_code', 'value' => 'X', 'compare' => '!=' ]
 			]
 		];
-		$studentResult = $student_dal->get_student( $criteria, 'student_call_sign', 'ASC', $operatingMode );
+		$studentResult = $student_dal->get_student_by_order( $criteria, 'student_call_sign', 'ASC', $operatingMode );
 		if ($studentResult === FALSE || $studentResult === NULL) {
 			if ($doDebug) {
 				echo "getting students needing intervention returned FALSD|NULL<br />";
@@ -3198,7 +3198,7 @@ function getTheReason($strReasonCode) {
 					['field' => 'advisorclass_sequence', 'value' => $inp_advisorClass, 'compare' => '=' ]
 				]
 			];
-			$advisorclassData = $advisorclass_dal->get_advisorclasses( $criteria, $operatingMode );
+			$advisorclassData = $advisorclass_dal->get_advisorclasses_by_order( $criteria, 'advisorclass_sequence', 'ASC', $operatingMode );
 			if ($advisorclassData === FALSE || $advisorclassData === NULL) {
 				if ($doDebug) {
 					echo "get_advisorclasses for $advisor_call_sign returned FALSE|NULL<br />";
@@ -4232,7 +4232,7 @@ function getTheReason($strReasonCode) {
 				['field' => 'student_call_sign', 'value' => $inp_callsign, 'compare' => '=' ]
 			]
 		];
-		$studentData = $student_dal->get_student( $criteria, 'student_date_created', 'DESC', $operatingMode );
+		$studentData = $student_dal->get_student_by_order( $criteria, 'student_date_created', 'DESC', $operatingMode );
 		if ($studentData === FALSE || $studentData === NULL) {
 			if ($doDebug) {
 				echo "get_student for $student_call_sign returned FALSE|NULL<br />";
