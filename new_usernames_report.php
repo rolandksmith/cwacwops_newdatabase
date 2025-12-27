@@ -410,7 +410,7 @@ function new_usernames_report_func(){
 									];
 									$orderby = 'student_date_created';
 									$order = 'DESC';
-									$studentData = $student_dal->get_student($criteria, $orderby, $order, $operatingMode);
+									$studentData = $student_dal->get_student_by_order($criteria, $orderby, $order, $operatingMode);
 									if ($studentData === FALSE) {
 										if ($doDebug) {
 											$debugData .= "attempting to get studentData for $user_uppercase returned FALSE<br />";
