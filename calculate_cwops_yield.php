@@ -251,7 +251,7 @@ function calculate_cwops_yield_func() {
 					['field' => 'student_promotable', 'value' => 'P', 'compare' => '=' ]
 				]
 			];
-			$studentData = $student_dal->get_student( $criteria, 'student_call_sign', 'ASC', $operatingMode );
+			$studentData = $student_dal->get_student_by_order( $criteria, 'student_call_sign', 'ASC', $operatingMode );
 			if ($studentData === FALSE || $studentData === NULL){
 				debugReport("<b>ERROR</b> attempting to get Beginner students for $theSemester returned FALSE|NULL");
 			} else {
@@ -274,7 +274,7 @@ function calculate_cwops_yield_func() {
 									['field' => 'student_level', 'value' => 'Beginner', 'compare' => '=' ]
 								]
 							];
-							$checkData = $student_dal->get_student( $criteria, 'student_call_sign', 'ASC', $operatingMode );
+							$checkData = $student_dal->get_student_by_order( $criteria, 'student_call_sign', 'ASC', $operatingMode );
 							if ($checkData === 'False' || $checkData === NULL) {
 								debugReport("getting the checkData for $student_call_sign student returned FALSE|NULL");
 							} else {
@@ -307,7 +307,7 @@ function calculate_cwops_yield_func() {
 									['field' => 'student_call_sign', 'value' => $thisCallsign, 'compare' => '=' ]
 								]
 							];
-							$studentRecords = $student_dal->get_student( $criteria, 'student_date_created', 'ASC', $operatingMode );
+							$studentRecords = $student_dal->get_student_by_order( $criteria, 'student_date_created', 'ASC', $operatingMode );
 							if ($studentRecords === FALSE) {
 								debugReport("Error retrieving student record for $thisCallsign<br />");
 							} else {
