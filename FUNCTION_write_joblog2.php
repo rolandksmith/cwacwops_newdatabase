@@ -94,17 +94,39 @@ function write_joblog2_func($dataToWrite=array()) {
 		$myStr				= print_r($dataToWrite,TRUE);
 		sendErrorEmail("function_write_joblog2: Bad jobname $badCode. $jobtitle\n<br /><pre>$myStr</pre>");
 	}
-	$jobIPData			= get_the_user_ip_data();
-	if ($doDebug) {
-		echo "jobIPData:<br /><pre>";
-		print_r($jobIPData);
-		echo "</pre><br />";
+	
+	// figure out if the job is automated
+	if (stripos($_SERVER['HTTP_USER_AGENT'], 'curl') === 0) {
+		// Define a constant so you know this is a background process
+		if (!defined('IS_CRON')) {
+			define('IS_CRON', true);
+		}
 	}
-	$thisBrowser 		= $jobIPData['browser'];
-	$thisVersion 		= $jobIPData['version'];
-	$thisOS 			= $jobIPData['OS'];
-	$thisMfgr 			= $jobIPData['Mfgr'];
-	$thisDevice 		= $jobIPData['device'];
+
+    if (defined('IS_CRON')) {
+        $jobwho = 'CRON';
+		$thisBrowser 		= '';
+		$thisVersion 		= '';
+		$thisOS 			= '';
+		$thisMfgr 			= '';
+		$thisDevice 		= '';
+    } else {
+		$jobIPData			= get_the_user_ip_data();
+		if ($doDebug) {
+			echo "jobIPData:<br /><pre>";
+			print_r($jobIPData);
+			echo "</pre><br />";
+		}
+		$thisBrowser 		= $jobIPData['browser'];
+		$thisVersion 		= $jobIPData['version'];
+		$thisOS 			= $jobIPData['OS'];
+		$thisMfgr 			= $jobIPData['Mfgr'];
+		$thisDevice 		= $jobIPData['device'];
+	}
+	$myStr = current_time('mysql', 1);
+	$myDateTime = strtotime($myStr);
+	$jobdate = date('Y-m-d', $myDateTime);
+	$jobtime = date('H:i:s', $myDateTime);
 	$updateParams			= array('job_name' 		=> $jobname,
 									'job_date' 		=> $jobdate,
 									'job_time'		=> $jobtime,
