@@ -261,7 +261,36 @@ if ( ! class_exists( 'CWA_Advisorclass_DAL' ) ) {
             return $this->wpdb->get_results( $sql, ARRAY_A );
         }
 
+ 
         /**
+         * Get advisorclass record by id
+         *
+         * @param ing $id The record_id of the advisorclass to retrieve
+         * @param string $operating_mode Database mode (Production, Testing, or Testmode)
+         * @return array|null Array of matching records or null on error
+         */
+        public function get_advisorclass_by_id( $id, $operating_mode ) {
+            if ( ! $this->_validate_mode( $operating_mode ) ) {
+                return null;
+            }
+            
+            // Validate id is numeric
+            if ( ! $this->_validate_id( $id )  ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $operating_mode );
+            
+            $sql = $this->wpdb->prepare(
+                "SELECT * FROM {$tables['primary']} WHERE user_ID = %d",
+                $id 
+            );
+            
+            return $this->wpdb->get_results( $sql, ARRAY_A );
+        }
+
+
+       /**
          * Run a custom SQL query
          * 
          * @param string $sql SQL query with TABLENAME placeholder
@@ -370,10 +399,15 @@ if ( ! class_exists( 'CWA_Advisorclass_DAL' ) ) {
          */
         private function _log( $call_sign, $action, $data, $tables ) {
             $user = wp_get_current_user();
+            if ( $user->ID > 0 ) {
+            	$theUser = $user->user_login;
+            } else {
+            	$theUser = 'CRON';
+            }
             
             $log_data = [
                 'data_date_written'  => current_time( 'mysql' ),
-                'data_user'          => ( $user->ID > 0 ) ? $user->user_login : 'Guest',
+                'data_user'          => $theUser,
                 'data_call_sign'     => $call_sign,
                 'data_table_name'    => $tables['primary'],
                 'data_action'        => $action,
