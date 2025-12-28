@@ -138,6 +138,34 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
             return $result;
         }
 
+
+        /**
+         * Get advisor record by id
+         *
+         * @param int $id The record_id of the advisor to retrieve
+         * @param string $operating_mode Database mode (Production, Testing, or Testmode)
+         * @return array|null Array of matching records or null on error
+         */
+        public function get_advisor_by_id( $id, $operating_mode ) {
+            if ( ! $this->_validate_mode( $operating_mode ) ) {
+                return null;
+            }
+            
+            // Validate id is numeric
+            if ( ! $this->_validate_id( $id )  ) {
+                return null;
+            }
+            
+            $tables = $this->_get_table_names( $operating_mode );
+            
+            $sql = $this->wpdb->prepare(
+                "SELECT * FROM {$tables['primary']} WHERE user_ID = %d",
+                $id 
+            );
+            
+            return $this->wpdb->get_results( $sql, ARRAY_A );
+        }
+
         /**
          * Delete an advisor record (moves to deleted table)
          * 
@@ -352,10 +380,15 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
          */
         private function _log( $call_sign, $action, $data, $tables ) {
             $user = wp_get_current_user();
-            
+             if ( $user->ID > 0 ) {
+            	$theUser = $user->user_login;
+            } else {
+            	$theUser = 'CRON';
+            }
+           
             $log_data = [
                 'data_date_written'  => current_time( 'mysql' ),
-                'data_user'          => ( $user->ID > 0 ) ? $user->user_login : 'Guest',
+                'data_user'          => $thisUser,
                 'data_call_sign'     => $call_sign,
                 'data_table_name'    => $tables['primary'],
                 'data_action'        => $action,
