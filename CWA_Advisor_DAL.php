@@ -388,7 +388,7 @@ if ( ! class_exists( 'CWA_Advisor_DAL' ) ) {
            
             $log_data = [
                 'data_date_written'  => current_time( 'mysql' ),
-                'data_user'          => $thisUser,
+                'data_user'          => $theUser,
                 'data_call_sign'     => $call_sign,
                 'data_table_name'    => $tables['primary'],
                 'data_action'        => $action,
