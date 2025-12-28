@@ -419,11 +419,16 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
          */
         private function _log_change( $call_sign, $action, $data, $primary_table_name, $log_table_name ) {
 
-			$currentUser = $this->get_current_user_login();
+            $user = wp_get_current_user();
+            if ( $user->ID > 0 ) {
+            	$theUser = $user->user_login;
+            } else {
+            	$theUser = 'CRON';
+            }
             
             $log_data = [
                 'data_date_written' => current_time( 'mysql' ),
-                'data_user'			=> $currentUser,
+                'data_user'			=> $theUser,
                 'data_call_sign'    => $call_sign,
                 'data_table_name'   => $primary_table_name,
                 'data_action'       => $action,
