@@ -22,9 +22,9 @@ function daily_advisor_cron_process_func() {
 
 */
 
-	global $wpdb;
+	global $wpdb, $doDebug, $debugLog;
 
-	$doDebug				= TRUE;
+	$doDebug				= FALSE;
 	$testMode				= FALSE;
 	$verifyMode				= FALSE;
 	$demoMode				= FALSE;
@@ -45,17 +45,10 @@ function daily_advisor_cron_process_func() {
 	if ($verifyMode && $testMode) {
 		$initializationArray['validEmailPeriod']	= 'Y';
 		$initializationArray['daysToSemester']		= 45;
-		if ($doDebug) {
-			echo "verifyMode and testMode. Have fudged the initializationArray<br />";
-		}
+		echo "verifyMode and testMode. Have fudged the initializationArray<br />";
 	}
 
 
-	if ($doDebug) {
-		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
-		echo "</pre><br />";
-	}
 	$userName				= $initializationArray['userName'];
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);
@@ -188,8 +181,17 @@ function daily_advisor_cron_process_func() {
 	$errorArray					= array();
 	$advisorClassInc			= 0;
 	$doDaysTest					= TRUE;
+	$debugLog					= "";
 
-
+	function debugReport($message) {
+		global $wpdb, $doDebug, $debugLog;
+		
+		$myDateTime = current_time('mysql', 1);
+		$debugLog .= "$message ($myDateTime)<br />";
+		if ($doDebug) {
+			echo "$message<br />";
+		}
+	}
 
 	$content = "<style type='text/css'>
 				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
@@ -242,25 +244,36 @@ function daily_advisor_cron_process_func() {
 				td {padding:5px;font-size:small;}
 				</style>";
 
-$runTheJob	= TRUE;
+		$runTheJob	= TRUE;
 
-	if ($userName != '') {
+        $current_user = wp_get_current_user();
+        if ($current_user->ID > 0) {
+            $theUser = $current_user->user_login;
+        } else {
+        	$theUser = 'CRON';
+        }
+        
+	if ($theUser != 'CRON') {
 		$content 		.= "<h3>Daily Cron Advisor Process Executed by $userName</h3>";
 	} else {
 		$content		.= "<h3>Daily Cron Advisor Process Automatically Executed</h3>";
 		$userName		= "CRON";
 		$runTheJob		= allow_job_to_run($doDebug);
 	}
+
 	if ($runTheJob) {
 
+		if ($doDebug) {
+			debugReport("Initialization Array:<pre>");
+			$myStr = print_r($initializationArray, TRUE);
+			debugReport("$myStr</pre>");
+		}
 		if ($testMode) {
 			$advisorTableName		= 'wpw1_cwa_advisor2';
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass2';
 			$userMasterTableName	= 'wpw1_cwa_user_master2';
 			$content .= "<p><strong>Function is under development</strong></p>";
-			if ($doDebug) {
-				echo "<b>Operating in TestMode</b><br />";
-			}
+			debugReport("<b>Operating in TestMode</b><br />");
 			$operatingMode			= 'Testmode';
 			$xmode					= 'tm';
 		} else {
@@ -279,6 +292,8 @@ $runTheJob	= TRUE;
 
 	// $doDebug = TRUE;
 
+
+
 		$advisorArray		= array();
 		$advisorRecords		= 0;
 		$addlAdvisorRecords	= 0;
@@ -287,14 +302,10 @@ $runTheJob	= TRUE;
 		$doAdvisorVerify	= FALSE;
 
 		if ($validEmailPeriod == 'N' || $daysToSemester > 45) {
-			if ($doDebug) {
-				echo "Send Welcome message<br >";
-			}
+			debugReport("Send Welcome message");
 			$doAdvisorWelcome	= TRUE;
 		} else {
-			if ($doDebug) {
-				echo "Within the verification period<br >";
-			}
+			debugReport("Within the verification period");
 			$doAdvisorVerify	= TRUE;
 		}
 		$doProceed				= TRUE;
@@ -327,22 +338,21 @@ $runTheJob	= TRUE;
 				foreach($value as $thisField => $thisValue) {
 					$$thisField = $thisValue;
 				}
-				if ($doDebug) {
-					echo "<br />Processing $advisor_call_sign<br />";
+				if (! isset($advisor_call_sign)) {
+					$debugReport("have an advisor record but advisor_call_sign is not set");
 				}
+				debugReport("<br />Processing $advisor_call_sign");
 				// get the user_master for this advisor
 				$userResult = $user_dal->get_user_master_by_callsign($advisor_call_sign,$operatingMode);
 				if ($userResult == NULL) {
 					$content .= "Attempting to get user_master for $user_call_sign returned NULL<br />";
 				} else {
-//					if ($doDebug) {
-//						echo "userResult:<br /><pre>";
-//						print_r($userResult);
-//						echo "</pre><br />";
-//					}
 					foreach($userResult as $key => $value) {
 						foreach($value as $thisField => $thisValue) {
 							$$thisField = $thisValue;
+						}
+						if (! isset($user_call_sign)) {
+							debugReport("have user_master record but user_call_sign not set");
 						}
 					}
 					if ($doProceed) {
@@ -378,22 +388,18 @@ $runTheJob	= TRUE;
 						}
 
 
-						if ($doDebug) {
-							echo "<br />Processing $advisor_call_sign<br />
+						debugReport("<br />Processing $advisor_call_sign<br />
 								  &nbsp;&nbsp;&nbsp;advisor_welcome_email_date: $advisor_welcome_email_date<br />
 								  &nbsp;&nbsp;&nbsp;advisor_verify_email_date: $advisor_verify_email_date<br />
 								  &nbsp;&nbsp;&nbsp;advisor_verify_email_number: $advisor_verify_email_number<br />
 								  &nbsp;&nbsp;&nbsp;advisor_verify_response: $advisor_verify_response<br />
 								  &nbsp;&nbsp;&nbsp;user_timezone: $user_timezone_id <br />
 								  &nbsp;&nbsp;&nbsp;advisor_semester:$advisor_semester<br />
-								  &nbsp;&nbsp;&nbsp;user_survey_score:$user_survey_score<br />";
-						}
+								  &nbsp;&nbsp;&nbsp;user_survey_score:$user_survey_score<br />");
 
 						// if the advisor has a survey score of 6, bypass the advisor
 						if ($user_survey_score == '6') {
-							if ($doDebug) {
-								echo "Survey score of 6. Bypassing<br />";
-							}
+							debugReport("Survey score of 6. Bypassing");
 							$surveyScore6++;
 							$content		.= "Advisor $advisor_call_sign has a survey score of 6<br />";
 						} else {
@@ -406,18 +412,14 @@ $runTheJob	= TRUE;
 							}
 							// if a welcome email has been sent and the advisor has verified, no action needed
 							if ($advisor_welcome_email_date != '' and $advisor_verify_response !='') {
-								if ($doDebug) {
-									echo "Advisor has been welcomed and has verified. Bypassing<br />";
-								}
+								debugReport("Advisor has been welcomed and has verified. Bypassing");
 								if ($advisor_verify_response == 'Y') {
 									$confirmedClasses++;
 								} elseif ($advisor_verify_response == 'R') {
 									$refusedClasses++;
 								}
 							} else {
-								if ($doDebug) {
-									echo "Advisor needs to be processed<br />";
-								}
+								debugReport("Advisor needs to be processed");
 								if ($advisor_verify_response == '') {
 									$unconfirmedClasses++;
 								}
@@ -431,45 +433,40 @@ $runTheJob	= TRUE;
 								if ($advisor_verify_response != '') {
 									$myNotVerified	= FALSE;
 								}
-								if ($doDebug) {
-									echo "Processing a record for $advisor_call_sign<br />";
-									if ($isNextSemester) {
-										echo "Has class in nextSemester<br />";
-									} else {
-										echo "Has class in a future semester<br />";
-									}
-									if ($myWelcomeDate) {
-										echo "Welcome date of $advisor_welcome_email_date has been set & welcome email sent<br />";
-									} else {
-										echo "No welcome email has been sent<br />";
-									}
-									if ($myVerifyDate) {
-										echo "Verify date of $advisor_verify_email_date has been set & verify email sent. Verify number: $advisor_verify_email_number<br />";
-									} else {
-										echo "No verify email has been sent<br />";
-									}
-									if ($myNotVerified) {
-										echo "Advisor has not verified<br />";
-									} else {
-										echo "Advisor has verified advisor_verify_response = $advisor_verify_response<br />";
-									}
+								debugReport("Processing a record for $advisor_call_sign<br />");
+								if ($isNextSemester) {
+									debugReport("Has class in nextSemester");
+								} else {
+									debugReport("Has class in a future semester");
 								}
+								if ($myWelcomeDate) {
+									debugReport("Welcome date of $advisor_welcome_email_date has been set & welcome email sent");
+								} else {
+									debugReport("No welcome email has been sent");
+								}
+								if ($myVerifyDate) {
+									debugReport("Verify date of $advisor_verify_email_date has been set & verify email sent. Verify number: $advisor_verify_email_number");
+								} else {
+									debugReport("No verify email has been sent");
+								}
+								if ($myNotVerified) {
+									debugReport("Advisor has not verified");
+								} else {
+									debugReport("Advisor has verified advisor_verify_response = $advisor_verify_response");
+								}
+
 								$updateParams					= array();
 								// fix some possible errors
 								if (!$isNextSemester) {			// registered for a future semester
 									if ($myVerifyDate)	{		// should be false - error
-										if ($doDebug) {
-											echo "myVerifyDate should be false and isn't. Resetting the verify date<br />";
-										}
+										debugReport("myVerifyDate should be false and isn't. Resetting the verify date");
 										$updateParams['advisor_verify_email_date'] = '';
 										$myVerifyDate			= FALSE;
 										$doUpdate				= TRUE;
 										$advisor_action_log		.= "removed verify_email_date ";
 									}
 									if (!$myNotVerified) {		// should not be true. blank out verify_response
-										if ($doDebug) {
-											echo "myNotVerified should be false and is not. Blanking out verify_response<br />";
-										}
+										debugReport("myNotVerified should be false and is not. Blanking out verify_response");
 										$updateParams['advisor_verify_response'] = '';
 										$doUpdate				= TRUE;
 										$myNotVerified			= FALSE;
@@ -529,18 +526,14 @@ $runTheJob	= TRUE;
 											foreach($value as $thisField => $thisValue) {
 												$$thisField = $thisValue;
 											}
-											if ($doDebug) {
-												echo "have $advisorclass_call_sign class $advisorclass_sequence<br />";
-											}
+											debugReport("have $advisorclass_call_sign class $advisorclass_sequence");
 
 											/// get the UTC times if these fields are empty for some reason
 											if ($advisorclass_class_schedule_days_utc == '' || $advisorclass_class_schedule_times_utc == '') {
 												if ($advisorclass_class_incomplete != 'Y') {
 													$thisResult						= utcConvert('toutc',$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days);
 													if ($thisResult[0] == 'FAIL') {
-														if ($doDebug) {
-															echo "utcConvert failed toutc,$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days<br />Error: $thisResult[3]<br />";
-														}
+														debugReport("utcConvert failed toutc,$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days<br />Error: $thisResult[3]");
 														$advisorclass_class_schedule_days_utc	= "ERROR";
 														$advisorclass_class_schedule_times_utc	= '';
 														$advisorclass_class_incomplete	= 'Y';
@@ -577,11 +570,9 @@ $runTheJob	= TRUE;
 											$classRecord	.= "<tr><td colspan='3'><hr></td></tr>";
 											if (! empty($updateClassParams)) {
 												// need to update the advisor class record
-												if ($doDebug) {
-													echo "updateClassParams:<br /><pre>";
-													print_r($updateClassParams);
-													echo "</pre><br />";
-												}
+												debugReport("updateClassParams:<pre>");
+												$myStr = print_r($updateClassParams, TRUE);
+												debugReport("$myStr</pre>");
 												$classUpdateResult = $advisorclass_dal->update($advisorclass_id,$updateClassParams,$operatingMode);
 												if ($classUpdateResult === FALSE) {
 													$content .= "Attempt to update advisorclass_id $advisorclass_id ($advisorclass_call_sign $advisorclass_semester $advisorclass_sequence) returned FALSE<br />";
@@ -592,22 +583,16 @@ $runTheJob	= TRUE;
 
 										}
 										$classRecord		.= "</table>";
-										if ($doDebug) {
-											echo "got the advisor and class records and ready to proceed<br />";
-										}
+										debugReport("got the advisor and class records and ready to proceed");
 										if (!$myWelcomeDate) {			/// welcome email needed
 											$updateParams['advisor_welcome_email_date'] = $actionDate;
 											$doUpdate				= TRUE;
 											$sendEmail				= TRUE;
 											$content				.= "Welcome email sent to $advisor_call_sign<br />";
 											$advisorWelcomeCount++;
-											if ($doDebug) {
-												echo "updating welcome_email_date and sending welcome email<br />";
-											}
+											debugReport("updating welcome_email_date and sending welcome email");
 											if ($validEmailPeriod == 'Y') {		// if so, verify the advisor
-												if ($doDebug) {
-													echo "validEMailPeriod is Y. Verifying the advisor<br />";
-												}
+												debugReport("validEMailPeriod is Y. Verifying the advisor");
 												$advisor_action_log		.= "verify email sent to $user_email. ";
 												$updateParams['advisor_verify_response'] = 'Y';
 												$updateParams['advisor_verify_email_date'] = $actionDate;
@@ -647,9 +632,7 @@ $runTheJob	= TRUE;
 																			<p>You can, at any time, log into <a href='$siteURL/login'>CW Academy</a> and see if any actious
 																			are outstanding, modify or delete your registration, and check the status of your registration.</p>";
 										} else {
-											if ($doDebug) {
-												echo "Advisor $advisor_call_sign has already received a welcome email<br />";
-											}
+											debugReport("Advisor $advisor_call_sign has already received a welcome email");
 										}
 									} else {
 										$classRecord		= "<p>No class information is available. Please update your
@@ -659,60 +642,52 @@ $runTheJob	= TRUE;
 																Resolution</a> for assistance.</p>";
 									}
 									$verifyOption					= FALSE;
-									if ($doDebug) {
-										if ($validEmailPeriod == 'Y') {
-											echo "validEmailPeriod is TRUE<br />";
-										} else {
-											echo "validEmailPeriod is FALSE<br />";
-										}
-										if ($myVerifyDate) {
-											echo "myVerifyDate is TRUE already verified<br />";
-										} else {
-											echo "myVerifyDate is FALSE not yet verified<br />";
-										}
-										if ($verifyOption) {
-											echo "verifyOption is TRUE<br />";
-										} else {
-											echo "verifyOption is FALSE<br />";
-										}
-										if ($advisor_welcome_email_date == '') {
-											echo "welcome_email_date is EMPTY<br />";
-										} else {
-											echo "welcome_email_date is $advisor_welcome_email_date<br />";
-										}
+									if ($validEmailPeriod == 'Y') {
+										debugReport("validEmailPeriod is TRUE");
+									} else {
+										debugReport("validEmailPeriod is FALSE");
+									}
+									if ($myVerifyDate) {
+										debugReport("myVerifyDate is TRUE already verified");
+									} else {
+										debugReport("myVerifyDate is FALSE not yet verified");
+									}
+									if ($verifyOption) {
+										debugReport("verifyOption is TRUE");
+									} else {
+										debugReport("verifyOption is FALSE");
+									}
+									if ($advisor_welcome_email_date == '') {
+										debugReport("welcome_email_date is EMPTY");
+									} else {
+										debugReport("welcome_email_date is $advisor_welcome_email_date");
 									}
 									if ($validEmailPeriod == 'Y' && $myVerifyDate == FALSE) {	/// send verify email?
-										if ($doDebug) {
-											echo "Setting verifyOption to TRUE<br />";
-										}
+										debugReport("Setting verifyOption to TRUE");
 										$verifyOption				= TRUE;
-										if ($doDebug) {
-											$myStr					 	= "";
-											if ($isNextSemester) {
-												$myStr					.= "isNextSemester is TRUE; ";
-											} else {
-												$myStr					.= "isNextSemester is FALSE; ";
-											}
-											if ($advisor_welcome_email_date == '') {
-												$myStr					.= "advisor welcome email date is empty; ";
-												$updateParams['advisor_welcome_email_date'] = $actionDate;
-												$doUpdate				= TRUE;
-											} else {
-												$myStr					.= "advisor welcome email date is $advisor_welcome_email_date; ";
-											}
-											if ($advisor_verify_response == '') {
-												$myStr					.= "advisor verify response is empty; ";
-											} else {
-												$myStr					.= "advisor verify response is $advisor_verify_response; ";
-											}
-											echo "$myStr<br />";
+										$myStr					 	= "";
+										if ($isNextSemester) {
+											$myStr					.= "isNextSemester is TRUE; ";
+										} else {
+											$myStr					.= "isNextSemester is FALSE; ";
 										}
+										if ($advisor_welcome_email_date == '') {
+											$myStr					.= "advisor welcome email date is empty; ";
+											$updateParams['advisor_welcome_email_date'] = $actionDate;
+											$doUpdate				= TRUE;
+										} else {
+											$myStr					.= "advisor welcome email date is $advisor_welcome_email_date; ";
+										}
+										if ($advisor_verify_response == '') {
+											$myStr					.= "advisor verify response is empty; ";
+										} else {
+											$myStr					.= "advisor verify response is $advisor_verify_response; ";
+										}
+										debugReport("$myStr");
 
 
 										if ($isNextSemester && $verifyOption && $advisor_welcome_email_date != '' && $advisor_verify_response == '') {
-											if ($doDebug) {
-												echo "isNextSemester and verifyOption are true, welcome email date is set and verify response is empty. Doing verify process<br />";
-											}
+											debugReport("isNextSemester and verifyOption are true, welcome email date is set and verify response is empty. Doing verify process");
 											$verifyEmailCount++;
 											$mySubject					= "CW Academy Advisor Verification";
 											$myContent					= "To: $user_last_name, $user_first_name ($advisor_call_sign):<br />
@@ -747,9 +722,7 @@ $runTheJob	= TRUE;
 
 											$sendEmail				= TRUE;
 											$advisor_action_log		.= "advisor verify email sent to $advisor_email. ";
-											if ($doDebug) {
-												echo "setting verify response to Y. isNextSemester and verifyOption are TRUE<br />";
-											}
+											debugReport("setting verify response to Y. isNextSemester and verifyOption are TRUE");
 											$updateParams['advisor_verify_response'] = 'Y';
 											$updateParams['advisor_verify_email_date'] = $actionDate;
 											$updateParams['advisor_verify_email_number'] = 0;
@@ -758,17 +731,15 @@ $runTheJob	= TRUE;
 											$content				.= "ADVISOR VERIFY $advisor_call_sign Verify Email will be sent to $advisor_email<br />";
 										}
 									}
-									if ($doDebug) {
-										if ($sendEmail) {
-											echo "Checking to send email. sendEmail is TRUE. Should send an email<br />";
-										} else {
-											echo "<br />Checking to send email. sendEmail is FALSE. No email should be sent<br />";
-										}
-										if ($doUpdate) {
-											echo "doUpdate is TRUE. Record should be updated<br />";
-										} else {
-											echo "doUpdate is FALSE. No update should be performed<br />";
-										}
+									if ($sendEmail) {
+										debugReport("Checking to send email. sendEmail is TRUE. Should send an email");
+									} else {
+										debugReport("<br />Checking to send email. sendEmail is FALSE. No email should be sent");
+									}
+									if ($doUpdate) {
+										debugReport("doUpdate is TRUE. Record should be updated");
+									} else {
+										debugReport("doUpdate is FALSE. No update should be performed");
 									}
 
 									if ($sendEmail) {
@@ -778,9 +749,7 @@ $runTheJob	= TRUE;
 											$mySubject 	= "TESTMODE $mySubject";
 											$increment++;
 											if ($myContent == '') {
-												if ($doDebug) {
-													echo "email content is empty<br />";
-												}
+												debugReport("email content is empty");
 											}
 										} else 	{
 											$myCode		= 12;
@@ -796,30 +765,22 @@ $runTheJob	= TRUE;
 																				'doDebug'=>$doDebug));
 										if ($mailResult !== TRUE) {
 											$content .= "<br /><b>ERROR:</b> The email send function failed to advisor $advisor_last_name, $advisor_first_name ($advisor_call_sign).<br /><pre>";
-											print_r($mailResult);
-											echo "</pre><br /><br />";
 											$advisorEmailErrors++;
 										} else {
 											$advisorEmails++;
-											if ($doDebug) {
-												echo "Email sent to $myTo on behalf of $advisor_call_sign ($user_email)<br >";
-											}
+											debugReport("Email sent to $myTo on behalf of $advisor_call_sign ($user_email)");
 										}
 									}
 									if ($doUpdate) {
 										$updateParams['advisor_action_log'] = $advisor_action_log;
-										if ($doDebug) {
-											echo "UpdateParams:<br /><pre>";
-											print_r($updateParams);
-											echo "</pre><br />";
-										}
+										debugReport("UpdateParams:<pre>");
+										$myStr = print_r($updateParams, TRUE);
+										debugReport("$myStr</pre>");
 										$updateResult	= $advisor_dal->update($advisor_id,$updateParams,$operatingMode);
 										if ($updateResult === FALSE) {
 											$content		.= "Unable to update advisorclass content for $advisorclass_call_sign (id: $advisorclass_id)<br />";
 										} else {
-											if ($doDebug) {
-												echo "Successfully updated $advisor_call_sign record at $advisor_id<br />";
-											}
+											debugReport("Successfully updated $advisor_call_sign record at $advisor_id");
 										}
 									}
 								}
@@ -833,9 +794,7 @@ $runTheJob	= TRUE;
 
 
 ///// all processing done. Prepare totals
-		if ($doDebug) {
-			echo "<br />Sending email with the totals<br />";
-		}
+		debugReport("<br />Sending email with the totals");
 		if ($validEmailPeriod == "N") {
 			$myString	= "Outside of the Verification Email Window.";
 		} else {
@@ -859,7 +818,7 @@ $runTheJob	= TRUE;
 						<tr><td colspan='2'><hr></td></tr>
 						</table><br />";
 
-		$thisTime 			= date('Y-m-d H:i:s');
+		$thisTime 			= current_time('mysql', 1);
 		$content 			.= "<br /><br /><p>V$versionNumber. Prepared at $thisTime</p>";
 		$endingMicroTime 	= microtime(TRUE);
 		$elapsedTime		= $endingMicroTime - $startingMicroTime;
@@ -871,7 +830,11 @@ $runTheJob	= TRUE;
 		if ($testMode) {
 			$thisStr		= 'Testmode';
 		}
-		$ipAddr			= get_the_user_ip();
+		if ($userName != '') {
+			$ipAddr			= get_the_user_ip();
+		} else {
+			$ipAddr			= 'cron';
+		}
 		$theTitle		= esc_html(get_the_title());
 		$jobmonth		= date('F Y');
 		$updateData		= array('jobname' 		=> $jobname,
@@ -891,11 +854,9 @@ $runTheJob	= TRUE;
 			$content	.= "<p>writing to joblog failed</p>";
 		}
 		// store the report in the reports table
-		$storeResult	= storeReportData_v2('Daily Advisor Cron',$content,$testMode,$doDebug);
+		$storeResult	= storeReportData_v2($jobname,$content,$testMode,$doDebug);
 		if ($storeResult[0] === FALSE) {
-			if ($doDebug) {
-				echo "storing report failed. $storeResult[1]<br />";
-			}
+			debugReport("storing report failed. $storeResult[1]");
 			$content	.= "Storing report failed. $storeResult[1]<br />";
 		} else {
 			$reportid	= $storeResult[2];
@@ -920,13 +881,11 @@ $runTheJob	= TRUE;
 									"token|$token|s");
 		$reminderResult	= add_reminder($inputParams,$testMode,$doDebug);
 		if ($reminderResult[0] === FALSE) {
-			if ($doDebug) {
-				echo "adding reminder failed. $reminderResult[1]<br />";
-			}
+			debugReport("adding reminder failed. $reminderResult[1]");
 		}
 
 		$theSubject	= "CWA Daily Advisor Cron Process";
-		$theContent	= "The daily advisor cron process was run at $nowDate $nowTime, Login to <a href='$siteURL/program-list'>CW Academy</a> to see the
+		$theContent	= "The daily advisor cron process was run at $thisTime, Login to <a href='$siteURL/program-list'>CW Academy</a> to see the
 						report.";
 		if ($testMode) {
 			$theRecipient	= '';
@@ -943,14 +902,12 @@ $runTheJob	= TRUE;
 												  'mailCode'=>$mailCode,
 												  'testMode'=>$testMode,
 												  'doDebug'=>$doDebug));
-		if ($result === TRUE) {
-			$myStr		= "Process completed";
-			return $myStr;
-		} else {
-			$myStr  = "<br />The final mail send function to the admins failed.<br /><br />
-						<a href='$siteURL/program-list/'>Return to Portal</a></p>";
-			return $myStr;
+		if ($result !== TRUE) {
+			debugReport("<br />The final mail send function to the admins failed");
 		}
+		// save the debug report
+		$storeResult	= storeReportData_v2("$jobname DEBUG",$debugLog,$testMode,$doDebug);
+		return "Process completed";		
 	}
 }
 add_shortcode ('daily_advisor_cron_process', 'daily_advisor_cron_process_func');
