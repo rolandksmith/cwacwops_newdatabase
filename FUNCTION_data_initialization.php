@@ -61,8 +61,9 @@ function data_initialization_func($attrib='') {
 	}
 
 // get today's date in a couple of formats
-	$myInterim 					= time();
-	$myDate 					= date('Y-m-d');
+	$theDateTime				= current_time('mysql', 1);
+	$myInterim 					= strtotime($theDateTime);
+	$myDate 					= date('Y-m-d', $myInterim);
 
 // based on the current date, determine the current and next three semesters
 // and how many days until the next semester
@@ -180,7 +181,7 @@ function data_initialization_func($attrib='') {
 // determine if we're in the period to allow replacement students
 // the valid periods are 4/10 thru 5/10, 8/10 thru 9/10 and 12/10 thru 1/10
 	$validReplacementPeriod		= "N";
-	$currentYMD					= date('Ymd');
+	$currentYMD					= date('Ymd', $myInterim);
 	
 	$apr10						= $currentYear . "0410";
 	$may10						= $currentYear . "0510";
@@ -230,72 +231,37 @@ function data_initialization_func($attrib='') {
 // get site url
 	$siteURL					= get_site_url();
 
-	$currentDateTime				= date('Y-m-d H:i:s');
-	if ($attrib == 'fake') {
-		$currentDate				= "2021-10-22 13:00:00";
-		$currentTimestamp			= strtotime($currentDate);
-		$result 					= array('validUser'=>$validUser,
-											'userRole'=>$user_role,
-											'userName'=>$user_name,
-											'userID'=>$userID,
-											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name,
-											'currentTimestamp'=>$currentTimestamp,
-											'currentDateTime'=>$currentDateTime,
-											'currentDate'=>'2021-10-22',
-											'prevSemester'=>'2021 Sep/Oct',
-											'currentSemester'=>'Not in Session',
-											'nextSemester'=>'2022 Jan/Feb',
-											'semesterTwo'=>'2022 May/Jun',
-											'semesterThree'=>'2022 SepOct',
-											'semesterFour'=>'2023 Jan/Feb',
-											'proximateSemester'=>'2022 Jan/Feb',
-											'pastSemesters'=>$pastSemesters,
-											'pastSemestersArray'=>$pastSemestersArray,
-											'validEmailPeriod'=>'Y',
-											'validReplacementPeriod'=>'N',
-											'daysToSemester'=>40,
-											'defaultClassSize'=>$defaultClassSize,
-											'validTestmode'=>$validTestmode,
-											'flatFilePath'=>'/home/cwacwops/CWAT',
-											'siteurl'=>$siteURL,
-											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name,
-											'languageArray'=>$languageArray,
-											'languageConversion'=>$languageConversion
-											);
-	} else {
-		$result 					= array('validUser'=>$validUser,
-											'userRole'=>$user_role,
-											'userName'=>$user_name,
-											'userID'=>$userID,
-											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name,
-											'currentTimestamp'=>$myInterim,
-											'currentDateTime'=>$currentDateTime,
-											'currentDate'=>$myDate,
-											'prevSemester'=>$prevSemester,
-											'currentSemester'=>$currentSemester,
-											'nextSemester'=>$nextSemester,
-											'semesterTwo'=>$semesterTwo,
-											'semesterThree'=>$semesterThree,
-											'semesterFour'=>$semesterFour,
-											'proximateSemester'=>$proximateSemester,
-											'pastSemesters'=>$pastSemesters,
-											'pastSemestersArray'=>$pastSemestersArray,
-											'validEmailPeriod'=>$validEmailPeriod,
-											'validReplacementPeriod'=>$validReplacementPeriod,
-											'daysToSemester'=>$daysToSemester,
-											'defaultClassSize'=>$defaultClassSize,
-											'validTestmode'=>$validTestmode,
-											'flatFilePath'=>'/home/cwacwops/CWAT',
-											'siteurl'=>$siteURL,
-											'userEmail'=>$user_email,
-											'userDisplayName'=>$user_display_name,
-											'languageArray'=>$languageArray,
-											'languageConversion'=>$languageConversion
-											);
-	}
+	$currentDateTime				= current_time('mysql', 1);
+	$result 					= array('validUser'=>$validUser,
+										'userRole'=>$user_role,
+										'userName'=>$user_name,
+										'userID'=>$userID,
+										'userEmail'=>$user_email,
+										'userDisplayName'=>$user_display_name,
+										'currentTimestamp'=>$myInterim,
+										'currentDateTime'=>$currentDateTime,
+										'currentDate'=>$myDate,
+										'prevSemester'=>$prevSemester,
+										'currentSemester'=>$currentSemester,
+										'nextSemester'=>$nextSemester,
+										'semesterTwo'=>$semesterTwo,
+										'semesterThree'=>$semesterThree,
+										'semesterFour'=>$semesterFour,
+										'proximateSemester'=>$proximateSemester,
+										'pastSemesters'=>$pastSemesters,
+										'pastSemestersArray'=>$pastSemestersArray,
+										'validEmailPeriod'=>$validEmailPeriod,
+										'validReplacementPeriod'=>$validReplacementPeriod,
+										'daysToSemester'=>$daysToSemester,
+										'defaultClassSize'=>$defaultClassSize,
+										'validTestmode'=>$validTestmode,
+										'flatFilePath'=>'/home/cwacwops/CWAT',
+										'siteurl'=>$siteURL,
+										'userEmail'=>$user_email,
+										'userDisplayName'=>$user_display_name,
+										'languageArray'=>$languageArray,
+										'languageConversion'=>$languageConversion
+										);
 	return $result;
 }
 add_action('data_initialization_func','data_initialization_func');
