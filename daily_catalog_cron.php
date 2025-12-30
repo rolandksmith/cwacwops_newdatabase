@@ -561,8 +561,10 @@ function daily_catalog_cron_process_func() {
 			$content	.= "<p>No changes to the catalog</p>";
 		}
 
+
 		$nowDate		= date('Y-m-d');
 		$nowTime		= date('H:i:s');
+		$thisTime 		= current_time('mysql', 1);
 
 		// store the report in the reports table
 		$storeResult	= storeReportData_v2($jobname,$content,$testMode,$doDebug);
@@ -581,7 +583,7 @@ function daily_catalog_cron_process_func() {
 		$close_date			= date('Y-m-d 00:00:00',$closeStr);
 
 		$token			= mt_rand();
-		$reminder_text	= "<b>Daily Catalog Cron</b> To view the Daily Catalog Cron report for $nowDate $nowTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=XXXXX&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
+		$reminder_text	= "<b>$jobname</b> To view the $jobname report for $thisTime, click <a href='cwa-display-saved-report/?strpass=3&inp_callsign=XXXXX&inp_id=$reportid&token=$token' target='_blank'>Display Report</a>";
 		$inputParams		= array("effective_date|$effective_date|s",
 									"close_date|$close_date|s",
 									"resolved_date||s",
@@ -620,7 +622,6 @@ function daily_catalog_cron_process_func() {
 										 		  'doDebug'=>$doDebug));
 */		
 
-		$thisTime 		= date('Y-m-d H:i:s');
 		$content		.= "<br />Function completed at $thisTime<br />";
 		$endingMicroTime = microtime(TRUE);
 		$elapsedTime	= $endingMicroTime - $startingMicroTime;
