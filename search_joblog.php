@@ -292,7 +292,7 @@ function search_joblog_func() {
 				$content	.= "<h3> Results of Searching Job Log</h3>
 								<p>Search Criteria: $searchWhere<br />
 								Showing next 25 records starting at record $begin</p>
-								<table style='width:1200px;'>
+								<table style='width:1600px;'>
 								<tr><th>ID</th>
 									<th>Program Name</th>
 									<th>Date</th>
@@ -304,6 +304,11 @@ function search_joblog_func() {
 									<th>Month</th>
 									<th>Comments</th>
 									<th>Title</th>
+									<th>Browser</th>
+									<th>Version</th>
+									<th>OS</th>
+									<th>Mfgr</th>
+									<th>Device</th>
 									<th>Date Created</td></tr>";
 				foreach($wpw1_cwa_joblog as $joblogRow) {
 					$record_id		= $joblogRow->record_id;
@@ -318,6 +323,11 @@ function search_joblog_func() {
 					$job_month		= $joblogRow->job_month;
 					$job_comments	= $joblogRow->job_comments;
 					$job_title		= $joblogRow->job_title;
+					$job_browser	= $joblogRow->job_browser;
+					$job_version	= $joblogRow->job_version;
+					$job_OS			= $joblogRow->job_OS;
+					$job_Mfgr		= $joblogRow->job_Mfgr;
+					$job_device		= $joblogRow->job_device;
 					$job_date_created	= $joblogRow->job_date_created;
 					$content	.= "<tr><td style='vertical-align:top;'>$record_id</td>
 										<td style='vertical-align:top;'>$job_name</td>
@@ -330,6 +340,11 @@ function search_joblog_func() {
 										<td style='vertical-align:top;'>$job_month</td>
 										<td style='vertical-align:top;'>$job_comments</td>
 										<td style='vertical-align:top;'>$job_title</td>
+										<td style='vertical-align:top;'>$job_browser</td>
+										<td style='vertical-align:top;'>$job_version</td>
+										<td style='vertical-align:top;'>$job_OS</td>
+										<td style='vertical-align:top;'>$job_Mfgr</td>
+										<td style='vertical-align:top;'>$job_device</td>
 										<td style='vertical-align:top;'>$job_date_created</td></tr>";
 					$displayCount++;
 				}
