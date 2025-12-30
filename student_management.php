@@ -2753,7 +2753,7 @@ function getTheReason($strReasonCode) {
 					$content		.= "<p><b>Student has not selected any class choices</b></p>";
 				}
 				if ($doTesting) {
-					//// get all the advisorClass records for the student's level and languag
+					//// get all the advisorClass records for the student's level and language
 
 					$criteria = [
 						'relation' => 'AND',
@@ -2884,7 +2884,7 @@ function getTheReason($strReasonCode) {
 //														$studentCount			= getStudentCount($advisorclass_call_sign,$advisorclass_sequence);
 														$classAvailableArray[]	= "2|$advisorclass_call_sign|$thisAdvisorFirstName, $thisAdvisorLastName<br />$thisAdvisorState, $thisAdvisorCountry|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|First|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level";
 														if ($doDebug) {
-															echo "Got a match. Added 2|$advisorclass_call_sign|$user_last_name, $user_first_name<br />$user_state, $advisor_country|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Second|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
+															echo "Got a match. Added 2|$advisorclass_call_sign|$user_last_name, $user_first_name<br />$user_state, $user_country|$advisorclass_sequence|$advisorclass_language|$advisorclass_class_schedule_times_utc|$advisorclass_class_schedule_days_utc|Second|$advisorclass_class_size|$advisorclass_number_students|$advisorclass_class_schedule_times $advisorclass_class_schedule_days|$advisorclass_timezone_offset|$displayTimes $displayDays|$student_level<br />";
 														}
 														$gotAMatch		= TRUE;
 													}
@@ -3064,6 +3064,7 @@ function getTheReason($strReasonCode) {
 								}
 								foreach ($classAvailableArray as $myValue) {
 									$myArray			= explode("|",$myValue);
+									$thisChoiceMatch	= $myArray[0];
 									$thisCallSign		= $myArray[1];
 									$thisName			= $myArray[2];
 									$thisClass			= $myArray[3];
@@ -3094,11 +3095,17 @@ function getTheReason($strReasonCode) {
 									if ($myInt > 0) {
 										$thisAvail		= "<b>$myInt</b>";
 									}
+									
+									// convert 1,2,3 into First, Second, Third
+									$countConvert = array('1' => 'First',
+														  '2' => 'Second',
+														  '3' => 'Third');
+									$countStr = $countConvert[$thisChoiceMatch];					  
 									$content			.= "<tr><td style='vertical-align:top;'>$thisCallSign</td>
 																<td style='vertical-align:top;'>$thisName</td>
 																<td style='vertical-align:top;text-align:center;'>$thisClass</td>
 																<td style='vertical-align:top;'>$thisLanguage</td>																<td style='vertical-align:top;'>$thisClassSkedTime $thisClassSkedDays UTC<br />$thisLocal Local</td>
-																<td style='vertical-align:top;'>$thisMatch</td>
+																<td style='vertical-align:top;'>$countStr</td>
 																<td style='vertical-align:top;text-align:center;'>$thisSize</td>
 																<td style='vertical-align:top;text-align:center;'>$thisCount</td>
 																<td style='vertical-align:top;text-align:center;'>$thisAvail</td>
@@ -3868,6 +3875,9 @@ function getTheReason($strReasonCode) {
 			// see if there is an advisor in the proximate semester. If so, get the classes at that level for the advisor
 			if ($haveAdvisor) {
 				// actualize the advisor info
+				if ($doDebug) {
+					echo "have the advisor record<br />";
+				}
 				foreach($advisor as $key => $value) {
 					$key = str_replace('user_','advisor_user_',$key);
 					$$key = $value;
@@ -3918,7 +3928,7 @@ function getTheReason($strReasonCode) {
 											current assigned advisor: $student_assigned_advisor<br />
 											current assigned advisor class: $student_assigned_advisor_class<br />
 											current intervention required: $student_intervention_required<br />
-											current email number: $user_email_number<br />";
+											current email number: $student_email_number<br />";
 								}
 								// if the student is assigned elsewhere, first remove the student
 								if ($student_assigned_advisor != '' && ($student_status == 'S' || $student_status == 'Y')) {
@@ -3948,6 +3958,17 @@ function getTheReason($strReasonCode) {
 									} else {
 										$content		.= "Student removed from $student_assigned_advisor $student_assigned_advisor_class class and unassigned<br />";
 									}
+								} elseif ($student_assigned_advisor != '') {			// have to clean up the student record
+									$updateParams = array('student_status' => '',
+														  'student_assigned_advisor' => '', 
+														  'student_assigned_advisor_class' => 0);
+									$updateResult = $student_dal->update($student_id, $updateParams, $operatingMode);
+									if ($updateResult === FALSE || $updateResult === NULL) {
+										if ($doDebug) {
+											echo "attempting to update $student_call_sign at id $student_id returned FALSE|NULL<br />";
+										}
+										$content .= "<p>unable to update student $student_call_sign record atid $student_id</p>";
+									}
 								}
 								// if the student_semester is not the proximate semester, change the semester
 								if ($student_semester != $theSemester) {
@@ -3961,6 +3982,7 @@ function getTheReason($strReasonCode) {
 										if ($doDebug) {
 											echo "updating $student_id returned FALSE|NULL<br />";
 										}
+										$content .= "<p>Unable to update the student semester to $proximateSemester<br />";
 									} else {
 										$content		.= "Updated student semester to $theSemester<br />";
 									}
