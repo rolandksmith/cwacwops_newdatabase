@@ -115,10 +115,12 @@ function student_and_advisor_assignments_func() {
 		}
 		$theStatement			= "<p>Running in TESTMODE using test data.</p>";
 		$operatingMode = 'Testmode';
+		$inp_mode = 'TESTMODE';
 	} else {
 		$extMode				= 'pd';
 		$theStatement			= "";
 		$operatingMode = 'Production';
+		$inp_mode = 'Production';
 	}
 
 	$student_dal = new CWA_Student_DAL();
