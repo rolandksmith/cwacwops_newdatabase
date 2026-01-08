@@ -385,7 +385,7 @@ if ( ! class_exists( 'CWA_User_Master_DAL' ) ) {
             return [
                 'primary' => $this->wpdb->prefix . 'cwa_user_master' . $suffix,
                 'log'     => $this->wpdb->prefix . 'cwa_data_log' . $suffix,
-                'deleted' => $this->wpdb->prefix . 'cwa_deleted_user_master' . $suffix
+                'deleted' => $this->wpdb->prefix . 'cwa_user_master_deleted' . $suffix
             ];
         }
 
