@@ -306,6 +306,8 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
             	error_log("CWA_Student_DAL INFORMATION deleting $student_id no record found to delete");
                 return false; // Record not found, nothing to delete
             }
+            
+            $call_sign_for_log = $record_to_delete['student_call_sign'];
 
             // --- Step 2: Copy the record to the deleted table ---
             $copied = $this->wpdb->insert( $tables['deleted'], $record_to_delete );
@@ -326,6 +328,15 @@ if ( ! class_exists( 'CWA_Student_DAL' ) ) {
 			if ($result === FALSE) {
 				$myStr = $this->wpdb->last_query;
 				error_log("CWA_Student_DAL ERROR deleting $student_id returned FALSE\nSQL: $myStr");
+			} else {
+				// --- Step 4: Log the change ---
+				$this->_log_change(
+					$call_sign_for_log,
+					'delete',
+					array('student_id' => $student_id),
+					$tables['primary'],
+					$tables['log']
+				);
 			}
             return $result;
         }
