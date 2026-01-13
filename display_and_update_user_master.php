@@ -852,7 +852,7 @@ function selectCountry($inp_country) {
 		if ($user_data === FALSE) {
 			$content .= "FATAL ERROR: attempting to get $inp_call_sign returned FALSE<br />";
 		} else {
-			if (count($user_data) > 0) {
+			if (is_array($user_data)) {
 				foreach($user_data as $key => $value) {
 					foreach($value as $thisField => $thisValue) {
 						$$thisField = $thisValue;
