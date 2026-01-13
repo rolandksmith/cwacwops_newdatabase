@@ -4665,7 +4665,7 @@ function student_registration_func() {
 														$registerAsBeginner";
 							}
 							if ($didFundamental) {
-								if ($bestFundamentalScore < 60) {
+								if ($bestResultFundamental < 60) {
 									$content		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
 														your Morse Code Proficiency Assessment result,  
 														CW Academy recommends that you switch to a Fundamental Level class. However, 
@@ -4674,7 +4674,7 @@ function student_registration_func() {
 														$registerAsBeginner";
 								
 								} elseif ($didIntermediate) {
-									if ($bestIntermediateScore < 60) {
+									if ($bestResultIntermediate < 60) {
 										$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
 															your Morse Code Proficiency Assessment result,  
 															CW Academy recommends that you switch to a Fundamental Level class. However, 
@@ -4683,7 +4683,7 @@ function student_registration_func() {
 															$registerAsBeginner";
 									} else {
 										if ($didAdvanced) {
-											if ($bestAdvancedScore < 70) {
+											if ($bestResultAdvanced < 70) {
 												$content 		.= "<p>You have requested a Beginner Level CW Academy class. However, based on 
 																	your Morse Code Proficiency Assessment result,  
 																	recommends that you, at minimum, switch to a Fundamental Level class. In addition, 
