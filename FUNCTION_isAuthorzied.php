@@ -3,11 +3,9 @@ function isAuthorized() {
 	$initializationArray = data_initialization_func();
 	$validUser = $initializationArray['validUser'];
 	if ($validUser == "N") {
+		http_response_code(403);
 		echo "You're not authorized";
-		$bigLoop = TRUE;
-		while (bigLoop) {
-			$ii = 0;
-		}
+		exit;
 	}
 	return "Authorized User";	
 }
