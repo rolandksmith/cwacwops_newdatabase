@@ -10,7 +10,7 @@ function repeating_students_statistics_func() {
 */
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	if ($doDebug) {
