@@ -16,7 +16,6 @@ function this_is_a_function_func() {
 	$userDisplayName	= $initializationArray['userDisplayName'];
 	$userRole			= $initializationArray['userRole'];
 	
-//	CHECK THIS!								//////////////////////
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
@@ -30,27 +29,28 @@ function this_is_a_function_func() {
 //	ini_set('max_execution_time',0);
 //	set_time_limit(0);
 
-//	if ($doDebug) {
+	if ($doDebug) {
 		ini_set('display_errors','1');
 		error_reporting(E_ALL);	
 		$wpdb->show_errors();
-//	} else {
-//		$wpdb->hide_errors();
-//	}
+	} else {
+		$wpdb->hide_errors();
+	}
 
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
 	$strPass					= "1";
 	$theURL						= "$siteURL/CHANGE THIS/";
-	$inp_semester				= '';
 	$inp_rsave					= '';
 	$jobname					= "FIX THIS V$versionNumber";
 	$debugLog					= "";
 	
+	// **ENTER VARIABLES NEEDING DEFINITION HERE
+	
 	function debugReport($message) {
 		global $debugLog, $doDebug;
-		$timestamp = date('Y-m-d H:i:s');
+		$timestamp = current_time('mysql', 1);
 		$debugLog .= "$message ($timestamp)<br />";
 		if ($doDebug) {
 			echo "$message<br />";
@@ -62,7 +62,7 @@ function this_is_a_function_func() {
 	debugReport("</pre>");
 	
 
-// get the input information
+// **VALIDATE _REQUEST VARIABLES
 	if (isset($_REQUEST)) {
 		foreach($_REQUEST as $str_key => $str_value) {
 			if (!is_array($str_value)) {
@@ -246,11 +246,13 @@ function this_is_a_function_func() {
 
 	if ("1" == $strPass) {
 		$content 		.= "<h3>$jobname</h3>
-							<p>
+							<p>**PROGRAM EXPLANATION HERE</p>
 							<form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
+							// **HIDDEN VARIABLES HERE
 							<table style='border-collapse:collapse;'>
+							// **INPUT VARIABLES HERE
 							$testModeOption
 							<tr><td>Save this report to the reports achive?</td>
 							<td><input type='radio' class='formInputButton' name='inp_rsave' value='N' checked='checked'> Do not save the report<br />
@@ -259,9 +261,6 @@ function this_is_a_function_func() {
 							</form></p>";
 	
 
-///// Pass 2 -- do the work
-
-
 	} elseif ("2" == $strPass) {
 	
 	
@@ -269,8 +268,7 @@ function this_is_a_function_func() {
 	}
 	$thisTime 		= date('Y-m-d H:i:s');
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
-/*
-	///// uncomment if the code to save a report is needed
+
 	debugReport("<br />Checking to see if the report is to be saved. inp_rsave: $inp_rsave");
 	if ($inp_rsave == 'Y') {
 		if ($doDebug) {
@@ -295,10 +293,10 @@ function this_is_a_function_func() {
 			}				
 							
 		} else {
-			$content	.= "<br />Storing the report in the reports pod failed";
+			$content	.= "<br />Storing the report in the reports failed";
 		}
 	}
-*/
+
 	$endingMicroTime = microtime(TRUE);
 	$elapsedTime	= $endingMicroTime - $startingMicroTime;
 	$elapsedTime	= number_format($elapsedTime, 4, '.', ',');
