@@ -87,7 +87,8 @@ function program_list_func() {
 	}
 
 
-	
+	$content = "";	
+/*
 	$content = "<style type='text/css'>
 				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
 				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
@@ -148,6 +149,7 @@ function program_list_func() {
 					padding-right: 5px;
 				}
 				</style>";	
+*/
 
 	if ($testMode) {
 		echo "<br /><b>Operating in TestMode</b><br />";
@@ -335,6 +337,12 @@ function program_list_func() {
 								$returnInfo[1]
 								</div>";
 			}
+			// get any announcements and display
+			$announce = display_cwa_announcements();
+			if ($announce) {
+				$content .= "<h4>Announcements</h4>
+							 $announce";
+			}
 		} else {
 			//// display user_master
 			$content		.= "<h4>Advisor Master Data</h4>
@@ -492,6 +500,7 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-list-students-for-a-semester/' target='_blank'>List Students for a Semester</a>
 								<li><a href='$siteURL/cwa-list-user-master-callsign-history' target='_blank'>List User Master Callsign History</a>
 								<li><a href='$siteURL/cwa-maintenance-mode/' target='_blank'>Maintenance Mode</a>
+								<li><a href='$siteURL/cwa-manage-cwa-announcements/' target='_blank'>Manage CWA Announcements</a>
 								<li><a href='$siteURL/cwa-make-or-restore-backups/' target='_blank'>Make or Restore Backups</a>
 								<li><a href='$siteURL/cwa-manage-advisor-class-assignments/' target='_blank'>Manage Advisor Class Assignments</a>
 								<li><a href='$siteURL/cwa-manage-temp-data/' target='_blank'>Manage Temp Data</a>
@@ -588,6 +597,11 @@ function program_list_func() {
 								<li><a href='$siteURL/cwa-display-recent-reminders/' target='_blank'>Display Recent Reminders</a>
 								<li><a href='$siteURL/cwa-display-reminders-for-a-callsign/' target='_blank'>Display Reminders for a Callsign</a>
 								<li><a href='$siteURL/cwa-display-and-update-reminders/' target='_blank'>Display and Update Reminders</a><br />
+								</ul>
+								
+								<h4>Announcement Management</h4>
+								<ul>
+								<li><a href='$siteURL/cwa-manage-cwa-announcements/' target='_blank'>Manage CWA Announcements</a>
 								</ul>
 				
 								<h4>User Master</h4>
@@ -846,6 +860,14 @@ function program_list_func() {
 								$returnInfo[1]
 								</div>";
 			}
+			
+			// get any announcements and display
+			$announce = display_cwa_announcements();
+			if ($announce) {
+				$content .= "<h4>Announcements</h4>
+							 $announce";
+			}
+			
 		}
 		//// display user_master
 		$content		.= "<h4>Advisor Master Data</h4>
@@ -953,6 +975,12 @@ function program_list_func() {
 								<div class='refresh' data-callsign='$userName' data-role='student' data-url='/wp-content/uploads/refreshapi.php' data-seconds='60'>
 								$returnInfo[1]
 								</div>";
+			}
+			// get any announcements and display
+			$announce = display_cwa_announcements();
+			if ($announce) {
+				$content .= "<h4>Announcements</h4>
+							 $announce";
 			}
 		}
 		//// display user_master
