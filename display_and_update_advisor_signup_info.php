@@ -936,132 +936,132 @@ function display_and_update_advisor_info_func() {
 										}
 									}
 									$classCount++;
-									$newACActionLog		= formatActionLog($advisorClass_action_log);
+									$newACActionLog		= formatActionLog($advisorclass_action_log);
 	
 									// display the advisorclass record
 									$content .= "<form method='post' action='$theURL' 
 												name='update_advisor_form' ENCTYPE='multipart/form-data''>
-												<input type='hidden' name='inp_advisorclass_id' value='$advisorClass_ID'>
-												<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorClass_call_sign'>
-												<input type='hidden' name='inp_semester' value='$advisorClass_semester'>
+												<input type='hidden' name='inp_advisorclass_id' value='$advisorclass_ID'>
+												<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorclass_call_sign'>
+												<input type='hidden' name='inp_semester' value='$advisorclass_semester'>
 												<input type='hidden' name='inp_depth' value='$inp_depth'>
 												<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 												<input type='hidden' name='inp_mode' value='$inp_mode'>
-												<h4><b>$advisorClass_call_sign $advisorClass_semester $advisorClass_level Class $advisorClass_sequence</b> Table $advisorClassTableName</h4>
+												<h4><b>$advisorclass_call_sign $advisorclass_semester $advisorclass_level Class $advisorclass_sequence</b> Table $advisorClassTableName</h4>
 												<table style='border-collapse:collapse;'>
 												<tr><td colspan='4'><b><u>Advisor Class Fields</u></b></td></tr>
-												<tr><td style='vertical-align:top;'><b>id</b><br />$advisorClass_ID</td>
-													<td style='vertical-align:top;'><b>call_sign</b><br />$advisorClass_call_sign</td>
-													<td style='vertical-align:top;'><b>sequence</b><br />$advisorClass_sequence</td>
-													<td style='vertical-align:top;'><b>semester</b><br />$advisorClass_semester</td></tr>
-												<tr><td style='vertical-align:top;'><b>timezone_offset</b><br />$advisorClass_timezone_offset</td>
-													<td style='vertical-align:top;'><b>level</b><br />$advisorClass_level</td>
-													<td style='vertical-align:top;'><b>Language</b><br />$advisorClass_language</td>
-													<td style='vertical-align:top;'><b>class_size</b><br />$advisorClass_class_size</td></tr>
-												<tr><td style='vertical-align:top;'><b>class_schedule_Local</b><br />$advisorClass_class_schedule_times $advisorClass_class_schedule_days</td>
-													<td style='vertical-align:top;'><b>class_schedule_utc</b><br />$advisorClass_class_schedule_times_utc $advisorClass_class_schedule_days_utc</td>
-													<td style='vertical-align:top;'><b>class_incomplete</b><br />$advisorClass_class_incomplete</td>
+												<tr><td style='vertical-align:top;'><b>id</b><br />$advisorclass_ID</td>
+													<td style='vertical-align:top;'><b>call_sign</b><br />$advisorclass_call_sign</td>
+													<td style='vertical-align:top;'><b>sequence</b><br />$advisorclass_sequence</td>
+													<td style='vertical-align:top;'><b>semester</b><br />$advisorclass_semester</td></tr>
+												<tr><td style='vertical-align:top;'><b>timezone_offset</b><br />$advisorclass_timezone_offset</td>
+													<td style='vertical-align:top;'><b>level</b><br />$advisorclass_level</td>
+													<td style='vertical-align:top;'><b>Language</b><br />$advisorclass_language</td>
+													<td style='vertical-align:top;'><b>class_size</b><br />$advisorclass_class_size</td></tr>
+												<tr><td style='vertical-align:top;'><b>class_schedule_Local</b><br />$advisorclass_class_schedule_times $advisorclass_class_schedule_days</td>
+													<td style='vertical-align:top;'><b>class_schedule_utc</b><br />$advisorclass_class_schedule_times_utc $advisorclass_class_schedule_days_utc</td>
+													<td style='vertical-align:top;'><b>class_incomplete</b><br />$advisorclass_class_incomplete</td>
 													<td></td></tr>
-												<tr><td style='vertical-align:top;'><b>date_created</b><br />$advisorClass_date_created</td>
-													<td style='vertical-align:top;'><b>date_updated</b><br />$advisorClass_date_updated</td>
+												<tr><td style='vertical-align:top;'><b>date_created</b><br />$advisorclass_date_created</td>
+													<td style='vertical-align:top;'><b>date_updated</b><br />$advisorclass_date_updated</td>
 													<td></td>
 													<td></td></tr>
 												<tr><td colspan='4'><table>
 												<tr><td style='vertical-align:top;'><b>Student01</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student01&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student01</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student01&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student01</a></td>
 													<td style='vertical-align:top;'><b>Student02</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student02&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student02</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student02&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student02</a></td>
 													<td style='vertical-align:top;'><b>Student03</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student03&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student03</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student03&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student03</a></td>
 													<td style='vertical-align:top;'><b>Student04</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student04&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student04</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student04&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student04</a></td>
 													<td style='vertical-align:top;'><b>Student05</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student05&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student05</a></td></tr>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student05&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student05</a></td></tr>
 												<tr><td style='vertical-align:top;'><b>Student06</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student06&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student06</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student06&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student06</a></td>
 													<td style='vertical-align:top;'><b>Student07</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student07&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student07</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student07&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student07</a></td>
 													<td style='vertical-align:top;'><b>Student08</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student08&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student08</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student08&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student08</a></td>
 													<td style='vertical-align:top;'><b>Student09</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student09&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student09</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student09&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student09</a></td>
 													<td style='vertical-align:top;'><b>Student10</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student10&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student10</a></td></tr>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student10&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student10</a></td></tr>
 												<tr><td style='vertical-align:top;'><b>Student11</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student11&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student11</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student11&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student11</a></td>
 													<td style='vertical-align:top;'><b>Student12</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student12&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student12</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student12&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student12</a></td>
 													<td style='vertical-align:top;'><b>Student13</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student13&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student13</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student13&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student13</a></td>
 													<td style='vertical-align:top;'><b>Student14</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student14&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student14</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student14&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student14</a></td>
 													<td style='vertical-align:top;'><b>Student15</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student15&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student15</a></td></tr>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student15&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student15</a></td></tr>
 												<tr><td style='vertical-align:top;'><b>Student16</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student16&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student16</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student16&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student16</a></td>
 													<td style='vertical-align:top;'><b>Student17</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student17&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student17</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student17&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student17</a></td>
 													<td style='vertical-align:top;'><b>Student18</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student18&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student18</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student18&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student18</a></td>
 													<td style='vertical-align:top;'><b>Student19</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student19&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student19</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student19&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student19</a></td>
 													<td style='vertical-align:top;'><b>Student20</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student20&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student20</a></td></tr>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student20&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student20</a></td></tr>
 												<tr><td style='vertical-align:top;'><b>Student21</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student21&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student21</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student21&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student21</a></td>
 													<td style='vertical-align:top;'><b>Student22</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student22&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student22</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student22&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student22</a></td>
 													<td style='vertical-align:top;'><b>Student23</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student23&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student23</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student23&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student23</a></td>
 													<td style='vertical-align:top;'><b>Student24</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student24&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student24</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student24&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student24</a></td>
 													<td style='vertical-align:top;'><b>Student25</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student25&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student25</a></td></tr>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student25&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student25</a></td></tr>
 												<tr><td style='vertical-align:top;'><b>Student26</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student26&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student26</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student26&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student26</a></td>
 													<td style='vertical-align:top;'><b>Student27</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student27&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student27</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student27&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student27</a></td>
 													<td style='vertical-align:top;'><b>Student28</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student28&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student28</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student28&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student28</a></td>
 													<td style='vertical-align:top;'><b>Student29</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student29&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student29</a></td>
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student29&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student29</a></td>
 													<td style='vertical-align:top;'><b>Student30</b><br />
-															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorClass_student30&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
-															target='_blank'>$advisorClass_student30</a></td></tr></table></td></tr>
-												<tr><td style='vertical-align:top;'><b>number_students</b><br />$advisorClass_number_students</td>
-													<td style='vertical-align:top;'><b>class_evaluation_complete</b><br />$advisorClass_class_evaluation_complete</td>
-													<td style='vertical-align:top;'><b>class_comments</b><br />$advisorClass_class_comments</td>
-													<td style='vertical-align:top;'><b>copycontrol</b><br />$advisorClass_copy_control</td></tr>
-												<tr><td style='vertical-align:top;' colspan='4'><b>action_log</b><br />$advisorClass_action_log</td></tr>";
+															<a href='$studentUpdateURL?request_type=callsign&request_info=$advisorclass_student30&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' 
+															target='_blank'>$advisorclass_student30</a></td></tr></table></td></tr>
+												<tr><td style='vertical-align:top;'><b>number_students</b><br />$advisorclass_number_students</td>
+													<td style='vertical-align:top;'><b>class_evaluation_complete</b><br />$advisorclass_class_evaluation_complete</td>
+													<td style='vertical-align:top;'><b>class_comments</b><br />$advisorclass_class_comments</td>
+													<td style='vertical-align:top;'><b>copycontrol</b><br />$advisorclass_copy_control</td></tr>
+												<tr><td style='vertical-align:top;' colspan='4'><b>action_log</b><br />$advisorclass_action_log</td></tr>";
 
 									if ($classCount == $numACRows) {			// show add a class
 										$content	.= "<tr><td><input type='submit' class='formInputButton' name='submitswitch' value='Update this Class' /></td>
@@ -1301,7 +1301,7 @@ function display_and_update_advisor_info_func() {
 					$firstTime					= TRUE;
 					foreach($languageArray as $thisLanguage) {
 						$thisChecked			= '';
-						if ($advisorClass_language == $thisLanguage) {
+						if ($advisorclass_language == $thisLanguage) {
 							$thisChecked		= ' checked ';
 						}
 						if ($firstTime) {
@@ -1312,12 +1312,12 @@ function display_and_update_advisor_info_func() {
 						}
 					}
 
-					$content	.= "<h3>Update the Advisor Class $advisorClass_sequence for $advisorClass_call_sign</h3>
+					$content	.= "<h3>Update the Advisor Class $advisorclass_sequence for $advisorclass_call_sign</h3>
 									<p>Table: $advisorClassTableName</p>
 									<form method='post' name='selection_form' action='$theURL' 
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='6'>
-									<input type='hidden' name='inp_advisorclass_id' value='$advisorClass_ID'>
+									<input type='hidden' name='inp_advisorclass_id' value='$advisorclass_ID'>
 									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
@@ -1325,111 +1325,111 @@ function display_and_update_advisor_info_func() {
 									<tr><th style='width:280px;'>Field</th>
 										<th>Value</th></tr>
 								   <tr><td>ID</td>
-										<td>$advisorClass_ID</td></tr>
+										<td>$advisorclass_ID</td></tr>
 									<tr><td>Call Sign</td>
-										<td>$advisorClass_call_sign</td></tr>
+										<td>$advisorclass_call_sign</td></tr>
 									<tr><td>Sequence</td>
-										<td>$advisorClass_sequence</td></tr>
+										<td>$advisorclass_sequence</td></tr>
 									<tr><td>Semester</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_semester' size='15' maxlenth='15' value='$advisorClass_semester'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_semester' size='15' maxlenth='15' value='$advisorclass_semester'></td></tr>
 									<tr><td>Timezone Offset</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_timezone_offset' size='8' maxlenth='8' value='$advisorClass_timezone_offset'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_timezone_offset' size='8' maxlenth='8' value='$advisorclass_timezone_offset'></td></tr>
 									<tr><td>Level</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_level' size='15' maxlenth='15' value='$advisorClass_level'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_level' size='15' maxlenth='15' value='$advisorclass_level'></td></tr>
 									<tr><td style='vertical-align:top;'>Language</td>
 										<td>$languageOptions</td></tr>
 									<tr><td>Class Size</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_size' size='5' maxlenth='5' value='$advisorClass_class_size'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_size' size='5' maxlenth='5' value='$advisorclass_class_size'></td></tr>
 									<tr><td>Class Schedule Days</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days' size='20' maxlenth='20' value='$advisorClass_class_schedule_days'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days' size='20' maxlenth='20' value='$advisorclass_class_schedule_days'></td></tr>
 									<tr><td>Class Schedule Times</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times' size='5' maxlenth='5' value='$advisorClass_class_schedule_times'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times' size='5' maxlenth='5' value='$advisorclass_class_schedule_times'></td></tr>
 									<tr><td>Class Schedule Days Utc</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days_utc' size='20' maxlenth='20' value='$advisorClass_class_schedule_days_utc'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_days_utc' size='20' maxlenth='20' value='$advisorclass_class_schedule_days_utc'></td></tr>
 									<tr><td>Class Schedule Times Utc</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times_utc' size='5' maxlenth='5' value='$advisorClass_class_schedule_times_utc'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_schedule_times_utc' size='5' maxlenth='5' value='$advisorclass_class_schedule_times_utc'></td></tr>
 									<tr><td>Class Incomplete</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_incomplete' size='5' maxlenth='5' value='$advisorClass_class_incomplete'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_incomplete' size='5' maxlenth='5' value='$advisorclass_class_incomplete'></td></tr>
 									<tr><td>Date Created</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_date_created' size='20' maxlenth='20' value='$advisorClass_date_created'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_date_created' size='20' maxlenth='20' value='$advisorclass_date_created'></td></tr>
 									<tr><td>Date Updated</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_date_updated' size='20' maxlenth='20' value='$advisorClass_date_updated'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_date_updated' size='20' maxlenth='20' value='$advisorclass_date_updated'></td></tr>
 
 									<tr><td colspan='2'><table>
 									<tr><td>Student01<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student01' size='20' maxlenth='20' value='$advisorClass_student01'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student01' size='20' maxlenth='20' value='$advisorclass_student01'></td>
 										<td>Student02<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student02' size='20' maxlenth='20' value='$advisorClass_student02'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student02' size='20' maxlenth='20' value='$advisorclass_student02'></td>
 										<td>Student03<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student03' size='20' maxlenth='20' value='$advisorClass_student03'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student03' size='20' maxlenth='20' value='$advisorclass_student03'></td>
 										<td>Student04<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student04' size='20' maxlenth='20' value='$advisorClass_student04'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student04' size='20' maxlenth='20' value='$advisorclass_student04'></td>
 										<td>Student05<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student05' size='20' maxlenth='20' value='$advisorClass_student05'></td></tr>
+											<input type='text' class='formInputText' name='inp_advisorclass_student05' size='20' maxlenth='20' value='$advisorclass_student05'></td></tr>
 									<tr><td>Student06<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student06' size='20' maxlenth='20' value='$advisorClass_student06'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student06' size='20' maxlenth='20' value='$advisorclass_student06'></td>
 										<td>Student07<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student07' size='20' maxlenth='20' value='$advisorClass_student07'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student07' size='20' maxlenth='20' value='$advisorclass_student07'></td>
 										<td>Student08<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student08' size='20' maxlenth='20' value='$advisorClass_student08'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student08' size='20' maxlenth='20' value='$advisorclass_student08'></td>
 										<td>Student09<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student09' size='20' maxlenth='20' value='$advisorClass_student09'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student09' size='20' maxlenth='20' value='$advisorclass_student09'></td>
 										<td>Student10<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student10' size='20' maxlenth='20' value='$advisorClass_student10'></td></tr>
+											<input type='text' class='formInputText' name='inp_advisorclass_student10' size='20' maxlenth='20' value='$advisorclass_student10'></td></tr>
 									<tr><td>Student11<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student11' size='20' maxlenth='20' value='$advisorClass_student11'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student11' size='20' maxlenth='20' value='$advisorclass_student11'></td>
 										<td>Student12<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student12' size='20' maxlenth='20' value='$advisorClass_student12'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student12' size='20' maxlenth='20' value='$advisorclass_student12'></td>
 										<td>Student13<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student13' size='20' maxlenth='20' value='$advisorClass_student13'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student13' size='20' maxlenth='20' value='$advisorclass_student13'></td>
 										<td>Student14<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student14' size='20' maxlenth='20' value='$advisorClass_student14'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student14' size='20' maxlenth='20' value='$advisorclass_student14'></td>
 										<td>Student15<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student15' size='20' maxlenth='20' value='$advisorClass_student15'></td></tr>
+											<input type='text' class='formInputText' name='inp_advisorclass_student15' size='20' maxlenth='20' value='$advisorclass_student15'></td></tr>
 									<tr><td>Student16<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student16' size='20' maxlenth='20' value='$advisorClass_student16'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student16' size='20' maxlenth='20' value='$advisorclass_student16'></td>
 										<td>Student17<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student17' size='20' maxlenth='20' value='$advisorClass_student17'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student17' size='20' maxlenth='20' value='$advisorclass_student17'></td>
 										<td>Student18<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student18' size='20' maxlenth='20' value='$advisorClass_student18'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student18' size='20' maxlenth='20' value='$advisorclass_student18'></td>
 										<td>Student19<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student19' size='20' maxlenth='20' value='$advisorClass_student19'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student19' size='20' maxlenth='20' value='$advisorclass_student19'></td>
 										<td>Student20<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student20' size='20' maxlenth='20' value='$advisorClass_student20'></td></tr>
+											<input type='text' class='formInputText' name='inp_advisorclass_student20' size='20' maxlenth='20' value='$advisorclass_student20'></td></tr>
 									<tr><td>Student21<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student21' size='20' maxlenth='20' value='$advisorClass_student21'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student21' size='20' maxlenth='20' value='$advisorclass_student21'></td>
 										<td>Student22<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student22' size='20' maxlenth='20' value='$advisorClass_student22'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student22' size='20' maxlenth='20' value='$advisorclass_student22'></td>
 										<td>Student23<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student23' size='20' maxlenth='20' value='$advisorClass_student23'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student23' size='20' maxlenth='20' value='$advisorclass_student23'></td>
 										<td>Student24<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student24' size='20' maxlenth='20' value='$advisorClass_student24'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student24' size='20' maxlenth='20' value='$advisorclass_student24'></td>
 										<td>Student25<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student25' size='20' maxlenth='20' value='$advisorClass_student25'></td></tr>
+											<input type='text' class='formInputText' name='inp_advisorclass_student25' size='20' maxlenth='20' value='$advisorclass_student25'></td></tr>
 									<tr><td>Student26<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student26' size='20' maxlenth='20' value='$advisorClass_student26'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student26' size='20' maxlenth='20' value='$advisorclass_student26'></td>
 										<td>Student27<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student27' size='20' maxlenth='20' value='$advisorClass_student27'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student27' size='20' maxlenth='20' value='$advisorclass_student27'></td>
 										<td>Student28<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student28' size='20' maxlenth='20' value='$advisorClass_student28'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student28' size='20' maxlenth='20' value='$advisorclass_student28'></td>
 										<td>Student29<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student29' size='20' maxlenth='20' value='$advisorClass_student29'></td>
+											<input type='text' class='formInputText' name='inp_advisorclass_student29' size='20' maxlenth='20' value='$advisorclass_student29'></td>
 										<td>Student30<br />
-											<input type='text' class='formInputText' name='inp_advisorclass_student30' size='20' maxlenth='20' value='$advisorClass_student30'></td></tr></table>
+											<input type='text' class='formInputText' name='inp_advisorclass_student30' size='20' maxlenth='20' value='$advisorclass_student30'></td></tr></table>
 									<tr><td>Number Students</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_number_students' size='5' maxlenth='5' value='$advisorClass_number_students'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_number_students' size='5' maxlenth='5' value='$advisorclass_number_students'></td></tr>
 									<tr><td>Class Evaluation Complete</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_class_evaluation_complete' size='5' maxlenth='5' value='$advisorClass_class_evaluation_complete'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_class_evaluation_complete' size='5' maxlenth='5' value='$advisorclass_class_evaluation_complete'></td></tr>
 									<tr><td>Class Comments</td>
-										<td><textarea class='formInputText' name='inp_advisorclass_class_comments' rows='5' cols= '50'>$advisorClass_class_comments</textarea></td></tr>
+										<td><textarea class='formInputText' name='inp_advisorclass_class_comments' rows='5' cols= '50'>$advisorclass_class_comments</textarea></td></tr>
 									<tr><td>Copycontrol</td>
-										<td><input type='text' class='formInputText' name='inp_advisorclass_copy_control' size='15' maxlenth='15' value='$advisorClass_copy_control'></td></tr>
+										<td><input type='text' class='formInputText' name='inp_advisorclass_copy_control' size='15' maxlenth='15' value='$advisorclass_copy_control'></td></tr>
 									<tr><td>Action Log</td>
-										<td><textarea class='formInputText' name='inp_advisorclass_action_log' rows='5' cols= '50'>$advisorClass_action_log</textarea></td></tr>
+										<td><textarea class='formInputText' name='inp_advisorclass_action_log' rows='5' cols= '50'>$advisorclass_action_log</textarea></td></tr>
 									<tr><td>&nbsp;</td>
 										<td><input class='formInputButton' type='submit' value='Submit' /></td></tr>
 									</table></form>
-									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p><br />"; 
+									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorclass_call_sign&strpass=2'>HERE</a></p><br />"; 
 
 				}			// end of the advisorClass while
 			} else {
@@ -1467,301 +1467,300 @@ function display_and_update_advisor_info_func() {
 					$dotheUpdate	= FALSE;
 					$actionContent	= '';
 					$updateUTC		= FALSE;
-					if ($inp_advisorclass_timezone_offset != $advisorClass_timezone_offset) {
+					if ($inp_advisorclass_timezone_offset != $advisorclass_timezone_offset) {
 						$doTheUpdate = TRUE;
-						$updateParams['advisorClass_timezone_offset'] = $inp_advisorclass_timezone_offset;
+						$updateParams['advisorclass_timezone_offset'] = $inp_advisorclass_timezone_offset;
 						$updateFormat[] = "%d";
-						$actionContent .= "Updated advisorclass_timezone_offset of $advisorClass_timezone_offset to $inp_advisorclass_timezone_offset. ";
+						$actionContent .= "Updated advisorclass_timezone_offset of $advisorclass_timezone_offset to $inp_advisorclass_timezone_offset. ";
 						$updateUTC	= TRUE;
-						$advisorClass_timezone_offset	= $inp_advisorclass_timezone_offset;
+						$advisorclass_timezone_offset	= $inp_advisorclass_timezone_offset;
 					}
-					if ($inp_advisorclass_level != $advisorClass_level) {
+					if ($inp_advisorclass_level != $advisorclass_level) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_level'] = $inp_advisorclass_level;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_level of $advisorClass_level to $inp_advisorclass_level. ";
+						$actionContent .= "Updated advisorclass_level of $advisorclass_level to $inp_advisorclass_level. ";
 					}
-					if ($inp_advisorclass_language != $advisorClass_language) {
+					if ($inp_advisorclass_language != $advisorclass_language) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_language'] = $inp_advisorclass_language;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_language of $advisorClass_language to $inp_advisorclass_language. ";
+						$actionContent .= "Updated advisorclass_language of $advisorclass_language to $inp_advisorclass_language. ";
 					}
-					if ($inp_advisorclass_class_size != $advisorClass_class_size) {
+					if ($inp_advisorclass_class_size != $advisorclass_class_size) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_size'] = $inp_advisorclass_class_size;
 						$updateFormat[] = "%d";
-						$actionContent .= "Updated advisorclass_class_size of $advisorClass_class_size to $inp_advisorclass_class_size. ";
+						$actionContent .= "Updated advisorclass_class_size of $advisorclass_class_size to $inp_advisorclass_class_size. ";
 					}
-					if ($inp_advisorclass_class_schedule_days != $advisorClass_class_schedule_days) {
+					if ($inp_advisorclass_class_schedule_days != $advisorclass_class_schedule_days) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_schedule_days'] = $inp_advisorclass_class_schedule_days;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_schedule_days of $advisorClass_class_schedule_days to $inp_advisorclass_class_schedule_days. ";
+						$actionContent .= "Updated advisorclass_class_schedule_days of $advisorclass_class_schedule_days to $inp_advisorclass_class_schedule_days. ";
 						$updateUTC	= TRUE;
-						$advisorClass_class_schedule_days	= $inp_advisorclass_class_schedule_days;
+						$advisorclass_class_schedule_days	= $inp_advisorclass_class_schedule_days;
 					}
-					if ($inp_advisorclass_class_schedule_times != $advisorClass_class_schedule_times) {
+					if ($inp_advisorclass_class_schedule_times != $advisorclass_class_schedule_times) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_schedule_times'] = $inp_advisorclass_class_schedule_times;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_schedule_times of $advisorClass_class_schedule_times to $inp_advisorclass_class_schedule_times. ";
+						$actionContent .= "Updated advisorclass_class_schedule_times of $advisorclass_class_schedule_times to $inp_advisorclass_class_schedule_times. ";
 						$updateUTC	= TRUE;
-						$advisorClass_class_schedule_times	= $inp_advisorclass_class_schedule_times;
+						$advisorclass_class_schedule_times	= $inp_advisorclass_class_schedule_times;
 					}
-					if ($inp_advisorclass_class_schedule_days_utc != $advisorClass_class_schedule_days_utc) {
+					if ($inp_advisorclass_class_schedule_days_utc != $advisorclass_class_schedule_days_utc) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_schedule_days_utc'] = $inp_advisorclass_class_schedule_days_utc;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_schedule_days_utc of $advisorClass_class_schedule_days_utc to $inp_advisorclass_class_schedule_days_utc. ";
+						$actionContent .= "Updated advisorclass_class_schedule_days_utc of $advisorclass_class_schedule_days_utc to $inp_advisorclass_class_schedule_days_utc. ";
 					}
-					if ($inp_advisorclass_class_schedule_times_utc != $advisorClass_class_schedule_times_utc) {
+					if ($inp_advisorclass_class_schedule_times_utc != $advisorclass_class_schedule_times_utc) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_schedule_times_utc'] = $inp_advisorclass_class_schedule_times_utc;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_schedule_times_utc of $advisorClass_class_schedule_times_utc to $inp_advisorclass_class_schedule_times_utc. ";
+						$actionContent .= "Updated advisorclass_class_schedule_times_utc of $advisorclass_class_schedule_times_utc to $inp_advisorclass_class_schedule_times_utc. ";
 					}
-					if ($inp_advisorclass_class_incomplete != $advisorClass_class_incomplete) {
+					if ($inp_advisorclass_class_incomplete != $advisorclass_class_incomplete) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_incomplete'] = $inp_advisorclass_class_incomplete;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_incomplete of $advisorClass_class_incomplete to $inp_advisorclass_class_incomplete. ";
+						$actionContent .= "Updated advisorclass_class_incomplete of $advisorclass_class_incomplete to $inp_advisorclass_class_incomplete. ";
 					}
-					if ($inp_advisorclass_date_created != $advisorClass_date_created) {
+					if ($inp_advisorclass_date_created != $advisorclass_date_created) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_date_created'] = $inp_advisorclass_date_created;
 						$updateFormat[] = "%2";
-						$actionContent .= "Updated advisorclass_date_created of $advisorClass_date_created to $inp_advisorclass_date_created. ";
+						$actionContent .= "Updated advisorclass_date_created of $advisorclass_date_created to $inp_advisorclass_date_created. ";
 					}
-					if ($inp_advisorclass_date_updated != $advisorClass_date_updated) {
+					if ($inp_advisorclass_date_updated != $advisorclass_date_updated) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_date_updated'] = $inp_advisorclass_date_updated;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_date_updated of $advisorClass_date_updated to $inp_advisorclass_date_updated. ";
+						$actionContent .= "Updated advisorclass_date_updated of $advisorclass_date_updated to $inp_advisorclass_date_updated. ";
 					}
-					if ($inp_advisorclass_student01 != $advisorClass_student01) {
+					if ($inp_advisorclass_student01 != $advisorclass_student01) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student01'] = $inp_advisorclass_student01;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student01 of $advisorClass_student01 to $inp_advisorclass_student01. ";
+						$actionContent .= "Updated advisorclass_student01 of $advisorclass_student01 to $inp_advisorclass_student01. ";
 					}
-					if ($inp_advisorclass_student02 != $advisorClass_student02) {
+					if ($inp_advisorclass_student02 != $advisorclass_student02) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student02'] = $inp_advisorclass_student02;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student02 of $advisorClass_student02 to $inp_advisorclass_student02. ";
+						$actionContent .= "Updated advisorclass_student02 of $advisorclass_student02 to $inp_advisorclass_student02. ";
 					}
-					if ($inp_advisorclass_student03 != $advisorClass_student03) {
+					if ($inp_advisorclass_student03 != $advisorclass_student03) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student03'] = $inp_advisorclass_student03;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student03 of $advisorClass_student03 to $inp_advisorclass_student03. ";
+						$actionContent .= "Updated advisorclass_student03 of $advisorclass_student03 to $inp_advisorclass_student03. ";
 					}
-					if ($inp_advisorclass_student04 != $advisorClass_student04) {
+					if ($inp_advisorclass_student04 != $advisorclass_student04) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student04'] = $inp_advisorclass_student04;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student04 of $advisorClass_student04 to $inp_advisorclass_student04. ";
+						$actionContent .= "Updated advisorclass_student04 of $advisorclass_student04 to $inp_advisorclass_student04. ";
 					}
-					if ($inp_advisorclass_student05 != $advisorClass_student05) {
+					if ($inp_advisorclass_student05 != $advisorclass_student05) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student05'] = $inp_advisorclass_student05;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student05 of $advisorClass_student05 to $inp_advisorclass_student05. ";
+						$actionContent .= "Updated advisorclass_student05 of $advisorclass_student05 to $inp_advisorclass_student05. ";
 					}
-					if ($inp_advisorclass_student06 != $advisorClass_student06) {
+					if ($inp_advisorclass_student06 != $advisorclass_student06) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student06'] = $inp_advisorclass_student06;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student06 of $advisorClass_student06 to $inp_advisorclass_student06. ";
+						$actionContent .= "Updated advisorclass_student06 of $advisorclass_student06 to $inp_advisorclass_student06. ";
 					}
-					if ($inp_advisorclass_student07 != $advisorClass_student07) {
+					if ($inp_advisorclass_student07 != $advisorclass_student07) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student07'] = $inp_advisorclass_student07;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student07 of $advisorClass_student07 to $inp_advisorclass_student07. ";
+						$actionContent .= "Updated advisorclass_student07 of $advisorclass_student07 to $inp_advisorclass_student07. ";
 					}
-					if ($inp_advisorclass_student08 != $advisorClass_student08) {
+					if ($inp_advisorclass_student08 != $advisorclass_student08) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student08'] = $inp_advisorclass_student08;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student08 of $advisorClass_student08 to $inp_advisorclass_student08. ";
+						$actionContent .= "Updated advisorclass_student08 of $advisorclass_student08 to $inp_advisorclass_student08. ";
 					}
-					if ($inp_advisorclass_student09 != $advisorClass_student09) {
+					if ($inp_advisorclass_student09 != $advisorclass_student09) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student09'] = $inp_advisorclass_student09;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student09 of $advisorClass_student09 to $inp_advisorclass_student09. ";
+						$actionContent .= "Updated advisorclass_student09 of $advisorclass_student09 to $inp_advisorclass_student09. ";
 					}
-					if ($inp_advisorclass_student10 != $advisorClass_student10) {
+					if ($inp_advisorclass_student10 != $advisorclass_student10) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student10'] = $inp_advisorclass_student10;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student10 of $advisorClass_student10 to $inp_advisorclass_student10. ";
+						$actionContent .= "Updated advisorclass_student10 of $advisorclass_student10 to $inp_advisorclass_student10. ";
 					}
-					if ($inp_advisorclass_student11 != $advisorClass_student11) {
+					if ($inp_advisorclass_student11 != $advisorclass_student11) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student11'] = $inp_advisorclass_student11;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student11 of $advisorClass_student11 to $inp_advisorclass_student11. ";
+						$actionContent .= "Updated advisorclass_student11 of $advisorclass_student11 to $inp_advisorclass_student11. ";
 					}
-					if ($inp_advisorclass_student12 != $advisorClass_student12) {
+					if ($inp_advisorclass_student12 != $advisorclass_student12) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student12'] = $inp_advisorclass_student12;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student12 of $advisorClass_student12 to $inp_advisorclass_student12. ";
+						$actionContent .= "Updated advisorclass_student12 of $advisorclass_student12 to $inp_advisorclass_student12. ";
 					}
-					if ($inp_advisorclass_student13 != $advisorClass_student13) {
+					if ($inp_advisorclass_student13 != $advisorclass_student13) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student13'] = $inp_advisorclass_student13;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student13 of $advisorClass_student13 to $inp_advisorclass_student13. ";
+						$actionContent .= "Updated advisorclass_student13 of $advisorclass_student13 to $inp_advisorclass_student13. ";
 					}
-					if ($inp_advisorclass_student14 != $advisorClass_student14) {
+					if ($inp_advisorclass_student14 != $advisorclass_student14) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student14'] = $inp_advisorclass_student14;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student14 of $advisorClass_student14 to $inp_advisorclass_student14. ";
+						$actionContent .= "Updated advisorclass_student14 of $advisorclass_student14 to $inp_advisorclass_student14. ";
 					}
-					if ($inp_advisorclass_student15 != $advisorClass_student15) {
+					if ($inp_advisorclass_student15 != $advisorclass_student15) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student15'] = $inp_advisorclass_student15;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student15 of $advisorClass_student15 to $inp_advisorclass_student15. ";
+						$actionContent .= "Updated advisorclass_student15 of $advisorclass_student15 to $inp_advisorclass_student15. ";
 					}
-					if ($inp_advisorclass_student16 != $advisorClass_student16) {
+					if ($inp_advisorclass_student16 != $advisorclass_student16) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student16'] = $inp_advisorclass_student16;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student16 of $advisorClass_student16 to $inp_advisorclass_student16. ";
+						$actionContent .= "Updated advisorclass_student16 of $advisorclass_student16 to $inp_advisorclass_student16. ";
 					}
-					if ($inp_advisorclass_student17 != $advisorClass_student17) {
+					if ($inp_advisorclass_student17 != $advisorclass_student17) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student17'] = $inp_advisorclass_student17;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student17 of $advisorClass_student17 to $inp_advisorclass_student17. ";
+						$actionContent .= "Updated advisorclass_student17 of $advisorclass_student17 to $inp_advisorclass_student17. ";
 					}
-					if ($inp_advisorclass_student18 != $advisorClass_student18) {
+					if ($inp_advisorclass_student18 != $advisorclass_student18) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student18'] = $inp_advisorclass_student18;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student18 of $advisorClass_student18 to $inp_advisorclass_student18. ";
+						$actionContent .= "Updated advisorclass_student18 of $advisorclass_student18 to $inp_advisorclass_student18. ";
 					}
-					if ($inp_advisorclass_student19 != $advisorClass_student19) {
+					if ($inp_advisorclass_student19 != $advisorclass_student19) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student19'] = $inp_advisorclass_student19;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student19 of $advisorClass_student19 to $inp_advisorclass_student19. ";
+						$actionContent .= "Updated advisorclass_student19 of $advisorclass_student19 to $inp_advisorclass_student19. ";
 					}
-					if ($inp_advisorclass_student20 != $advisorClass_student20) {
+					if ($inp_advisorclass_student20 != $advisorclass_student20) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student20'] = $inp_advisorclass_student20;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student20 of $advisorClass_student20 to $inp_advisorclass_student20. ";
+						$actionContent .= "Updated advisorclass_student20 of $advisorclass_student20 to $inp_advisorclass_student20. ";
 					}
-					if ($inp_advisorclass_student21 != $advisorClass_student21) {
+					if ($inp_advisorclass_student21 != $advisorclass_student21) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student21'] = $inp_advisorclass_student21;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student21 of $advisorClass_student21 to $inp_advisorclass_student21. ";
+						$actionContent .= "Updated advisorclass_student21 of $advisorclass_student21 to $inp_advisorclass_student21. ";
 					}
-					if ($inp_advisorclass_student22 != $advisorClass_student22) {
+					if ($inp_advisorclass_student22 != $advisorclass_student22) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student22'] = $inp_advisorclass_student22;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student22 of $advisorClass_student22 to $inp_advisorclass_student22. ";
+						$actionContent .= "Updated advisorclass_student22 of $advisorclass_student22 to $inp_advisorclass_student22. ";
 					}
-					if ($inp_advisorclass_student23 != $advisorClass_student23) {
+					if ($inp_advisorclass_student23 != $advisorclass_student23) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student23'] = $inp_advisorclass_student23;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student23 of $advisorClass_student23 to $inp_advisorclass_student23. ";
+						$actionContent .= "Updated advisorclass_student23 of $advisorclass_student23 to $inp_advisorclass_student23. ";
 					}
-					if ($inp_advisorclass_student24 != $advisorClass_student24) {
+					if ($inp_advisorclass_student24 != $advisorclass_student24) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student24'] = $inp_advisorclass_student24;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student24 of $advisorClass_student24 to $inp_advisorclass_student24. ";
+						$actionContent .= "Updated advisorclass_student24 of $advisorclass_student24 to $inp_advisorclass_student24. ";
 					}
-					if ($inp_advisorclass_student25 != $advisorClass_student25) {
+					if ($inp_advisorclass_student25 != $advisorclass_student25) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student25'] = $inp_advisorclass_student25;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student25 of $advisorClass_student25 to $inp_advisorclass_student25. ";
+						$actionContent .= "Updated advisorclass_student25 of $advisorclass_student25 to $inp_advisorclass_student25. ";
 					}
-					if ($inp_advisorclass_student26 != $advisorClass_student26) {
+					if ($inp_advisorclass_student26 != $advisorclass_student26) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student26'] = $inp_advisorclass_student26;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student26 of $advisorClass_student26 to $inp_advisorclass_student26. ";
+						$actionContent .= "Updated advisorclass_student26 of $advisorclass_student26 to $inp_advisorclass_student26. ";
 					}
-					if ($inp_advisorclass_student27 != $advisorClass_student27) {
+					if ($inp_advisorclass_student27 != $advisorclass_student27) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student27'] = $inp_advisorclass_student27;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student27 of $advisorClass_student27 to $inp_advisorclass_student27. ";
+						$actionContent .= "Updated advisorclass_student27 of $advisorclass_student27 to $inp_advisorclass_student27. ";
 					}
-					if ($inp_advisorclass_student28 != $advisorClass_student28) {
+					if ($inp_advisorclass_student28 != $advisorclass_student28) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student28'] = $inp_advisorclass_student28;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student28 of $advisorClass_student28 to $inp_advisorclass_student28. ";
+						$actionContent .= "Updated advisorclass_student28 of $advisorclass_student28 to $inp_advisorclass_student28. ";
 					}
-					if ($inp_advisorclass_student29 != $advisorClass_student29) {
+					if ($inp_advisorclass_student29 != $advisorclass_student29) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student29'] = $inp_advisorclass_student29;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student29 of $advisorClass_student29 to $inp_advisorclass_student29. ";
+						$actionContent .= "Updated advisorclass_student29 of $advisorclass_student29 to $inp_advisorclass_student29. ";
 					}
-					if ($inp_advisorclass_student30 != $advisorClass_student30) {
+					if ($inp_advisorclass_student30 != $advisorclass_student30) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_student30'] = $inp_advisorclass_student30;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_student30 of $advisorClass_student30 to $inp_advisorclass_student30. ";
+						$actionContent .= "Updated advisorclass_student30 of $advisorclass_student30 to $inp_advisorclass_student30. ";
 					}
-					if ($inp_advisorclass_number_students != $advisorClass_number_students) {
+					if ($inp_advisorclass_number_students != $advisorclass_number_students) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_number_students'] = $inp_advisorclass_number_students;
 						$updateFormat[] = "%d";
-						$actionContent .= "Updated advisorclass_number_students of $advisorClass_number_students to $inp_advisorclass_number_students. ";
+						$actionContent .= "Updated advisorclass_number_students of $advisorclass_number_students to $inp_advisorclass_number_students. ";
 					}
-					if ($inp_advisorclass_class_evaluation_complete != $advisorClass_class_evaluation_complete) {
+					if ($inp_advisorclass_class_evaluation_complete != $advisorclass_class_evaluation_complete) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_evaluation_complete'] = $inp_advisorclass_class_evaluation_complete;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_evaluation_complete of $advisorClass_class_evaluation_complete to $inp_advisorclass_class_evaluation_complete. ";
+						$actionContent .= "Updated advisorclass_class_evaluation_complete of $advisorclass_class_evaluation_complete to $inp_advisorclass_class_evaluation_complete. ";
 					}
-					if ($inp_advisorclass_class_comments != $advisorClass_class_comments) {
+					if ($inp_advisorclass_class_comments != $advisorclass_class_comments) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_class_comments'] = $inp_advisorclass_class_comments;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_class_comments of $advisorClass_class_comments to $inp_advisorclass_class_comments. ";
+						$actionContent .= "Updated advisorclass_class_comments of $advisorclass_class_comments to $inp_advisorclass_class_comments. ";
 					}
-					if ($inp_advisorclass_copy_control != $advisorClass_copy_control) {
+					if ($inp_advisorclass_copy_control != $advisorclass_copy_control) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_copy_control'] = $inp_advisorclass_copy_control;
 						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_copy_control of $advisorClass_copy_control to $inp_advisorclass_copy_control. ";
+						$actionContent .= "Updated advisorclass_copy_control of $advisorclass_copy_control to $inp_advisorclass_copy_control. ";
 					}
-					if ($inp_advisorclass_action_log != $advisorClass_action_log) {
+					if ($inp_advisorclass_action_log != $advisorclass_action_log) {
 						$doTheUpdate = TRUE;
 						$updateParams['advisorclass_action_log'] = $inp_advisorclass_action_log;
-						$updateFormat[] = "%s";
-						$actionContent .= "Updated advisorclass_action_log of $advisorClass_action_log to $inp_advisorclass_action_log. ";
+						$actionContent .= "Updated advisorclass_action_log of $advisorclass_action_log to $inp_advisorclass_action_log. ";
 					}
 					
 					if ($updateUTC) {
 						if ($doDebug) {
 							debugReport("Updating UTC info due to a local time change");
 						}
-						$utcResult		= utcConvert('toutc',$advisorClass_timezone_offset,$advisorClass_class_schedule_times,$advisorClass_class_schedule_days,$doDebug);
+						$utcResult		= utcConvert('toutc',$advisorclass_timezone_offset,$advisorclass_class_schedule_times,$advisorclass_class_schedule_days,$doDebug);
 						if ($utcResult[0] == 'FAIL') {
 							if ($doDebug) {
-								debugReport("converting $advisorClass_timezone_offset,$inp_class_schedule_times,$inp_class_schedule_days to UTC failed");
+								debugReport("converting $advisorclass_timezone_offset,$inp_class_schedule_times,$inp_class_schedule_days to UTC failed");
 							}
 						} else {
-							$inp_advisorClass_class_schedule_times_utc				= $utcResult[1];
-							$inp_advisorClass_class_schedule_days_utc				= $utcResult[2];
+							$inp_advisorclass_class_schedule_times_utc				= $utcResult[1];
+							$inp_advisorclass_class_schedule_days_utc				= $utcResult[2];
 							$updateParams['advisorclass_class_schedule_days_utc'] 	= $utcResult[2];
 							$updateFormat[]											= '%s';
 							$updateParams['advisorclass_class_schedule_times_utc']	= $utcResult[1];
@@ -1782,9 +1781,9 @@ function display_and_update_advisor_info_func() {
 							$myInt ++;
 						}
 					}
-					if ($myInt != $advisorClass_number_students) {
+					if ($myInt != $advisorclass_number_students) {
 						if ($doDebug) {
-							debugReport("advisorClass_number_students is $advisorClass_number_students which does not match $myInt actual students");
+							debugReport("advisorclass_number_students is $advisorclass_number_students which does not match $myInt actual students");
 						}
 						$inp_number_students		= $myInt;
 						$doTheUpdate = TRUE;
@@ -1799,12 +1798,8 @@ function display_and_update_advisor_info_func() {
 							$myStr = print_r($updateParams,TRUE);
 							debugReport("$myStr</pre>");
 						}
-						if ($advisorClass_action_log != $inp_advisorclass_action_log) { 
-							$advisorClass_action_log	= $inp_advisorclass_action_log;
-						}
-						$advisorClass_action_log				= "$advisorClass_action_log ADVUPDATE $actionDate $userName $actionContent ";
-						$updateParams['advisorclass_action_log'] = $advisorClass_action_log;
-						$updateFormat[]							= '%s';
+						$advisorclass_action_log .= " ADVUPDATE $actionDate $userName $actionContent ";
+						$updateParams['advisorclass_action_log'] = $advisorclass_action_log;
 						$updateResult = $advisorclass_dal->update( $advisorclass_id, $updateParams, $operatingMode );
 						if ($updateResult === FALSE || $updateResult === NULL) {
 							debugReport("Updating advisorclass id $advisorclass_id returned FALSE|NULL");
@@ -1818,7 +1813,7 @@ function display_and_update_advisor_info_func() {
 						$content .= "No updates were requested.<br />";
 					}
 				}
-				$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
+				$content		.= "<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorclass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
 			} else {
 				if ($doDebug) {
 					debugReport("No record found for id=$advisorclass_id");
@@ -1850,9 +1845,9 @@ function display_and_update_advisor_info_func() {
 				if (! isset($advisorclass_call_sign)) {
 					debugReport("supposely have advisorclass record for advisorclas_id but advisorclass_call_sign not set");
 				} else {					
-					$inp_sequence = $advisorClass_sequence + 1;
+					$inp_sequence = $advisorclass_sequence + 1;
 					if ($doDebug) {
-						debugReport("preping to add sequence $inp_sequence to $advisorClass_call_sign $advisorClass_semester semester");
+						debugReport("preping to add sequence $inp_sequence to $advisorclass_call_sign $advisorclass_semester semester");
 					}
 
 					//Build language selection
@@ -1871,9 +1866,9 @@ function display_and_update_advisor_info_func() {
 									ENCTYPE='multipart/form-data'>
 									<input type='hidden' name='strpass' value='11'>
 									<input type='hidden' name='inp_sequence' value='$inp_sequence'>
-									<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorClass_call_sign'>
-									<input type='hidden' name='inp_advisorclass_semester' value='$advisorClass_semester'>
-									<input type='hidden' name='inp_advisorclass_timezone_offset' value='$advisorClass_timezone_offset'>
+									<input type='hidden' name='inp_advisorclass_call_sign' value='$advisorclass_call_sign'>
+									<input type='hidden' name='inp_advisorclass_semester' value='$advisorclass_semester'>
+									<input type='hidden' name='inp_advisorclass_timezone_offset' value='$advisorclass_timezone_offset'>
 									<input type='hidden' name='inp_depth' value='$inp_depth'>
 									<input type='hidden' name='inp_verbose' value='$inp_verbose'>
 									<input type='hidden' name='inp_mode' value='$inp_mode'>
@@ -1881,13 +1876,13 @@ function display_and_update_advisor_info_func() {
 									<tr><th style='width:200px;'>Field</th>
 										<th>Value</th></tr>
 									<tr><td style='vertical-align:top;'>Call Sign</td>
-										<td>$advisorClass_call_sign</td></tr>
+										<td>$advisorclass_call_sign</td></tr>
 									<tr><td style='vertical-align:top;'>Sequence</td>
 										<td>$inp_sequence</td></tr>
 									<tr><td style='vertical-align:top;'>Semester</td>
-										<td>$advisorClass_semester</td></tr>
+										<td>$advisorclass_semester</td></tr>
 									<tr><td>Class Size</td>
-										<td>$advisorClass_timezone_offset</td></tr>
+										<td>$advisorclass_timezone_offset</td></tr>
 									<tr><td style='vertical-align:top;'>Level</td>
 										<td><input type='radio' class='formInputButton' name='inp_advisorclass_level' value='Beginner' checked='checked'> Beginner<br />
 											<input type='radio' class='formInputButton' name='inp_advisorclass_level' value='Fundamental'> Fundamental<br />
@@ -1948,7 +1943,7 @@ function display_and_update_advisor_info_func() {
 									<tr><td>&nbsp;</td>
 										<td><input class='formInputButton' type='submit' value='Add AdvisorClass Record' /></td></tr>
 									</table></form>
-									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />"; 
+									<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$advisorclass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />"; 
 				}			// end of the advisorClass while
 			} else {
 				$content	.= "<p>No record found for $inp_advisor_call_sign</p>";
@@ -2003,21 +1998,21 @@ Error: $result[3]<br />";
 		if ($updateResult === FALSE || $updateResult === NULL) {
 			debugReport("addin gnew advisor class returned FALSE|NULL");
 		} else {
-			$advisorClass_call_sign					= $inp_advisorclass_call_sign;
-			$advisorClass_sequence					= $inp_sequence;
-			$advisorClass_semester					= $inp_advisorclass_semester;
-			$advisorClass_timezone_offset			= $inp_advisorclass_timezone_offset;
-			$advisorClass_level						= $inp_advisorclass_level;
-			$advisorClass_language					= $inp_advisorclass_language;
+			$advisorclass_call_sign					= $inp_advisorclass_call_sign;
+			$advisorclass_sequence					= $inp_sequence;
+			$advisorclass_semester					= $inp_advisorclass_semester;
+			$advisorclass_timezone_offset			= $inp_advisorclass_timezone_offset;
+			$advisorclass_level						= $inp_advisorclass_level;
+			$advisorclass_language					= $inp_advisorclass_language;
 			$advisorCLass_language					= $inp_advisorclass_language;
-			$advisorClass_class_size				= $inp_advisorclass_class_size;
-			$advisorClass_class_schedule_days		= $inp_class_schedule_days;
-			$advisorClass_class_schedule_times		= $inp_times;
-			$advisorClass_class_schedule_days_utc	= $displayDays;
-			$advisorClass_class_schedule_times_utc	= $displayTimes;
-			$advisorClass_evaluation_complete		= 'N';
-			$advisorClass_number_students			= $inp_advisorclass_number_students;
-			$advisorClass_class_comments			= $inp_advisorclass_class_comments;
+			$advisorclass_class_size				= $inp_advisorclass_class_size;
+			$advisorclass_class_schedule_days		= $inp_class_schedule_days;
+			$advisorclass_class_schedule_times		= $inp_times;
+			$advisorclass_class_schedule_days_utc	= $displayDays;
+			$advisorclass_class_schedule_times_utc	= $displayTimes;
+			$advisorclass_evaluation_complete		= 'N';
+			$advisorclass_number_students			= $inp_advisorclass_number_students;
+			$advisorclass_class_comments			= $inp_advisorclass_class_comments;
 			$newid									= $wpdb->insert_id;
 
 			// Now display the class record
@@ -2025,25 +2020,25 @@ Error: $result[3]<br />";
 							<p><a href='$theURL'>Display another advisor</a></p>
 							<table style='width:600px;'>
 							<tr><td style='width:250px;'><b>Level</b></td>
-								<td>$advisorClass_level</td></tr>
+								<td>$advisorclass_level</td></tr>
 							<tr><td><b>Language</b></td>
-								<td>$advisorClass_language</td></tr>
+								<td>$advisorclass_language</td></tr>
 							<tr><td><b>Class Size</b></td>
-								<td>$advisorClass_class_size</td></tr>
+								<td>$advisorclass_class_size</td></tr>
 							<tr><td><b>Class Schedule Days</b></td>
-								<td>$advisorClass_class_schedule_days</td></tr>
+								<td>$advisorclass_class_schedule_days</td></tr>
 							<tr><td><b>Class Schedule Time<b></td>
-								<td>$advisorClass_class_schedule_times</td></tr>
+								<td>$advisorclass_class_schedule_times</td></tr>
 							<tr><td><b>Class Schedule Days UTC</b></td>
-								<td>$advisorClass_class_schedule_days_utc</td></tr>
+								<td>$advisorclass_class_schedule_days_utc</td></tr>
 							<tr><td><b>Class Schedule Times UTC<b></td>
-								<td>$advisorClass_class_schedule_times_utc</td></tr>
+								<td>$advisorclass_class_schedule_times_utc</td></tr>
 							<tr><td><b>Number Students</b></td>
-								<td>$advisorClass_number_students</td></tr>
+								<td>$advisorclass_number_students</td></tr>
 							<tr><td><b>Evaluation Complete</b></td>
-								<td>$advisorClass_evaluation_complete</td></tr>
+								<td>$advisorclass_evaluation_complete</td></tr>
 							<tr><td><b>Class Comments</b></td>
-								<td>$advisorClass_class_comments</td></tr>
+								<td>$advisorclass_class_comments</td></tr>
 							</table>
 							<p>To return to the advisor screen, click <a href='$theURL?request_type=callsign&request_info=$inp_advisorclass_call_sign&strpass=2&inp_depth=$inp_depth'>HERE</a></p><br />";
 		}
@@ -2085,11 +2080,11 @@ Error: $result[3]<br />";
 							debugReport("supposedly have advisorclass data but advisorclass_call_sign not set");
 						} else {
 							// if there are any students, they need to be unassigned
-							if ($advisorClass_number_students > 0) {
+							if ($advisorclass_number_students > 0) {
 								if ($doDebug) {
-									debugReport("have to unassign $advisorClass_number_students students");
+									debugReport("have to unassign $advisorclass_number_students students");
 								}
-								$content		.= "<p>The class has $advisorClass_number_students students assigned. They 
+								$content		.= "<p>The class has $advisorclass_number_students students assigned. They 
 													will each be unassigned</p>";	
 								for ($snum=1;$snum<31;$snum++) {
 									if ($snum < 10) {
@@ -2097,15 +2092,15 @@ Error: $result[3]<br />";
 									} else {
 										$strSnum		= strval($snum);
 									}
-									$unassignCallSign	= ${'advisorClass_student' . $strSnum};
+									$unassignCallSign	= ${'advisorclass_student' . $strSnum};
 									if ($doDebug) {
 										debugReport("obtained $unassignCallSign for snum $strSnum");
 									}
 									if ($unassignCallSign != '') {
 										$inp_data			= array('inp_student'=>$unassignCallSign,
-																	'inp_semester'=>$advisorClass_semester,
-																	'inp_assigned_advisor'=>$advisorClass_call_sign,
-																	'inp_assigned_advisor_class'=>$advisorClass_sequence,
+																	'inp_semester'=>$advisorclass_semester,
+																	'inp_assigned_advisor'=>$advisorclass_call_sign,
+																	'inp_assigned_advisor_class'=>$advisorclass_sequence,
 																	'inp_remove_status'=>'',
 																	'inp_arbitrarily_assigned'=>'',
 																	'inp_method'=>'remove',
@@ -2118,7 +2113,7 @@ Error: $result[3]<br />";
 										if ($removeResult[0] === FALSE) {
 											$thisReason		= $removeResult[1];
 											if ($doDebug) {
-												echo "attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason<br />";
+												echo "attempting to remove $unassignCallSign from $advisorclass_call_sign class failed:<br />$thisReason<br />";
 											}
 											sendErrorEmail("$jobname Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason");
 											$content		.= "Attempting to remove $student_call_sign from $student_assigned_advisor class failed:<br />$thisReason<br />";
@@ -2140,7 +2135,7 @@ Error: $result[3]<br />";
 						}
 						$content					.= "<p>The advisor and class records have been deleted.</p>
 														<p>To return to the initial advisor page, click 
-														<a href='$theURL?request_type=callsign&request_info=$advisorClass_call_sign&strpass=2'>HERE</a></p>
+														<a href='$theURL?request_type=callsign&request_info=$advisorclass_call_sign&strpass=2'>HERE</a></p>
 														<p>Otherwise, you can close this window</p>";
 					}
 				} else {
@@ -2194,63 +2189,63 @@ Error: $result[3]<br />";
 				}
 				if ($numACRows > 0) {
 					foreach ($wpw1_cwa_advisorclass as $advisorClassRow) {
-						$advisorClass_ID				 		= $advisorClassRow->advisorclass_id;
-						$advisorClass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
-						$advisorClass_sequence 					= $advisorClassRow->advisorclass_sequence;
-						$advisorClass_semester 					= $advisorClassRow->advisorclass_semester;
-						$advisorClass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
-						$advisorClass_level 					= $advisorClassRow->advisorclass_level;
-						$advisorClass_language					= $advisorClassRow->advisorclass_language;
-						$advisorClass_class_size 				= $advisorClassRow->advisorclass_class_size;
-						$advisorClass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
-						$advisorClass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
-						$advisorClass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
-						$advisorClass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
-						$advisorClass_action_log 				= $advisorClassRow->advisorclass_action_log;
-						$advisorClass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
-						$advisorClass_date_created				= $advisorClassRow->advisorclass_date_created;
-						$advisorClass_date_updated				= $advisorClassRow->advisorclass_date_updated;
-						$advisorClass_student01 				= $advisorClassRow->advisorclass_student01;
-						$advisorClass_student02 				= $advisorClassRow->advisorclass_student02;
-						$advisorClass_student03 				= $advisorClassRow->advisorclass_student03;
-						$advisorClass_student04 				= $advisorClassRow->advisorclass_student04;
-						$advisorClass_student05 				= $advisorClassRow->advisorclass_student05;
-						$advisorClass_student06 				= $advisorClassRow->advisorclass_student06;
-						$advisorClass_student07 				= $advisorClassRow->advisorclass_student07;
-						$advisorClass_student08 				= $advisorClassRow->advisorclass_student08;
-						$advisorClass_student09 				= $advisorClassRow->advisorclass_student09;
-						$advisorClass_student10 				= $advisorClassRow->advisorclass_student10;
-						$advisorClass_student11 				= $advisorClassRow->advisorclass_student11;
-						$advisorClass_student12 				= $advisorClassRow->advisorclass_student12;
-						$advisorClass_student13 				= $advisorClassRow->advisorclass_student13;
-						$advisorClass_student14 				= $advisorClassRow->advisorclass_student14;
-						$advisorClass_student15 				= $advisorClassRow->advisorclass_student15;
-						$advisorClass_student16 				= $advisorClassRow->advisorclass_student16;
-						$advisorClass_student17 				= $advisorClassRow->advisorclass_student17;
-						$advisorClass_student18 				= $advisorClassRow->advisorclass_student18;
-						$advisorClass_student19 				= $advisorClassRow->advisorclass_student19;
-						$advisorClass_student20 				= $advisorClassRow->advisorclass_student20;
-						$advisorClass_student21 				= $advisorClassRow->advisorclass_student21;
-						$advisorClass_student22 				= $advisorClassRow->advisorclass_student22;
-						$advisorClass_student23 				= $advisorClassRow->advisorclass_student23;
-						$advisorClass_student24 				= $advisorClassRow->advisorclass_student24;
-						$advisorClass_student25 				= $advisorClassRow->advisorclass_student25;
-						$advisorClass_student26 				= $advisorClassRow->advisorclass_student26;
-						$advisorClass_student27 				= $advisorClassRow->advisorclass_student27;
-						$advisorClass_student28 				= $advisorClassRow->advisorclass_student28;
-						$advisorClass_student29 				= $advisorClassRow->advisorclass_student29;
-						$advisorClass_student30 				= $advisorClassRow->advisorclass_student30;
-						$advisorClass_number_students			= $advisorClassRow->advisorclass_number_students;
-						$advisorClass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
-						$advisorClass_class_comments			= $advisorClassRow->advisorclass_class_comments;
-						$advisorClass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
+						$advisorclass_ID				 		= $advisorClassRow->advisorclass_id;
+						$advisorclass_call_sign 				= $advisorClassRow->advisorclass_call_sign;
+						$advisorclass_sequence 					= $advisorClassRow->advisorclass_sequence;
+						$advisorclass_semester 					= $advisorClassRow->advisorclass_semester;
+						$advisorclass_timezone_offset			= $advisorClassRow->advisorclass_timezone_offset;	// new
+						$advisorclass_level 					= $advisorClassRow->advisorclass_level;
+						$advisorclass_language					= $advisorClassRow->advisorclass_language;
+						$advisorclass_class_size 				= $advisorClassRow->advisorclass_class_size;
+						$advisorclass_class_schedule_days 		= $advisorClassRow->advisorclass_class_schedule_days;
+						$advisorclass_class_schedule_times 		= $advisorClassRow->advisorclass_class_schedule_times;
+						$advisorclass_class_schedule_days_utc 	= $advisorClassRow->advisorclass_class_schedule_days_utc;
+						$advisorclass_class_schedule_times_utc 	= $advisorClassRow->advisorclass_class_schedule_times_utc;
+						$advisorclass_action_log 				= $advisorClassRow->advisorclass_action_log;
+						$advisorclass_class_incomplete 			= $advisorClassRow->advisorclass_class_incomplete;
+						$advisorclass_date_created				= $advisorClassRow->advisorclass_date_created;
+						$advisorclass_date_updated				= $advisorClassRow->advisorclass_date_updated;
+						$advisorclass_student01 				= $advisorClassRow->advisorclass_student01;
+						$advisorclass_student02 				= $advisorClassRow->advisorclass_student02;
+						$advisorclass_student03 				= $advisorClassRow->advisorclass_student03;
+						$advisorclass_student04 				= $advisorClassRow->advisorclass_student04;
+						$advisorclass_student05 				= $advisorClassRow->advisorclass_student05;
+						$advisorclass_student06 				= $advisorClassRow->advisorclass_student06;
+						$advisorclass_student07 				= $advisorClassRow->advisorclass_student07;
+						$advisorclass_student08 				= $advisorClassRow->advisorclass_student08;
+						$advisorclass_student09 				= $advisorClassRow->advisorclass_student09;
+						$advisorclass_student10 				= $advisorClassRow->advisorclass_student10;
+						$advisorclass_student11 				= $advisorClassRow->advisorclass_student11;
+						$advisorclass_student12 				= $advisorClassRow->advisorclass_student12;
+						$advisorclass_student13 				= $advisorClassRow->advisorclass_student13;
+						$advisorclass_student14 				= $advisorClassRow->advisorclass_student14;
+						$advisorclass_student15 				= $advisorClassRow->advisorclass_student15;
+						$advisorclass_student16 				= $advisorClassRow->advisorclass_student16;
+						$advisorclass_student17 				= $advisorClassRow->advisorclass_student17;
+						$advisorclass_student18 				= $advisorClassRow->advisorclass_student18;
+						$advisorclass_student19 				= $advisorClassRow->advisorclass_student19;
+						$advisorclass_student20 				= $advisorClassRow->advisorclass_student20;
+						$advisorclass_student21 				= $advisorClassRow->advisorclass_student21;
+						$advisorclass_student22 				= $advisorClassRow->advisorclass_student22;
+						$advisorclass_student23 				= $advisorClassRow->advisorclass_student23;
+						$advisorclass_student24 				= $advisorClassRow->advisorclass_student24;
+						$advisorclass_student25 				= $advisorClassRow->advisorclass_student25;
+						$advisorclass_student26 				= $advisorClassRow->advisorclass_student26;
+						$advisorclass_student27 				= $advisorClassRow->advisorclass_student27;
+						$advisorclass_student28 				= $advisorClassRow->advisorclass_student28;
+						$advisorclass_student29 				= $advisorClassRow->advisorclass_student29;
+						$advisorclass_student30 				= $advisorClassRow->advisorclass_student30;
+						$advisorclass_number_students			= $advisorClassRow->advisorclass_number_students;
+						$advisorclass_class_evaluation_complete = $advisorClassRow->advisorclass_evaluation_complete;
+						$advisorclass_class_comments			= $advisorClassRow->advisorclass_class_comments;
+						$advisorclass_copycontrol				= $advisorClassRow->advisorclass_copy_control;
 	
 						// if there are any students, they need to be unassigned
-						if ($advisorClass_number_students > 0) {
+						if ($advisorclass_number_students > 0) {
 							if ($doDebug) {
-								echo "have to unassign $advisorClass_number_students students<br />";
+								echo "have to unassign $advisorclass_number_students students<br />";
 							}
-							$content		.= "<p>The class has $advisorClass_number_students students assigned. They 
+							$content		.= "<p>The class has $advisorclass_number_students students assigned. They 
 												will each be unassigned</p>";
 			
 							for ($snum=1;$snum<31;$snum++) {
@@ -2259,15 +2254,15 @@ Error: $result[3]<br />";
 								} else {
 									$strSnum		= strval($snum);
 								}
-								$unassignCallSign	= ${'advisorClass_student' . $strSnum};
+								$unassignCallSign	= ${'advisorclass_student' . $strSnum};
 								if ($doDebug) {
 									echo "obtained $unassignCallSign for snum $strSnum<br />";
 								}
 								if ($unassignCallSign != '') {
 									$inp_data			= array('inp_student'=>$unassignCallSign,
-																'inp_semester'=>$advisorClass_semester,
-																'inp_assigned_advisor'=>$advisorClass_call_sign,
-																'inp_assigned_advisor_class'=>$advisorClass_sequence,
+																'inp_semester'=>$advisorclass_semester,
+																'inp_assigned_advisor'=>$advisorclass_call_sign,
+																'inp_assigned_advisor_class'=>$advisorclass_sequence,
 																'inp_remove_status'=>'',
 																'inp_arbitrarily_assigned'=>'',
 																'inp_method'=>'remove',
@@ -2280,10 +2275,10 @@ Error: $result[3]<br />";
 									if ($removeResult[0] === FALSE) {
 										$thisReason		= $removeResult[1];
 										if ($doDebug) {
-											echo "attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason<br />";
+											echo "attempting to remove $unassignCallSign from $advisorclass_call_sign class failed:<br />$thisReason<br />";
 										}
-										sendErrorEmail("$jobname Attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason");
-										$content		.= "Attempting to remove $unassignCallSign from $advisorClass_call_sign class failed:<br />$thisReason<br />";
+										sendErrorEmail("$jobname Attempting to remove $unassignCallSign from $advisorclass_call_sign class failed:<br />$thisReason");
+										$content		.= "Attempting to remove $unassignCallSign from $advisorclass_call_sign class failed:<br />$thisReason<br />";
 									} else {
 										$content		.= "Student $unassignCallSign removed from class and unassigned<br />";
 			
@@ -2298,10 +2293,10 @@ Error: $result[3]<br />";
 														'inp_data'=>array(),
 														'inp_format'=>array(),
 														'jobname'=>$jobname,
-														'inp_id'=>$advisorClass_ID,
-														'inp_callsign'=>$advisorClass_call_sign,
-														'inp_semester'=>$advisorClass_semester,
-														'inp_sequence'=>$advisorClass_sequence,
+														'inp_id'=>$advisorclass_ID,
+														'inp_callsign'=>$advisorclass_call_sign,
+														'inp_semester'=>$advisorclass_semester,
+														'inp_sequence'=>$advisorclass_sequence,
 														'inp_who'=>$userName,
 														'testMode'=>$testMode,
 														'doDebug'=>$doDebug);
@@ -2310,13 +2305,13 @@ Error: $result[3]<br />";
 							handleWPDBError("FUNCTION Update Advisor Class $jobname",$doDebug);
 							$content		.= "Unable to delete content in $advisorClassTableName<br />";
 						} else {
-							$content		.= "<br /><p>AdvisorClass record $advisorClass_ID for $advisorClass_call_sign $advisorClass_semester deleted</p>";
+							$content		.= "<br /><p>AdvisorClass record $advisorclass_ID for $advisorclass_call_sign $advisorclass_semester deleted</p>";
 							
 							// since there is more than one class record, possibly need to resequence them
 							$reseqSQL		= "select * from $advisorClassTableName 
-												where advisorclass_call_sign = '$advisorClass_call_sign' 
-												and advisorclass_semester = '$advisorClass_semester' 
-												order by advisorClass_sequence";
+												where advisorclass_call_sign = '$advisorclass_call_sign' 
+												and advisorclass_semester = '$advisorclass_semester' 
+												order by advisorclass_sequence";
 							$reseqResult	= $wpdb->get_results($reseqSQL);
 							if ($reseqResult === FALSE) {
 								handWPDBError($jobname,$doDebug);
@@ -2327,7 +2322,7 @@ Error: $result[3]<br />";
 								}
 								if ($numRRows > 0) {
 									$kk		= 0;
-									$content	.= "<p>Resquencing advisorClass records for $advisorClass_call_sign in $advisorClass_semester semester</p>";
+									$content	.= "<p>Resquencing advisorClass records for $advisorclass_call_sign in $advisorclass_semester semester</p>";
 									foreach($reseqResult as $reseqRow) {
 										$reseqClass_ID		= $reseqRow->advisorclass_id;
 										$reseq_sequence		= $reseqRow->advisorclass_sequence;
