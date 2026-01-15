@@ -41,6 +41,7 @@ function advisor_statistics_func() {
 	$test2				= 0;
 	$unconfirmedArray	= array();
 	$nextSemester		= $initializationArray['nextSemester'];
+	$proximateSemester	= $initializationArray['proximateSemester'];
 	$myString			= '';
 	$strPass			= '1';
 	$theURL				= "$siteURL/cwa-advisor-statistics/";
@@ -165,7 +166,7 @@ function advisor_statistics_func() {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$content 		.= "<h3>$jobname for $nextSemester</h3>
+		$content 		.= "<h3>$jobname for $proximateSemester</h3>
 							<p><form method='post' action='$theURL' 
 							name='selection_form' ENCTYPE='multipart/form-data'>
 							<input type='hidden' name='strpass' value='2'>
@@ -182,7 +183,7 @@ function advisor_statistics_func() {
 
 		$sql						= "select * from $advisorTableName 
 										left join $userMasterTableName on user_call_sign = advisor_call_sign 
-									   where advisor_semester='$nextSemester' 
+									   where advisor_semester='$proximateSemester' 
 										order by advisor_call_sign";
 
 		$wpw1_cwa_advisor	= $wpdb->get_results($sql);
