@@ -426,7 +426,7 @@ function getTheReason($strReasonCode) {
 	if ($strReasonCode == 'B') {
 		return "(B) Student is a Bad Actor";
 	}
-	if ($strReaasonCode === 'L') {
+	if ($strReasonCode === 'L') {
 		return "(L) Student wants a class in a language that is not available";
 	}
 	return "($strReasonCode) unknown";
