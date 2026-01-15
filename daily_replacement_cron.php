@@ -1287,7 +1287,7 @@ and confirmed. Click on <a href='$advisorVerifyURL/?&token=$token' target='_blan
 				$content .= "<br />The final mail send function failed>";
 			}
 
-			$thisTime 		= date('Y-m-d H:i:s');
+			$thisTime 		= current_time('mysql', 1);
 			$content		.= "<br />Function completed at $thisTime<br />";
 			$theSubject		= "$jobname";
 			$endingMicroTime = microtime(TRUE);
