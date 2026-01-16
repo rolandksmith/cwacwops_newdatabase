@@ -1879,7 +1879,7 @@ function getTheReason($strReasonCode) {
 						}
 					} else {
 						if ($doDebug) {
-							echo "no advisorclass records for $inp_advisor_call_sign in the $student_semester semester<br />";
+							echo "no advisorclass records for $inp_advisor_callsign in the $student_semester semester<br />";
 						}
 						$content .= "<p>No advisorclass record for the student to be assigned to<br />";
 					}
