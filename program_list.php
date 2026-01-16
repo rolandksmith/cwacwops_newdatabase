@@ -978,9 +978,9 @@ function program_list_func() {
 			}
 			// get any announcements and display
 			$announce = display_cwa_announcements();
-			if ($announce) {
-				$content .= "<h4>Announcements</h4>
-							 $announce";
+			if ($announce != '') {
+				$content .= "<div><h4>Announcements</h4>
+							 $announce</div>";
 			}
 		}
 		//// display user_master
