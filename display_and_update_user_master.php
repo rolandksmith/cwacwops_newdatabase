@@ -2,7 +2,7 @@ function display_and_update_user_master_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$initializationArray 			= data_initialization_func();
 	$validUser 						= $initializationArray['validUser'];
@@ -833,9 +833,9 @@ function selectCountry($inp_country) {
 			} else {
 				if (!$displayedAlready) {
 					if ($doDebug) {
-						echo "no record found in $userMasterTableName or userMeta for $request_info<br />";
+						echo "no record found in user_master or userMeta for $request_info<br />";
 					}
-					$content			.= "<p>No record found in $userMasterTableName or userMeta for $request_info</p>";
+					$content			.= "<p>No record found in user_master or userMeta for $request_info</p>";
 				}
 			}
 		}
