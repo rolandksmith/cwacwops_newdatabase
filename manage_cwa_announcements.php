@@ -9,9 +9,14 @@ function manage_cwa_announcements_func() {
 
 	$siteURL      = $initializationArray['siteurl'];
 	$userName     = $initializationArray['userName'];
+	$jobname	  = "Manage CWA Announcements";
+	$versionNumber = '1';
 	$tableName    = "wpw1_cwa_announcements";
 	$theURL       = "$siteURL/cwa-manage-cwa-announcements/"; // Update to your actual page slug
 	
+/// get the time that the process started
+	$startingMicroTime			= microtime(TRUE);
+
 	// Get State Variables
 	$strPass      = filter_input(INPUT_POST, 'strpass') ?: "1";
 	$mode      = filter_input(INPUT_POST, 'inp_mode') ?: "LIST"; 
@@ -59,6 +64,12 @@ function manage_cwa_announcements_func() {
 										<input type="hidden" name="inp_id" value="<?php echo $row->ann_record_id; ?>">
 										<input type="submit" name="inp_mode" value="EDIT" class="formInputButton" style="float:none; display:inline-block;">
 										<input type="submit" name="inp_mode" value="DELETE" class="formInputButton" style="float:none; display:inline-block; background:#d9534f; color:#fff;" onclick="return confirm('Delete this announcement?')">
+									</form>
+			
+									<form method="post" action="<?php echo $theURL; ?>" style="display:inline-block;">
+										<input type="hidden" name="strpass" value="4">
+										<input type="hidden" name="inp_id" value="<?php echo $row->ann_record_id; ?>">
+										<input type="submit" value="View Log" class="formInputButton" style="background:#5bc0de; color:#fff;">
 									</form>
 								</td>
 							</tr>
@@ -199,7 +210,76 @@ function manage_cwa_announcements_func() {
 			}
 			echo "<a href='$theURL' class='formInputButton'>Return to List</a>";
 			break;
+
+		case "4":
+			// Fetch the announcement details first
+			$ann = $wpdb->get_row($wpdb->prepare("SELECT ann_title FROM $tableName WHERE ann_record_id = %d", $record_id));
+			
+			// Fetch the list of users who viewed it
+			$trackTable = "wpw1_cwa_announcements_tracking";
+			$viewers = $wpdb->get_results($wpdb->prepare("
+				SELECT t.date_viewed, u.display_name, u.user_email 
+				FROM $trackTable t
+				JOIN {$wpdb->prefix}users u ON t.user_id = u.ID
+				WHERE t.ann_id = %d
+				ORDER BY t.date_viewed DESC
+			", $record_id));
+		
+			echo "<h3>Read Receipts for: " . esc_html($ann->ann_title) . "</h3>";
+			
+			if ($viewers) {
+				echo "<table style='width:100%; border-collapse: collapse;'>
+						<thead>
+							<tr>
+								<th>User Name</th>
+								<th>Email</th>
+								<th>Date Viewed</th>
+							</tr>
+						</thead>
+						<tbody>";
+				foreach ($viewers as $v) {
+					echo "<tr>
+							<td>" . esc_html($v->display_name) . "</td>
+							<td>" . esc_html($v->user_email) . "</td>
+							<td>" . esc_html($v->date_viewed) . "</td>
+						  </tr>";
+				}
+				echo "</tbody></table>";
+			} else {
+				echo "<p>No one has viewed this announcement yet.</p>";
+			}
+			
+			echo "<br /><a href='$theURL' class='formInputButton' style='text-decoration:none;'>Back to Manager</a>";
+			break;
 	}
+	$endingMicroTime = microtime(TRUE);
+	$elapsedTime	= $endingMicroTime - $startingMicroTime;
+	$elapsedTime	= number_format($elapsedTime, 4, '.', ',');
+	echo "<p>Report V$versionNumber pass $strPass took $elapsedTime seconds to run</p>";
+	$nowDate		= date('Y-m-d');
+	$nowTime		= date('H:i:s');
+	$thisStr		= 'Production';
+	$ipAddr			= get_the_user_ip();
+	$theTitle		= esc_html(get_the_title());
+	$jobmonth		= date('F Y');
+	$updateData		= array('jobname' 		=> $jobname,
+							'jobdate' 		=> $nowDate,
+							'jobtime'		=> $nowTime,
+							'jobwho' 		=> $userName,
+							'jobmode'		=> 'Time',
+							'jobdatatype' 	=> $thisStr,
+							'jobaddlinfo'	=> "$strPass: $elapsedTime",
+							'jobip' 		=> $ipAddr,
+							'jobmonth' 		=> $jobmonth,
+							'jobcomments' 	=> '',
+							'jobtitle' 		=> $theTitle,
+							'doDebug'		=> FALSE);
+	$result			= write_joblog2_func($updateData);
+	if ($result === FALSE){
+		echo"<p>writing to joblog failed</p>";
+	}
+
+
 
 	echo "</div>";
 	return ob_get_clean();
