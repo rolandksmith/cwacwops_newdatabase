@@ -12,6 +12,7 @@ function display_cwa_announcements() {
 
     $currentUserID   = $initializationArray['userID'];
     $currentUserRole = strtolower($initializationArray['userRole']);
+    $currentUserEmail = $initializationArray['userEmail'];
     $tableName       = "wpw1_cwa_announcements";
     $trackTable      = "wpw1_cwa_announcements_tracking";
     $today           = current_time('Y-m-d');
@@ -38,6 +39,7 @@ function display_cwa_announcements() {
             <div class="announcement-item" style="border: 1px solid #d3d3d3; padding: 15px; background: #fff; margin-bottom: 20px; border-left: 5px solid #d9534f;">
                 <h4 style="margin-top: 0; color: #333;"><?php echo esc_html($ann->ann_title); ?></h4>
                 <div class="ann_text"><?php echo wpautop(wp_kses_post($ann->ann_text)); ?></div>
+                <div class="ann_text"><a href="mailto:<?php echo $currentUserEmail; ?>"><b>Email this announcement to me</b></a></div>
                 <small style="color: #999;">Posted on: <?php echo date('F j, Y', strtotime($ann->ann_date_created)); ?></small>
             </div>
             <?php
