@@ -59,7 +59,7 @@ function show_advisor_class_assignments_func() {
 		$testMode					= FALSE;
 	}
 	if ($userName == '') {
-		$content				.= "You are not authorized";
+		$content				= "You are not authorized";
 		return $content;
 	}
 	
@@ -509,7 +509,7 @@ function show_advisor_class_assignments_func() {
 																										where student_semester='$advisorClass_semester' 
 																										and student_call_sign = '$theInfo'");
 															if ($wpw1_cwa_student === FALSE) {
-																handleWPDBError($jobname,$doDebug,');
+																handleWPDBError($jobname,$doDebug,'');
 															} else {
 																$numSRows									= $wpdb->num_rows;
 																if ($doDebug) {
