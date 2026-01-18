@@ -419,7 +419,8 @@ function check_student_status_func() {
 					} else {
 						if ($daysToSemester > 48) {
 							if ($student_response == 'Y') {
-								sendErrorEmail("$jobname -- $userName -- response is set to Y and more 
+								$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$userName&inp_depth=one&doDebug&testMode' target='_blank'>$userName</a>";
+								sendErrorEmail("$jobname -- $studentLink -- response is set to Y and more 
 than 48 days before the semester. Possible error");
 							}
 							if ($student_no_catalog == 'Y') {
