@@ -326,7 +326,8 @@ function prepare_preassigned_class_display($inp_advisor='', $inp_semester='', $a
 											$processStudent			= TRUE;
 											if ($student_status != 'S' && $student_status != 'Y') {
 												$processStudent		= FALSE;
-												sendErrorEmail("student $thisStudent needs to be removed from $advisorclass_call_sign class $advisorclass_sequence");
+												$studentLink	= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$thisStudent&inp_depth=one&doDebug&testMode' target='_blank'>$thisStudent</a>";
+												sendErrorEmail("FUNCTION Prepare Preassinged Class Display: student $studentLink needs to be removed from $advisorclass_call_sign class $advisorclass_sequence");
 												if ($doDebug) {
 													echo "<b>ERROR</b>student status is $student_status so not processing<br />";
 												}
