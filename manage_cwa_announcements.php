@@ -218,7 +218,7 @@ function manage_cwa_announcements_func() {
 			// Fetch the list of users who viewed it
 			$trackTable = "wpw1_cwa_announcements_tracking";
 			$viewers = $wpdb->get_results($wpdb->prepare("
-				SELECT t.date_viewed, u.display_name, u.user_email 
+				SELECT t.date_viewed, u.display_name, u.user_email, u.user_login  
 				FROM $trackTable t
 				JOIN {$wpdb->prefix}users u ON t.user_id = u.ID
 				WHERE t.ann_id = %d
@@ -238,8 +238,10 @@ function manage_cwa_announcements_func() {
 						</thead>
 						<tbody>";
 				foreach ($viewers as $v) {
+					$myName = esc_html($v->display_name);
+					$myUser = esc_html($v->user_login);
 					echo "<tr>
-							<td>" . esc_html($v->display_name) . "</td>
+							<td>$myName ($myUser)</td>
 							<td>" . esc_html($v->user_email) . "</td>
 							<td>" . esc_html($v->date_viewed) . "</td>
 						  </tr>";
