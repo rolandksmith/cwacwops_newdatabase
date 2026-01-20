@@ -8,16 +8,17 @@ function display_cwa_announcements() {
     // ----------------------
 
     $initializationArray = data_initialization_func();
- //   if ($initializationArray['validUser'] !== "Y") { return "invalid user"; }
-
+    
+    // 1. GET THE USER'S EMAIL
+    // We try to grab it from your init array, or fall back to the WP current user
+    $currentUserEmail = isset($initializationArray['userEmail']) ? $initializationArray['userEmail'] : wp_get_current_user()->user_email;
+    
     $currentUserID   = $initializationArray['userID'];
     $currentUserRole = strtolower($initializationArray['userRole']);
-    $currentUserEmail = $initializationArray['userEmail'];
     $tableName       = "wpw1_cwa_announcements";
     $trackTable      = "wpw1_cwa_announcements_tracking";
-    $today           = current_time('Y-m-d');
+    $today           = current_time('mysql', 1);
 
-    // Use LOWER() for 'All' check to fix the target role issue
     $query = $wpdb->prepare("
         SELECT a.* FROM $tableName a
         LEFT JOIN $trackTable t ON a.ann_record_id = t.ann_id AND t.user_id = %d
@@ -35,12 +36,30 @@ function display_cwa_announcements() {
         ob_start();
         echo "<div class='announcement-display-box'>";
         foreach ($announcements as $ann) {
+            
+            // 2. PREPARE EMAIL CONTENT
+            // We strip HTML tags (like <b> or <p>) so the email body is readable plain text
+            // We use rawurlencode to handle spaces and special characters safely in the link
+            $mailTo      = $currentUserEmail;
+            $mailSubject = rawurlencode("Announcement: " . $ann->ann_title);
+            $cleanText   = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $ann->ann_text));
+            $mailBody    = rawurlencode($cleanText . "\n\n--\nSent from CW Academy Dashboard");
+            
+            // Construct the Link
+            $mailtoLink  = "mailto:$mailTo?subject=$mailSubject&body=$mailBody";
             ?>
             <div class="announcement-item" style="border: 1px solid #d3d3d3; padding: 15px; background: #fff; margin-bottom: 20px; border-left: 5px solid #d9534f;">
                 <h4 style="margin-top: 0; color: #333;"><?php echo esc_html($ann->ann_title); ?></h4>
                 <div class="ann_text"><?php echo wpautop(wp_kses_post($ann->ann_text)); ?></div>
-                <div class="ann_text"><a href="mailto:<?php echo $currentUserEmail; ?>"><b>Email this announcement to me</b></a></div>
-                <small style="color: #999;">Posted on: <?php echo date('F j, Y', strtotime($ann->ann_date_created)); ?></small>
+                
+                <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; overflow:hidden;">
+                    <small style="color: #999; float:left; line-height: 28px;">Posted on: <?php echo date('F j, Y', strtotime($ann->ann_date_created)); ?></small>
+                    
+                    <a href="<?php echo $mailtoLink; ?>" 
+                       style="float:right; background:#f0f0f1; color:#2271b1; text-decoration:none; padding:4px 10px; border:1px solid #2271b1; border-radius:3px; font-size:12px;">
+                       Email to Me
+                    </a>
+                </div>
             </div>
             <?php
             
