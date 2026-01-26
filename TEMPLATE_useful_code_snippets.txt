@@ -860,3 +860,11 @@ $criteria = [
 
 /// tool tip
 	<span class="info-asterisk" data-title=''>*</span>
+	
+	
+	
+/// utc date
+	$myStr = current_time('mysql', 1);
+	$myDateTime = strtotime($myStr);
+	$jobdate = date('Y-m-d', $myDateTime);
+	$jobtime = date('H:i:s', $myDateTime);
