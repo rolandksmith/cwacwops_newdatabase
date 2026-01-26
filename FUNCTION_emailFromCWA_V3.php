@@ -25,7 +25,7 @@ function emailFromCWA_v3($mailParameters) {
 													    'jobname'=>$jobname,
 													    'increment'=>$increment,
 													    'testMode'=>$testMode,
-													    'doDebug'=>$doDebug));
+													    'doDebug'=>$doDebug);
 	
 	any attachment must be uploaded to the media library. theAttachment is the path to 
 	the attachment. If multiple, the links must be in an array
