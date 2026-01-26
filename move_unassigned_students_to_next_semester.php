@@ -118,67 +118,7 @@ function move_unassigned_students_to_next_semester_func() {
 		}
 	}
 
-// The content to be returned initially includes the special style information.
-	$content = "<style type='text/css'>
-				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-				
-				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-				
-				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-				
-				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputFile {color:#666;background:#fee;padding:2px;border:
-				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-				
-				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				select.formSelect {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-				
-				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-				
-				input.formInputButton {vertical-align:middle;font-weight:bolder;
-				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-				cursor:pointer;position:relative;float:left;}
-				
-				input.formInputButton:hover {color:#f8f400;}
-				
-				input.formInputButton:active {color:#00ffff;}
-				
-				tr {color:#333;background:#eee;}
-				
-				table{font:'Times New Roman', sans-serif;background-image:none;}
-				
-				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-				
-				td {padding:5px;font-size:small;vertical-align:top;}
-				
-				th:first-child,
-				td:first-child {
-				 padding-left: 10px;
-				}
-				
-				th:last-child,
-				td:last-child {
-					padding-right: 5px;
-				}
-				</style>";	
+	$content = "";
 
 
 	if ($testMode) {
@@ -434,8 +374,9 @@ function move_unassigned_students_to_next_semester_func() {
 									echo "Updating current semester student record<br />";
 								}
 								$myStr					= "$student_action_log / $myDate REASSIGN $userName student moved to $nextSemester semester ";
-								$updateParams			= array('student_action_log'=>$myStr);
-								$updateFormat			= array('%s');
+								$updateParams			= array('student_action_log'=>$myStr, 
+																'student_status'=>'U');
+								$updateFormat			= array('%s','%s');
 
 								$studentUpdateData		= array('tableName'=>$studentTableName,
 																'inp_method'=>'update',
