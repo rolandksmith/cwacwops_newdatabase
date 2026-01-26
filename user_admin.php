@@ -119,67 +119,7 @@ function user_admin_func() {
 		$testModeOption	= '';
 	}
 	
-	
-	$content = "<style type='text/css'>
-		fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-		background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-		legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-		font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-		label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-		text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-		textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-		background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputFile {color:#666;background:#fee;padding:2px;border:
-		solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-		input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		select.formSelect {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-		select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-		input.formInputButton {vertical-align:middle;font-weight:bolder;
-		text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-		cursor:pointer;position:relative;float:left;}
-
-		input.formInputButton:hover {color:#f8f400;}
-
-		input.formInputButton:active {color:#00ffff;}
-
-		tr {color:#333;background:#eee;}
-
-		table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-		th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-		td {padding:5px;font-size:small;}
-
-		th:first-child,
-		td:first-child {
-		 padding-left: 10px;
-		}
-
-		th:last-child,
-		td:last-child {
-			padding-right: 5px;
-		}
-		</style>";	
+	$content = "";
 
 	if ($testMode) {
 		$content	.= "<p><strong>Operating in Test Mode.</strong></p>";
@@ -189,12 +129,15 @@ function user_admin_func() {
 		$extMode					= 'tm';
 		$userTableName				= "wpw1_users";
 		$tempTableName				= 'wpw1_cwa_temp_data';
+		$operatingMode				= 'Testmode';
 	} else {
 		$extMode					= 'pd';
 		$userTableName				= "wpw1_users";
 		$tempTableName				= 'wpw1_cwa_temp_data';
+		$operatingMode				= 'Production';
 	}
 
+	$user_dal = new CWA_User_Master_DAL();
 
 
 	if ("1" == $strPass) {
@@ -436,29 +379,64 @@ function user_admin_func() {
 									}
 									$content				.= "$inp_callsign user data has been restored<br />";
 									
-									// resolve the reminder
-									$resolveResult				= resolve_reminder($userName,$reminderToken,$testMode,$doDebug);
-									if ($resolveResult === FALSE) {
-										if ($doDebug) {
-											echo "resolve_reminder for $inp_callsign and $reminderToken failed<br />";
-										}
-									} else {
-										$content	.= "Reminder has been resolved<br />";
+									if ($doDebug) {
+										$content .= "updating user_master email<br />";
 									}
-
-									// now delete the temp_data record
-									$deleteResult			= $wpdb->delete($tempTableName, 
-																		array('callsign'=>$inp_callsign,
-																			  'token'=>'admin'),
-																		array('%s','%s'));
-									if ($deleteResult === FALSE) {
-										handleWPDBError($jobname,$doDebug);
+									$myStr = strtoupper($user_login);
+									$userMasterData = $user_dal->get_user_master_by_callsign($myStr, $operatingMode);
+									if ($userMasterData === FALSE || $userMasterData === NULL) {
+										$content .= "Attempt to get User_Master for $myStr failed<br />";
 									} else {
-										if ($doDebug) {
-											echo "deleting $inp_callsign admin token resulted in deleting $deleteResult rows<br />";
+										if (!empty($userMasterData)) {
+											foreach($userMasterData as $key => $value) {
+												$$key = $value;
+											}
+											if (! isset($user_call_sign)) {
+												if ($doDebug) {
+													echo "user_dal returned data but user_call_sign not set<br />";
+												}
+												$content .= "Unable to obtain User_Master for $myStr<br />";
+											} else {	// update the user_master email
+												$updateData = array('user_email' => $oldEmail);
+												$updateResult = $user_dal->update($user_ID, $updateData, $operatingMode);
+												if ($updateResult === FALSE || $updateResult === NULL) {
+													if ($doDebug) {
+														echo "attempt to update user_master for id $user_ID failed<br />";
+													}
+													$content .= "Attempt to update user_master for id $user_ID failed<br />";
+												} else {
+													$content .= "User_Master email address updated to $oldEmail<br />";
+													// resolve the reminder
+													$resolveResult				= resolve_reminder($userName,$reminderToken,$testMode,$doDebug);
+													if ($resolveResult === FALSE) {
+														if ($doDebug) {
+															echo "resolve_reminder for $inp_callsign and $reminderToken failed<br />";
+														}
+													} else {
+														$content	.= "Reminder has been resolved<br />";
+													}
+				
+													// now delete the temp_data record
+													$deleteResult			= $wpdb->delete($tempTableName, 
+																						array('callsign'=>$inp_callsign,
+																							  'token'=>'admin'),
+																						array('%s','%s'));
+													if ($deleteResult === FALSE) {
+														handleWPDBError($jobname,$doDebug);
+													} else {
+														if ($doDebug) {
+															echo "deleting $inp_callsign admin token resulted in deleting $deleteResult rows<br />";
+														}
+														$content			.= "Temp_data record for $inp_callsign has been deleted<br /><br />
+																				$inp_callsign user record has been restored<br />";
+													}
+												}
+											}
+										} else {
+											if ($doDebug) {
+												echo "getting user_master for $myStr returned an empty dataset<br />";
+											}
 										}
-										$content			.= "Temp_data record for $inp_callsign has been deleted<br /><br />
-																$inp_callsign user record has been restored<br />";
 									}
 								}
 							} else {
@@ -474,7 +452,7 @@ function user_admin_func() {
 			}
 		}	
 	}
-	$thisTime 		= date('Y-m-d H:i:s');
+	$thisTime 		= current_time('mysql', 1);
 	$content 		.= "<br /><br /><p>Prepared at $thisTime</p>";
 	$endingMicroTime = microtime(TRUE);
 	$elapsedTime	= $endingMicroTime - $startingMicroTime;
