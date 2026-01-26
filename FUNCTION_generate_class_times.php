@@ -1,4 +1,4 @@
-function generateClassTimes($inp_tz=-99,$inp_level='',$inp_semester='',$inp_display='all',$doDebug,$catalogMode='Production') {
+function generateClassTimes($inp_tz=-99, $inp_level='', $inp_semester='', $inp_display='all' ,$doDebug=FALSE, $catalogMode='Production') {
 
 /* generateClassTimes runs in two modes
 		If inp_level is 'all', the program returns a complete list in table
