@@ -149,6 +149,10 @@ function generate_catalog_for_student($inp_data = array('')) {
 									'2300'=>'11:00 pm',
 									'2330'=>'11:30 pm');
 		
+	foreach($inp_data as $thisKey=>$thisValue) {
+		$$thisKey					= $thisValue;
+	}
+
 	if ($doDebug) {
 		echo "<br /><b>Generate Catalog for Student</b><br />
 			   inp_data:<br /><pre>";
@@ -165,12 +169,6 @@ function generate_catalog_for_student($inp_data = array('')) {
 		$doProceed			= FALSE;
 	}
 
-	foreach($inp_data as $thisKey=>$thisValue) {
-		${$thisKey}					= $thisValue;
-		if ($doDebug) {
-			echo "setting $thisKey to $thisValue<br />";
-		}
-	}
 	
 	
 	// student_semester must be in the semester array
@@ -219,12 +217,24 @@ function generate_catalog_for_student($inp_data = array('')) {
 		
 		if ($currentTime < $date2) {
 			$show13Options		= TRUE;
+			if ($doDebug) {
+				echo "$currentTime (currentTime) is less than $date2 (date2). show13Options is TRUE<br />";
+			}
 		} elseif ($currentTime < $date3 && $currentTime >= $date2) {
 			$showCatalog		= TRUE;
+			if ($doDebug) {
+				echo "$currentTime (currentTime) is less than $date3 (date3) and greater than $date2 (date2). showCatalog is TRUE<br />";
+			}
 		} elseif ($currentTime < $date1 && $currentTime >= $date3) {
 			$showAvail			= TRUE;
+			if ($doDebug) {
+				echo "$currentTime (currentTime) is less than $date1 (date1) and greater/equal than $date3 (date3). showAvail is TRUE<br />";
+			}
 		} elseif ($currentTime > $date1) {		// after Semester Starts
 			$show13Options		= TRUE;
+			if ($doDebug) {
+				echo "$currentTime (currentTime) is less than $date1 (date1). show13Options is TRUE<br />";
+			}
 		} else {
 			$errorInfo			= "run_date of $currentTime doesn't compare to $date1, $date2, or $date3";
 			if ($doDebug) {
@@ -241,9 +251,9 @@ function generate_catalog_for_student($inp_data = array('')) {
 			}
 		}
 
-$showCatalog = TRUE;
-$show13Options = FALSE;
-$showAvail = FALSE;
+// $showCatalog = TRUE;
+// $show13Options = FALSE;
+// $showAvail = FALSE;
 		
 		if ($doProceed) {
 			if ($show13Options) {
