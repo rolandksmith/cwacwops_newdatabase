@@ -632,6 +632,7 @@ function getTheReason($strReasonCode) {
 				}
 			} else {
 				if (! empty($studentData)) {
+					$numSRows = count($studentData);
 					$content		.= "<table style='width:900px;'><tr>
 										<th>Name</th>
 										<th>Email</th>
@@ -652,7 +653,7 @@ function getTheReason($strReasonCode) {
 							echo "processing student $student_call_sign with status of $student_status<br />";
 						}
 
-						$theLink			= "$user_last_name, $user_first_name <a href='$siteURL/cwa-display-and-update-student-information/?request_type=callsign&request_info=$student_call_sign&request_table=$studentTableName&strpass=2' target='_blank'>($student_call_sign)";
+						$theLink			= "$user_last_name, $user_first_name <a href='$siteURL/cwa-display-and-update-student-information/?request_type=callsign&request_info=$student_call_sign&strpass=2' target='_blank'>($student_call_sign)";
 						$content			.= "<tr><td>$theLink</td>
 													<td>$user_email</td>
 													<td>$user_ph_code $user_phone</td>
