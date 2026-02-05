@@ -137,66 +137,7 @@ function verify_advisor_class_func() {
 		}
 	}
 	
-	$content = "<style type='text/css'>
-				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-				
-				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-				
-				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-				
-				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputFile {color:#666;background:#fee;padding:2px;border:
-				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-				
-				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				select.formSelect {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-				
-				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-				
-				input.formInputButton {vertical-align:middle;font-weight:bolder;
-				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-				cursor:pointer;position:relative;float:left;}
-				
-				input.formInputButton:hover {color:#f8f400;}
-				
-				input.formInputButton:active {color:#00ffff;}
-				
-				tr {color:#333;background:#eee;}
-				
-				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;width:80%;}
-				
-				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-				
-				td {padding:5px;font-size:small;}
-				
-				th:first-child,
-				td:first-child {
-				 padding-left: 10px;
-				}
-				
-				th:last-child,
-				td:last-child {
-					padding-right: 5px;
-				}
-				</style>";	
+	$content = "";	
 					
 	if (in_array($userName,$validTestmode)) {			// give option to run in test mode 
 		$testModeOption	= "<tr><td>Operation Mode</td>
@@ -317,29 +258,6 @@ function verify_advisor_class_func() {
 						$advisor_date_updated 				= $advisorRow->advisor_date_updated;
 						$advisor_replacement_status 		= $advisorRow->advisor_replacement_status;
 	
-						// if you need the country name and phone code, include the following
-						$countrySQL		= "select * from wpw1_cwa_country_codes  
-											where country_code = '$advisor_country_code'";
-						$countrySQLResult	= $wpdb->get_results($countrySQL);
-						if ($countrySQLResult === FALSE) {
-							handleWPDBError($jobname,$doDebug);
-							$advisor_country		= "UNKNOWN";
-							$advisor_ph_code		= "";
-						} else {
-							$numCRows		= $wpdb->num_rows;
-							if ($doDebug) {
-								echo "ran $countrySQL<br />and retrieved $numCRows rows<br />";
-							}
-							if($numCRows > 0) {
-								foreach($countrySQLResult as $countryRow) {
-									$advisor_country		= $countryRow->country_name;
-									$advisor_ph_code		= $countryRow->ph_code;
-								}
-							} else {
-								$advisor_country			= "Unknown";
-								$advisor_ph_code			= "";
-							}
-						}
 							
 						$content			.= "<h3>$jobname for $advisor_call_sign</h3>
 												<p>Please mark each student as either YES (attending) or NO (not attending). 
@@ -533,12 +451,12 @@ function verify_advisor_class_func() {
 																echo "Bypassing this student<br/>";
 															}
 														}
-														if ($student_promotable == 'W') {
-															$doProceed							= FALSE;
-															if ($doDebug) {
-																echo "Bypassing student already withdrawn<br />";
-															}
-														}
+//														if ($student_promotable == 'W') {
+//															$doProceed							= FALSE;
+//															if ($doDebug) {
+//																echo "Bypassing student already withdrawn<br />";
+//															}
+//														}
 														if ($doProceed) {								
 															if ($doDebug) {
 																echo "Got a student $student_last_name, $student_first_name ($student_call_sign) $student_time_zone; $student_level<br />";
@@ -553,9 +471,17 @@ function verify_advisor_class_func() {
 																						<th>Attending?</th>
 																					</tr>";
 															}
+															$yesChecked = '';
+															$noChecked = '';
+															if ($student_promotable == 'W') {
+																$noChecked = 'checked';
+															} else {
+																$yesChecked = 'checked';
+															}
+															
 															$content			.= "<tr><td>$student_last_name, $student_first_name ($student_call_sign)</td>
-																						<td>YES <input type='radio' class='formInputButton' name='inp_attending[$studentRecordCount|$student_ID]' value='Y|$student_call_sign' checked='checked'><br />
-																							NO <input type='radio' class='formInputButton' name='inp_attending[$studentRecordCount|$student_ID]' value='N|$student_call_sign'></td>
+																						<td>YES <input type='radio' class='formInputButton' name='inp_attending[$studentRecordCount|$student_ID]' value='Y|$student_call_sign' $yesChecked ><br />
+																							NO <input type='radio' class='formInputButton' name='inp_attending[$studentRecordCount|$student_ID]' value='N|$student_call_sign' $noChecked ></td>
 																					</tr>";
 															$studentRecordCount++;
 														}
@@ -721,26 +647,49 @@ function verify_advisor_class_func() {
 							if ($doDebug) {
 								echo "Handling non-attending student at id $theRecordID<br />";
 							}
-							$student_action_log		.= " / $myDate CLASSVERIFY $inp_advisor marked student as not attending. Promotable set to W ";
-							$updateData				= array('student_promotable'=>'W',
-															'student_action_log'=>$student_action_log);
-							$updateFormat			= array('%s',
-															'%s');
-							$content				.= "Marking $theAttendingCallSign as not attending<br />";
-							if ($student_status == 'S') {			// make status a Y
-								$updateData['student_status']	= 'Y';
-								$updateFormat[]					= '%s';
+							// if promtable already set to 'W', don't do anything
+							if ($student_promotable == 'W') {
+								if ($doDebug) {
+									echo "student already marked as not attending<br />";
+								}
+							} else {
+								
+								$student_action_log		.= " / $myDate CLASSVERIFY $inp_advisor marked student as not attending. Promotable set to W ";
+								$updateData				= array('student_promotable'=>'W',
+																'student_action_log'=>$student_action_log);
+								$updateFormat			= array('%s',
+																'%s');
+								$content				.= "Marking $theAttendingCallSign as not attending<br />";
+								if ($student_status == 'S') {			// make status a Y
+									$updateData['student_status']	= 'Y';
+									$updateFormat[]					= '%s';
+								}
+								$updateStudent			= TRUE;
 							}
-							$updateStudent			= TRUE;
 
 						} else {			// student attending. Is the student status an 'S'?
-						
-							if ($student_status == 'S') {			// make this a 'Y'
-								$updateData		= array('student_status'=>'Y');
-								$updateFormat	= array('%s');
-								$updateStudent	= TRUE;
-								if ($doDebug) {
-									echo "Student status of 'Y' has been saved for $student_call_sign<br />";
+							// if promotable marked as 'W', change it back to empty
+							if ($student_promotable == 'W') {
+								$student_action_log		.= " / $myDate CLASSVERIFY $inp_advisor marked student as not attending. Promotable changed from W to blank ";
+								$updateData				= array('student_promotable'=>'',
+																'student_action_log'=>$student_action_log);
+								$updateFormat			= array('%s',
+																'%s');
+								$content				.= "Marking $theAttendingCallSign as attending<br />";
+								if ($student_status == 'S') {			// make status a Y
+									$updateData['student_status']	= 'Y';
+									$updateFormat[]					= '%s';
+								}
+								$updateStudent			= TRUE;
+							
+							} else {
+								if ($student_status == 'S') {			// make this a 'Y'
+									$updateData		= array('student_status'=>'Y');
+									$updateFormat	= array('%s');
+									$updateStudent	= TRUE;
+									if ($doDebug) {
+										echo "Student status of 'Y' has been saved for $student_call_sign<br />";
+									}
 								}
 							}
 						}
