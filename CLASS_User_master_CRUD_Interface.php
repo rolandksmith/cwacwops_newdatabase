@@ -351,7 +351,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleList($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         // Get all records
         $records = $this->dal->get_user_master(
@@ -473,7 +473,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleView($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         $records = $this->dal->get_user_master_by_id($input['user_id'], $mode);
         
@@ -508,7 +508,7 @@ class CWA_User_Master_CRUD {
      * Handle create form
      */
     private function handleCreateForm($input) {
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         $content = "<h3>Create New User Master Record</h3>";
         $content .= "<p><a href='{$theURL}?strpass=" . self::PASS_LIST . "'>Back to List</a></p>";
@@ -537,7 +537,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleCreateSave($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         // Collect and sanitize data
         $data = $this->collectFormData();
@@ -569,7 +569,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleEditForm($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         $records = $this->dal->get_user_master_by_id($input['user_id'], $mode);
         
@@ -602,7 +602,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleEditSave($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         // Collect and sanitize data
         $data = $this->collectFormData();
@@ -668,7 +668,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleDeleteExecute($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         $result = $this->dal->delete($input['user_id'], $mode);
         
@@ -690,7 +690,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleSearch($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
         
         // Build search criteria
         $criteria = array(
