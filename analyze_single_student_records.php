@@ -1,5 +1,7 @@
 function analyze_single_student_records_func() {
 
+//	prepares counts of students who took one class only
+
 	global $wpdb, $doDebug, $debugLog;
 
 	$doDebug						= FALSE;
