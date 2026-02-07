@@ -222,7 +222,7 @@ function daily_temp_data_cleanup_func() {
 								}
 								$studentLink		= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?strpass=2&request_type=callsign&request_info=$callsign&inp_depth=one&doDebug&testMode' target='_blank'>$callsign</a>";
 								$assessmentLink		= "<a href='siteURL/cwa-display-cw-assessment-for-a-callsign/?strpass=2&inp_callsign=$callsign' target='_blank'>View Assessment</a>";
-								$userMasterLink		 = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$callsign&doDebug&testMode' target='_blank'>View User_Master</a>";
+								$userMasterLink		 = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' target='_blank'>View User_Master</a>";
 								$emailLink			 = "<a href='mailto:$inp_email?subject=CW Academy -- Do You Need Help?'>$inp_email</a>";
 								$assessmentReport	.= "Assessment Record <em>Callsign:</em> $studentLink <em>Email:</em> $emailLink <em>Age:</em> $thisAge hours $myStr<br />
 														$assessmentLink ... $userMasterLink<br /><br />";
