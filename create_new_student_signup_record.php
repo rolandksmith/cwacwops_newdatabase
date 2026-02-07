@@ -530,7 +530,7 @@ function create_new_student_signup_record_func() {
 									<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>";
 					}
 					$content	.= "</table>
-									<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode' 
+									<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=10' 
 									target='_blank'>HERE</a> to update the advisor Master Data</p>";
 									
 									
@@ -921,7 +921,7 @@ function create_new_student_signup_record_func() {
 											<td><b>Date Updated</b><br />$user_date_updated</td></tr>
 										<tr><td colspan='4'><b>Action Log</b><br />$myStr</td></tr>
 										</table>
-										<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$user_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode&inp_mode=$inp_mode' 
+										<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=10' 
 										target='_blank'>HERE</a> to update the advisor Master Data</p>";
 			
 						// get the student signup info
@@ -991,11 +991,11 @@ function create_new_student_signup_record_func() {
 									$updateLink			= "<a href='$updateStudent/?strpass=3&inp_callsign=$inp_callsign&inp_student_id=$student_ID&inp_verbose=$inp_verbose&inp_mode=$inp_mode'>$student_ID<a/>";
 									$preAssignedLink	= '';
 									if ($student_pre_assigned_advisor != '') {
-										$preAssignedLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_pre_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_pre_assigned_advisor</a>";
+										$preAssignedLink	= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=10' target='_blank'>$student_pre_assigned_advisor</a>";
 									}
 									$assignedLink		= '';
 									if ($student_assigned_advisor != '') {
-										$assignedLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=2&request_type=callsign&request_info=$student_assigned_advisor&inp_depth=one&doDebug&testMode' target='_blank'>$student_assigned_advisor</a>";
+										$assignedLink		= "<a href='$siteURL/cwa-display-and-update-advisor-signup-info/?strpass=10' target='_blank'>$student_assigned_advisor</a>";
 									}
 
 									$responseStr	= $responseCode[$student_response];
