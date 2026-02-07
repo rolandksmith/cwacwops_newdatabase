@@ -624,7 +624,7 @@ function new_usernames_report_func(){
 							if ($hasSignup == 'Y') {
 								$thisLink		= "<a href='$advisorUpdateURL?request_type=callsign&request_info=$thisUser&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2' target='_blank'>$thisUser</a>";
 							} elseif ($hasUserMaster == 'Y') {
-								$thisLink		= "<a href='$userMasterUpdateURL?request_type=callsign&request_info=$thisUser&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisUser</a>";
+								$thisLink		= "<a href='$userMasterUpdateURL?strpass=10' target='_blank'>$thisUser</a>";
 							} else {
 								$thisLink		= $thisUser;
 							}
@@ -633,7 +633,7 @@ function new_usernames_report_func(){
 							if ($hasSignup == 'Y') {
 								$thisLink		= "<a href='$studentUpdateURL?request_type=callsign&request_info=$thisUser&inp_depth=one&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisUser</a>";
 							} elseif ($hasUserMaster == 'Y') {
-								$thisLink		= "<a href='$userMasterUpdateURL?request_type=callsign&request_info=$thisUser&strpass=2&doDebug=$doDebug&testMode=$testMode' target='_blank'>$thisUser</a>";
+								$thisLink		= "<a href='$userMasterUpdateURL?str[ass=10' target='_blank'>$thisUser</a>";
 							} else {
 								$thisLink		= $thisUser;
 							}
