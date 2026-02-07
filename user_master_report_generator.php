@@ -1130,7 +1130,7 @@ where rg_report_name = '$inp_report_name'";
                            $content .= "<td style='vertical-align:top'>$user_ID</td>";
                         }
                        if ($user_call_sign_checked == 'X') {
-                           $content .= "<td style='vertical-align:top'><a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug=$doDebug&testMode=$testMode' 
+                           $content .= "<td style='vertical-align:top'><a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' 
                            target='_blank'>$user_call_sign<a/></td>";
                         }
                        if ($user_first_name_checked == 'X') {
