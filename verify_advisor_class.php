@@ -443,7 +443,7 @@ function verify_advisor_class_func() {
 														}
 
 														$doProceed								= FALSE;
-														if ($student_status == 'Y' || $student_student_status == 'S') {
+														if ($student_status == 'Y' || $student_status == 'S') {
 															$doProceed							= TRUE;
 														} else {
 															$doProceed							= FALSE;
