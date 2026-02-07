@@ -1615,7 +1615,7 @@ function display_and_update_student_signup_func() {
 								<table style='width:900px;'>
 								$theDisplay
 								</table>
-								<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=2&request_type=callsign&request_info=$student_call_sign&inp_depth=one$doDebug=$doDebug&testMode=$testMode&inp_mode=$inp_mode' 
+								<p>Click <a href='$siteURL/cwa-display-and-update-user-master-information/?strpass=10' 
 								target='_blank'>HERE</a> to update the advisor Master Data</p>";
 			
 				// get the student signup info
