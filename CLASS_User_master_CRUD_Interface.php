@@ -3,6 +3,10 @@
  * 
  * Provides a user interface for Create, Read, Update, and Delete operations
  * on the user_master table using the CWA_User_Master_DAL.
+ * 
+ * Access levels:
+ * - Admin users (user_is_admin = 'Y'): Full CRUD access to all records
+ * - Non-admin users: Can only view/edit their own record (no delete)
  */
 
 class CWA_User_Master_CRUD {
@@ -10,6 +14,7 @@ class CWA_User_Master_CRUD {
     private $dal;
     private $config;
     private $user;
+    private $display;
     
     // Job name for logging
     private $jobname = 'User Master CRUD';
@@ -24,6 +29,8 @@ class CWA_User_Master_CRUD {
     const PASS_DELETE_CONFIRM = '7';
     const PASS_DELETE_EXECUTE = '8';
     const PASS_SEARCH = '9';
+    const PASS_EXTERNAL_ENTRY = '10';
+    const PASS_EXTERNAL_EDIT_SAVE = '11';
     
     // Field definitions for forms
     private $field_definitions = array(
@@ -194,8 +201,19 @@ class CWA_User_Master_CRUD {
         )
     );
     
+    // Fields that non-admin users cannot see or edit in external entry mode
+    private $admin_only_fields = array(
+        'user_timezone_id',
+        'user_survey_score',
+        'user_is_admin',
+        'user_role',
+        'user_prev_callsign',
+        'user_action_log'
+    );
+    
     public function __construct() {
         $this->dal = new CWA_User_Master_DAL();
+        $this->display = new CWA_User_Master_Display();
         $this->initializeConfig();
         $this->initializeUser();
     }
@@ -216,16 +234,28 @@ class CWA_User_Master_CRUD {
     }
     
     /**
-     * Initialize user
+     * Initialize user including admin status from user_master
      */
     private function initializeUser() {
         $initData = data_initialization_func();
+        $mode = $this->config['testMode'] ? 'Testing' : 'Production';
         
         $this->user = array(
             'name' => $initData['userName'],
             'role' => $initData['userRole'],
             'ipAddress' => $this->getUserIP(),
+            'callSign' => $initData['userName'],
+            'isAdmin' => false,
+            'userId' => null,
         );
+        
+        // Look up user's admin status from user_master table
+        $userRecord = $this->dal->get_user_master_by_callsign($this->user['callSign'], $mode);
+        
+        if ($userRecord && count($userRecord) > 0) {
+            $this->user['isAdmin'] = ($userRecord[0]['user_is_admin'] === 'Y');
+            $this->user['userId'] = $userRecord[0]['user_ID'];
+        }
     }
     
     /**
@@ -234,31 +264,55 @@ class CWA_User_Master_CRUD {
     public function handle() {
         $startTime = microtime(true);
         
-        // Check authorization
-        if (!$this->isAuthorized()) {
-            return '<p>You are not authorized to access this page.</p>';
-        }
-        
         // Handle test mode
         $this->handleTestMode();
         
         // Get input
         $input = $this->getInput();
         
+        // Check authorization based on pass and user status
+        $authResult = $this->checkAuthorization($input);
+        if ($authResult !== true) {
+            return $authResult;
+        }
+        
         // Route to appropriate handler
         $content = $this->routeRequest($input);
         
-        // Add footer with joblog
-        $content .= $this->addFooter($startTime, $input['strpass']);
+        // Add footer with joblog (skip for external entry completion messages)
+        if (!in_array($input['strpass'], array(self::PASS_EXTERNAL_EDIT_SAVE))) {
+            $content .= $this->addFooter($startTime, $input['strpass']);
+        }
         
         return $content;
     }
     
     /**
-     * Check if user is authorized
+     * Check authorization based on pass type and user status
+     * 
+     * @param array $input The sanitized input array
+     * @return true|string Returns true if authorized, or error message HTML if not
      */
-    private function isAuthorized() {
-        return $this->user['role'] === 'administrator';
+    private function checkAuthorization($input) {
+        $pass = $input['strpass'];
+        
+        // External entry passes - any logged-in user can access their own record
+        if (in_array($pass, array(self::PASS_EXTERNAL_ENTRY, self::PASS_EXTERNAL_EDIT_SAVE))) {
+            if (empty($this->user['callSign'])) {
+                return '<p>You must be logged in to access this page.</p>';
+            }
+            if ($this->user['userId'] === null) {
+                return '<p>Your user record was not found. Please contact an administrator.</p>';
+            }
+            return true;
+        }
+        
+        // Admin-only passes - require user_is_admin = 'Y'
+        if (!$this->user['isAdmin']) {
+            return '<p>You are not authorized to access this page. Admin privileges required.</p>';
+        }
+        
+        return true;
     }
     
     /**
@@ -341,6 +395,12 @@ class CWA_User_Master_CRUD {
             case self::PASS_SEARCH:
                 return $this->handleSearch($input);
             
+            case self::PASS_EXTERNAL_ENTRY:
+                return $this->handleExternalEntry($input);
+            
+            case self::PASS_EXTERNAL_EDIT_SAVE:
+                return $this->handleExternalEditSave($input);
+            
             default:
                 return '<p>Invalid request.</p>';
         }
@@ -351,7 +411,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleList($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         // Get all records
         $records = $this->dal->get_user_master(
@@ -469,37 +529,16 @@ class CWA_User_Master_CRUD {
     }
     
     /**
-     * Handle view single record
+     * Handle view single record - uses CWA_User_Master_Display
      */
     private function handleView($input) {
-        $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
-        $records = $this->dal->get_user_master_by_id($input['user_id'], $mode);
-        
-        if (!$records || count($records) === 0) {
-            return "<h3>User Master Record</h3><p>Record not found.</p>";
-        }
-        
-        $record = $records[0];
-        
-        $content = "<h3>User Master Record - {$record['user_call_sign']}</h3>";
-        $content .= "<p><a href='{$theURL}?strpass=" . self::PASS_LIST . "'>Back to List</a> | ";
+        $content = "<p><a href='{$theURL}?strpass=" . self::PASS_LIST . "'>Back to List</a> | ";
         $content .= "<a href='{$theURL}?strpass=" . self::PASS_EDIT_FORM . "&user_id={$input['user_id']}'>Edit</a></p>";
         
-        $content .= "<table style='width:900px;'>";
-        
-        foreach ($this->field_definitions as $field => $def) {
-            if (isset($record[$field])) {
-                $value = esc_html($record[$field]);
-                $label = $def['label'];
-                $content .= "<tr><td><b>{$label}</b></td><td>{$value}</td></tr>";
-            }
-        }
-        
-        $content .= "<tr><td><b>Date Created</b></td><td>" . esc_html($record['user_date_created']) . "</td></tr>";
-        $content .= "<tr><td><b>Date Updated</b></td><td>" . esc_html($record['user_date_updated']) . "</td></tr>";
-        $content .= "</table>";
+        // Use the standard display class
+        $content .= $this->display->render($input['user_id']);
         
         return $content;
     }
@@ -508,7 +547,7 @@ class CWA_User_Master_CRUD {
      * Handle create form
      */
     private function handleCreateForm($input) {
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         $content = "<h3>Create New User Master Record</h3>";
         $content .= "<p><a href='{$theURL}?strpass=" . self::PASS_LIST . "'>Back to List</a></p>";
@@ -537,7 +576,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleCreateSave($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         // Collect and sanitize data
         $data = $this->collectFormData();
@@ -569,7 +608,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleEditForm($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         $records = $this->dal->get_user_master_by_id($input['user_id'], $mode);
         
@@ -602,7 +641,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleEditSave($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         // Collect and sanitize data
         $data = $this->collectFormData();
@@ -635,7 +674,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleDeleteConfirm($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-user-master-crud/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         $records = $this->dal->get_user_master_by_id($input['user_id'], $mode);
         
@@ -668,7 +707,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleDeleteExecute($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         $result = $this->dal->delete($input['user_id'], $mode);
         
@@ -690,7 +729,7 @@ class CWA_User_Master_CRUD {
      */
     private function handleSearch($input) {
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master/';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
         
         // Build search criteria
         $criteria = array(
@@ -726,12 +765,107 @@ class CWA_User_Master_CRUD {
     }
     
     /**
+     * Handle external entry - display edit form for current user's own record
+     * Called from other programs, opens in new tab
+     */
+    private function handleExternalEntry($input) {
+        $mode = $this->config['testMode'] ? 'Testing' : 'Production';
+        $theURL = $this->config['siteURL'] . '/cwa-display-and-update-user-master-information/';
+        
+        // Get current user's record by their user_id (already looked up in initializeUser)
+        $records = $this->dal->get_user_master_by_id($this->user['userId'], $mode);
+        
+        if (!$records || count($records) === 0) {
+            return "<h3>Edit Your User Record</h3><p>Your user record was not found.</p>";
+        }
+        
+        $record = $records[0];
+        
+        $content = "<h3>Edit Your User Record - {$record['user_call_sign']}</h3>";
+        
+        $content .= "<form method='post' action='{$theURL}'>
+            <input type='hidden' name='strpass' value='" . self::PASS_EXTERNAL_EDIT_SAVE . "'>
+            <input type='hidden' name='user_id' value='{$this->user['userId']}'>
+            <table style='width:900px;'>";
+        
+        foreach ($this->field_definitions as $field => $def) {
+            // Skip admin-only fields for non-admin users
+            if (!$this->user['isAdmin'] && in_array($field, $this->admin_only_fields)) {
+                continue;
+            }
+            
+            $content .= $this->renderFormField($field, $def, $record);
+        }
+        
+        $content .= "<tr><td>&nbsp;</td><td><input type='submit' value='Update My Record' class='formInputButton'></td></tr>";
+        $content .= "</table></form>";
+        
+        return $content;
+    }
+    
+    /**
+     * Handle external entry save - save current user's own record
+     */
+    private function handleExternalEditSave($input) {
+        $mode = $this->config['testMode'] ? 'Testing' : 'Production';
+        $startTime = microtime(true);
+        
+        // Security check: ensure they're updating their own record
+        $submittedUserId = $this->sanitize(isset($_POST['user_id']) ? $_POST['user_id'] : 0, 'int');
+        
+        if ((int)$submittedUserId !== (int)$this->user['userId']) {
+            return "<h3>Error</h3><p>You can only update your own record.</p>
+                    <p><strong>You may close this tab.</strong></p>";
+        }
+        
+        // Collect and sanitize data
+        $data = $this->collectFormData();
+        
+        // For non-admin users, remove admin-only fields they shouldn't be able to change
+        if (!$this->user['isAdmin']) {
+            foreach ($this->admin_only_fields as $field) {
+                unset($data[$field]);
+            }
+        }
+        
+        // Add to action log (handled separately since it's in admin_only_fields)
+        $actionDate = date('dMy H:i', $this->config['currentTimestamp']);
+        
+        // Get existing action log from database
+        $existingRecord = $this->dal->get_user_master_by_id($this->user['userId'], $mode);
+        $existingLog = ($existingRecord && count($existingRecord) > 0) 
+            ? $existingRecord[0]['user_action_log'] 
+            : '';
+        
+        $data['user_action_log'] = $existingLog . " / {$actionDate} Self-service record updated by {$this->user['name']}";
+        
+        // Update record
+        $result = $this->dal->update($this->user['userId'], $data, $mode);
+        
+        if ($result !== false) {
+            $content = "<h3>Success</h3>";
+            $content .= "<p>Your user record has been updated successfully.</p>";
+            $content .= "<p><strong>You may close this tab.</strong></p>";
+        } else {
+            $content = "<h3>Error</h3>";
+            $content .= "<p>Failed to update your user record. Please try again or contact an administrator.</p>";
+            $content .= "<p><strong>You may close this tab.</strong></p>";
+        }
+        
+        // Add footer for external save
+        $content .= $this->addFooter($startTime, self::PASS_EXTERNAL_EDIT_SAVE);
+        
+        return $content;
+    }
+    
+    /**
      * Render form field
      */
     private function renderFormField($field, $def, $record) {
         $value = isset($record[$field]) ? esc_attr($record[$field]) : (isset($def['default']) ? $def['default'] : '');
         $required = isset($def['required']) && $def['required'] ? 'required' : '';
         $readonly = isset($def['readonly']) && $def['readonly'] ? 'readonly' : '';
+        $disabled = isset($def['readonly']) && $def['readonly'] ? 'disabled' : '';
         $label = $def['label'];
         
         $html = "<tr><td><b>{$label}:</b></td><td>";
@@ -746,7 +880,7 @@ class CWA_User_Master_CRUD {
             case 'number':
                 $min = isset($def['min']) ? "min='{$def['min']}'" : '';
                 $max = isset($def['max']) ? "max='{$def['max']}'" : '';
-                $html .= "<input type='number' name='{$field}' value='{$value}' class='formInputText' {$min} {$max} {$required}>";
+                $html .= "<input type='number' name='{$field}' value='{$value}' class='formInputText' {$min} {$max} {$required} {$readonly}>";
                 break;
             
             case 'textarea':
@@ -754,12 +888,16 @@ class CWA_User_Master_CRUD {
                 break;
             
             case 'select':
-                $html .= "<select name='{$field}' class='formSelect' {$required}>";
+                $html .= "<select name='{$field}' class='formSelect' {$required} {$disabled}>";
                 foreach ($def['options'] as $optValue => $optLabel) {
                     $selected = ($value == $optValue) ? 'selected' : '';
                     $html .= "<option value='{$optValue}' {$selected}>{$optLabel}</option>";
                 }
                 $html .= "</select>";
+                // Add hidden field if disabled to preserve value on submit
+                if ($disabled) {
+                    $html .= "<input type='hidden' name='{$field}' value='{$value}'>";
+                }
                 break;
         }
         
