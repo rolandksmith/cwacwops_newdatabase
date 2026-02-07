@@ -266,7 +266,7 @@ function crosscheck_callsigns_func() {
 										$$thisField = $thisValue;
 									}
 									if ($user_role != 'advisor') {
-										$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug&testMode' target='_blank'>$user_call_sign</a>";
+										$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' target='_blank'>$user_call_sign</a>";
 										$content .= "The User_Master record for advisor $updateLink says the user_role is $user_role<br />";
 										$errors++;
 										$users_result = $wpdb->get_results("select * from $userTableName where user_login like '%$user_call_sign%'");
@@ -343,7 +343,7 @@ function crosscheck_callsigns_func() {
 								$content .= "<p>Attempting to get advisor data for $user_call_sign returned FALSE</p>";
 							} else {
 								if ( empty($advisor_data)) {
-									$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug&testMode' target='_blank'>$user_call_sign</a>";
+									$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' target='_blank'>$user_call_sign</a>";
 									$content .= "User_Master says $updateLink is an advisor but no advisor record found<br />";
 									$errors++;
 								}
@@ -383,7 +383,7 @@ function crosscheck_callsigns_func() {
 										$$thisField = $thisValue;
 									}
 									if ($user_role != 'student') {
-										$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug&testMode' target='_blank'>$user_call_sign</a>";
+										$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' target='_blank'>$user_call_sign</a>";
 										$content .= "The User_Master record for student $updateLink says the user_role is $user_role<br />";
 										$errors++;
 									}
@@ -425,7 +425,7 @@ function crosscheck_callsigns_func() {
 								$content .= "<p>Attempting to get student data for $user_call_sign returned FALSE</p>";
 							} else {
 								if ( empty($student_data)) {
-									$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=2&request_type=callsign&request_info=$user_call_sign&doDebug&testMode' target='_blank'>$user_call_sign</a>";
+									$updateLink = "<a href='$siteURL/cwa-display-and-update-user-master/?strpass=10' target='_blank'>$user_call_sign</a>";
 									$content .= "User_Master says $updateLink is an student but no student record found<br />";
 									$errors++;
 								}
