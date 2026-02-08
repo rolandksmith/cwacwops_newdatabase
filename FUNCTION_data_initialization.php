@@ -29,16 +29,25 @@ function data_initialization_func($attrib='') {
 
 
 	// determine if current user is a valid user
-	$validUsers 				= array('wr7q','WR7Q','Roland','kcgator','n7ast','N7AST','k7ojl','K7OJL','KF7WX','kf7wx', 'N9EEE', 'n9eee'); 
-	$validTestmode				= array('Roland','kcgator','n7ast', 'N7AST', 'k7ojl','K7OJL','wr7q','WR7Q','KF7WX','kf7wx');
-	$current_user 				= wp_get_current_user();
-	
-//	echo "current_user:<br /><pre>";
-//	print_r($current_user);
-//	echo "</pre><br />";
-	
+	$validUsers 				= array('WR7Q', 
+										'N7AST', 
+										'K7OJL', 
+										'KF7WX', 
+										'N9EEE', ); 
+	$validTestmode				= array('N7AST', 
+										'K7OJL', 
+										'WR7Q', 
+										'KF7WX', 
+										'DD1MAT', 
+										'SV2TCC', 
+										'KA1JXY', 
+										'KF7BBU', 
+										'K7JTO', 
+										);
+	$current_user 				= wp_get_current_user();	
 	
 	$user_name 					= trim($current_user->user_login);
+	$user_name					= strtoupper($user_name);
 	$user_email					= $current_user->user_email;
 	$user_display_name			= $current_user->display_name;
 	$userID						= get_current_user_id();
@@ -231,7 +240,7 @@ function data_initialization_func($attrib='') {
 // get site url
 	$siteURL					= get_site_url();
 
-	$currentDateTime				= current_time('mysql', 1);
+	$currentDateTime			= current_time('mysql', 1);
 	$result 					= array('validUser'=>$validUser,
 										'userRole'=>$user_role,
 										'userName'=>$user_name,
