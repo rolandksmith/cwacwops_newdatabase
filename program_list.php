@@ -5,15 +5,18 @@ function program_list_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$ctx = CWA_Context::getInstance();
+error_log('userName: ' . $ctx->userName);
+error_log('userID: ' . $ctx->userID);	$validUser = $ctx->validUser;
+	$userName = $ctx->userName;
+	$userName = strtoupper($userName);
+	$siteURL = $ctx->siteurl;
 	if ($doDebug) {
-		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
-		echo "</pre><br />";
+		echo "context data:<br />
+			  validUser: $validUser<br />
+			  userName: $userName<br />
+			  siteURL: $siteURL<br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= strtoupper($initializationArray['userName']);
-	$siteURL			= $initializationArray['siteurl'];
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
 		$content		= "You must be logged in to access this information<br />
@@ -22,15 +25,15 @@ function program_list_func() {
 		return $content;
 	}
 	
-	$userRole			= $initializationArray['userRole'];
-	$userEmail			= $initializationArray['userEmail'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
+	$userRole			= $ctx->userRole;
+	$userEmail			= $ctx->userEmail;
+	$currentTimestamp	= $ctx->currentTimestamp;
 	$strPass			= "0";
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
+	$currentSemester	= $ctx->currentSemester;
+	$nextSemester		= $ctx->nextSemester;
+	$semesterTwo		= $ctx->semesterTwo;
+	$semesterThree		= $ctx->semesterThree;
+	$semesterFour		= $ctx->semesterFour;
 	$jobname			= "Program List";
 	
 	$criticalZipCodeMsg	= "<p><b>CRITICAL!</b> Your ZipCode is missing. As a result, the system is unable to properly 
@@ -232,7 +235,14 @@ function program_list_func() {
 			$content		.= "getting data for $userName failed.<br />Reason: $reason<br />";
 		} else {
 			foreach($dataResult as $key => $value) {
-				$$key = $value;
+				if ($key == 'user_role') {
+					$user_role = $value[0];
+					$userRole = $user_role;
+				} else {
+					if (str_contains($key,'user_')) {
+						$$key = $value;
+					}
+				}
 			}
 			$gotData				= TRUE;
 		}
@@ -285,27 +295,6 @@ function program_list_func() {
 		} else {
 			//// display user_master
 			$content .= $display->render($userName);
-/*			
-			$content		.= "<h4>Advisor Master Data</h4>
-							<table style='width:900px;'>
-							<tr><td><b>Callsign<br />$user_call_sign</b></td>
-								<td><b>Name</b><br />$user_last_name, $user_first_name</td>
-								<td><b>Phone</b><br />+$user_ph_code $user_phone</td>
-								<td><b>Email</b><br />$user_email</td></tr>
-							<tr><td><b>City</b><br />$user_city</td>
-								<td><b>State</b><br />$user_state</td>
-								<td><b>Zip Code</b><br />$user_zip_code</td>
-								<td><b>Country</b><br />$user_country</td></tr>
-							<tr><td><b>WhatsApp</b><br />$user_whatsapp</td>
-								<td><b>Telegram</b><br />$user_telegram</td>
-								<td><b>Signal</b><br />$user_signal</td>
-								<td><b>Messenger</b><br />$user_messenger</td></tr>
-							<tr><td><b>Timezone ID</b><br />$user_timezone_id</td>
-								<td><b>Date Created</b><br />$user_date_created</td>
-								<td><b>Date Updated</b><br />$user_date_updated</td>
-								<td></td></tr>
-							</table>";
-*/
 			if ($xxTimezoneID) {
 				if ($doDebug) {
 					echo "timezone_id is ??. Giving update user master message<br />";
