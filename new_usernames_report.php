@@ -804,6 +804,8 @@ Academy</a>, enter your usename and password, and sign up by clicking on the 'Si
 		} else {
 			return $content;
 		}
+	} else {
+		return notAuthorized();
 	}
 }
 add_shortcode ('new_usernames_report','new_usernames_report_func');
