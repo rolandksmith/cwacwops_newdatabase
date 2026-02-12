@@ -24,7 +24,7 @@ function current_semester_statistics_func() {
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+		return notAuthorized();
 	}
 
 	if (!in_array($userName,$validTestmode) && $doDebug) {	// turn off doDebug if not a testmode user
