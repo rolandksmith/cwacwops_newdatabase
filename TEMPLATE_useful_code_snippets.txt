@@ -887,4 +887,16 @@ $criteria = [
 	$theURL = $this->config['siteURL'] . self::PAGE_SLUG;
 	
 		
+/// using the data_initialization function replacement:
+	$ctx = CWA_Context::getInstance();
+	$userName = $ctx->userName;
+	$userRole			= $ctx->userRole;
+	$userEmail			= $ctx->userEmail;
+	$currentTimestamp	= $ctx->currentTimestamp;
+	$currentSemester	= $ctx->currentSemester;
+	$nextSemester		= $ctx->nextSemester;
+	$semesterTwo		= $ctx->semesterTwo;
+	$semesterThree		= $ctx->semesterThree;
+	$semesterFour		= $ctx->semesterFour;
+
 	
