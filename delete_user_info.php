@@ -290,6 +290,8 @@ function delete_user_info_func() {
 		$hasAdvisorRecord		= FALSE;
 		$hasAdvisorClassRecord	= FALSE;
 		$hasStudentRecord		= FALSE;
+		$user_id				= 0;
+		$userMaster_call_sign 	= '';
 		$userMaster_id			= 0;
 	
 		if ($doProceed) {
@@ -323,8 +325,6 @@ function delete_user_info_func() {
 						$user_email			= $resultRow->user_email;
 						$user_registered	= $resultRow->user_registered;
 
-						$user_needs_verification	= FALSE;
-						
 						$metaSQL		= "select meta_key, meta_value 
 											from $userMetaTableName 
 											where user_id = $user_id 
@@ -367,9 +367,6 @@ function delete_user_info_func() {
 									if ($myInt !== FALSE) {
 										$user_role	= 'advisor';
 									}
-								}
-								if ($meta_key == 'wpumuv_needs_verification') {
-									$user_needs_verification	= TRUE;
 								}
 							}
 			
@@ -509,11 +506,6 @@ function delete_user_info_func() {
 								User_last_name: $user_last_name<br />
 								User_registered: $user_registered<br />";
 			}				
-			if ($user_needs_verification) {
-				$content	.= "User has not verified</p>";
-			} else {
-				$content	.= "User record is verified</p>";
-			}
 			if ($hasUserMasterRecord) {
 				$content	.= "<p>User has a User Master record, meaning the user has signed 
 								in at least once.</p>";
