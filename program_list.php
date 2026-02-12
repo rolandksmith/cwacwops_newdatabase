@@ -6,8 +6,6 @@ function program_list_func() {
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$ctx = CWA_Context::getInstance();
-error_log('userName: ' . $ctx->userName);
-error_log('userID: ' . $ctx->userID);	$validUser = $ctx->validUser;
 	$userName = $ctx->userName;
 	$userName = strtoupper($userName);
 	$siteURL = $ctx->siteurl;
