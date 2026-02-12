@@ -1,3 +1,4 @@
+<?php
 /** CWA Config DAL
 	Provides the methods to manage the data initialization static values
 	
@@ -100,7 +101,7 @@ class CWA_Config_DAL {
     }
     
     /**
-     * Get all config values
+     * Get all config values (typed)
      * 
      * @return array Associative array of all config values
      */
@@ -136,6 +137,146 @@ class CWA_Config_DAL {
         unset($this->cache[$key]);
         
         return $result !== false;
+    }
+    
+    // ---------------------------------------------------------------
+    // CRUD support methods
+    // ---------------------------------------------------------------
+    
+    /**
+     * Get a single raw row by config_key (for CRUD edit forms)
+     * 
+     * @param string $key The config key
+     * @return array|null The raw row or null if not found
+     */
+    public function getRow($key) {
+        $row = $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT config_key, config_value, config_type, updated_at, updated_by 
+                 FROM {$this->table_name} WHERE config_key = %s",
+                $key
+            ),
+            ARRAY_A
+        );
+        
+        return $row;
+    }
+    
+    /**
+     * Get all raw rows (for CRUD list view)
+     * 
+     * @param string $orderby Column to sort by
+     * @param string $order ASC or DESC
+     * @return array Array of raw rows
+     */
+    public function getAllRows($orderby = 'config_key', $order = 'ASC') {
+        // Whitelist allowed columns
+        $allowed_columns = array('config_key', 'config_value', 'config_type', 'updated_at', 'updated_by');
+        if (!in_array($orderby, $allowed_columns)) {
+            $orderby = 'config_key';
+        }
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+        
+        $rows = $this->wpdb->get_results(
+            "SELECT config_key, config_value, config_type, updated_at, updated_by 
+             FROM {$this->table_name} ORDER BY {$orderby} {$order}",
+            ARRAY_A
+        );
+        
+        return $rows ?: array();
+    }
+    
+    /**
+     * Search rows by key or value (for CRUD search)
+     * 
+     * @param string $field The field to search (config_key, config_value, config_type, updated_by)
+     * @param string $value The search value
+     * @return array Array of matching raw rows
+     */
+    public function searchRows($field, $value) {
+        // Whitelist allowed search fields
+        $allowed_fields = array('config_key', 'config_value', 'config_type', 'updated_by');
+        if (!in_array($field, $allowed_fields)) {
+            return array();
+        }
+        
+        $rows = $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT config_key, config_value, config_type, updated_at, updated_by 
+                 FROM {$this->table_name} WHERE {$field} LIKE %s ORDER BY config_key ASC",
+                '%' . $this->wpdb->esc_like($value) . '%'
+            ),
+            ARRAY_A
+        );
+        
+        return $rows ?: array();
+    }
+    
+    /**
+     * Insert a raw config row (for CRUD create)
+     * 
+     * @param array $data Associative array with config_key, config_value, config_type, updated_by
+     * @return bool Success/failure
+     */
+    public function insertRow($data) {
+        $result = $this->wpdb->insert(
+            $this->table_name,
+            array(
+                'config_key'   => $data['config_key'],
+                'config_value' => $data['config_value'],
+                'config_type'  => $data['config_type'],
+                'updated_by'   => $data['updated_by']
+            ),
+            array('%s', '%s', '%s', '%s')
+        );
+        
+        // Clear cache since data changed
+        $this->clearCache();
+        
+        return $result !== false;
+    }
+    
+    /**
+     * Update a raw config row (for CRUD edit)
+     * 
+     * @param string $key The config_key to update
+     * @param array $data Associative array with config_value, config_type, updated_by
+     * @return bool Success/failure
+     */
+    public function updateRow($key, $data) {
+        $result = $this->wpdb->update(
+            $this->table_name,
+            array(
+                'config_value' => $data['config_value'],
+                'config_type'  => $data['config_type'],
+                'updated_by'   => $data['updated_by']
+            ),
+            array('config_key' => $key),
+            array('%s', '%s', '%s'),
+            array('%s')
+        );
+        
+        // Clear cache since data changed
+        $this->clearCache();
+        
+        return $result !== false;
+    }
+    
+    /**
+     * Check if a config key exists
+     * 
+     * @param string $key The config key
+     * @return bool
+     */
+    public function keyExists($key) {
+        $count = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_name} WHERE config_key = %s",
+                $key
+            )
+        );
+        
+        return (int)$count > 0;
     }
     
     /**
