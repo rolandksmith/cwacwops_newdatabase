@@ -1,25 +1,35 @@
 function student_and_advisor_assignments_func() {
 
 	global $wpdb, $advisorClassArray, $doDebug;
+	// set initial values
+	$ctx 				= CWA_Context::getInstance();
+	$validUser			= $ctx->validUser;
 
-	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
 	if ($validUser == "N") {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+		return isNotAuthorized();
 	}
+
+	$inp_semester		= $ctx->nextSemester;
+	$userName 			= $ctx->userName;
+	$siteURL			= $ctx->siteurl;
+	$defaultClassSize	= $ctx->defaultClassSize;
+	$validTestmode		= $ctx->validTestmode;
+	$pastSemesters		= $ctx->pastSemesters;
+	$currentSemester	= $ctx->currentSemester;
+	$nextSemester		= $ctx->nextSemester;
+	$semesterTwo		= $ctx->semesterTwo;
+	$semesterThree		= $ctx->semesterThree;
+
+
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
 	$doDebug 					= FALSE;
 	$testMode					= FALSE;
 	$thisVersion				= '4';
-	$inp_semester				= $initializationArray['nextSemester'];
-	$userName					= $initializationArray['userName'];
-	$siteURL					= $initializationArray['siteurl'];
 	$strPass					= "1";
 	$errorCount					= 0;
 	$xStudentCount				= 0;
-	$defaultClassSize			= $initializationArray['defaultClassSize'];
 	$inp_rsave				 	= '';
 	$inp_verified				= '';
 	$inp_verbose			 	= 'N';
@@ -28,14 +38,8 @@ function student_and_advisor_assignments_func() {
 	$studentHistoryURL		 	= "$siteURL/cwa-show-detailed-history-for-student/";	
 	$advisorUpdateURL			= "$siteURL/cwa-display-and-update-advisor-information/";	
 	$studentManagementURL		= "$siteURL/cwa-student-management/";
-	$pastSemesters				= $initializationArray['pastSemesters'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
 	$pastSemesterArray			= explode("|",$pastSemesters);
 	$inp_semesterlist			= '';
-	$validTestmode				= $initializationArray['validTestmode'];
 	$jobname					= "Student and Advisor Assignments V$thisVersion";
 	
 	$levelConvert				= array('Beginner'=>1,'Fundamental'=>2,'Intermediate'=>3,'Advanced'=>4);
