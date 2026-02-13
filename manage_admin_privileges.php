@@ -116,119 +116,7 @@ function manage_admin_privileges_func() {
 	}
 	
 	
-	$content = "<style type='text/css'>
-				fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-				background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-				
-				legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-				font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-				
-				label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-				text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-				
-				textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-				background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-				
-				input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				input.formInputFile {color:#666;background:#fee;padding:2px;border:
-				solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-				
-				input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-				
-				select.formSelect {color:#666;background:#fee;padding:2px;
-				border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-				
-				select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-				
-				input.formInputButton {vertical-align:middle;font-weight:bolder;
-				text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-				cursor:pointer;position:relative;float:left;}
-				
-				input.formInputButton:hover {color:#f8f400;}
-				
-				input.formInputButton:active {color:#00ffff;}
-				
-				tr {color:#333;background:#eee;}
-				
-				table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-				
-				th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-				
-				td {padding:5px;font-size:small;}
-				
-				th:first-child,
-				td:first-child {
-				 padding-left: 10px;
-				}
-				
-				th:last-child,
-				td:last-child {
-					padding-right: 5px;
-				}
-		
-		.info-asterisk {
-			cursor: help;
-			color: #d9534f;
-			font-weight: bold;
-			padding: 0 4px;
-			position: relative; /* Keeps the tooltip anchored to this element */
-			display: inline-block;
-		}
-		
-		/* The updated tooltip box */
-		.hover-popup {
-			position: absolute;
-			background: #333;
-			color: #fff;
-			padding: 8px 12px;
-			border-radius: 4px;
-			font-size: 13px;
-			z-index: 1000;
-			
-			/* Position logic */
-			bottom: 150%;      /* Places it above the asterisk */
-			left: 0;           /* Aligns the left edge of the box with the asterisk */
-			
-			/* Responsive width logic */
-			width: max-content; 
-			max-width: 250px;   /* Prevents it from being too wide */
-			white-space: normal; /* Allows text to wrap if it hits max-width */
-			word-wrap: break-word;
-		
-			/* Smooth entry */
-			opacity: 0;
-			visibility: hidden;
-			transition: opacity 0.2s ease-in-out;
-			box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-		}
-		
-		/* Add a small arrow pointing down */
-		.hover-popup::after {
-			content: '';
-			position: absolute;
-			top: 100%; 
-			left: 10px; /* Aligns arrow with the start of the text */
-			border-width: 5px;
-			border-style: solid;
-			border-color: #333 transparent transparent transparent;
-		}
-		
-		/* Show on hover */
-		.info-asterisk:hover .hover-popup {
-			opacity: 1;
-			visibility: visible;
-		}		
-	</style>";	
+	$content = "";	
 
 	function findSubstringsInBrackets($string) {
 		// Use a regular expression to find substrings within brackets
@@ -840,3 +728,4 @@ function manage_admin_privileges_func() {
 	return $content;
 }
 add_shortcode ('manage_admin_privileges', 'manage_admin_privileges_func');
+
