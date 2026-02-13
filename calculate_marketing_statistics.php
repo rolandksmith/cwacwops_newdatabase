@@ -162,98 +162,7 @@ function calculate_marketing_statistics_func() {
 	}
 	
 	
-	$content = "<style type='text/css'>
-		fieldset {font:'Times New Roman', sans-serif;color:#666;background-image:none;
-		background:#efefef;padding:2px;border:solid 1px #d3dd3;}
-
-		legend {font:'Times New Roman', sans-serif;color:#666;font-weight:bold;
-		font-variant:small-caps;background:#d3d3d3;padding:2px 6px;margin-bottom:8px;}
-
-		label {font:'Times New Roman', sans-serif;font-weight:bold;line-height:normal;
-		text-align:right;margin-right:10px;position:relative;display:block;float:left;width:150px;}
-
-		textarea.formInputText {font:'Times New Roman', sans-serif;color:#666;
-		background:#fee;padding:2px;border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		textarea.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		textarea.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;}
-
-		input.formInputText:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputText:hover {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		input.formInputFile {color:#666;background:#fee;padding:2px;border:
-		solid 1px #f66;margin-right:5px;margin-bottom:5px;height:20px;}
-
-		input.formInputFile:focus {color:#000;background:#ffffff;border:solid 1px #006600;}
-
-		select.formSelect {color:#666;background:#fee;padding:2px;
-		border:solid 1px #f66;margin-right:5px;margin-bottom:5px;cursor:pointer;}
-
-		select.formSelect:hover {color:#333;background:#ccffff;border:solid 1px #006600;}
-
-		input.formInputButton {vertical-align:middle;font-weight:bolder;
-		text-align:center;color:#300;background:#f99;padding:1px;border:solid 1px #f66;
-		cursor:pointer;position:relative;float:left;}
-
-		input.formInputButton:hover {color:#f8f400;}
-
-		input.formInputButton:active {color:#00ffff;}
-
-		tr {color:#333;background:#eee;}
-
-		table{font:'Times New Roman', sans-serif;background-image:none;border-collapse:collapse;}
-
-		th {color:#ffff;background-color:#000;padding:5px;font-size:small;}
-
-		td {padding:5px;font-size:small;}
-
-		th:first-child,
-		td:first-child {
-		 padding-left: 10px;
-		}
-
-		th:last-child,
-		td:last-child {
-			padding-right: 5px;
-		}
-
-        .info-asterisk {
-            cursor: help; /* Changes cursor to a question mark/help icon */
-            color: #d9534f;
-            font-weight: bold;
-            padding: 0 4px;
-            position: relative;
-        }
-
-        /* The actual tooltip box */
-        .hover-popup {
-            position: absolute;
-            background: #333;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 1000;
-            bottom: 125%; /* Position above the asterisk */
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* Show the tooltip on hover */
-        .info-asterisk:hover .hover-popup {
-            opacity: 1;
-        }        
-	</style>";	
+	$content = "";	
 
 	if ($testMode) {
 		$operatingMode = 'Testmode';
@@ -745,3 +654,4 @@ function calculate_marketing_statistics_func() {
 	return $content;
 }
 add_shortcode ('calculate_marketing_statistics', 'calculate_marketing_statistics_func');
+
