@@ -4,20 +4,21 @@ function this_is_a_function_func() {
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-
+	
+	$ctx = CWA_Context::getInstance();
+	$userName 			= $ctx->userName;
+	$validUser 			= $ctx->validUser;
+	$currentTimestamp	= $ctx->currentTimestamp;
+	$validTestmode		= $ctx->validTestmode;
+	$siteURL			= $ctx->siteurl;
+	$userEmail			= $ctx->userEmail;
+	$userDisplayName	= $ctx->userDisplayName;
+	$userRole			= $ctx->userRole;
+	
 	$versionNumber				 	= "1";
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
 	
 	if ($userName == '') {
-		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
+		return notAuthorized;
 	}
 
 	if (!in_array($userName,$validTestmode) && $doDebug) {	// turn off doDebug if not a testmode user
@@ -46,16 +47,13 @@ function this_is_a_function_func() {
 	$jobname					= "FIX THIS V$versionNumber";
 	$debugLog					= "";
 	
-	// **ENTER VARIABLES NEEDING DEFINITION HERE
 	
 	ob_start();
 	echo "<div id='cwa-admin-wrapper'>";
 
-	if ($doDebug) {
-	 	echo "Initialization Array:<br /><pre>";
-		$myStr = print_r($initializationArray, TRUE);
-		echo "$myStr</pre><br />";
-	}
+
+	// POST variables come from a form
+	// GET variables come from a link
 	
 	if ($doDebug) {
 		if (isset($_POST)) {
@@ -125,6 +123,7 @@ function this_is_a_function_func() {
 	$advisor_dal = new CWA_Advisor_DAL();
 	$advisorclass_dal = new CWA_Advisorclass_DAL();
 	$user_dal = new CWA_User_Master_DAL();
+	$logger = new CWA_Action_Logger();
 
 	switch ($strPass) {
 
