@@ -174,7 +174,7 @@ textarea {
 --------------------------------------------------------------*/
 
 fieldset {
-	font-family: 'Times New Roman', sans-serif;
+	font-family: 'Calibri', sans-serif;
 	color: #666;
 	background-image: none;
 	background: #efefef;
@@ -183,7 +183,7 @@ fieldset {
 }
 
 legend {
-	font-family: 'Times New Roman', sans-serif;
+	font-family: 'Calibri', sans-serif;
 	color: #666;
 	font-weight: bold;
 	font-variant: small-caps;
@@ -193,7 +193,7 @@ legend {
 }
 
 label {
-	font-family: 'Times New Roman', sans-serif;
+	font-family: 'Calibri', sans-serif;
 	font-weight: bold;
 	line-height: normal;
 	text-align: right;
@@ -205,7 +205,7 @@ label {
 }
 
 textarea.formInputText {
-	font-family: 'Times New Roman', sans-serif;
+	font-family: 'Calibri', sans-serif;
 	color: #666;
 	background: #fee;
 	padding: 2px;
@@ -296,7 +296,7 @@ input.formInputButton:active {
 --------------------------------------------------------------*/
 
 table {
-	font-family: 'Times New Roman', sans-serif;
+	font-family: 'Calibri', sans-serif;
 	background-image: none;
 	border-collapse: collapse;
 }
