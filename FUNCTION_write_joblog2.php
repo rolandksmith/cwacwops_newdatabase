@@ -53,7 +53,7 @@ function write_joblog2_func($dataToWrite=array()) {
 	}
 
 
-	$initializationArray	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	foreach($dataToWrite as $thisKey=>$thisValue) {
 		$$thisKey			= $thisValue;
 	}

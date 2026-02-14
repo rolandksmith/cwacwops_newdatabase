@@ -17,15 +17,15 @@ function send_end_of_semester_assessment_email_to_advisors_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userName			= $initializationArray['userName'];
+	$validUser = $context->validUser;
+	$siteURL			= $context->siteurl;
+	$userName			= $context->userName;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -45,13 +45,13 @@ function send_end_of_semester_assessment_email_to_advisors_func() {
 	$myCount			= 0;
 	$additionaltext		= "";
 	$increment			= 0;
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	$theURL				= "$siteURL/cwa-send-end-of-semester-assessment-email-to-advisors/";
 	$jobname			= 'Send End of Semester Eval Email to Advisors';
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$prevSemester		= $context->prevSemester;
 	if ($currentSemester == "Not in Session") {
 		$theSemester	= $prevSemester;
 	} else {

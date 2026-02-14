@@ -37,10 +37,10 @@ function check_advisor_registration($inp_callsign = '',$doDebug=FALSE,$testMode=
 
 //	$doDebug										= TRUE;
 //	$testMode										= FALSE;
-	$initializationArray 							= data_initialization_func();
-	$currentSemester								= $initializationArray['currentSemester'];
-	$prevSemester									= $initializationArray['nextSemester'];
-	$proximateSemester								= $initializationArray['proximateSemester'];
+	$context = CWA_Context::getInstance();
+	$currentSemester								= $context->currentSemester;
+	$prevSemester									= $context->nextSemester;
+	$proximateSemester								= $context->proximateSemester;
 	$returnArray['advisor']['Semester']						= '';
 	$returnArray['advisor']['first_name']					= '';
 	$returnArray['advisor']['last_name']					= '';

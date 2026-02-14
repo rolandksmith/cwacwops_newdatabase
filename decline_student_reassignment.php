@@ -12,17 +12,17 @@ function decline_student_reassignment_func() {
 	$myDate 			= date('dMy Hi') . 'z';
 	$doDebug			= FALSE;
 	$testMode			= FALSE;
-	$initializationArray = data_initialization_func();
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
+	$context = CWA_Context::getInstance();
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
 	if ($userName == '') {				// turn off debug and testmode
 		$doDebug					= FALSE;
 		$testMode					= FALSE;
 	}
-	$siteURL			= $initializationArray['siteurl'];
-	$currentDate		= $initializationArray['currentDate'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$previousSemester		= $initializationArray['prevSemester'];
+	$siteURL			= $context->siteurl;
+	$currentDate		= $context->currentDate;
+	$currentSemester		= $context->currentSemester;
+	$previousSemester		= $context->prevSemester;
 	if ($currentSemester == 'Not in Session') {
 		$currentSemester	= $previousSemester;
 	}

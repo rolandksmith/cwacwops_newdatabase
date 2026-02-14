@@ -4,18 +4,18 @@ function calculate_cwops_yield_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 
 	$versionNumber				 	= "1";
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
-    $pastSemestersArray = $initializationArray['pastSemestersArray'];
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$userRole			= $context->userRole;
+    $pastSemestersArray = $context->pastSemestersArray;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -162,7 +162,7 @@ function calculate_cwops_yield_func() {
 	} elseif ("2" == $strPass) {
         debugReport("<br />Starting Pass 2<br />
                     Initialization Array:<br /><pre>");
-		$myStr = print_r($initializationArray, TRUE);
+		$myStr = print_r($context->toArray(), TRUE);
         debugReport("$myStr</pre><br />
 					inp_level: $inp_level");
 	

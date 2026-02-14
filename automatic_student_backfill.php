@@ -43,19 +43,19 @@ function automatic_student_backfill_v1_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$theSemester		= $initializationArray['proximateSemester'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$theSemester		= $context->proximateSemester;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -79,8 +79,8 @@ function automatic_student_backfill_v1_func() {
 	$inp_semester				= '';
 	$inp_rsave					= '';
 	$jobname					= "Automatic Student Backfill V$versionNumber";
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
 	$fuzzySearch				= FALSE;
 	$matchArray					= array();
 	$jsonObject					= '';

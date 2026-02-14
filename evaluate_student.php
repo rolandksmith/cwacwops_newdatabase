@@ -41,15 +41,15 @@ function evaluate_student_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
-	$nextSemester					= $initializationArray['nextSemester'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
+	$nextSemester					= $context->nextSemester;
 	$versionNumber					= '1';
-	$currentSemester				= $initializationArray['currentSemester'];
-	$prevSemester					= $initializationArray['prevSemester'];
+	$currentSemester				= $context->currentSemester;
+	$prevSemester					= $context->prevSemester;
 	if ($currentSemester != 'Not in Session') {
 		$theSemester				= $currentSemester;
 	} else {
@@ -61,7 +61,7 @@ function evaluate_student_func() {
 	}
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 

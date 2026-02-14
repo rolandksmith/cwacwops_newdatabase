@@ -64,18 +64,18 @@ function prepare_students_for_assignment_to_advisors_func() {
  	global $wpdb;
  
 	$doDebug						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$currentDate		= $initializationArray['currentDate'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
+	$currentDate		= $context->currentDate;
+	$validTestmode		= $context->validTestmode;
+	$currentTimestamp	= $context->currentTimestamp;
+	$siteURL			= $context->siteurl;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -98,8 +98,8 @@ function prepare_students_for_assignment_to_advisors_func() {
 	$emailCount			= 0;
 	$inp_request_type	= '';
 	$actionDate			= date('dMY H:i', $currentTimestamp);
-	$nextSemester		= $initializationArray['nextSemester'];
-	$proximateSemester	= $initializationArray['proximateSemester'];
+	$nextSemester		= $context->nextSemester;
+	$proximateSemester	= $context->proximateSemester;
 	$anomolyCount		= 0;
 	$updateCount		= 0;
 	$advisorCount		= 0;
@@ -122,11 +122,11 @@ function prepare_students_for_assignment_to_advisors_func() {
 	$logDate			= date('Y-m-d H:i',$currentTimestamp);
 	$fieldTest			= array('action_log','post_status','post_title','control_code');
 	$semesterConversion		= array('Jan/Feb'=>1,'Apr/May'=>2,'May/Jun'=>2,'Sep/Oct'=>3,'SEP/OCT'=>3,'JAN/FEB'=>1,'APR/MAY'=>2);
-	$currentSemester	= $initializationArray['currentSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
+	$currentSemester	= $context->currentSemester;
+	$prevSemester		= $context->prevSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
+	$semesterFour		= $context->semesterFour;
 	$theURL				= "$siteURL/cwa-prepare-students-for-assignment-to-advisors/";
 	$studentManagementURL = "$siteURL/cwa-student-management/";
 	$studentUpdateURL	= "$siteURL/cwa-display-and-update-student-signup-information/";

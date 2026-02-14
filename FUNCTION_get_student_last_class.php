@@ -51,12 +51,12 @@ function get_student_last_class($inp_callsign = '',$doDebug=FALSE,$testMode=FALS
 
 //	$doDebug										= TRUE;
 //	$testMode										= FALSE;
-	$initializationArray 							= data_initialization_func();
-	$currentSemester								= $initializationArray['currentSemester'];
-	$nextSemester									= $initializationArray['nextSemester'];
-	$semesterTwo									= $initializationArray['semesterTwo'];
-	$semesterThree									= $initializationArray['semesterThree'];
-	$semesterFour									= $initializationArray['semesterFour'];
+	$context = CWA_Context::getInstance();
+	$currentSemester								= $context->currentSemester;
+	$nextSemester									= $context->nextSemester;
+	$semesterTwo									= $context->semesterTwo;
+	$semesterThree									= $context->semesterThree;
+	$semesterFour									= $context->semesterFour;
 	$returnArray['Beginner']['Semester']		 	= '';
 	$returnArray['Beginner']['Advisor']				= '';
 	$returnArray['Beginner']['Advisor class']		= '';

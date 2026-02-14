@@ -68,8 +68,8 @@ function cwa_validate_student_record( int $student_id ): array {
          $errors[] = 'Configuration Error: Required function data_initialization_func() is not defined.';
          return $errors;
     }
-    $initializationArray = data_initialization_func();
-    $language_array = $initializationArray['languageArray'] ?? [];
+    $context = CWA_Context::getInstance();
+    $language_array = $context->languageArray ?? [];
     
     // Convert object to array for easier access and validation
     $data = (array) $record;
@@ -114,7 +114,7 @@ function cwa_validate_student_record( int $student_id ): array {
     }
 
     // Special Rule 2 Checks
-    // 2.3 `student_class_language` is in the array $initializationArray['languateArray']
+    // 2.3 `student_class_language` is in the array $context->languateArray
     if ( ! in_array( $data['student_class_language'], $language_array, true ) ) {
         $errors[] = "Rule 2 Failure: Field `student_class_language` ('{$data['student_class_language']}') is not in the allowed list of languages.";
     }

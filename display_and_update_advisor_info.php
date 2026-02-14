@@ -10,8 +10,8 @@ function display_and_update_advisor_info_func() {
 	$doDebug 						= FALSE;
 	$testMode						= FALSE;
 
-	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser = $context->validUser;
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
@@ -19,8 +19,8 @@ function display_and_update_advisor_info_func() {
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
 
-	$siteURL			= $initializationArray['siteurl'];
-	$languageArray		= $initializationArray['languageArray'];
+	$siteURL			= $context->siteurl;
+	$languageArray		= $context->languageArray;
 	
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
@@ -33,8 +33,8 @@ function display_and_update_advisor_info_func() {
 	$fieldTest						= array('action_log','post_status','post_title','control_code');
 	$actionDate						= date('dMy H:i');
 	$logDate						= date('Y-m-d H:i');
-	$userName						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
+	$userName						= $context->userName;
+	$validTestmode					= $context->validTestmode;
 	$inp_depth						= "one";
 	$inp_verbose					= 'N';
 	$inp_mode						= 'Production';
@@ -136,7 +136,7 @@ function display_and_update_advisor_info_func() {
     }
     
 		debugReport("Initialization Array:<pre>");
-		$myStr = print_r($initializationArray, TRUE);
+		$myStr = print_r($context->toArray(), TRUE);
 		debugReport("$myStr</pre>");
 
     

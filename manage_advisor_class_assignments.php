@@ -12,24 +12,24 @@ function manage_advisor_class_assignments_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 		= data_initialization_func();
-	$validUser 					= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
+	$context = CWA_Context::getInstance();
+	$validUser 					= $context->validUser;
+	$userName					= $context->userName;
 
 	$versionNumber				= '1';
 	$jobname					= "Manage Advisor Class Assignments V$versionNumber";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userRole					= $initializationArray['userRole'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$userName					= $initializationArray['userName'];
-	$siteURL					= $initializationArray['siteurl'];	
-	$validReplacementPeriod		= $initializationArray['validReplacementPeriod'];	
+	$userRole					= $context->userRole;
+	$validTestmode				= $context->validTestmode;
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$userName					= $context->userName;
+	$siteURL					= $context->siteurl;	
+	$validReplacementPeriod		= $context->validReplacementPeriod;	
 
 // must be a logged-in user
 	if ($userName == '') {

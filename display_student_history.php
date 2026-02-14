@@ -23,15 +23,15 @@ function display_student_history_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL	= $initializationArray['siteurl'];
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL	= $context->siteurl;
 	$jobname	= "Display Student History";
 	
 //	CHECK THIS!								//////////////////////

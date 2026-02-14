@@ -98,8 +98,8 @@ function emailFromCWA_v3($mailParameters) {
 	}
 
 
-	$initializationArray 	= data_initialization_func();
-	$siteURL				= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$siteURL				= $context->siteurl;
 
 
 	if ($testMode) {

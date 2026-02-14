@@ -28,16 +28,16 @@ function display_evaluations_for_an_advisor_func() {
 	
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$userName  						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 						= $context->validUser;
+	$userName  						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -150,8 +150,8 @@ function display_evaluations_for_an_advisor_func() {
 		if ($validUser == "N") {
 			return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 		} else {
-			$currentSemester	= $initializationArray['currentSemester'];
-			$prevSemester		= $initializationArray['prevSemester'];
+			$currentSemester	= $context->currentSemester;
+			$prevSemester		= $context->prevSemester;
 			if ($currentSemester == 'Not in Session') {
 				$theSemester	= $prevSemester;
 			} else {
@@ -180,8 +180,8 @@ function display_evaluations_for_an_advisor_func() {
 
 	} elseif ("2" == $strPass) {
 
-		$currentSemester		= $initializationArray['currentSemester'];
-		$pastSemester			= $initializationArray['prevSemester'];
+		$currentSemester		= $context->currentSemester;
+		$pastSemester			= $context->prevSemester;
 		if ($currentSemester == 'Not in Session') {
 			$thisSemester		= $pastSemester;
 		} else {
@@ -247,7 +247,7 @@ function display_evaluations_for_an_advisor_func() {
 					$pastSemesterArray	= array($newSemester);
 				} else {
 					if ($theSemester == 'all') {
-						$pastSemesters		= $initializationArray['pastSemesters'];
+						$pastSemesters		= $context->pastSemesters;
 						$pastSemesterArray	= explode("|",$pastSemesters);
 					} else {
 						$pastSemesterArray	= array($theSemester);

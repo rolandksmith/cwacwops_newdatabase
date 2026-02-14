@@ -26,19 +26,19 @@ function send_evaluation_email_to_advisors_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser			= $initializationArray['validUser'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userName			= $initializationArray['userName'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
+	$validUser			= $context->validUser;
+	$siteURL			= $context->siteurl;
+	$userName			= $context->userName;
+	$validTestmode		= $context->validTestmode;
+	$nextSemester		= $context->nextSemester;
+	$currentSemester	= $context->currentSemester;
+	$prevSemester		= $context->prevSemester;
 	if ($currentSemester == "Not in Session") {
 		$theSemester	= $prevSemester;
 	} else {

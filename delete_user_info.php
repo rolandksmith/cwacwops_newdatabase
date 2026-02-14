@@ -4,8 +4,8 @@ function delete_user_info_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 /*
 	if ($validUser == 'N') {				// turn off debug and testmode
 		$doDebug					= FALSE;
@@ -15,25 +15,25 @@ function delete_user_info_func() {
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userRole			= $initializationArray['userRole'];
-	$userName			= $initializationArray['userName'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$userRole			= $context->userRole;
+	$userName			= $context->userName;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
+	$semesterFour		= $context->semesterFour;
 	$advisorTableName	= "wpw1_cwa_consolidated_advisor";
 	$studentTableName	= "wpw1_cwa_consolidated_student";
 	$tempTableName		= "wpw1_cwa_temp_data";

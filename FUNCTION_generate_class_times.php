@@ -40,7 +40,7 @@ function generateClassTimes($inp_tz=-99, $inp_level='', $inp_semester='', $inp_d
 	}
 
 	$increment					= 0;	
-	$initializationArray		= data_initialization_func();
+	$context = CWA_Context::getInstance();
 
 	$validLevelArray			= array('Beginner',
 										'Fundamental',
@@ -53,11 +53,11 @@ function generateClassTimes($inp_tz=-99, $inp_level='', $inp_semester='', $inp_d
 	$printArray					= array();
 	$outputArray				= array();
 	
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$semesterFour				= $initializationArray['semesterFour'];
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$semesterFour				= $context->semesterFour;
 	$validSemesters				= array($currentSemester,$nextSemester,$semesterTwo,$semesterThree,$semesterFour);
 	
 	if ($catalogMode == 'Production') {

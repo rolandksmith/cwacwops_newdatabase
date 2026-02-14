@@ -21,15 +21,15 @@ function advisors_with_unconfirmed_students_func() {
 
 	global $wpdb;
 
-	$initializationArray 	= data_initialization_func();
-	$validUser				= $initializationArray['validUser'];
-	$userName  				= $initializationArray['userName'];
-	$currentDate			= $initializationArray['currentDate'];
-	$currentTimestamp		= $initializationArray['currentTimestamp'];
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
+	$context = CWA_Context::getInstance();
+	$validUser				= $context->validUser;
+	$userName  				= $context->userName;
+	$currentDate			= $context->currentDate;
+	$currentTimestamp		= $context->currentTimestamp;
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
@@ -55,7 +55,7 @@ function advisors_with_unconfirmed_students_func() {
 	$myInt						= 0;
 	$increment					= 0;
 	$inp_include				= 'sonly';
-	$currentDate				= $initializationArray['currentDate'];
+	$currentDate				= $context->currentDate;
 	$theURL						= "$siteURL/cwa-advisors-with-unconfirmed-students/";
 	
 	$theSemester				= $currentSemester;

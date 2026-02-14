@@ -4,13 +4,13 @@ function student_evaluation_of_advisor_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 		= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$prevSemester				= $initializationArray['prevSemester'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName					= $context->userName;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
+	$currentSemester			= $context->currentSemester;
+	$prevSemester				= $context->prevSemester;
 	if ($currentSemester == 'Not in Session') {
 		$currentSemester		= $prevSemester;
 	}
@@ -21,7 +21,7 @@ function student_evaluation_of_advisor_func() {
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 

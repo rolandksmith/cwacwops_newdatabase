@@ -16,17 +16,17 @@ function list_past_advisors_registration_info_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -52,9 +52,9 @@ function list_past_advisors_registration_info_func() {
 	$jobname					= "List Past Advisors Registration Info";
 	$inpSemesterArray			= array();
 	$futureSemester				= "";
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
 	$advisorArray				= array();			
 	$ClassesArray				= array();
 	$newSemesterOrder			= array();
@@ -149,7 +149,7 @@ function list_past_advisors_registration_info_func() {
 	if ("1" == $strPass) {
 	
 		// get the list of past semesters and process them one at a time
-		$pastSemesters			= $initializationArray['pastSemesters'];
+		$pastSemesters			= $context->pastSemesters;
 		$pastSemesterArray		= explode("|",$pastSemesters);
 		if ($doDebug) {
 			echo "past semesters:<br /><pre>";

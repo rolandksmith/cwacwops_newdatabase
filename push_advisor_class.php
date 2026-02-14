@@ -5,18 +5,18 @@ function push_advisor_class_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 				= $initializationArray['validUser'];
-	$userName				= $initializationArray['userName'];
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
+	$validUser 				= $context->validUser;
+	$userName				= $context->userName;
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
 	$inp_semester			= $currentSemester;
 	if ($currentSemester == "Not in Session") {
 		$inp_semester		= $nextSemester;
@@ -36,10 +36,10 @@ function push_advisor_class_func() {
 
 
 	$theURL						= "$siteURL/cwa-push-advisor-class/";
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$defaultClassSize			= $initializationArray['defaultClassSize'];
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$defaultClassSize			= $context->defaultClassSize;
 	$jobname					= "Push Advisor Class V$versionNumber";
 	$strPass					= "1";
 	$requestString				= "";

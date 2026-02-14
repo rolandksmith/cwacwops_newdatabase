@@ -4,23 +4,23 @@ function update_callsign_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
-	$userName			= $initializationArray['userName'];
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$userRole			= $context->userRole;
+	$userName			= $context->userName;
 	
 	if ($userName == '') {
 		$content		= "You are not authorized";

@@ -14,10 +14,10 @@ function advisor_request_student_survey_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$userRole						= $initializationArray['userRole'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$userRole						= $context->userRole;
 	$holdUser						= $userName;
 	$holdRole						= $userRole;
 	
@@ -30,15 +30,15 @@ function advisor_request_student_survey_func() {
 	}
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$siteURL			= $initializationArray['siteurl'];
-	$currentDateTime	= $initializationArray['currentDateTime'];
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$siteURL			= $context->siteurl;
+	$currentDateTime	= $context->currentDateTime;
 	$versionNumber		= '1';
 	$theSemester		= $currentSemester;
 	if ($currentSemester == 'Not in Session') {

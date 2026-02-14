@@ -15,16 +15,16 @@ function display_current_and_future_students_and_errors_func() {
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	
-	$initializationArray		 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$userName  						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
+	$validUser 						= $context->validUser;
+	$userName  						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
 	
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -97,7 +97,7 @@ function display_current_and_future_students_and_errors_func() {
 	$doHeader						= TRUE;
 	$headerInterval					= 10;
 	$headerCount					= 0;
-	$myUnixTime						= $initializationArray['currentTimestamp'];
+	$myUnixTime						= $context->currentTimestamp;
 	$totalStudents					= 0;
 	$totalThisSemester				= 0;
 	$prev_semester					= "xyz";
@@ -205,12 +205,12 @@ function display_current_and_future_students_and_errors_func() {
 	
 	$validWelcomeDate				= strtotime('2019-11-30 23:59');
 	$validFutureDate				= strtotime('2019-12-10 23:59');
-	$prevSemester					= $initializationArray['prevSemester'];
-	$currentSemester				= $initializationArray['currentSemester'];
-	$nextSemester					= $initializationArray['nextSemester'];
-	$semesterTwo					= $initializationArray['semesterTwo'];
-	$semesterThree					= $initializationArray['semesterThree'];
-	$semesterFour					= $initializationArray['semesterFour'];
+	$prevSemester					= $context->prevSemester;
+	$currentSemester				= $context->currentSemester;
+	$nextSemester					= $context->nextSemester;
+	$semesterTwo					= $context->semesterTwo;
+	$semesterThree					= $context->semesterThree;
+	$semesterFour					= $context->semesterFour;
 	$updateStudentURL 				= "<a href='$siteURL/cwa-display-and-update-student-signup-information/?request_type=callsign&inp_depth=one&doDebug=$doDebug&testMode=$testMode&strpass=2"; 
 	if ($currentSemester == 'Not in Session') {
 		$theSemester	= $prevSemester;

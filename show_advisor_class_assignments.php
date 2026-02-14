@@ -33,26 +33,26 @@ function show_advisor_class_assignments_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 		= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 	$versionNumber				= '5';
 	$jobname					= "Show Advisor Class Assignments V$versionNumber";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 					= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
-	$userRole					= $initializationArray['userRole'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$prevSemester				= $initializationArray['prevSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$proximateSemester			= $initializationArray['proximateSemester'];
-	$prevSemester				= $initializationArray['prevSemester'];
-	$daysToSemester				= $initializationArray['daysToSemester'];
-	$siteURL					= $initializationArray['siteurl'];	
+	$validUser 					= $context->validUser;
+	$userName					= $context->userName;
+	$userRole					= $context->userRole;
+	$validTestmode				= $context->validTestmode;
+	$currentSemester			= $context->currentSemester;
+	$prevSemester				= $context->prevSemester;
+	$nextSemester				= $context->nextSemester;
+	$proximateSemester			= $context->proximateSemester;
+	$prevSemester				= $context->prevSemester;
+	$daysToSemester				= $context->daysToSemester;
+	$siteURL					= $context->siteurl;	
 
 	if ($userRole != 'administrator') {				// turn off debug and testmode
 		$doDebug					= FALSE;
@@ -70,7 +70,7 @@ function show_advisor_class_assignments_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$theSemester				= $initializationArray['proximateSemester'];
+	$theSemester				= $context->proximateSemester;
 	$strPass					= "1";
 	$studentArray				= array();
 	$studentDataArray			= array();
@@ -80,7 +80,7 @@ function show_advisor_class_assignments_func() {
 	$inp_callsign				= "";
 	$inp_email					= "";
 	$inp_phone					= "";
-	$userName					= $initializationArray['userName'];
+	$userName					= $context->userName;
 	$advisorVerificationURL		= "$siteURL/cwa-advisor-verification-of-student/";
 	$promotableArray			= array('P'=>'Yes',
 										'N'=>'No',

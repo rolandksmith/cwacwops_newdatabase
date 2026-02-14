@@ -4,22 +4,22 @@ function create_new_student_signup_record_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$userRole			= $context->userRole;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -49,12 +49,12 @@ function create_new_student_signup_record_func() {
 	$updateMaster				= "$siteURL/cwa-display-and-update-user-master-information/";
 	$updateStudent				= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$jobname					= "Create New Student Signup Record V$versionNumber";
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$proximateSemester			= $initializationArray['proximateSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$semesterFour				= $initializationArray['semesterFour'];
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$proximateSemester			= $context->proximateSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$semesterFour				= $context->semesterFour;
 	$inp_callsign				= '';
 	$student_call_sign				= "";
 	$inp_student_time_zone  			= "";

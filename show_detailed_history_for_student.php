@@ -11,15 +11,15 @@ function show_detailed_history_for_student_func() {
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {

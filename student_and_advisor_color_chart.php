@@ -30,16 +30,16 @@ function student_and_advisor_color_chart_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName  			= $initializationArray['userName'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 			= $context->validUser;
+	$userName  			= $context->userName;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	$versionNumber		= '3';
 	$jobname			= "Student and Advisor Color Chart V$versionNumber";
 	
@@ -62,12 +62,12 @@ function student_and_advisor_color_chart_func() {
 	$theURL						= "$siteURL/cwa-student-and-advisor-color-chart/";
 	$updateAdvisorURL			= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$updateStudentURL			= "$siteURL/cwa-display-and-update-student-signup-information/";
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$proximateSemeter			= $initializationArray['proximateSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree			 	= $initializationArray['semesterThree'];
-	$defaultClassSize			= $initializationArray['defaultClassSize'];
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$proximateSemeter			= $context->proximateSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree			 	= $context->semesterThree;
+	$defaultClassSize			= $context->defaultClassSize;
 	$totalAdvisors				= 0;
 	$advisorCount				= 0;
 	$totalClasses				= 0;

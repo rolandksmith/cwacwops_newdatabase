@@ -27,8 +27,8 @@ function playAudioFile($inp_level='',$inp_mode='',$id_number=1,$doDebug=FALSE,$p
 		echo "<br />Arrived at playAudioFile with data: $inp_level|$inp_mode|$id_number|$playOnce<br />";
 	}
 
-	$initializationArray			= data_initialization_func();
-	$siteURL						= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$siteURL						= $context->siteurl;
 
 	$levelArray						= array("BegBas","BasInt","IntAdv","Adv");
 

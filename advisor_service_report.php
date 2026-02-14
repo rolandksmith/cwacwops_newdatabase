@@ -14,25 +14,25 @@ function advisor_service_report_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
- 	$userName						= $initializationArray['userName'];
-	$currentTimestamp				= $initializationArray['currentTimestamp'];
-	$currentSemester				= $initializationArray['currentSemester'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
-	$userName						= $initializationArray['userName'];
-	$userEmail						= $initializationArray['userEmail'];
-	$userDisplayName				= $initializationArray['userDisplayName'];
-	$userRole						= $initializationArray['userRole'];
-	$pastSemestersArray				= $initializationArray['pastSemestersArray'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+ 	$userName						= $context->userName;
+	$currentTimestamp				= $context->currentTimestamp;
+	$currentSemester				= $context->currentSemester;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
+	$userName						= $context->userName;
+	$userEmail						= $context->userEmail;
+	$userDisplayName				= $context->userDisplayName;
+	$userRole						= $context->userRole;
+	$pastSemestersArray				= $context->pastSemestersArray;
 	$inp_semester					= '';
 	$semesterList					= '';
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	

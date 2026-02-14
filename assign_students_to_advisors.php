@@ -107,19 +107,19 @@ function assign_students_to_advisors_func() {
 	}
 	
 	
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 		$thisStr	= "Initialization Array:<br /><pre>";
-		$thisStr 	.= print_r($initializationArray,TRUE);
+		$thisStr 	.= print_r($context->toArray(), TRUE);
 		$thisStr	.= "</pre><br />\n";
 		debugReport($thisStr);
 	
 	
 	
-	$validUser 				= $initializationArray['validUser'];
-	$userName				= $initializationArray['userName'];
-	$siteURL   				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
+	$validUser 				= $context->validUser;
+	$userName				= $context->userName;
+	$siteURL   				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
 	$theSemester			= $currentSemester;
 	if ($theSemester == 'Not in Session') {
 		$theSemester		= $nextSemester;
@@ -175,8 +175,8 @@ function assign_students_to_advisors_func() {
 	$preAssignedArray				= array();
 	$overrideArray					= array();
 	$unassignedArray				= array();
-	$defaultClassSize				= $initializationArray['defaultClassSize'];
-	$userName						= $initializationArray['userName'];
+	$defaultClassSize				= $context->defaultClassSize;
+	$userName						= $context->userName;
 	$studentUpdateURL				= "$siteURL/cwa-display-and-update-student-signup-information/";
 	$advisorUpdateURL				= "$siteURL/cwa-display-and-update-advisor-signup-info/";
 	$unassignedArraySequence		= 0;

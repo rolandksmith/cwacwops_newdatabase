@@ -14,16 +14,16 @@ function list_all_students_func() {
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	
-	$initializationArray		 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$userName  						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
+	$validUser 						= $context->validUser;
+	$userName  						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
 	
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -90,7 +90,7 @@ function list_all_students_func() {
 	$doHeader						= TRUE;
 	$headerInterval					= 10;
 	$headerCount					= 0;
-	$myUnixTime						= $initializationArray['currentTimestamp'];
+	$myUnixTime						= $context->currentTimestamp;
 	$totalStudents					= 0;
 	$totalThisSemester				= 0;
 	$prev_semester					= "xyz";
@@ -195,12 +195,12 @@ function list_all_students_func() {
 	
 	$validWelcomeDate				= strtotime('2019-11-30 23:59');
 	$validFutureDate				= strtotime('2019-12-10 23:59');
-	$prevSemester					= $initializationArray['prevSemester'];
-	$currentSemester				= $initializationArray['currentSemester'];
-	$nextSemester					= $initializationArray['nextSemester'];
-	$semesterTwo					= $initializationArray['semesterTwo'];
-	$semesterThree					= $initializationArray['semesterThree'];
-	$semesterFour					= $initializationArray['semesterFour'];
+	$prevSemester					= $context->prevSemester;
+	$currentSemester				= $context->currentSemester;
+	$nextSemester					= $context->nextSemester;
+	$semesterTwo					= $context->semesterTwo;
+	$semesterThree					= $context->semesterThree;
+	$semesterFour					= $context->semesterFour;
 	$updateStudentURL				= "$siteURL/cwa-display-and-update-student-signup-information/";
 	if ($currentSemester == 'Not in Session') {
 		$theSemester	= $prevSemester;

@@ -55,19 +55,19 @@ function send_congratulations_email_to_students_func() {
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$bobTest					= FALSE;
-	$initializationArray 		= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
+	$validUser = $context->validUser;
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	$userName				= $initializationArray['userName'];
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
+	$userName				= $context->userName;
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
 	
 	ini_set('memory_limit','256M');
 	ini_set('max_execution_time',0);
@@ -197,11 +197,11 @@ function send_congratulations_email_to_students_func() {
 		$advisorTableName	= 'wpw1_cwa_advisor';
 	}
 
-	$currentSemester	= $initializationArray['currentSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
+	$currentSemester	= $context->currentSemester;
+	$prevSemester		= $context->prevSemester;
+	$nextSemester		= $context->nextSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
 	if ($currentSemester == 'Not in Session') {
 		$thisSemester	= $prevSemester;
 	} else {

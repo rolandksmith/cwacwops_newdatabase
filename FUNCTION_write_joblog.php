@@ -32,7 +32,7 @@ function write_joblog_func($dataToWrite="",$doDebug=FALSE) {
 	}
 
 
-	$initializationArray				= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	$myArray							= explode("|",$dataToWrite);
 	$thisII								= 0;
 	for ($thisII= 0;$thisII < count($myArray);$thisII++) {

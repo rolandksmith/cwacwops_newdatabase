@@ -52,12 +52,12 @@ function generate_catalog_for_student($inp_data = array('')) {
 // print_r($inp_data);
 // echo "</pre><br />";
 
-	$initializationArray 				= data_initialization_func();
-	$currentSemester					= $initializationArray['currentSemester'];
-	$nextSemester						= $initializationArray['nextSemester'];
-	$semesterTwo						= $initializationArray['semesterTwo'];
-	$semesterThree						= $initializationArray['semesterThree'];
-	$semesterFour						= $initializationArray['semesterFour'];
+	$context = CWA_Context::getInstance();
+	$currentSemester					= $context->currentSemester;
+	$nextSemester						= $context->nextSemester;
+	$semesterTwo						= $context->semesterTwo;
+	$semesterThree						= $context->semesterThree;
+	$semesterFour						= $context->semesterFour;
 	$semesterArray						= array($currentSemester,
 												$nextSemester,
 												$semesterTwo, 

@@ -2,13 +2,13 @@ function manage_cwa_announcements_func() {
 	global $wpdb;
 
 	// --- SECTION 1: INITIALIZATION ---
-	$initializationArray = data_initialization_func();
-	if ($initializationArray['validUser'] !== "Y") {
+	$context = CWA_Context::getInstance();
+	if ($context->validUser !== "Y") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodbye";
 	}
 
-	$siteURL      = $initializationArray['siteurl'];
-	$userName     = $initializationArray['userName'];
+	$siteURL      = $context->siteurl;
+	$userName     = $context->userName;
 	$jobname	  = "Manage CWA Announcements";
 	$versionNumber = '1';
 	$tableName    = "wpw1_cwa_announcements";

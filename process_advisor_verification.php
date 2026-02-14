@@ -24,9 +24,9 @@ function process_advisor_verification_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
 
 	if ($userName == '') {
 		return "You are not authorized";
@@ -35,13 +35,13 @@ function process_advisor_verification_func() {
 		$doDebug					= FALSE;
 		$testMode					= FALSE;
 	}
-	$siteURL						= $initializationArray['siteurl'];
+	$siteURL						= $context->siteurl;
 	$jobname						= "Process Advisor Verification";
 	$userName						= "Not Available";
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 
@@ -66,7 +66,7 @@ function process_advisor_verification_func() {
 	$increment					= 0;
 	$logDate					= date('Y-m-d H:i');
 	$fieldTest					= array('action_log','post_status','post_title','control_code');
-	$nextSemester				= $initializationArray['nextSemester'];
+	$nextSemester				= $context->nextSemester;
 	$advisor_call_sign			= 'unknown';
 	$theURL						= "$siteURL/cwa-process-advisor-verification/";
 	$jobname					= "Process Advisor Verification";

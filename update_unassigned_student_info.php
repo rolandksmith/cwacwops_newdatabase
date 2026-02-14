@@ -21,18 +21,18 @@ function update_unassigned_student_info_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$userName						= $initializationArray['userName'];
-	$siteURL						= $initializationArray['siteurl'];	
-	$currentSemester				= $initializationArray['currentSemester'];	
-	$nextSemester					= $initializationArray['nextSemester'];	
+	$validUser 						= $context->validUser;
+	$validTestmode					= $context->validTestmode;
+	$userName						= $context->userName;
+	$siteURL						= $context->siteurl;	
+	$currentSemester				= $context->currentSemester;	
+	$nextSemester					= $context->nextSemester;	
 	
 	$proximateSemester				= $currentSemester;
 	if ($currentSemester == 'Not in Session') {
@@ -58,7 +58,7 @@ function update_unassigned_student_info_func() {
 	$actionDate					= date('dMY H:i');
 	$logDate					= date('Y-m-d');
 	$fieldTest					= array('action_log','post_status','post_title','control_code');
-	$userName					= $initializationArray['userName'];
+	$userName					= $context->userName;
 	$theURL						= "$siteURL/cwa-update-unassigned-student-information/";
 	$haveInpCallsign			= FALSE;
 	$haveInpID					= FALSE;

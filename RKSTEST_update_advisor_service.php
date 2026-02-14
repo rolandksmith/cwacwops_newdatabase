@@ -14,22 +14,22 @@ function RKSTEST_update_advisor_service_func() {
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$currentTimestamp				= $initializationArray['currentTimestamp'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
-	$userName						= $initializationArray['userName'];
-	$userEmail						= $initializationArray['userEmail'];
-	$userDisplayName				= $initializationArray['userDisplayName'];
-	$userRole						= $initializationArray['userRole'];
-	$pastSemestersArray				= $initializationArray['pastSemestersArray'];
-	$currentSemester				= $initializationArray['currentSemester'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$currentTimestamp				= $context->currentTimestamp;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
+	$userName						= $context->userName;
+	$userEmail						= $context->userEmail;
+	$userDisplayName				= $context->userDisplayName;
+	$userRole						= $context->userRole;
+	$pastSemestersArray				= $context->pastSemestersArray;
+	$currentSemester				= $context->currentSemester;
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	

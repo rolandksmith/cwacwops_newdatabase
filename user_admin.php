@@ -16,15 +16,15 @@ function user_admin_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$userRole			= $context->userRole;
 
 	if ($userName == '') {				
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -36,7 +36,7 @@ function user_admin_func() {
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	

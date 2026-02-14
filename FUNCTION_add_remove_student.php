@@ -108,10 +108,10 @@ function add_remove_student($inp_data = array()) {
 		$doProceed				= FALSE;
 	}
 	if ($doProceed) {
-		$initializationArray 		= data_initialization_func();
-		$userName					= $initializationArray['userName'];
-		$currentSemester			= $initializationArray['currentSemester'];
-		$nextSemester				= $initializationArray['nextSemester'];
+		$context = CWA_Context::getInstance();
+		$userName					= $context->userName;
+		$currentSemester			= $context->currentSemester;
+		$nextSemester				= $context->nextSemester;
 		$inp_student				= '';
 		$inp_semester				= '';
 		$inp_assigned_advisor		= '';

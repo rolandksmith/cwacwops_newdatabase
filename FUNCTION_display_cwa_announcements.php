@@ -7,14 +7,14 @@ function display_cwa_announcements() {
     $already_run = true;
     // ----------------------
 
-    $initializationArray = data_initialization_func();
+    $context = CWA_Context::getInstance();
     
     // 1. GET THE USER'S EMAIL
     // We try to grab it from your init array, or fall back to the WP current user
-    $currentUserEmail = isset($initializationArray['userEmail']) ? $initializationArray['userEmail'] : wp_get_current_user()->user_email;
+    $currentUserEmail = isset($context->userEmail) ? $context->userEmail : wp_get_current_user()->user_email;
     
-    $currentUserID   = $initializationArray['userID'];
-    $currentUserRole = strtolower($initializationArray['userRole']);
+    $currentUserID   = $context->userID;
+    $currentUserRole = strtolower($context->userRole);
     $tableName       = "wpw1_cwa_announcements";
     $trackTable      = "wpw1_cwa_announcements_tracking";
     $today           = current_time('mysql', 1);

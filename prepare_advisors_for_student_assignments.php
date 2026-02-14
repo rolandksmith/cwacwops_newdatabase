@@ -20,16 +20,16 @@ function prepare_advisors_for_student_assignments_func() {
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$saveChanges					= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$userName  						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
+	$validUser 						= $context->validUser;
+	$userName  						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -53,10 +53,10 @@ function prepare_advisors_for_student_assignments_func() {
 		$sevenSurveyScore			= FALSE;
 		$jobname					= 'Prepare Advisors for Student Assignments';
 		$logDate					= date('Y-m-d H:i');
-		$nextSemester				= $initializationArray['nextSemester'];	
-		$prevSemester				= $initializationArray['prevSemester'];
-		$userName					= $initializationArray['userName'];
-		$pastSemesterArray			= $initializationArray['pastSemestersArray'];
+		$nextSemester				= $context->nextSemester;	
+		$prevSemester				= $context->prevSemester;
+		$userName					= $context->userName;
+		$pastSemesterArray			= $context->pastSemestersArray;
 		$fieldTest					= array('action_log','post_status','post_title','control_code');
 		$theURL						= "$siteURL/cwa-prepare-advisors-for-student-assignments/";
 		$advisorUpdateURL			= "$siteURL/cwa-display-and-update-advisor-signup-information/";

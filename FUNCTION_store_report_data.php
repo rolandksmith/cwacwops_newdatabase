@@ -15,9 +15,9 @@ function storeReportData_v2($reportName='',$reportData='',$testMode=FALSE,$doDeb
 
 	global $wpdb;
 
-	$initializationArray	= data_initialization_func();
-	$currentDate			= $initializationArray['currentDate'];
-	$currentTimestamp		= $initializationArray['currentTimestamp'];
+	$context = CWA_Context::getInstance();
+	$currentDate			= $context->currentDate;
+	$currentTimestamp		= $context->currentTimestamp;
 	if ($doDebug) {
 		echo "<br />storeReportData: Function has been called.<br />";
 	}
