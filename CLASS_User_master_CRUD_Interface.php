@@ -222,29 +222,29 @@ class CWA_User_Master_CRUD {
      * Initialize configuration
      */
     private function initializeConfig() {
-        $initData = data_initialization_func();
-        
+        $ctx = CWA_Context::getInstance();
+
         $this->config = array(
             'testMode' => false,
             'doDebug' => false,
-            'validTestmode' => $initData['validTestmode'],
-            'siteURL' => $initData['siteurl'],
-            'currentTimestamp' => $initData['currentTimestamp'],
+            'validTestmode' => $ctx->validTestmode,
+            'siteURL' => $ctx->siteurl,
+            'currentTimestamp' => $ctx->currentTimestamp,
         );
     }
-    
+
     /**
      * Initialize user including admin status from user_master
      */
     private function initializeUser() {
-        $initData = data_initialization_func();
+        $ctx = CWA_Context::getInstance();
         $mode = $this->config['testMode'] ? 'Testing' : 'Production';
-        
+
         $this->user = array(
-            'name' => $initData['userName'],
-            'role' => $initData['userRole'],
+            'name' => $ctx->userName,
+            'role' => $ctx->userRole,
             'ipAddress' => $this->getUserIP(),
-            'callSign' => $initData['userName'],
+            'callSign' => $ctx->userName,
             'isAdmin' => false,
             'userId' => null,
         );

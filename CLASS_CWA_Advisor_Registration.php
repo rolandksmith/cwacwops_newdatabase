@@ -38,25 +38,25 @@ class CWA_Advisor_Registration {
      * Initialize configuration settings
      */
     private function initializeConfig() {
-        $initData = data_initialization_func();
-        
+        $ctx = CWA_Context::getInstance();
+
         $this->config = array(
             'testMode' => false,
             'doDebug' => false,
             'maintenanceMode' => false,
-            'validUser' => $initData['validUser'],
-            'currentTimestamp' => $initData['currentTimestamp'],
-            'currentSemester' => $initData['currentSemester'],
-            'prevSemester' => $initData['prevSemester'],
-            'nextSemester' => $initData['nextSemester'],
-            'semesterTwo' => $initData['semesterTwo'],
-            'semesterThree' => $initData['semesterThree'],
-            'semesterFour' => $initData['semesterFour'],
-            'daysToSemester' => intval($initData['daysToSemester']),
-            'siteURL' => $initData['siteurl'],
-            'languageArray' => $initData['languageArray'],
-            'validTestmode' => $initData['validTestmode'],
-            'defaultClassSize' => $initData['defaultClassSize'],
+            'validUser' => $ctx->validUser,
+            'currentTimestamp' => $ctx->currentTimestamp,
+            'currentSemester' => $ctx->currentSemester,
+            'prevSemester' => $ctx->prevSemester,
+            'nextSemester' => $ctx->nextSemester,
+            'semesterTwo' => $ctx->semesterTwo,
+            'semesterThree' => $ctx->semesterThree,
+            'semesterFour' => $ctx->semesterFour,
+            'daysToSemester' => intval($ctx->daysToSemester),
+            'siteURL' => $ctx->siteurl,
+            'languageArray' => $ctx->languageArray,
+            'validTestmode' => $ctx->validTestmode,
+            'defaultClassSize' => $ctx->defaultClassSize,
             'allowSignup' => false,
         );
         
@@ -83,11 +83,11 @@ class CWA_Advisor_Registration {
      * Initialize user data
      */
     private function initializeUser() {
-        $initData = data_initialization_func();
-        
+        $ctx = CWA_Context::getInstance();
+
         $this->user = array(
-            'name' => $initData['userName'],
-            'role' => $initData['userRole'],
+            'name' => $ctx->userName,
+            'role' => $ctx->userRole,
             'ipAddress' => $this->getUserIP(),
         );
     }

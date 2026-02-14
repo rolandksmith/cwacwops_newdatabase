@@ -57,26 +57,13 @@ function daily_student_cron_func() {
 	$startingMicroTime			= microtime(TRUE);
 	$studentEmailCount			= 90;
 	
-	$initializationArray 	= data_initialization_func();
-	$userName				= $initializationArray['userName'];
+	$context = CWA_Context::getInstance();
+	$userName				= $context->userName;
 	ini_set('display_errors','1');
-	error_reporting(E_ALL);	
+	error_reporting(E_ALL);
 	ini_set('memory_limit','256M');
-	
+
 	$debugLog				= "";
-	
-
-	if ($verifyMode) {
-		$initializationArray['validEmailPeriod']	= 'Y';
-		$initializationArray['daysToSemester']		= 45;
-		$studentEmailCount							= 100;
-		echo "<br /><b>Operating in VERIFY mode</b><br />";
-	}
-	
-	if ($replaceMode) {
-		$validReplacementPeriod						= 'Y';
-	}
-
 
 // Needed variables initialization
 	$processStudent			= TRUE;
@@ -89,24 +76,35 @@ function daily_student_cron_func() {
 	$badActorCount			= 0;
 //	$emailCountArray		= array();
 	$jobname				= "Daily Student Cron";
-	$currentTimestamp 		= $initializationArray['currentTimestamp'];
-	$todaysDate 			= $initializationArray['currentDate'];
+	$currentTimestamp 		= $context->currentTimestamp;
+	$todaysDate 			= $context->currentDate;
 	$checkDate 				= date('Y-m-d',$currentTimestamp);
 	$unixCheckDate			= strtotime($checkDate);
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester 			= $initializationArray['nextSemester'];
-	$semesterTwo 			= $initializationArray['semesterTwo'];
-	$semesterThree 			= $initializationArray['semesterThree'];
-	$semesterFour 			= $initializationArray['semesterFour'];
-	$proximateSemester		= $initializationArray['proximateSemester'];
-	$prevSemester			= $initializationArray['prevSemester'];
-	$validEmailPeriod 		= $initializationArray['validEmailPeriod'];
-	$daysToSemester			= $initializationArray['daysToSemester'];
-	$validReplacementPeriod	= $initializationArray['validReplacementPeriod'];
+	$currentSemester		= $context->currentSemester;
+	$nextSemester 			= $context->nextSemester;
+	$semesterTwo 			= $context->semesterTwo;
+	$semesterThree 			= $context->semesterThree;
+	$semesterFour 			= $context->semesterFour;
+	$proximateSemester		= $context->proximateSemester;
+	$prevSemester			= $context->prevSemester;
+	$validEmailPeriod 		= $context->validEmailPeriod;
+	$daysToSemester			= $context->daysToSemester;
+	$validReplacementPeriod	= $context->validReplacementPeriod;
 	$actionDate				= date('dMy H:i',$currentTimestamp);
 	$logDate				= date('Y-m-d H:i:s',$currentTimestamp);
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
+
+	if ($verifyMode) {
+		$validEmailPeriod		= 'Y';
+		$daysToSemester			= 45;
+		$studentEmailCount		= 100;
+		echo "<br /><b>Operating in VERIFY mode</b><br />";
+	}
+
+	if ($replaceMode) {
+		$validReplacementPeriod	= 'Y';
+	}
 	
 	$studentRegistrationURL	= "$siteURL/cwa-student-registration/";
 	$checkClassURL			= "$siteURL/cwa-check-student-status/";
@@ -212,7 +210,7 @@ function daily_student_cron_func() {
 	
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 

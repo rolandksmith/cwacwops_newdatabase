@@ -40,16 +40,9 @@ function daily_advisor_cron_process_func() {
 //	$inp_mode				= '';
 	ini_set('max_execution_time',360);
 
-	$initializationArray 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 
-	if ($verifyMode && $testMode) {
-		$initializationArray['validEmailPeriod']	= 'Y';
-		$initializationArray['daysToSemester']		= 45;
-		echo "verifyMode and testMode. Have fudged the initializationArray<br />";
-	}
-
-
-	$userName				= $initializationArray['userName'];
+	$userName				= $context->userName;
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);
 	ini_set('memory_limit','256M');
@@ -64,19 +57,25 @@ function daily_advisor_cron_process_func() {
 	$surveyScore6			= 0;
 	$numARows				= 0;
 	$jobname				= 'Daily Advisor Cron';
-	$currentTimestamp 		= $initializationArray['currentTimestamp'];
-	$todaysDate 			= $initializationArray['currentDate'];
+	$currentTimestamp 		= $context->currentTimestamp;
+	$todaysDate 			= $context->currentDate;
 	$checkDate 				= date('Y-m-d',$currentTimestamp);
 	$unixCheckDate			= strtotime($checkDate);
-	$currentSemester		= $initializationArray['currentSemester'];
-	$proximateSemester		= $initializationArray['proximateSemester'];
-	$nextSemester 			= $initializationArray['nextSemester'];
-	$semesterTwo 			= $initializationArray['semesterTwo'];
-	$semesterThree 			= $initializationArray['semesterThree'];
-	$semesterFour 			= $initializationArray['semesterFour'];
-	$validEmailPeriod 		= $initializationArray['validEmailPeriod'];
-	$daysToSemester			= $initializationArray['daysToSemester'];
-	$siteURL				= $initializationArray['siteurl'];
+	$currentSemester		= $context->currentSemester;
+	$proximateSemester		= $context->proximateSemester;
+	$nextSemester 			= $context->nextSemester;
+	$semesterTwo 			= $context->semesterTwo;
+	$semesterThree 			= $context->semesterThree;
+	$semesterFour 			= $context->semesterFour;
+	$validEmailPeriod 		= $context->validEmailPeriod;
+	$daysToSemester			= $context->daysToSemester;
+	$siteURL				= $context->siteurl;
+
+	if ($verifyMode && $testMode) {
+		$validEmailPeriod		= 'Y';
+		$daysToSemester			= 45;
+		echo "verifyMode and testMode. Have fudged validEmailPeriod and daysToSemester<br />";
+	}
 	$actionDate				= date('Y-m-d H:i:s');
 	$logDate				= date('Y-m-d H:i:s');
 	$advisorVerifyURL		= "$siteURL/cwa-process-advisor-verification/";
@@ -216,7 +215,7 @@ function daily_advisor_cron_process_func() {
 
 		if ($doDebug) {
 			debugReport("Initialization Array:<pre>");
-			$myStr = print_r($initializationArray, TRUE);
+			$myStr = print_r($context->toArray(), TRUE);
 			debugReport("$myStr</pre>");
 		}
 		if ($testMode) {

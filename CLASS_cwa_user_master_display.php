@@ -26,22 +26,22 @@ class CWA_User_Master_Display {
      * Initialize configuration
      */
     private function initializeConfig() {
-        $initData = data_initialization_func();
-        
+        $ctx = CWA_Context::getInstance();
+
         $this->config = array(
             'testMode' => false,
-            'userName' => $initData['userName'],
+            'userName' => $ctx->userName,
         );
-        
+
         // Check for test mode
-        if (isset($_REQUEST['inp_mode']) && 
-            $_REQUEST['inp_mode'] === 'TESTMODE' && 
-            in_array($initData['userName'], $initData['validTestmode'])) {
+        if (isset($_REQUEST['inp_mode']) &&
+            $_REQUEST['inp_mode'] === 'TESTMODE' &&
+            in_array($ctx->userName, $ctx->validTestmode)) {
             $this->config['testMode'] = true;
         }
-        
+
         // Determine admin status from userRole
-        $this->isAdmin = ($initData['userRole'] === 'administrator');
+        $this->isAdmin = ($ctx->userRole === 'administrator');
     }
     
     /**
