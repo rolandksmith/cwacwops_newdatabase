@@ -9,24 +9,18 @@ argument-hint: [query or table name]
 
 Run queries against the CWA MySQL database in the Docker development environment.
 
-## Finding the Database Container
-
-1. List running containers: `docker ps --format '{{.Names}}\t{{.Image}}\t{{.Ports}}'`
-2. Identify the MySQL container (image name contains `mysql` or `mariadb`)
-3. If no containers are running, tell the user to start Docker first: `docker-compose up -d`
-
 ## Connecting
 
-Use `docker exec` to run MySQL commands inside the container:
-
 ```
-docker exec -i <container_name> mysql -u root -p<password> <database_name>
+docker exec -i mysql mysql -u cwacwops_wp540 -pcwacwops cwacwops_wp540 -e "SQL_HERE;"
 ```
 
-Common credentials to try (check `wp-config.php` or `docker-compose.yml` for actual values):
-- Look for `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` in any `wp-config.php` in the project or Docker volumes
-- Try: `docker exec -i <container> mysql -u root -proot`
-- Try: `docker exec -i <container> mysql -u wordpress -pwordpress wordpress`
+- **Container:** `mysql`
+- **User:** `cwacwops_wp540`
+- **Password:** `cwacwops`
+- **Database:** `cwacwops_wp540`
+
+If the container is not running, tell the user to start Docker first.
 
 ## Argument Handling
 
