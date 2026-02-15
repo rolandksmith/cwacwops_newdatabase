@@ -12,17 +12,17 @@ function repeating_students_statistics_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 						= $context->validUser;
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$validTestmode					= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -43,13 +43,13 @@ function repeating_students_statistics_func() {
 
 /// build the semesterArray and semesterSequence
 	$theURL						= "$siteURL/cwa-repeating-student-statistics/";
-	$pastSemesters				= $initializationArray['pastSemesters'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$prevSemester				= $initializationArray['prevSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$semesterFour				= $initializationArray['semesterFour'];
+	$pastSemesters				= $context->pastSemesters;
+	$currentSemester			= $context->currentSemester;
+	$prevSemester				= $context->prevSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$semesterFour				= $context->semesterFour;
 	$semesterArray				= explode("|",$pastSemesters);
 	if ($currentSemester != 'Not in Session') {
 		$semesterArray[]		= $currentSemester;

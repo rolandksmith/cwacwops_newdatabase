@@ -33,16 +33,16 @@ function gather_and_display_student_statistics_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];
-	$validTestmode		= $initializationArray['validTestmode'];
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL			= $context->siteurl;
+	$validTestmode		= $context->validTestmode;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -126,7 +126,7 @@ function gather_and_display_student_statistics_func() {
 		}
 		
 		$optionList		= "";
-		$pastSemesters	= $initializationArray['pastSemesters'];
+		$pastSemesters	= $context->pastSemesters;
 		$semesterArray	= explode("|",$pastSemesters);
 		foreach($semesterArray as $theValue) {
 			$optionList	.= "<input type='radio' class='formInputButton' name='inp_semester' value='$theValue' required>$theValue<br />";

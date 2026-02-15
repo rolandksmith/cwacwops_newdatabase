@@ -50,7 +50,7 @@ function storeAuditLogData($dataToStore='',$doDebug=FALSE) {
 		echo "<br />----Arrived at the store_audit_log_data function<br />";
 	}
 
-//	$initializationArray 		= data_initialization_func();
+//	$context = CWA_Context::getInstance();
 
 	$dataTypeArray				= array('STUDENT'=>'student',
 										'ADVISOR'=>'advisor',

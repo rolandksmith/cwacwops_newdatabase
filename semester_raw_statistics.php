@@ -4,29 +4,29 @@ function semester_raw_statistics_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$proximateSemester	= $initializationArray['proximateSemester'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$pastSemestersArray			= $initializationArray['pastSemestersArray'];
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$proximateSemester	= $context->proximateSemester;
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$pastSemestersArray			= $context->pastSemestersArray;
 	$inp_semesterlist			= '';
-	$siteURL			= $initializationArray['siteurl'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$userRole			= $initializationArray['userRole'];
+	$siteURL			= $context->siteurl;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$userRole			= $context->userRole;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {

@@ -220,7 +220,7 @@ $verifiedUser = TRUE;
 											$user_action_log	= "";
 											$user_survey_score	= 0;
 											$user_is_admin		= "";
-											$user_role			= $metaArray['user_role'][0];
+											$user_role			= strtolower($metaArray['user_role'][0]);
 											$user_timezone_id	= "";
 //											$user_languages		= $metaArray['user_languages'];
 											$user_languages		= "";
@@ -352,7 +352,7 @@ $verifiedUser = TRUE;
 														user_role: $user_role<br />";
 											}
 											if ($isStudent) {
-												if ($user_role != 'Student') {
+												if ($user_role != 'student') {
 													// must update usermeta capabilities
 													$updateMeta	= TRUE;
 													if (array_key_exists('student',$capArray)) {
@@ -362,7 +362,7 @@ $verifiedUser = TRUE;
 												}
 											}
 											if ($isAdvisor) {
-												if ($user_role != 'Advisor') {
+												if ($user_role != 'advisor') {
 													// must update usermeta capabilite\ies
 													$updateMeta	= TRUE;
 													if (array_key_exists('advisor',$capArray)) {

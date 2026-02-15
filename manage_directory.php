@@ -5,16 +5,16 @@ function manage_directory_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 		= $initializationArray['validUser'];
-	$userName  		= $initializationArray['userName'];
-	$flatFilePath 	= $initializationArray['flatFilePath'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 		= $context->validUser;
+	$userName  		= $context->userName;
+	$flatFilePath 	= defined('CWA_FLAT_FILE_PATH') ? CWA_FLAT_FILE_PATH : '';
+	$siteURL		= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($validUser == "N") {

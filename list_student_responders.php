@@ -18,10 +18,10 @@ function list_student_responders_func() {
 	$doDebug			= FALSE;
 	$testMode			= FALSE;
 	
-	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL			= $context->siteurl;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -29,7 +29,7 @@ function list_student_responders_func() {
 	
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 //	if ($doDebug) {
@@ -41,7 +41,7 @@ function list_student_responders_func() {
 /// get the time that the process started
 	$startingMicroTime			= microtime(TRUE);
 
-	$inp_semester		= $initializationArray['nextSemester'];
+	$inp_semester		= $context->nextSemester;
 	$strPass			= "1";
 	$totalR				= 0;
 	$totalY				= 0;
@@ -87,10 +87,10 @@ function list_student_responders_func() {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$nextSemester		= $initializationArray['nextSemester'];
-		$semesterTwo		= $initializationArray['semesterTwo'];
-		$semesterThree		= $initializationArray['semesterThree'];
+		$currentSemester	= $context->currentSemester;
+		$nextSemester		= $context->nextSemester;
+		$semesterTwo		= $context->semesterTwo;
+		$semesterThree		= $context->semesterThree;
 		$optionList		= "";
 		if ($currentSemester != "Not in Session") {
 			$optionList	.= "<option value='$currentSemester'>$currentSemester</option>";

@@ -18,15 +18,15 @@ function audit_student_record($inp_value='',$doDebug=FALSE) {
 	}
 	
 	$jobname				= "Audit Student Record";
-	$initializationArray 	= data_initialization_func();
- 	$prevSemester			= $initializationArray['prevSemester'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
-	$semesterTwo			= $initializationArray['semesterTwo'];
-	$semesterThree			= $initializationArray['semesterThree'];
-	$semesterFour			= $initializationArray['semesterFour'];
-	$proximateSemester		= $initializationArray['proximateSemester'];
-	$pastSemestersArray		= $initializationArray['pastSemestersArray'];
+	$context = CWA_Context::getInstance();
+ 	$prevSemester			= $context->prevSemester;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
+	$semesterTwo			= $context->semesterTwo;
+	$semesterThree			= $context->semesterThree;
+	$semesterFour			= $context->semesterFour;
+	$proximateSemester		= $context->proximateSemester;
+	$pastSemestersArray		= $context->pastSemestersArray;
 	$issuesFound			= "";	
 	$issuesCount			= 0;
 	$doProceed				= TRUE;

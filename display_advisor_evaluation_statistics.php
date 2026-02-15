@@ -9,22 +9,22 @@ function display_advisor_evaluation_statistics_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 	= $initializationArray['validUser'];
-	$userName	= $initializationArray['userName'];
+	$validUser 	= $context->validUser;
+	$userName	= $context->userName;
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
 	$jobname			= "Display Advisor Evaluation Statistics";
-	$currentSemester	= $initializationArray['currentSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
+	$currentSemester	= $context->currentSemester;
+	$prevSemester		= $context->prevSemester;
 	if ($currentSemester == 'Not in Session') {
 		$theSemester	= $prevSemester;
 	} else {
@@ -223,8 +223,8 @@ function display_advisor_evaluation_statistics_func() {
 		if ($theSemester == 'SPECIFIED') { 		// semester info in newSemester
 			$theSemester			= $newSemester;	
 		} else {
-			$currentSemester	= $initializationArray['currentSemester'];
-			$prevSemester		= $initializationArray['prevSemester'];
+			$currentSemester	= $context->currentSemester;
+			$prevSemester		= $context->prevSemester;
 			if ($currentSemester == 'Not in Session') {
 				$theSemester	= $prevSemester;
 			} else {

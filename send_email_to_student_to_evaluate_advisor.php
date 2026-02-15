@@ -32,18 +32,18 @@ function send_email_to_student_to_evaluate_advisor_func() {
 	$doDebug				= FALSE;
 	$testMode				= FALSE;
 
-	$initializationArray 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$prevSemester		= $initializationArray['prevSemester'];
+	$validUser = $context->validUser;
+	$userName			= $context->userName;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$currentSemester	= $context->currentSemester;
+	$prevSemester		= $context->prevSemester;
 
 	if ($userName == '') {
 		return "You are not authorized";

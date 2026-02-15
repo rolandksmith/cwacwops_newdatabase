@@ -46,12 +46,12 @@ function get_student_and_user_master($studentCallSign, $requestType, $requestInf
 	}
 	$student_dal = new CWA_Student_DAL();
 
- 	$initializationArray 		= data_initialization_func();
-	$currentSemester 			= $initializationArray['currentSemester'];
-	$nextSemester 				= $initializationArray['nextSemester'];
-	$semesterTwo 				= $initializationArray['semesterTwo'];
-	$semesterThree 				= $initializationArray['semesterThree'];
-	$semesterFour 				= $initializationArray['semesterFour'];
+ 	$context = CWA_Context::getInstance();
+	$currentSemester 			= $context->currentSemester;
+	$nextSemester 				= $context->nextSemester;
+	$semesterTwo 				= $context->semesterTwo;
+	$semesterThree 				= $context->semesterThree;
+	$semesterFour 				= $context->semesterFour;
 	
 
 	

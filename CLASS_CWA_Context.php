@@ -46,7 +46,8 @@ class CWA_Context {
     protected $defaultClassSize;
     protected $languageArray;
     protected $languageConversion;
-    
+    protected $pastSemesters;
+
     // Site properties
     protected $siteurl;
     
@@ -100,7 +101,8 @@ class CWA_Context {
         // Config properties (from database)
         $configProps = array(
             'validUsers', 'validTestmode', 'pastSemestersArray',
-            'defaultClassSize', 'languageArray', 'languageConversion'
+            'defaultClassSize', 'languageArray', 'languageConversion',
+            'pastSemesters'
         );
         
         if (in_array($name, $userProps) && !$this->userComputed) {
@@ -144,7 +146,8 @@ class CWA_Context {
         $this->defaultClassSize = $this->config_dal->get('default_class_size', 6);
         $this->languageArray = $this->config_dal->get('language_array', array('English'));
         $this->languageConversion = $this->config_dal->get('language_conversion', array());
-        
+        $this->pastSemesters = implode('|', $this->pastSemestersArray);
+
         $this->configLoaded = true;
     }
     

@@ -30,22 +30,22 @@ function move_student_to_different_semester_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName  			= $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];	
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
-	$daysToSemester		= $initializationArray['daysToSemester'];
-	$myDate				= $initializationArray['currentDate'];
+	$validUser 			= $context->validUser;
+	$userName  			= $context->userName;
+	$siteURL			= $context->siteurl;	
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
+	$semesterFour		= $context->semesterFour;
+	$daysToSemester		= $context->daysToSemester;
+	$myDate				= $context->currentDate;
 	$actionDate			= date('Y/m/d H:i');
 
 //	CHECK THIS!								//////////////////////
@@ -66,7 +66,7 @@ function move_student_to_different_semester_func() {
 	$inp_callSign				= '';
 	$inp_callSign				= '';
 	$theURL						= "$siteURL/cwa-move-student-to-different-semester/";
-	$validTestmode				= $initializationArray['validTestmode'];
+	$validTestmode				= $context->validTestmode;
 	$jobname					= "Move Student to Different Semester";
 
 // get the input information

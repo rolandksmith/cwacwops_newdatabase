@@ -12,19 +12,19 @@ function display_cw_assessment_for_a_callsign_func() {
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$proximateSemester	= $initializationArray['proximateSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$currentSemester	= $context->currentSemester;
+	$proximateSemester	= $context->proximateSemester;
+	$nextSemester		= $context->nextSemester;
 	
 // must be a logged-in user
 	if ($userName == '') {

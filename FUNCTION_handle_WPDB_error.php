@@ -2,8 +2,8 @@ function handleWPDBError($jobname,$doDebug=FALSE,$info='') {
 
 	global $wpdb;
 	
-	$initializationArray = data_initialization_func();
-	$userName				= $initializationArray['userName'];
+	$context = CWA_Context::getInstance();
+	$userName				= $context->userName;
 	
 	
 	$lastError		= $wpdb->last_error;

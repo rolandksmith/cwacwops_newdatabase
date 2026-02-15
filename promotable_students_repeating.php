@@ -17,18 +17,18 @@ function promotable_students_repeating_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName  			= $initializationArray['userName'];
-	$currentSemester  	= $initializationArray['currentSemester'];
-	$nextSemester	  	= $initializationArray['nextSemester'];
-	$siteURL			= $initializationArray['siteurl'];
-	$pastSemestersArray	= $initializationArray['pastSemesters'];
+	$validUser 			= $context->validUser;
+	$userName  			= $context->userName;
+	$currentSemester  	= $context->currentSemester;
+	$nextSemester	  	= $context->nextSemester;
+	$siteURL			= $context->siteurl;
+	$pastSemestersArray	= $context->pastSemesters;
 	$theSemester		= $currentSemester;
 	if ($currentSemester == 'Not in Session') {
 		$theSemester	= $nextSemester;
@@ -52,8 +52,8 @@ function promotable_students_repeating_func() {
 	$countable					= 0;
 	$theURL						= "$siteURL/cwa-promotable-students-repeating/";
 	$studentHistoryURL			= "$siteURL/cwa-show-detailed-history-for-student/";
-	$theSemester				= $initializationArray['proximateSemester'];
-	$pastSemestersArray			= $initializationArray['pastSemestersArray'];
+	$theSemester				= $context->proximateSemester;
+	$pastSemestersArray			= $context->pastSemestersArray;
 	$nextStudents				= array();
 	$countBeginner				= 0;
 	$countFundamental			= 0;

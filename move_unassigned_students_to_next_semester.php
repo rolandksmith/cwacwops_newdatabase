@@ -28,20 +28,20 @@ function move_unassigned_students_to_next_semester_func() {
 
 	$doDebug 				= TRUE;
 	$testMode				= FALSE;
-	$initializationArray 	= data_initialization_func();
-	$validUser 				= $initializationArray['validUser'];
-	$userName  				= $initializationArray['userName'];
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
+	$context = CWA_Context::getInstance();
+	$validUser 				= $context->validUser;
+	$userName  				= $context->userName;
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	ini_set('max_execution_time',0);
@@ -71,7 +71,7 @@ function move_unassigned_students_to_next_semester_func() {
 	$promoString				= '';
 	$increment					= 0;
 	$jobname					= "Move Unassigned Students to Next Semester";
-	$currentDate				= $initializationArray['currentDate'];
+	$currentDate				= $context->currentDate;
 	$fieldTest					= array('action_log','post_status','post_title','control_code');
 	$theURL						= "$siteURL/cwa-move-unassigned-students-to-next-semester/";
 	$studentRegistrationURL		= "$siteURL/cwa-student-registration/";
@@ -197,9 +197,9 @@ function move_unassigned_students_to_next_semester_func() {
 			$doProceed		= FALSE;
 		}
 		if ($doProceed) {		
-			$currentSemester			= $initializationArray['currentSemester'];
-			$nextSemester				= $initializationArray['nextSemester'];
-			$semesterTwo				= $initializationArray['semesterTwo'];
+			$currentSemester			= $context->currentSemester;
+			$nextSemester				= $context->nextSemester;
+			$semesterTwo				= $context->semesterTwo;
 			if ($currentSemester == "Not in Session") {
 				if ($inp_type == 'NOTIFY') {
 					$currentSemester			= $nextSemester;

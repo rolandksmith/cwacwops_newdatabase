@@ -12,16 +12,16 @@ function advisor_statistics_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL   = $initializationArray['siteurl'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL   = $context->siteurl;
+	$currentTimestamp	= $context->currentTimestamp;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -40,8 +40,8 @@ function advisor_statistics_func() {
 	$test1				= 0;
 	$test2				= 0;
 	$unconfirmedArray	= array();
-	$nextSemester		= $initializationArray['nextSemester'];
-	$proximateSemester	= $initializationArray['proximateSemester'];
+	$nextSemester		= $context->nextSemester;
+	$proximateSemester	= $context->proximateSemester;
 	$myString			= '';
 	$strPass			= '1';
 	$theURL				= "$siteURL/cwa-advisor-statistics/";

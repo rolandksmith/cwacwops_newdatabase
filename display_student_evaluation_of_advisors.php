@@ -10,19 +10,19 @@ function display_student_evaluation_of_advisors_func() {
 
 	$doDebug				= FALSE;
 	$testMode				= FALSE;
-	$initializationArray 	= data_initialization_func();
-	$userName				= $initializationArray['userName'];
-	$validUser 				= $initializationArray['validUser'];
-	$siteURL				= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$userName				= $context->userName;
+	$validUser 				= $context->validUser;
+	$siteURL				= $context->siteurl;
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	$validTestmode				= $initializationArray['validTestmode'];
+	$validTestmode				= $context->validTestmode;
 
 //	if ($doDebug) {
 		ini_set('display_errors','1');
@@ -117,8 +117,8 @@ function display_student_evaluation_of_advisors_func() {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$prevSemester		= $initializationArray['prevSemester'];
+		$currentSemester	= $context->currentSemester;
+		$prevSemester		= $context->prevSemester;
 		if ($currentSemester == 'Not in Session') {
 			$useSemester	= "<input type='radio' name='theSemester' value='$prevSemester' class='formInputButton' checked required> Previous Semester: $prevSemester<br />";
 		} else {

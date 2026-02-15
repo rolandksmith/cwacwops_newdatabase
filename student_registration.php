@@ -13,16 +13,16 @@ function student_registration_func() {
 	
 	$daysToGo						= 0;
 	
-	$initializationArray 		= data_initialization_func();
-	$currentDate				= $initializationArray['currentDate'];
-	$currentDateTime			= $initializationArray['currentDateTime'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$userName					= $initializationArray['userName'];
-	$userRole					= $initializationArray['userRole'];
-	$userEmail					= $initializationArray['userEmail'];
-	$languageArray				= $initializationArray['languageArray'];
+	$context = CWA_Context::getInstance();
+	$currentDate				= $context->currentDate;
+	$currentDateTime			= $context->currentDateTime;
+	$validTestmode				= $context->validTestmode;
+	$userName					= $context->userName;
+	$userRole					= $context->userRole;
+	$userEmail					= $context->userEmail;
+	$languageArray				= $context->languageArray;
 	$fakeIt						= "Y";
-	$replacementPeriod			= $initializationArray['validReplacementPeriod'];
+	$replacementPeriod			= $context->validReplacementPeriod;
 	
 	if ($userName == '') {
 		$content				= "Your are not authorized";
@@ -47,7 +47,7 @@ function student_registration_func() {
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 
@@ -91,19 +91,19 @@ function student_registration_func() {
 	if ($replacementPeriod == 'Y') {
 		 $validReplacementPeriod = TRUE;
 	}
-	$siteURL					= $initializationArray['siteurl'];
+	$siteURL					= $context->siteurl;
 	$thisMode						= ''; 	// Production(TESTMODE)
 	$fieldTest						= array('action_log','control_code');
 	$logDate						= date('Y-m-d H:i');
-	$currentSemester				= $initializationArray['currentSemester'];
-	$nextSemester					= $initializationArray['nextSemester'];
-	$semesterTwo					= $initializationArray['semesterTwo'];
-	$semesterThree					= $initializationArray['semesterThree'];
-	$semesterFour					= $initializationArray['semesterFour'];
-	$daysToSemester					= $initializationArray['daysToSemester'];
-	$prevSemester					= $initializationArray['prevSemester'];
-	$validEmailPeriod				= $initializationArray['validEmailPeriod'];
-	$proximateSemester				= $initializationArray['proximateSemester'];
+	$currentSemester				= $context->currentSemester;
+	$nextSemester					= $context->nextSemester;
+	$semesterTwo					= $context->semesterTwo;
+	$semesterThree					= $context->semesterThree;
+	$semesterFour					= $context->semesterFour;
+	$daysToSemester					= $context->daysToSemester;
+	$prevSemester					= $context->prevSemester;
+	$validEmailPeriod				= $context->validEmailPeriod;
+	$proximateSemester				= $context->proximateSemester;
 	$thisIP							= get_the_user_ip();
 	$browser_timezone_id		 	= "";
 	$submit							= "";

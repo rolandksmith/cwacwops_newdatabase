@@ -10,17 +10,17 @@ function manage_reminders_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 	$versionNumber				 	= "2";
-	$userName						= $initializationArray['userName'];
-	$currentTimestamp				= $initializationArray['currentTimestamp'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
+	$userName						= $context->userName;
+	$currentTimestamp				= $context->currentTimestamp;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
 	
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 //	CHECK THIS!								//////////////////////

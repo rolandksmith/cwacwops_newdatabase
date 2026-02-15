@@ -18,17 +18,17 @@ function send_advisor_email_to_view_student_evaluations_func() {
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
 	$bobTest					= FALSE;
-	$initializationArray 		= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	$versionNumber				= '1';
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 					= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
+	$validUser 					= $context->validUser;
+	$userName					= $context->userName;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -163,8 +163,8 @@ function send_advisor_email_to_view_student_evaluations_func() {
 		if ($inp_list == '') {
 			$content		.= "No advisors requested<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$prevSemester		= $initializationArray['prevSemester'];
+		$currentSemester	= $context->currentSemester;
+		$prevSemester		= $context->prevSemester;
 		if ($currentSemester == 'Not in Session') {
 			$theSemester	= $prevSemester;
 		} else {

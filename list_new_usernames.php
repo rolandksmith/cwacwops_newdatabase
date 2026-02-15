@@ -19,27 +19,27 @@ function list_new_usernames_func(){
 	$testMode						= FALSE;
 	$doAdvisorNoUsername			= FALSE;
 	$doStudentNoUsername			= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 	
 	$debugData						= "";
 
 
 	$versionNumber				 	= "1";
 		$debugData .= "Initialization Array:<br /><pre>";
-		$debugData		.= print_r($initializationArray,TRUE);
+		$debugData		.= print_r($context->toArray(), TRUE);
 		$debugData .= "</pre><br /><br />";
-	$userName			= $initializationArray['userName'];
-	$userEmail			= $initializationArray['userEmail'];
-	$userDisplayName	= $initializationArray['userDisplayName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$validTestmode		= $initializationArray['validTestmode'];
-	$siteURL			= $initializationArray['siteurl'];
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
+	$userName			= $context->userName;
+	$userEmail			= $context->userEmail;
+	$userDisplayName	= $context->userDisplayName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$validTestmode		= $context->validTestmode;
+	$siteURL			= $context->siteurl;
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
+	$semesterFour		= $context->semesterFour;
 	
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	

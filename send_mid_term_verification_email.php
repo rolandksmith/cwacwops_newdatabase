@@ -25,18 +25,18 @@ function send_mid_term_verification_email_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 						= $initializationArray['validUser'];
-	$userName  						= $initializationArray['userName'];
-	$userRole						= $initializationArray['userRole'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
-	$currentSemester				= $initializationArray['currentSemester'];
+	$validUser 						= $context->validUser;
+	$userName  						= $context->userName;
+	$userRole						= $context->userRole;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
+	$currentSemester				= $context->currentSemester;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";

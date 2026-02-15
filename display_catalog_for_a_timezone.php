@@ -8,25 +8,25 @@ function display_catalog_for_a_timezone_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray			= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser = $initializationArray['validUser'];
+	$validUser = $context->validUser;
 	
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}
-	$userName				= $initializationArray['userName'];
-	$validTestmode			= $initializationArray['validTestmode'];
-	$siteURL				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester			= $initializationArray['nextSemester'];
-	$semesterTwo			= $initializationArray['semesterTwo'];
-	$semesterThree			= $initializationArray['semesterThree'];
-	$semesterFour			= $initializationArray['semesterFour'];
+	$userName				= $context->userName;
+	$validTestmode			= $context->validTestmode;
+	$siteURL				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester			= $context->nextSemester;
+	$semesterTwo			= $context->semesterTwo;
+	$semesterThree			= $context->semesterThree;
+	$semesterFour			= $context->semesterFour;
 	$strPass				= "1";
 	$inp_timezone_id		= '';
 	$inp_timezone_offset	= -99.00;

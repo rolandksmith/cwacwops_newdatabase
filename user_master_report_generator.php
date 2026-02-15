@@ -14,23 +14,23 @@ function user_master_report_generator_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />\n";
 	}
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL	= $initializationArray['siteurl'];
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL	= $context->siteurl;
 	$versionNumber = '3';
-	$currentSemester	= $initializationArray['currentSemester'];
-	$nextSemester		= $initializationArray['nextSemester'];
-	$semesterTwo		= $initializationArray['semesterTwo'];
-	$semesterThree		= $initializationArray['semesterThree'];
-	$semesterFour		= $initializationArray['semesterFour'];
+	$currentSemester	= $context->currentSemester;
+	$nextSemester		= $context->nextSemester;
+	$semesterTwo		= $context->semesterTwo;
+	$semesterThree		= $context->semesterThree;
+	$semesterFour		= $context->semesterFour;
 	$futureSemester	= "(semester = '$nextSemester' or semester = '$semesterTwo' or semester = '$semesterThree' or semester = '$semesterFour')";
-	$proximateSemester	= $initializationArray['proximateSemester'];
+	$proximateSemester	= $context->proximateSemester;
 	if ($validUser == "N") {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
 	}

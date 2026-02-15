@@ -5,16 +5,16 @@ function display_initialization_array_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray = data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 			= $initializationArray['validUser'];
-	$userName			= $initializationArray['userName'];
-	$currentTimestamp	= $initializationArray['currentTimestamp'];
-	$siteURL			= $initializationArray['siteurl'];
+	$validUser 			= $context->validUser;
+	$userName			= $context->userName;
+	$currentTimestamp	= $context->currentTimestamp;
+	$siteURL			= $context->siteurl;
 	
 //	CHECK THIS!								//////////////////////
 	if ($validUser == "N") {
@@ -75,9 +75,9 @@ function display_initialization_array_func() {
 	
 	
 function setupOperationMode() {
-		$initializationArray = data_initialization_func();
-		$user_name			= $initializationArray['userName'];
-		if ($user_name == 'wr7q') {			// give option to run in test mode 
+		$ctx = CWA_Context::getInstance();
+		$user_name			= $ctx->userName;
+		if ($user_name == 'wr7q') {			// give option to run in test mode
 			$testModeOption	= "<tr><td>Operation Mode</td>
 <tr><td>Verbose Mode</td>
 	<td><input type='radio' class='formInputButton' name='inp_verbose' value='standard' checked='checked'> Standard Output<br />
@@ -133,10 +133,12 @@ $testModeOption
 		if ($doDebug) {
 			echo "<br />At pass 2 with inp_attrib of $inp_attrib<br />";
 		}
-		if ($inp_attrib == '') {
-			$initializationArray = data_initialization_func();		
-		} else {
-			$initializationArray = data_initialization_func($inp_attrib);
+		$initializationArray = $context->toArray();
+		if ($inp_attrib != '') {
+			// Filter to show only the requested attribute
+			if (array_key_exists($inp_attrib, $initializationArray)) {
+				$initializationArray = array($inp_attrib => $initializationArray[$inp_attrib]);
+			}
 		}
 		echo "Initialization Array:<br /><pre>";
 		print_r($initializationArray);

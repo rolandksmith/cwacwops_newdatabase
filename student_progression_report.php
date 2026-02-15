@@ -11,18 +11,18 @@ function student_progression_report_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 		= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 					= $initializationArray['validUser'];
-	$userName					= $initializationArray['userName'];
-	$currentTimestamp			= $initializationArray['currentTimestamp'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
-	$currentSemester			= $initializationArray['currentSemester'];
+	$validUser 					= $context->validUser;
+	$userName					= $context->userName;
+	$currentTimestamp			= $context->currentTimestamp;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
+	$currentSemester			= $context->currentSemester;
 	
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
@@ -120,7 +120,7 @@ function student_progression_report_func() {
 			echo "<br />At pass $strPass<br />";
 		}
 		
-		$pastSemesters			= $initializationArray['pastSemesters'];
+		$pastSemesters			= $context->pastSemesters;
 		$pastSemesterArray		= explode("|",$pastSemesters);
 		$selectList				= "<select name='inp_semester[]' multiple>\n";
 		foreach($pastSemesterArray as $thisValue) {

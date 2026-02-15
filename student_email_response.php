@@ -22,17 +22,17 @@ function student_email_response_func() {
 	$strPass				= "1";
 	$increment				= 0;
 	$token					= '';
-	$initializationArray 	= data_initialization_func();
-	$validUser 				= $initializationArray['validUser'];
-	$userName				= $initializationArray['userName']; 
+	$context = CWA_Context::getInstance();
+	$validUser 				= $context->validUser;
+	$userName				= $context->userName; 
 	if ($validUser == 'N') {				// turn off debug and testmode
 		$doDebug					= FALSE;
 		$testMode					= FALSE;
 	}
 	$versionNumber			= '2';
-	$siteURL				= $initializationArray['siteurl'];
-	$semesterTwo			= $initializationArray['semesterTwo'];
-	$semesterThree			= $initializationArray['semesterThree'];
+	$siteURL				= $context->siteurl;
+	$semesterTwo			= $context->semesterTwo;
+	$semesterThree			= $context->semesterThree;
 	$jobname				= "Student Email Response V$versionNumber";
 	$theURL					= "$siteURL/cwa-thank-you-remove/";
 
@@ -155,12 +155,12 @@ prospective student responds to the verification email.</p>";
 // to 10 days before the semester starts. Any response outside the time period
 // doesn't work.
 // echo "Starting. Studentid: $studentID<br />";
-		$theSemester		= $initializationArray['currentSemester'];
-		$nextSemester		= $initializationArray['nextSemester'];
+		$theSemester		= $context->currentSemester;
+		$nextSemester		= $context->nextSemester;
 		if ($theSemester == 'Not in Session') {
 			$theSemester 	= $nextSemester;
 		}
-		$daysToSemester		= $initializationArray['daysToSemester'];
+		$daysToSemester		= $context->daysToSemester;
 //	  echo "daysToSemester: $daysToSemester<br />";
 		if ($daysToSemester > 10 && $daysToSemester < 45) {
 			$goodtogo		= TRUE;

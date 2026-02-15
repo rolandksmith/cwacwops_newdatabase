@@ -33,14 +33,14 @@ function verify_advisor_class_func() {
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$myDate							= date('dMy hi') . 'z';
-	$initializationArray			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$userRole						= $initializationArray['userRole'];
-	$currentSemester				= $initializationArray['currentSemester'];
-	$prevSemester					= $initializationArray['prevSemester'];
-	$siteURL						= $initializationArray['siteurl'];
-	$validTestmode					= $initializationArray['validTestmode'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$userRole						= $context->userRole;
+	$currentSemester				= $context->currentSemester;
+	$prevSemester					= $context->prevSemester;
+	$siteURL						= $context->siteurl;
+	$validTestmode					= $context->validTestmode;
 
 	if ($userName == '') {
 		return "You are not authorized";
@@ -53,7 +53,7 @@ function verify_advisor_class_func() {
 
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 
@@ -560,7 +560,7 @@ function verify_advisor_class_func() {
 			$advisorClassTableName	= 'wpw1_cwa_advisorclass';
 			$userMasterTableName	= 'wpw1_cwa_user_master';
 		}
-		$nextSemester	= $initializationArray['nextSemester'];
+		$nextSemester	= $context->nextSemester;
 
 		$content		.= "<h3>$jobname for $inp_advisor</h3>";
 
@@ -782,7 +782,7 @@ function verify_advisor_class_func() {
 			}
 		
 			// Finally, update the advisor's class_verified so we don't ask again.
-			$currentDate		= $initializationArray['currentDate'];
+			$currentDate		= $context->currentDate;
 
 			$sql						= "select advisor_call_sign, 
 												  advisor_action_log 

@@ -25,14 +25,14 @@ function daily_uploads_cleanup_func() {
 
 	ini_set('max_execution_time',360);
 
-	$initializationArray 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName				= $initializationArray['userName'];
-	$siteURL				= $initializationArray['siteurl'];
+	$userName				= $context->userName;
+	$siteURL				= $context->siteurl;
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
 	ini_set('memory_limit','256M');

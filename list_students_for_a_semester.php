@@ -13,10 +13,10 @@ function list_students_for_a_semester_func() {
 	
 	global $wpdb;
 	
-	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
-	$userName  = $initializationArray['userName'];
-	$siteURL			= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$validUser = $context->validUser;
+	$userName  = $context->userName;
+	$siteURL			= $context->siteurl;
 
 	if ($userName == '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";
@@ -62,10 +62,10 @@ function list_students_for_a_semester_func() {
 		if ($doDebug) {
 			echo "Function starting.<br />";
 		}
-		$currentSemester	= $initializationArray['currentSemester'];
-		$nextSemester		= $initializationArray['nextSemester'];
-		$semesterTwo		= $initializationArray['semesterTwo'];
-		$semesterThree		= $initializationArray['semesterThree'];
+		$currentSemester	= $context->currentSemester;
+		$nextSemester		= $context->nextSemester;
+		$semesterTwo		= $context->semesterTwo;
+		$semesterThree		= $context->semesterThree;
 		$optionList		= "";
 		if ($currentSemester != "Not in Session") {
 			$optionList	.= "<option value='$currentSemester'>$currentSemester</option>";
@@ -88,9 +88,9 @@ function list_students_for_a_semester_func() {
 
 	} elseif ("2" == $strPass) {
 
-		$currentSemester	= $initializationArray['currentSemester'];
-		$nextSemester		= $initializationArray['nextSemester'];
-		$semesterTwo		= $initializationArray['semesterTwo'];
+		$currentSemester	= $context->currentSemester;
+		$nextSemester		= $context->nextSemester;
+		$semesterTwo		= $context->semesterTwo;
 		$theSemester		= $currentSemester;
 		if ($theSemester == 'Not in Session') {
 			$theSemester	= $nextSemester;

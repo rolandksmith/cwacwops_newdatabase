@@ -4,23 +4,23 @@ function check_student_status_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$validUser 					= $initializationArray['validUser'];
-	$userName  					= $initializationArray['userName'];
-	$userRole					= $initializationArray['userRole'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$semesterFour				= $initializationArray['semesterFour'];
+	$validUser 					= $context->validUser;
+	$userName  					= $context->userName;
+	$userRole					= $context->userRole;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$semesterFour				= $context->semesterFour;
 	$jobname					= 'Check Student Status';
 
 	if ($userName == '') {

@@ -1,7 +1,7 @@
 function isAuthorized() {
 
-	$initializationArray = data_initialization_func();
-	$validUser = $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser = $context->validUser;
 	if ($validUser == "N") {
 		http_response_code(403);
 		echo "You're not authorized";

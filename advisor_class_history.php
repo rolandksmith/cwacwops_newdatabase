@@ -10,13 +10,13 @@ function advisor_class_history_func() {
 
 	$doDebug						= FALSE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
-	$userName						= $initializationArray['userName'];
-	$userRole						= $initializationArray['userRole'];
-	$currentTimestamp				= $initializationArray['currentTimestamp'];
-	$validTestmode					= $initializationArray['validTestmode'];
-	$siteURL						= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
+	$userName						= $context->userName;
+	$userRole						= $context->userRole;
+	$currentTimestamp				= $context->currentTimestamp;
+	$validTestmode					= $context->validTestmode;
+	$siteURL						= $context->siteurl;
 
 	if ($userName == '') {
 		return "You are not authorized";
@@ -30,7 +30,7 @@ function advisor_class_history_func() {
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 	
@@ -54,10 +54,10 @@ function advisor_class_history_func() {
 	$theURL						= "$siteURL/cwa-advisor-class-history/";
 	$inp_semester				= '';
 	$jobname					= "Advisor Class History V$versionNumber";
-	$pastSemestersArray			= $initializationArray['pastSemestersArray'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$prevSemester				= $initializationArray['prevSemester'];
+	$pastSemestersArray			= $context->pastSemestersArray;
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$prevSemester				= $context->prevSemester;
 	$advisorData				= array();
 	$showArrayDetail			= FALSE;
 

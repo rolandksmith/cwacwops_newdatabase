@@ -14,14 +14,14 @@ function display_all_students_func() {
 	
 	$doDebug				= FALSE;
 	$testMode				= FALSE;
-	$initializationArray 	= data_initialization_func();
-	$validUser 				= $initializationArray['validUser'];
-	$userName				= $initializationArray['userName'];
-	$siteURL				= $initializationArray['siteurl'];
-	$currentSemester		= $initializationArray['currentSemester'];
-	$nextSemester	    	= $initializationArray['nextSemester'];
-	$semesterTwo	    	= $initializationArray['semesterTwo'];
-	$semesterThree  		= $initializationArray['semesterThree'];
+	$context = CWA_Context::getInstance();
+	$validUser 				= $context->validUser;
+	$userName				= $context->userName;
+	$siteURL				= $context->siteurl;
+	$currentSemester		= $context->currentSemester;
+	$nextSemester	    	= $context->nextSemester;
+	$semesterTwo	    	= $context->semesterTwo;
+	$semesterThree  		= $context->semesterThree;
 
 	if ($userName = '') {
 		return "YOU'RE NOT AUTHORIZED!<br />Goodby";

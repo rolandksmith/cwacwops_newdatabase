@@ -46,24 +46,24 @@ function daily_catalog_cron_process_func() {
 
 	ini_set('max_execution_time',360);
 
-	$initializationArray 	= data_initialization_func();
+	$context = CWA_Context::getInstance();
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName				= $initializationArray['userName'];
+	$userName				= $context->userName;
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
 	ini_set('memory_limit','256M');
 
 
 // Needed variables initialization
-	$currentSemester		= $initializationArray['currentSemester'];
-	$proximateSemester		= $initializationArray['proximateSemester'];
-	$siteURL				= $initializationArray['siteurl'];
+	$currentSemester		= $context->currentSemester;
+	$proximateSemester		= $context->proximateSemester;
+	$siteURL				= $context->siteurl;
 
-	$replacementPeriod		= $initializationArray['validReplacementPeriod'];
+	$replacementPeriod		= $context->validReplacementPeriod;
 	$validReplacementPeriod	= FALSE;
 	if ($replacementPeriod == 'Y') {
 		 $validReplacementPeriod = TRUE;

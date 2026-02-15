@@ -30,8 +30,8 @@ function display_reminders($inp_role,$inp_callsign,$doDebug=FALSE) {
 
 	global $wpdb;
 	
-	$initializationArray 	= data_initialization_func();
-	$siteURL				= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$siteURL				= $context->siteurl;
 	
 //	$inp_role				= "";
 //	$inp_callsign			= "";

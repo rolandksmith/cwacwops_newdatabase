@@ -8,28 +8,28 @@ function student_management_func() {
 
 	$doDebug					= FALSE;
 	$testMode					= FALSE;
-	$initializationArray 		= data_initialization_func();
-	$userName 					= $initializationArray['userName'];
-	$currentDate 				= $initializationArray['currentDate'];
-	$daysToSemester				= $initializationArray['daysToSemester'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
-	$userName 					= $initializationArray['userName'];
-	$currentDate 				= $initializationArray['currentDate'];
-	$daysToSemester				= $initializationArray['daysToSemester'];
-	$validTestmode				= $initializationArray['validTestmode'];
-	$siteURL					= $initializationArray['siteurl'];
-	$proximateSemester			= $initializationArray['proximateSemester'];
-	$currentSemester			= $initializationArray['currentSemester'];
-	$nextSemester				= $initializationArray['nextSemester'];
-	$semesterTwo				= $initializationArray['semesterTwo'];
-	$semesterThree				= $initializationArray['semesterThree'];
-	$semesterFour				= $initializationArray['semesterFour'];
-	$proximateSemester			= $initializationArray['proximateSemester'];
-	$languageConversion			= $initializationArray['languageConversion'];
+	$context = CWA_Context::getInstance();
+	$userName 					= $context->userName;
+	$currentDate 				= $context->currentDate;
+	$daysToSemester				= $context->daysToSemester;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
+	$userName 					= $context->userName;
+	$currentDate 				= $context->currentDate;
+	$daysToSemester				= $context->daysToSemester;
+	$validTestmode				= $context->validTestmode;
+	$siteURL					= $context->siteurl;
+	$proximateSemester			= $context->proximateSemester;
+	$currentSemester			= $context->currentSemester;
+	$nextSemester				= $context->nextSemester;
+	$semesterTwo				= $context->semesterTwo;
+	$semesterThree				= $context->semesterThree;
+	$semesterFour				= $context->semesterFour;
+	$proximateSemester			= $context->proximateSemester;
+	$languageConversion			= $context->languageConversion;
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
 
@@ -3783,8 +3783,8 @@ function getTheReason($strReasonCode) {
 		}
 		$jobname	= "Student Management Add a Student to an Advisor Class Regardless";
 		
-		$theSemester		= $initializationArray['currentSemester'];
-		$nextSemester		= $initializationArray['nextSemester'];
+		$theSemester		= $context->currentSemester;
+		$nextSemester		= $context->nextSemester;
 		if ($theSemester == 'Not in Session') {
 			$theSemester	= $nextSemester;
 		}

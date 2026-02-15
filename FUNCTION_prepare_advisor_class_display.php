@@ -21,8 +21,8 @@ function prepare_advisor_class_display($inp_advisor='', $inp_semester='', $all='
 		echo "<br /><b>FUNCTION Prepare Advisor Class Display</b><br />";
 	}
 	
-	$initializationArray 	= data_initialization_func();
-	$siteURL				= $initializationArray['siteurl'];
+	$context = CWA_Context::getInstance();
+	$siteURL				= $context->siteurl;
 	
 	$advisorVerificationURL		= "$siteURL/cwa-advisor-verification-of-student/";
 

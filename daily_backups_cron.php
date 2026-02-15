@@ -18,17 +18,17 @@ function daily_backups_cron_func() {
 
 	$doDebug						= TRUE;
 	$testMode						= FALSE;
-	$initializationArray 			= data_initialization_func();
-	$validUser 						= $initializationArray['validUser'];
+	$context = CWA_Context::getInstance();
+	$validUser 						= $context->validUser;
 
 	$versionNumber				 	= "1";
 	if ($doDebug) {
 		echo "Initialization Array:<br /><pre>";
-		print_r($initializationArray);
+		print_r($context->toArray());
 		echo "</pre><br />";
 	}
-	$userName			= $initializationArray['userName'];
-	$userRole			= $initializationArray['userRole'];
+	$userName			= $context->userName;
+	$userRole			= $context->userRole;
 	
 	ini_set('display_errors','1');
 	error_reporting(E_ALL);	
