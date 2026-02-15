@@ -3,7 +3,7 @@ function program_list_func() {
 
 	global $wpdb;
 
-	$doDebug						= TRUE;
+	$doDebug						= FALSE;
 	$testMode						= FALSE;
 	$ctx = CWA_Context::getInstance();
 	$userName = $ctx->userName;
