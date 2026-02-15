@@ -22,7 +22,8 @@ function display_cwa_announcements() {
     $query = $wpdb->prepare("
         SELECT a.* FROM $tableName a
         LEFT JOIN $trackTable t ON a.ann_record_id = t.ann_id AND t.user_id = %d
-        WHERE (LOWER(a.ann_target_role) = 'all' OR LOWER(a.ann_target_role) = %s)
+        WHERE ann_completed = 'N'  
+        AND	(LOWER(a.ann_target_role) = 'all' OR LOWER(a.ann_target_role) = %s)
         AND (
             (a.ann_occurances = 'Once' AND t.track_id IS NULL)
             OR (a.ann_occurances REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND a.ann_occurances >= %s)
