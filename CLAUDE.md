@@ -55,11 +55,92 @@ system was refactored from a monolithic 2000+ line file into:
 - Action logging class
 - Display/rendering class
 
+### Configuration: CWA_Context Singleton
+
+All configuration and initialization data is accessed through the
+`CWA_Context` singleton class. The old `data_initialization_func()` is
+deprecated and exists only as a thin wrapper.
+
+- **Usage:** `$context = CWA_Context::getInstance();`
+- **Access properties:** `$context->propertyName` (uses magic `__get()`)
+- **For legacy compatibility:** `$context->toArray()` returns an associative array
+- **Never use:** `$initializationArray = data_initialization_func();` in new code
+
 ### Action Logging
 
 All significant user actions are logged through the centralized logging
 system. Log entries include: user ID, action type, timestamp, and details.
 Any new CRUD interface or workflow must integrate with this logging system.
+
+---
+
+## Code Snippets (WordPress Code Snippets Plugin)
+
+All PHP code is managed through the WordPress Code Snippets plugin, which
+stores snippets in the `wpw1_snippets` database table. Each snippet
+corresponds to a PHP file in the repository.
+
+### Snippet Naming Convention
+
+Certain keywords must always be uppercase:
+
+- **Prefix keywords** (uppercase only when the first word):
+  `CLASS`, `FUNCTION`, `JAVASCRIPT`, `UTILITY`, `RKSTEST`
+- **Acronyms** (uppercase anywhere in the name):
+  `CWA`, `DAL`, `CRUD`
+
+**Important:** The word "Class" meaning a course/session (e.g.,
+"Advisor Class Report") is NOT uppercased — only the type prefix "CLASS"
+(e.g., "CLASS CWA Action Logger") is uppercased.
+
+### PHP Filenames
+
+- Prefix keywords are uppercase followed by underscore: `CLASS_`, `FUNCTION_`,
+  `JAVASCRIPT_`, `UTILITY_`, `RKSTEST_`
+- Acronyms are uppercase anywhere: `CWA_`, `_DAL`, `_CRUD_`
+- The rest of the filename is lowercase `snake_case`
+- Examples:
+  - `FUNCTION_store_audit_log_data.php`
+  - `CLASS_CWA_Action_Logger.php`
+  - `CWA_Advisor_DAL.php`
+  - `manage_CWA_announcements.php`
+
+### Database Snippet Names (wpw1_snippets.name)
+
+- Same keyword rules as filenames
+- Words are separated by spaces (not underscores) and Title Cased
+- Examples:
+  - `FUNCTION Store Audit Log Data`
+  - `CLASS CWA Action Logger`
+  - `CWA Advisor DAL`
+  - `Manage CWA Announcements`
+
+### Generating Import JSON
+
+Use `generate_code_snippets_json.py` to create Code Snippets JSON import
+files from PHP files. The script:
+
+- Converts filenames to snippet names with keyword enforcement
+- Looks up existing snippet IDs in the database
+- Generates `.code-snippets.json` files for import
+
+```bash
+# Single file
+python3 generate_code_snippets_json.py FUNCTION_store_audit_log_data.php
+
+# Multiple files from a list
+python3 generate_code_snippets_json.py --file list_of_files.txt
+
+# Without database lookup
+python3 generate_code_snippets_json.py --no-db file.php
+```
+
+**Import limit:** The Code Snippets plugin accepts a maximum of 20 JSON
+files per import batch.
+
+**Caution:** Importing with mismatched names can create duplicate snippets
+with new IDs instead of updating existing ones. Always verify the snippet
+name in the JSON matches the database name exactly.
 
 ---
 
@@ -114,7 +195,8 @@ These are non-negotiable. Every PR will be checked against these rules.
 3. **Role-based access** on all admin-facing pages and AJAX handlers
 4. **No credentials in code** — Use `wp-config.php` or environment variables
 5. **CSRF protection** — Use WordPress nonces on all forms and AJAX calls
-6. **No `eval()` or `exec()`** — ever
+6. **No `eval()` or `exec()`** — ever (sole exception:
+   `RKSTEST_run_arbitrary_php_code.php`, an admin-only debug tool)
 
 ---
 
