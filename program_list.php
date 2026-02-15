@@ -3,11 +3,11 @@ function program_list_func() {
 
 	global $wpdb;
 
-	$doDebug						= FALSE;
+	$doDebug						= TRUE;
 	$testMode						= FALSE;
 	$ctx = CWA_Context::getInstance();
 	$userName = $ctx->userName;
-	$userName = strtoupper($userName);
+	$validUser = $ctx->validUser;
 	$siteURL = $ctx->siteurl;
 	if ($doDebug) {
 		echo "context data:<br />
@@ -17,9 +17,7 @@ function program_list_func() {
 	}
 //	CHECK THIS!								//////////////////////
 	if ($userName == '') {
-		$content		= "You must be logged in to access this information<br />
-							Click <a href='$siteURL/login/'>HERE</a> to log into CW Academy<br /><br />
-							Click <a href='$siteURL/register/'>HERE</a> to register";
+		$content		= notAuthorized();
 		return $content;
 	}
 	
@@ -151,6 +149,9 @@ function program_list_func() {
 		}
 	} else {
 		if (! empty($userMasterData)) {
+			if ($doDebug) {
+				echo "have userMasterData<br />";
+			}
 			$updateUserMaster = FALSE;
 			$updateUserMasterParams = array();
 			$updateUsers = FALSE;
@@ -160,6 +161,9 @@ function program_list_func() {
 					$$thisField = $thisValue;
 				}
 				$gotData = TRUE;
+				if ($doDebug) {
+					echo "have set gotData to TRUE<br />";
+				}
 				// check the user_master email and role
 				if ($userRole != 'administrator') {
 					if ($user_role != $userRole) {
@@ -183,6 +187,9 @@ function program_list_func() {
 				}
 			}
 			if ($updateUserMaster) {
+				if ($doDebug) {
+					echo "need to update User Master<br />";
+				}
 				$updateResult = $user_dal->update($user_ID,$updateUserMasterParams,$operatingMode);
 				if ($updateResult === FALSE) {
 					if ($doDebug) {
@@ -195,6 +202,9 @@ function program_list_func() {
 				}
 			}
 			if ($updateUsers) {
+				if ($doDebug) {
+					echo "updating Users<br />";
+				}
 				$myStr = date('Y-m-d H:i:s');
 				$usersUpdateResult = $wpdb->get_results("update $usersTableName 
 												set user_registered = '$myStr' 
@@ -217,6 +227,9 @@ function program_list_func() {
 		}
 	}
 	if (! $gotData) {
+		if ($doDebug) {
+			echo "No User Master record found. Attempting to build one<br />";
+		}
 		// no userMaster record found. See if one needs to be created
 		$dataArray					= array('getMethod'=>'callsign',
 											'getInfo'=>$userName,
@@ -234,7 +247,7 @@ function program_list_func() {
 		} else {
 			foreach($dataResult as $key => $value) {
 				if ($key == 'user_role') {
-					$user_role = $value[0];
+					$user_role = strtolower($value);
 					$userRole = $user_role;
 				} else {
 					if (str_contains($key,'user_')) {
@@ -243,6 +256,11 @@ function program_list_func() {
 				}
 			}
 			$gotData				= TRUE;
+			if ($doDebug) {
+				echo "have set gotData to TRUE<br />
+					  user_role: $user_role<br />
+					  userRole: $userRole<br />";
+			}
 		}
 	}
 	if ($gotData) {
